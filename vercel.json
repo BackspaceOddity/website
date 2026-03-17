@@ -1,4 +1,6 @@
 {
+  "outputDirectory": "src",
+  "buildCommand": "",
   "images": {
     "sizes": [640, 828, 1080, 1200, 1440, 1920],
     "formats": ["image/avif", "image/webp"],
