@@ -1,0 +1,108 @@
+/* Reset */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-body-sm);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  color: var(--color-dark-green);
+  background: var(--color-cream);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Page wrapper */
+.page {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: 0 var(--side-padding);
+  position: relative;
+}
+
+/* Heading styles */
+.heading-hero {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-hero);
+  line-height: var(--lh-hero);
+  letter-spacing: var(--ls-heading);
+
+}
+
+.heading-section {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-section);
+  line-height: var(--lh-section);
+  letter-spacing: var(--ls-heading-tight);
+
+}
+
+.heading-card {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-card-title);
+  line-height: var(--lh-card-title);
+  letter-spacing: var(--ls-heading-tight);
+}
+
+/* Body text variants */
+.text-lg {
+  font-size: var(--text-body-lg);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+}
+
+.text-md {
+  font-size: var(--text-body-md);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+}
+
+.text-sm {
+  font-size: var(--text-body-sm);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+}
+
+/* Color utilities */
+.text-ivory { color: var(--color-ivory); }
+.text-dark { color: var(--color-dark-green); }
+.bg-cream { background-color: var(--color-cream); }
+.bg-black { background-color: var(--color-black); }
+.bg-dark-green { background-color: var(--color-dark-green); }
+
+/* Two-column layout */
+.two-col {
+  display: flex;
+  gap: var(--gap-columns);
+}
+
+.two-col > * {
+  flex: 1;
+}

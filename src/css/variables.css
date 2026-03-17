@@ -1,0 +1,48 @@
+:root {
+  /* Colors */
+  --color-cream: #F5F2E9;
+  --color-ivory: #FDFBF4;
+  --color-dark-green: #011C00;
+  --color-black: #000000;
+
+  /* Typography — Headings (SouvenirGothic) */
+  --font-heading: 'SouvenirGothic', Georgia, serif;
+  --font-body: 'EB Garamond', Georgia, serif;
+
+  /* Font sizes */
+  --text-hero: 160px;
+  --text-section: 80px;
+  --text-card-title: 30px;
+  --text-body-lg: 30px;
+  --text-body-md: 24px;
+  --text-body-sm: 20px;
+
+  /* Line heights */
+  --lh-hero: 0.88;
+  --lh-section-tight: 0.80;
+  --lh-section: 0.96;
+  --lh-card-title: 0.83;
+  --lh-body: 1.12;
+
+  /* Letter spacing */
+  --ls-heading: -0.02em;
+  --ls-heading-tight: -0.03em;
+  --ls-body: -0.02em;
+
+  /* Layout */
+  --page-max-width: 1440px;
+  --content-wide: 1400px;
+  --content-narrow: 1280px;
+  --side-padding: 20px;
+  --content-padding: 80px;
+
+  /* Radii */
+  --radius-section: 22px;
+  --radius-card: 12px;
+
+  /* Spacing */
+  --gap-columns: 80px;
+  --gap-cards: 20px;
+  --gap-card-content: 24px;
+  --gap-text-block: 16px;
+}

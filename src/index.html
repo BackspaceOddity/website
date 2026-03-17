@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backspace Oddity — Brand is not what you look like. It's how you make decisions.</title>
+  <meta name="description" content="Backspace Oddity helps B2B companies turn brand strategy into something that actually runs. We build the system, then stay until it works.">
+
+  <!-- Social Preview -->
+  <meta property="og:title" content="Backspace Oddity — Brand is not what you look like. It's how you make decisions.">
+  <meta property="og:description" content="We help B2B companies build brand into how decisions get made. We stay until the work is running.">
+  <meta property="og:image" content="https://backspace-oddity.vercel.app/assets/images/og-image.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://backspace-oddity.vercel.app">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Backspace Oddity — Brand is not what you look like. It's how you make decisions.">
+  <meta name="twitter:description" content="We help B2B companies build brand into how decisions get made. We stay until the work is running.">
+  <meta name="twitter:image" content="https://backspace-oddity.vercel.app/assets/images/og-image.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/images/Logo Mark.svg">
+
+  <!-- Google Fonts: EB Garamond -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/sections.css">
+
+  <style>
+    /* ══════════════════════════════════════
+       TYPOGRAPHY SCALE OVERRIDES
+    ══════════════════════════════════════ */
+    :root {
+      --text-section: 60px;
+      --lh-section: 1.05;
+      --side-padding: 0px;
+      --px: 40px;
+    }
+
+    /* ══════════════════════════════════════
+       TIGHT HORIZONTAL MARGINS (Figma-match)
+    ══════════════════════════════════════ */
+    .description,
+    .text-section { padding-left: var(--px); padding-right: var(--px); }
+    .manifesto    { padding-left: var(--px); padding-right: var(--px); }
+    .portfolio    { padding-left: var(--px); padding-right: var(--px); }
+    .method       { padding-left: var(--px); padding-right: var(--px); }
+    .make         { padding-left: var(--px); padding-right: var(--px); }
+    .team         { padding-left: var(--px); padding-right: var(--px); }
+    .cta          { padding-left: var(--px); padding-right: var(--px); }
+    @media (max-width: 768px) {
+      :root { --px: 16px; }
+    }
+
+    /* ══════════════════════════════════════
+       HERO OVERRIDES
+    ══════════════════════════════════════ */
+    .hero__content {
+      justify-content: center;
+      align-items: center;
+      padding: 80px var(--px);
+    }
+    .hero__title {
+      font-size: 80px;
+      width: 100%;
+      text-align: center;
+      mix-blend-mode: normal;
+    }
+    .hero__footer {
+      position: absolute;
+      bottom: 80px;
+      left: var(--px);
+      right: var(--px);
+      text-align: center;
+    }
+    .hero__desc {
+      font-family: var(--font-body);
+      font-size: 26px;
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      color: var(--color-ivory);
+      opacity: 0.8;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1024px) {
+      .hero__title { font-size: 64px; }
+      .hero__content { padding: 60px var(--px); }
+      .hero__footer { bottom: 60px; left: var(--px); right: var(--px); }
+    }
+    @media (max-width: 768px) {
+      .hero__title { font-size: 36px; }
+      .hero__content { padding: 40px var(--px); }
+      .hero__footer { bottom: 32px; left: var(--px); right: var(--px); }
+      .hero__desc { font-size: 16px; }
+    }
+
+    /* ══════════════════════════════════════
+       BRAND DIAGRAM
+    ══════════════════════════════════════ */
+    .brand-diagram {
+      display: grid;
+      grid-template-columns: 26% 1fr;
+      grid-template-areas:
+        "question question"
+        "caption  diagram";
+      column-gap: 60px;
+      row-gap: 48px;
+      padding: 80px var(--px);
+    }
+    .brand-diagram__question {
+      grid-area: question;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-section);
+      line-height: var(--lh-section);
+      letter-spacing: var(--ls-heading-tight);
+      color: var(--color-dark-green);
+    }
+    .brand-diagram__caption {
+      grid-area: caption;
+      align-self: end;
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 26px;
+      line-height: 1.3;
+      letter-spacing: var(--ls-body);
+      color: var(--color-dark-green);
+    }
+    .brand-diagram__svg {
+      grid-area: diagram;
+      display: block;
+      width: 100%;
+    }
+    @media (max-width: 768px) {
+      .brand-diagram {
+        grid-template-columns: 1fr;
+        grid-template-areas: "question" "caption" "diagram";
+        padding: 48px 16px;
+        row-gap: 32px;
+      }
+      .brand-diagram__question { font-size: 36px; }
+      .brand-diagram__caption { font-size: 20px; }
+    }
+
+    /* ══════════════════════════════════════
+       EDITORIAL SPACING
+    ══════════════════════════════════════ */
+    .brand-diagram  { padding-top: 120px; padding-bottom: 120px; }
+    .description    { padding-top: 0; padding-bottom: 120px; }
+    .bizcase        { padding-top: 120px; padding-bottom: 120px; }
+    .manifesto      { margin-top: 80px; margin-bottom: 120px; }
+    .method         { padding-top: 120px; padding-bottom: 120px; }
+    .make           { padding-top: 120px; padding-bottom: 120px; }
+    .portfolio      { margin-bottom: 120px; }
+    .team           { padding-top: 120px; padding-bottom: 120px; }
+    .cta            { padding-top: 120px; padding-bottom: 120px; }
+
+    @media (max-width: 768px) {
+      .brand-diagram,
+      .bizcase,
+      .method,
+      .make,
+      .team,
+      .cta            { padding-top: 64px; padding-bottom: 64px; }
+      .description    { padding-bottom: 64px; }
+      .manifesto,
+      .portfolio      { margin-bottom: 64px; }
+    }
+
+    /* ══════════════════════════════════════
+       BUSINESS CASE
+    ══════════════════════════════════════ */
+    .bizcase {
+      padding: 80px var(--px) 80px;
+    }
+    .bizcase__header {
+      margin-bottom: 100px;
+    }
+    .bizcase__label {
+      font-family: var(--font-body);
+      font-size: var(--text-body-sm);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      opacity: 0.5;
+      margin-bottom: 16px;
+    }
+    .bizcase__heading {
+      max-width: 920px;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-section);
+      line-height: var(--lh-section);
+      letter-spacing: var(--ls-heading-tight);
+      color: var(--color-dark-green);
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: auto auto;
+      column-gap: 40px;
+      row-gap: 20px;
+    }
+    .metric {
+      display: grid;
+      grid-template-rows: subgrid;
+      grid-row: span 2;
+      padding-top: 32px;
+      border-top: 2px solid var(--color-dark-green);
+    }
+    .metric__title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-card-title);
+      line-height: var(--lh-card-title);
+      letter-spacing: var(--ls-heading-tight);
+      color: var(--color-dark-green);
+    }
+    .metric__text {
+      font-family: var(--font-body);
+      font-size: var(--text-body-sm);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      color: var(--color-dark-green);
+    }
+
+    /* ══════════════════════════════════════
+       FOUR PHASES
+    ══════════════════════════════════════ */
+    .phases-grid {
+      display: flex;
+      gap: 20px;
+      margin-top: 60px;
+    }
+    .phase {
+      flex: 1;
+      padding-top: 32px;
+      border-top: 2px solid var(--color-dark-green);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .phase__number {
+      font-family: var(--font-body);
+      font-size: var(--text-body-sm);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      opacity: 0.4;
+      color: var(--color-dark-green);
+    }
+    .phase__title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-card-title);
+      line-height: var(--lh-card-title);
+      letter-spacing: var(--ls-heading-tight);
+      color: var(--color-dark-green);
+    }
+    .phase__text {
+      font-family: var(--font-body);
+      font-size: var(--text-body-sm);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      color: var(--color-dark-green);
+    }
+
+    /* ══════════════════════════════════════
+       WHAT WE MAKE
+    ══════════════════════════════════════ */
+    .make {
+      padding: 80px 60px 80px;
+    }
+    .make__header {
+      margin-bottom: 60px;
+    }
+    .make__label {
+      font-family: var(--font-body);
+      font-size: var(--text-body-sm);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      opacity: 0.5;
+      margin-bottom: 16px;
+    }
+    .make__heading {
+      max-width: 920px;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-section);
+      line-height: var(--lh-section);
+      letter-spacing: var(--ls-heading-tight);
+      color: var(--color-dark-green);
+      margin-bottom: 24px;
+    }
+    .make__intro {
+      max-width: 760px;
+      font-family: var(--font-body);
+      font-size: var(--text-body-md);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      color: var(--color-dark-green);
+    }
+    .make__grid {
+      display: flex;
+      gap: var(--gap-columns);
+    }
+    .make__col {
+      flex: 1;
+      padding-top: 32px;
+      border-top: 2px solid var(--color-dark-green);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .make__col-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-card-title);
+      line-height: var(--lh-card-title);
+      letter-spacing: var(--ls-heading-tight);
+      color: var(--color-dark-green);
+    }
+    .make__items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .make__items li {
+      font-family: var(--font-body);
+      font-size: var(--text-body-md);
+      line-height: 1.3;
+      letter-spacing: var(--ls-body);
+      color: var(--color-dark-green);
+      display: flex;
+      gap: 10px;
+    }
+    .make__items li::before {
+      content: '—';
+      opacity: 0.4;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════
+       TEAM — 4 MEMBERS
+    ══════════════════════════════════════ */
+    .team__bio {
+      max-width: 760px;
+      font-family: var(--font-body);
+      font-size: var(--text-body-md);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      color: var(--color-dark-green);
+      margin-bottom: 60px;
+    }
+    .team__members--four {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+    }
+    .team__members--four .team__member-photo {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius-card);
+      background: var(--color-dark-green);
+      object-fit: cover;
+    }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE — NEW SECTIONS
+    ══════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .metrics-grid { flex-wrap: wrap; }
+      .metric { flex: 1 1 calc(50% - 10px); }
+      .phases-grid { flex-wrap: wrap; }
+      .phase { flex: 1 1 calc(50% - 10px); }
+      .team__members--four { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .bizcase { padding: 48px 16px 40px; }
+      .bizcase__heading { font-size: 36px; line-height: 1; margin-bottom: 40px; }
+      .metrics-grid { flex-direction: column; gap: 0; }
+      .metric { padding: 24px 0; }
+      .metric__title { font-size: 22px; }
+      .metric__text { font-size: 16px; }
+
+      .phases-grid { flex-direction: column; gap: 0; margin-top: 40px; }
+      .phase { padding: 24px 0; }
+      .phase__title { font-size: 22px; }
+      .phase__text { font-size: 16px; }
+
+      .make { padding: 48px 16px 40px; }
+      .make__heading { font-size: 36px; line-height: 1; }
+      .make__intro { font-size: 18px; margin-bottom: 40px; }
+      .make__grid { flex-direction: column; gap: 0; }
+      .make__col { padding: 24px 0; }
+      .make__col-title { font-size: 22px; }
+      .make__items { font-size: 18px; }
+
+      .team__bio { font-size: 18px; margin-bottom: 40px; }
+      .team__members--four { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    }
+
+    /* ══════════════════════════════════════
+       PORTFOLIO — HOVER OVERLAY
+    ══════════════════════════════════════ */
+    .card__overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      display: flex;
+      align-items: flex-end;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: var(--radius-card);
+    }
+    .card:hover .card__overlay {
+      opacity: 1;
+    }
+    .card__overlay .card__description {
+      color: var(--color-ivory);
+      font-family: var(--font-body);
+      font-size: var(--text-body-sm);
+      line-height: var(--lh-body);
+      letter-spacing: var(--ls-body);
+      margin: 0;
+    }
+
+    /* ══════════════════════════════════════
+       PORTFOLIO — 2+3 GRID
+    ══════════════════════════════════════ */
+    section.portfolio {
+      margin-top: 120px;
+    }
+    .portfolio__header {
+      margin-bottom: 48px;
+    }
+    .portfolio__heading {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-section);
+      line-height: var(--lh-section);
+      letter-spacing: var(--ls-heading-tight);
+      color: var(--color-dark-green);
+    }
+    .pf-row {
+      display: flex;
+      gap: var(--gap-cards);
+      margin-bottom: var(--gap-cards);
+    }
+    .pf-row:last-child { margin-bottom: 0; }
+
+    /* Row 1: 60/40, tall */
+    .pf-row--2col .pf-wide  { flex: 6; }
+    .pf-row--2col .pf-narrow { flex: 4; }
+    .pf-row--2col .card__image { height: 360px; }
+
+    /* Row 2: 3 equal, shorter */
+    .pf-row--3col .card { flex: 1; }
+    .pf-row--3col .card__image { height: 260px; }
+
+    /* Row 3: 2 equal */
+    .pf-row--2col-eq .card { flex: 1; }
+    .pf-row--2col-eq .card__image { height: 300px; }
+
+    /* Title inside image */
+    .pf-row .card__info { display: none; }
+
+    /* Screenshots — contain so nothing is cropped */
+    .card--top .card__image { background: #0d0d0d; }
+    .card--top .card__backdrop { object-fit: contain; }
+
+    .pf-row .card__title {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      color: var(--color-ivory);
+      z-index: 3;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Scrim behind title */
+    .pf-row .card__image::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 180px;
+      background: linear-gradient(to top, rgba(1, 28, 0, 0.75) 0%, transparent 100%);
+      border-radius: 0 0 var(--radius-card) var(--radius-card);
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Overlay on top of everything */
+    .card__overlay { z-index: 4; }
+
+    /* On hover: scrim + title fade, overlay appears */
+    .pf-row .card:hover .card__image::before { opacity: 0; }
+    .pf-row .card:hover .card__title { opacity: 0; }
+
+    @media (max-width: 768px) {
+      .pf-row { flex-direction: column; }
+      .pf-row--2col .card__image,
+      .pf-row--3col .card__image { height: 220px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ======== NAVIGATION ======== -->
+  <nav class="nav">
+    <a href="/" class="nav__logo">
+      <img src="assets/images/Logo Workmark Black.svg" alt="Backspace Oddity" class="nav__logo-img">
+    </a>
+    <div class="nav__info">
+      <div class="nav__info-block">
+        <div class="nav__info-label">Contact us:</div>
+        <a href="mailto:start@backspaceoddity.com">start@backspaceoddity.com</a><br>
+        <a href="#">Book a call</a>
+      </div>
+      <div class="nav__info-block">
+        <div class="nav__info-label">Office:</div>
+        Vijzelstraat 68-78<br>
+        1017 ES Amsterdam
+      </div>
+    </div>
+  </nav>
+
+  <!-- ======== HERO ======== -->
+  <section class="hero">
+    <img class="hero__backdrop" src="assets/images/backdrop-03.webp" alt="" fetchpriority="high">
+    <div class="hero__gradient"></div>
+    <div class="hero__content">
+      <h1 class="hero__title">Brand is not what you look like.<br>It's how you make decisions</h1>
+      <div class="hero__footer">
+        <p class="hero__desc">Product got you traction. Brand is what turns that traction into a flywheel. We help companies build it — and make sure it runs.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== THE REFRAME + BRAND DIAGRAM ======== -->
+  <section class="brand-diagram">
+    <h2 class="brand-diagram__question">But what is brand?</h2>
+    <p class="brand-diagram__caption">It's a promise consistently fulfilled in every interaction</p>
+    <svg class="brand-diagram__svg" viewBox="0 0 900 440" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left circle -->
+      <circle cx="300" cy="230" r="185" fill="none" stroke="#011C00" stroke-width="1.2"/>
+      <!-- Right circle -->
+      <circle cx="560" cy="230" r="185" fill="none" stroke="#011C00" stroke-width="1.2"/>
+
+      <!-- Left: Brand -->
+      <text text-anchor="middle" x="218" y="208" font-family="'SouvenirGothic', Georgia, serif" font-weight="700" font-size="24" fill="#011C00">Brand</text>
+      <text text-anchor="middle" x="218" y="238" font-family="'EB Garamond', Georgia, serif" font-style="italic" font-size="19" fill="#011C00">"Why you exist"</text>
+      <text text-anchor="middle" x="218" y="264" font-family="'EB Garamond', Georgia, serif" font-size="19" fill="#011C00">Promise</text>
+
+      <!-- Right: Experience -->
+      <text text-anchor="middle" x="645" y="208" font-family="'SouvenirGothic', Georgia, serif" font-weight="700" font-size="24" fill="#011C00">Experience</text>
+      <text text-anchor="middle" x="645" y="238" font-family="'EB Garamond', Georgia, serif" font-style="italic" font-size="19" fill="#011C00">"What you do"</text>
+      <text text-anchor="middle" x="645" y="264" font-family="'EB Garamond', Georgia, serif" font-size="19" fill="#011C00">Reasons to believe</text>
+
+      <!-- Intersection: Brand Experience -->
+      <text text-anchor="middle" x="430" y="220" font-family="'EB Garamond', Georgia, serif" font-size="17" fill="#011C00">Brand</text>
+      <text text-anchor="middle" x="430" y="244" font-family="'EB Garamond', Georgia, serif" font-size="17" fill="#011C00">Experience</text>
+    </svg>
+  </section>
+
+  <section class="description">
+    <div class="description__col text-md">
+      Every product decision, every pricing tier, every feature, every customer touchpoint — each one either strengthens your brand promise or quietly undermines it. Companies that compound fastest are those where brand isn't a department. It's a question everyone in the organization knows how to answer.
+    </div>
+    <div class="description__col text-md">
+      That question: <em>does this strengthen our promise?</em> When it runs through every decision — product, pricing, hiring, partnerships — you stop competing on features. You start compounding.
+    </div>
+  </section>
+
+  <!-- ======== THE BUSINESS CASE ======== -->
+  <section class="bizcase">
+    <div class="bizcase__header">
+      <h2 class="bizcase__heading">How investing in brand shows up in numbers</h2>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric">
+        <h3 class="metric__title">Decision speed</h3>
+        <p class="metric__text">Teams with a clear brand promise decide faster. Fewer debates about what to build, who for, and why it matters.</p>
+      </div>
+      <div class="metric">
+        <h3 class="metric__title">CAC reduction</h3>
+        <p class="metric__text">Strong brands lower cost per acquisition. Brand-building investment reduces what you pay for every performance campaign that follows.</p>
+      </div>
+      <div class="metric">
+        <h3 class="metric__title">Net Revenue Retention</h3>
+        <p class="metric__text">Customers who believe in your promise stay longer and expand. The gap between what you claim and what you deliver is the primary driver of churn.</p>
+      </div>
+      <div class="metric">
+        <h3 class="metric__title">Category ownership</h3>
+        <p class="metric__text">You stop competing on price when you own a Category Entry Point — the specific moment when customers start looking for what you sell.</p>
+      </div>
+      <div class="metric">
+        <h3 class="metric__title">Compounding advantage</h3>
+        <p class="metric__text">Product features get copied in months. A decision-making framework built into an organization takes years to replicate.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== HOW WE WORK (dark) ======== -->
+  <section class="manifesto">
+    <img class="manifesto__backdrop" src="assets/images/backdrop-02.webp" alt="" loading="lazy">
+    <div class="manifesto__gradient"></div>
+    <h2 class="manifesto__heading">
+      Not just decision-making.<br>Decision making.
+    </h2>
+    <div class="manifesto__text">
+      <div class="manifesto__col">
+        Most brand strategies end as a document. Beautifully written, carefully researched — and quietly ignored six months later. Not because the thinking was wrong. Because there was no system to carry it into how your organization actually works.
+      </div>
+      <div class="manifesto__col">
+        We build that system. Agents, decision frameworks, and processes embedded where work happens — so every product choice, every campaign, every pricing change runs on brand logic. AI makes this possible at a scale it never was before. When we leave, the decisions keep making things.
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== FOUR PHASES ======== -->
+  <section class="method">
+    <div class="method__header">
+      <h2 class="method__heading">Our working process</h2>
+    </div>
+    <div class="phases-grid">
+      <div class="phase">
+        <div class="phase__number">01</div>
+        <h3 class="phase__title">Understand & Frame</h3>
+        <p class="phase__text">We start with your task. What do you have, what position does it put you in, and what do we not know yet. We name the hypotheses before we start building.</p>
+      </div>
+      <div class="phase">
+        <div class="phase__number">02</div>
+        <h3 class="phase__title">Build</h3>
+        <p class="phase__text">We design the solution. Could be a brand platform, a GTM strategy, a campaign, a product experience. The form follows the task.</p>
+      </div>
+      <div class="phase">
+        <div class="phase__number">03</div>
+        <h3 class="phase__title">Operationalize</h3>
+        <p class="phase__text">We build the infrastructure that makes it run — agents, workflows, repeatable processes. Strategy that actually executes.</p>
+      </div>
+      <div class="phase">
+        <div class="phase__number">04</div>
+        <h3 class="phase__title">Transfer</h3>
+        <p class="phase__text">We hand it over. Your team inherits the capability, not just the deliverable. We leave, and it keeps working.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== WHAT WE MAKE ======== -->
+  <section class="make">
+    <div class="make__header">
+      <h2 class="make__heading">Our work takes many forms</h2>
+      <p class="make__intro">Most teams specialize in one layer. We connect strategy, brand, product, design, and technology into a single coherent experience — and know how to make each layer reinforce the others.</p>
+    </div>
+    <div class="make__grid">
+      <div class="make__col">
+        <h3 class="make__col-title">Strategy</h3>
+        <ul class="make__items">
+          <li>Brand positioning</li>
+          <li>Product strategy</li>
+          <li>Go-to-market</li>
+          <li>Market entry</li>
+          <li>Hypothesis frameworks</li>
+        </ul>
+      </div>
+      <div class="make__col">
+        <h3 class="make__col-title">Design</h3>
+        <ul class="make__items">
+          <li>Brand identity</li>
+          <li>Design systems</li>
+          <li>Product experience</li>
+          <li>Campaigns</li>
+          <li>Tone of voice</li>
+        </ul>
+      </div>
+      <div class="make__col">
+        <h3 class="make__col-title">Technology</h3>
+        <ul class="make__items">
+          <li>AI agents</li>
+          <li>Agentic workflows</li>
+          <li>Internal tools</li>
+          <li>Dashboards</li>
+          <li>Execution infrastructure</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== PORTFOLIO ======== -->
+  <section class="portfolio">
+
+    <div class="portfolio__header">
+      <h2 class="portfolio__heading">Our most recent experience</h2>
+    </div>
+
+    <!-- Row 1: 60/40 — Miro + Sidekick -->
+    <div class="pf-row pf-row--2col">
+      <article class="card pf-wide">
+        <div class="card__image">
+          <img class="card__backdrop" src="assets/images/project-miro.png" alt="" loading="lazy">
+          <h3 class="card__title">Rebrand: from RealtimeBoard to Miro</h3>
+          <div class="card__overlay"><p class="card__description">New name, visual identity, and brand architecture for the world's leading online collaboration platform. The rebrand that set Miro on a path to a $17.5B valuation.</p></div>
+        </div>
+      </article>
+      <article class="card pf-narrow card--top">
+        <div class="card__image">
+          <img class="card__backdrop" src="assets/images/project-sidekick.png" alt="" loading="lazy">
+          <h3 class="card__title">Sidekick Browser (acquired by Perplexity)</h3>
+          <div class="card__overlay"><p class="card__description">Product repositioning and new category definition — introducing the productivity browser as a distinct category for power users.</p></div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Row 2: 2 equal — Global Payroll Platform + Film Production Company -->
+    <div class="pf-row pf-row--2col-eq">
+      <article class="card card--top">
+        <div class="card__image">
+          <img class="card__backdrop" src="assets/images/project-global-payroll.png" alt="" loading="lazy">
+          <h3 class="card__title">Global Payroll Platform</h3>
+          <div class="card__overlay"><p class="card__description">Brand strategy and product design for a global payroll platform simplifying cross-border employment.</p></div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card__image">
+          <img class="card__backdrop" src="assets/images/backdrop-01.webp" alt="" loading="lazy">
+          <h3 class="card__title">Film Production Company</h3>
+          <div class="card__overlay"><p class="card__description">Coming soon.</p></div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Row 3: 3 equal — Wayfund, iki.ai, Superabundance -->
+    <div class="pf-row pf-row--3col">
+      <article class="card card--top">
+        <div class="card__image">
+          <img class="card__backdrop" src="assets/images/project-wayfund.png" alt="" loading="lazy">
+          <h3 class="card__title">Wayfund</h3>
+          <div class="card__overlay"><p class="card__description">Brand strategy and product design for an AI-powered platform helping EU SMEs find and access government funding.</p></div>
+        </div>
+      </article>
+      <article class="card card--top">
+        <div class="card__image">
+          <img class="card__backdrop" src="assets/images/project-iki.png" alt="" loading="lazy">
+          <h3 class="card__title">iki.ai</h3>
+          <div class="card__overlay"><p class="card__description">Brand positioning and identity for a personal knowledge management tool built for professionals who think for a living.</p></div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card__image">
+          <img class="card__backdrop" src="assets/images/project-superabundance.png" alt="" loading="lazy">
+          <h3 class="card__title">Superabundance</h3>
+          <div class="card__overlay"><p class="card__description">Brand strategy and visual identity for a longevity platform redefining how people think about health, time, and human potential.</p></div>
+        </div>
+      </article>
+    </div>
+
+  </section>
+
+  <!-- ======== TEAM ======== -->
+  <section class="team">
+    <div class="team__header">
+      <h2 class="team__heading">We've done this before. At companies you've heard of</h2>
+    </div>
+    <div class="team__content">
+      <div class="team__text">
+        <p>Built by people who've shipped brands and products at companies like Miro, Sidekick Browser, Meta, McKinsey, R/GA, Metalab, Stink Studios, and Your Majesty. We don't staff up with generalists. When you work with us, you work with the people who've done this before, in the roles that actually matter.</p>
+      </div>
+      <div class="team__members">
+        <div class="team__member">
+          <img class="team__member-photo" src="assets/images/Yegor Korobeynikov.webp" alt="Yegor Korobeynikov" loading="lazy">
+          <h4 class="team__member-name">Yegor Korobeynikov</h4>
+          <p class="team__member-role">Founder & CEO</p>
+        </div>
+        <div class="team__member">
+          <img class="team__member-photo" src="assets/images/Anna Barinova.webp" alt="Anna Barinova" loading="lazy">
+          <h4 class="team__member-name">Anna Barinova</h4>
+          <p class="team__member-role">Head of Production</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== CTA ======== -->
+  <section class="cta">
+    <h2 class="cta__heading">Ready to build your flywheel?</h2>
+    <div class="cta__content">
+      <p class="cta__text">If brand has been a finishing layer in your company — applied after decisions are made — let's change that. We'll help you build it into how you think.</p>
+      <a href="mailto:start@backspaceoddity.com" class="cta__button">Start a conversation</a>
+    </div>
+  </section>
+
+  <!-- ======== FOOTER ======== -->
+  <footer class="footer">
+    <div class="footer__logo">
+      <img src="assets/images/Logo Workmark Black.svg" alt="Backspace Oddity" class="footer__logo-img">
+    </div>
+    <div class="footer__info">
+      <div class="footer__info-block">
+        <div class="footer__info-label">Office</div>
+        <p>Vijzelstraat 68-78,<br>1017 ES Amsterdam</p>
+      </div>
+      <div class="footer__info-block">
+        <div class="footer__info-label">Contact</div>
+        <a href="mailto:start@backspaceoddity.com">start@backspaceoddity.com</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>
