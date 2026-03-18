@@ -377,17 +377,20 @@
        RESPONSIVE — NEW SECTIONS
     ══════════════════════════════════════ */
     @media (max-width: 1024px) {
-      .metrics-grid { flex-wrap: wrap; }
-      .metric { flex: 1 1 calc(50% - 10px); }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: none; }
+      .metric { display: flex; flex-direction: column; gap: 12px; grid-row: auto; }
       .phases-grid { flex-wrap: wrap; }
       .phase { flex: 1 1 calc(50% - 10px); }
       .team__members--four { grid-template-columns: repeat(2, 1fr); }
+      .description { gap: 40px; }
+      .make__grid { gap: 40px; }
     }
 
     @media (max-width: 768px) {
       .bizcase { padding: 48px 16px 40px; }
-      .bizcase__heading { font-size: 36px; line-height: 1; margin-bottom: 40px; }
-      .metrics-grid { flex-direction: column; gap: 0; }
+      .bizcase__heading { font-size: 36px; line-height: 1; }
+      .bizcase__header { margin-bottom: 48px; }
+      .metrics-grid { grid-template-columns: 1fr; gap: 0; }
       .metric { padding: 24px 0; }
       .metric__title { font-size: 22px; }
       .metric__text { font-size: 16px; }
