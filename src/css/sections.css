@@ -43,7 +43,7 @@
    ======================================== */
 .hero {
   position: relative;
-  height: min(800px, calc(100vh - 120px));
+  height: min(800px, calc(100vh - 160px));
   border-radius: var(--radius-section);
   overflow: hidden;
   margin: 0 var(--px);
