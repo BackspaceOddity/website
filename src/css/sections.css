@@ -577,7 +577,6 @@
   }
   .nav__logo-img { height: 56px; }
   .nav__info { gap: 24px; font-size: 16px; }
-  .nav__info-block:last-child { display: none; }
 
   /* --- Hero --- */
   .hero {
