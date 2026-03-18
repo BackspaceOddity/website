@@ -5,7 +5,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 24px 0;
+  padding: 24px var(--px);
   position: relative;
   z-index: 10;
 }
@@ -573,7 +573,7 @@
   .nav {
     flex-direction: column;
     gap: 20px;
-    padding: 20px 0;
+    padding: 20px var(--px);
   }
   .nav__logo-img { height: 56px; }
   .nav__info { gap: 24px; font-size: 16px; }
