@@ -43,7 +43,7 @@
    ======================================== */
 .hero {
   position: relative;
-  height: 800px;
+  height: min(800px, calc(100vh - 120px));
   border-radius: var(--radius-section);
   overflow: hidden;
   margin: 0 var(--px);
@@ -553,7 +553,7 @@
    RESPONSIVE — TABLET (≤1024px)
    ======================================== */
 @media (max-width: 1024px) {
-  .hero { height: 600px; }
+  .hero { height: min(600px, calc(100vh - 100px)); }
   .hero__content { padding: 0 60px 100px; }
   .hero__title { font-size: 120px; }
 
