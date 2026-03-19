@@ -62,22 +62,23 @@
        HERO OVERRIDES
     ══════════════════════════════════════ */
     .hero__content {
-      justify-content: center;
-      align-items: center;
-      padding: 80px var(--px);
+      justify-content: flex-start;
+      align-items: flex-end;
+      padding: 121px var(--px) 60px;
     }
     .hero__title {
       font-size: 80px;
-      width: 100%;
-      text-align: center;
+      width: 50%;
+      text-align: left;
       mix-blend-mode: normal;
+      color: #F5F2E9;
     }
     .hero__footer {
       position: absolute;
       bottom: 80px;
-      left: var(--px);
+      left: 50%;
       right: var(--px);
-      text-align: center;
+      text-align: left;
     }
     .hero__desc {
       font-family: var(--font-body);
@@ -87,7 +88,7 @@
       color: var(--color-ivory);
       opacity: 0.8;
       max-width: 640px;
-      margin: 0 auto;
+      margin: 0;
     }
     @media (max-width: 1024px) {
       .hero__title { font-size: 64px; }
@@ -550,8 +551,8 @@
 
   <!-- ======== HERO ======== -->
   <section class="hero">
-    <img class="hero__backdrop" src="assets/images/backdrop-03.webp" alt="" fetchpriority="high">
-    <div class="hero__gradient"></div>
+    <img class="hero__backdrop" src="assets/images/hero_alt.webp" alt="" fetchpriority="high">
+    <!-- hero__gradient hidden for alt hero -->
     <div class="hero__content">
       <h1 class="hero__title">Brand is not what you look like.<br>It's how you make decisions</h1>
       <div class="hero__footer">
