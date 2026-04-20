@@ -76,14 +76,14 @@ Product features get copied in months. A decision-making framework built into an
 _Dark section, backdrop image_
 
 **H2:**
-Most agencies leave after the strategy.
-We stay until it runs.
+Not just decision-making.
+But decision making, too.
 
 **Col 1:**
-Strategy without execution is an expensive PDF. We build not just the positioning, but the system that runs it — agents, processes, dashboards, decisions embedded into how your team works.
+Most brand strategies end as a document. Beautifully written, carefully researched — and quietly ignored six months later. Not because the thinking was wrong. Because there was no system to carry it into how your organization actually works.
 
 **Col 2:**
-When we leave, the system keeps working without us.
+We build that system. Agents, structured creative frameworks, and processes embedded where work happens — so every product choice, every campaign, every pricing change runs on brand logic. AI makes this possible at a scale it never was before. When we leave, the decisions keep making things.
 
 ---
 
@@ -142,7 +142,7 @@ New name, visual identity, and brand architecture for the world's leading online
 Image: `assets/images/project-miro.png`
 
 **Narrow (40%):** Sidekick Browser
-Product repositioning and new category definition — introducing the productivity browser as a distinct category for power users.
+Product repositioning and category creation for Sidekick Browser — introducing the productivity browser as a distinct category for power users. Acquired by Perplexity in 2025, relaunched as Comet.
 Image: `assets/images/project-sidekick.png` (card--top: object-fit: contain, dark bg)
 
 ### Row 2 — 2 equal columns
