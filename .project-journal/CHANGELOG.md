@@ -59,3 +59,7 @@
 
 **Result:**
 - Portfolio section fully rebuilt and approved
+
+### 2026-04-20 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-04-20-1930-89345-yegorkorobeynikov.md` had 2 user prompts, 16 tool calls, 0 errors. Full raw log has been deleted (retention policy).
