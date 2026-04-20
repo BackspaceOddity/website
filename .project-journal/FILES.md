@@ -30,6 +30,7 @@
 - `.gitignore` — excludes node_modules, .DS_Store, .claude, .playwright-mcp, bugs
 
 ## Content / Reference
-- `WEBSITE-CONTENT.md` — full approved copy for all sections (keep in sync with HTML)
+- `WEBSITE-CONTENT.md` — full approved copy for all sections (V2 synced from `src/index.html` on 2026-04-20; keep in sync with HTML)
+- `WEBSITE-CONTENT-v1-archive.md` — historical snapshot of copy as of 2026-03-17 (do not edit)
 - `PROJECT-CONTEXT.md` — design system tokens, portfolio cases list, tech stack
 - `.project-journal/` — this journal

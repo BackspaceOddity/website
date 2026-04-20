@@ -53,3 +53,13 @@ _Backfilled after fixing the session-end-gate hook that silently skipped this pr
 [RETRO 2026-04-20] [LEARN] [LOCAL]: Deployment flow for BackspaceOddity/website requires a GitHub PAT that the CC VM can't obtain interactively. Workaround: `git -c credential.helper= commit && git push https://<PAT>@github.com/BackspaceOddity/website.git main`. The user must supply the PAT each session — don't assume cached credentials.
 
 [RETRO 2026-04-20] [WIN] [CROSS-PROJECT]: Two-file content-sync pattern (WEBSITE-CONTENT.md + PROJECT-CONTEXT.md) survives multi-session copy churn. Content doc tracks approved strings, context doc tracks tokens/structure. Update both after any copy change, in the same edit batch, or they desync within one session.
+
+## Session 2026-04-20 — content-sync rebuild
+
+[2026-04-20] [ERROR] [CROSS-PROJECT]: WebFetch returns AI-summarized content that can invent or miss structural details. On the BSO site rebuild, WebFetch reported Row 3 of the portfolio as "3 equal cards" matching a stale HTML comment, when the actual DOM had only 2 cards (pf-row--2col). Fix: after any WebFetch of a page whose source you own, grep the source file for the key entities to verify before treating WebFetch as ground truth. Source file > live scrape > WebFetch summary, in that order.
+
+[2026-04-20] [LEARN] [LOCAL]: When a content doc (WEBSITE-CONTENT.md) diverges from the deployed source, rebuild from `src/index.html` not the live URL. The HTML file is the committed source of truth; the live site can be momentarily out of sync during deploys. For BSO Website: `src/index.html` is always canonical.
+
+[2026-04-20] [WIN] [CROSS-PROJECT]: Archive-with-banner pattern for versioned content docs: when a content file gets rebuilt from scratch, rename the old one to `<name>-v1-archive.md` and prepend a "⚠️ HISTORICAL SNAPSHOT — do not edit" blockquote with a pointer to the current file. Cheaper than git archaeology, survives file moves, and prevents accidental edits to stale content.
+
+[2026-04-20] [LEARN] [LOCAL]: Stale HTML comments outlive the code they describe. The `<!-- Row 3: 3 equal — Wayfund, iki.ai, Superabundance -->` comment survived the iki.ai card removal. Scan HTML comments during any structural change and update them in the same commit, or they mislead future WebFetch/AI passes.

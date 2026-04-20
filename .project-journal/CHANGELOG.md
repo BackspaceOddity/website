@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-04-20 — WEBSITE-CONTENT.md rebuilt from live-site ground truth
+
+**What happened:**
+- Fetched backspaceoddity.com + cross-referenced `src/index.html` to capture actual deployed copy
+- Created V2 of WEBSITE-CONTENT.md with verbatim section-by-section content
+- Renamed: V2 → `WEBSITE-CONTENT.md` (primary), V1 → `WEBSITE-CONTENT-v1-archive.md` with do-not-edit banner
+- Documented 12+ divergences between V1 (2026-03-17 state) and live site in a DIFF section
+- Updated STATE.md to reflect current reality: Film Production has real content, iki.ai removed, Row 3 restructured to 2 cards, 5 unpushed commits
+
+**Decisions made:**
+- Keep V1 as historical snapshot rather than delete — useful diff baseline for future copy changes
+- Primary filename stays `WEBSITE-CONTENT.md` so downstream references don't break
+
+**Errors encountered:**
+- WebFetch missed Row 3 structure (treated stale HTML comment as truth); caught by grepping `iki` in the actual HTML. Lesson: always verify WebFetch output against the source file.
+
+**Result:**
+- `WEBSITE-CONTENT.md` now matches live site 1:1 (source: `src/index.html`)
+- 5 commits queued for push (awaiting GitHub PAT)
+
+---
+
 ## 2026-04-08 — Major copy rewrite + portfolio restructure + deployment setup
 
 **What happened:**
