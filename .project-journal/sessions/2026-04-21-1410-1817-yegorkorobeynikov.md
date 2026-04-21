@@ -21,3 +21,5 @@ PID: 1817 | User: yegorkorobeynikov | cwd: BSO Website
 [14:23] TOOL Write → context/website-ia-sketch-v0.md
 [14:24] TOOL ToolSearch : select:mcp__e3144146-fe0f-4a38-b31e-a82559465fb4__notion-create-pages
 [14:26] TOOL mcp__e3144146-fe0f-4a38-b31e-a82559465fb4__notion-create-pages
+[14:26] TOOL Bash : cd "/Users/yegorkorobeynikov/Cursor/Home space/Backspace Oddity/Internal projects/BSO Website" && git add context/website-ia-sketch-v0.md .project-jo…
+[14:34] USER: Я могу прокомментировать, но итоговый контент должен быть на английском. Может, ты сразу начнёшь писать его на английском?
