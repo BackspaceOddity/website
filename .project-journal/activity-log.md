@@ -5,3 +5,4 @@
 [2026-04-21 14:11] Write → context/new-website-v2-notion.md
 [2026-04-21 14:23] Write → context/website-ia-sketch-v0.md
 [2026-04-21 14:42] Edit → context/new-website-v2-notion.md
+[2026-04-21 15:33] Edit → context/CANONICAL-SOURCES.md
