@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-04-22 → 2026-04-23 — V2 content rebuild: skeleton + audit + hero locked
+
+**What happened:**
+- Published IA sketch drafts v0 / v1 / v1.1 to Notion → Yegor rejected the lot: "wrong accents, wrong packaging, wrong positioning". Drafts archived.
+- Built best-practice structure skeleton page (8 screens + footer + open questions); added Jobs-framing cross-cutting principle, Screen 3 renamed "Jobs we close"
+- Reference site audit of 7 sites (Harvey, Sierra, Decagon, 11x, Sana, Superside, IDEO) published as Notion subpage
+- Yegor annotated audit with 14 inline comments → filtered most enterprise-grade patterns out for V1 (BSO too early)
+- Hero went through 4 failed iterations before landing on Yegor's formulation: "GTM strategy is not a set of tactics across channels." Locked in skeleton 2026-04-22.
+- Mid-session catch: Cascade Navigation System v5.1 canonical IP was missing from graph → patched SB node + positioning-framework wiki-links + cached full v5.1 doc in vault/docs
+
+**Decisions made:**
+- Jobs framing (JTBD over segments) as cross-cutting structural principle
+- Content Marketing Strategy v1 BRIEF signature thesis didn't survive Maja-check → needs tightening (change-request to parallel CM session)
+- Screen 1 Hero locked; Screen 2 work deferred; Screens 3–10 skeleton only
+- "Defer V1 for": logo strip, outcome metrics, testimonials, trust/SOC2, video hero, FAQ
+
+**Errors encountered (all captured in LEARNINGS):**
+- Option-C snapshot (CANONICAL-SOURCES.md) is write-once — cached v0 BRIEF at session start, didn't catch v1 lock in Notion mid-session. Same class as cascade miss.
+- Under pushback I re-generated drafts from abstract principles instead of re-reading BRIEF §4. Four failed hero drafts before landing.
+- Notion normalizes `_italic_` → `*italic*` on storage — first `update_content` failed silently because anchors used create-time syntax.
+- tov.md rule "no client diagnosis" violated with "You have X. You don't have Y." despite knowing the rule.
+
+**Result:**
+- Notion skeleton page ready for Screen 2 drafting next session
+- Hero locked with 4-gate validation (tov/Maja/BRIEF/hook)
+- 6 transferable learnings captured
+- Advisor identified 3 distinct error roots + hook/enforcement proposal
+
+---
+
 ## 2026-04-20 — WEBSITE-CONTENT.md rebuilt from live-site ground truth
 
 **What happened:**

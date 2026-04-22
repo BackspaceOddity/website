@@ -1,48 +1,91 @@
 # Backspace Oddity Website — Current State
 
-**Last updated:** 2026-04-20
-**Status:** In Progress
+**Last updated:** 2026-04-23 (/wrap)
+**Status:** In Progress — **V2 content rebuild in progress** (site rewrite track); live-site maintenance track on pause
 **Client/Context:** Backspace Oddity — strategic brand growth agency, Amsterdam
 
 ## What This Project Is
-Rebuilding the Backspace Oddity marketing website (backspaceoddity.com) — static HTML/CSS, no framework. The existing CSS design system is preserved; all changes happen via `<style>` block overrides and HTML edits in `src/index.html`. Goal: ship a polished, content-accurate site that reflects current brand positioning.
+Rebuilding the Backspace Oddity marketing website (backspaceoddity.com) under two tracks:
+1. **Live-site maintenance** — static HTML/CSS at `src/index.html`, what's currently deployed.
+2. **V2 content rebuild** — new site copy + IA, authored in Notion under "New website V2" parent page (`349402511cda8064acc2f157d1ab11b8`). Skeleton + drafts live there before anything lands in HTML.
 
 ## Current Status
-- Live site is up at backspaceoddity.com
-- Major copy, portfolio, hero, manifesto, and CTA sections all approved and deployed
-- **WEBSITE-CONTENT.md rebuilt (2026-04-20)** from `src/index.html` as ground truth; old version preserved as `WEBSITE-CONTENT-v1-archive.md`
-- Portfolio currently: Miro + Sidekick (Row 1, 60/40), Global Payroll + Film Production (Row 2, 2-eq), Wayfund + Superabundance (Row 3, 40/60). `iki.ai` card removed
-- Film Production Company card now has real content (governance model + content hypothesis framework)
-- Team: Yegor + Anna. Artem and Siraj still pending photos
-- Contact email in nav + footer: `yegor@backspaceoddity.com`; Cal.com booking link
-- 5 local commits on `master` not yet pushed to `origin/main` (blocked on PAT)
+
+### Track 1 — Live site (on pause)
+- Live at backspaceoddity.com
+- WEBSITE-CONTENT.md synced to `src/index.html` (2026-04-20)
+- 5 local commits on `master` still unpushed (blocked on PAT)
+
+### Track 2 — V2 content rebuild (active, 2026-04-22 → 2026-04-23)
+
+Notion structure under "New website V2":
+- **IA sketch v0 — screen by screen** (`349402511cda8171bd5bff0dc665a390`) — archive of v0 + v1 + v1.1 drafts that got rejected
+- **Landing skeleton — best-practice structure** (`34a402511cda81bcaf55fcc83eadd4d0`) — working skeleton where drafts land
+- **Reference site audit — 6 sites across 3 clusters** (`34a402511cda81bd84c6e88f60918a05`) — Harvey, Sierra, Decagon, 11x, Sana, Superside, IDEO with 14 Yegor annotations
+
+**Hero locked 2026-04-22:**
+- **H1:** "GTM strategy is not a set of tactics across channels."
+- **Sub (draft):** "It's the decisions underneath — underserved jobs, ICP, category entry points — that make the channels worth running."
+- **CTA:** Book a call → Cal.com
+- Passed 4 gates: tov.md (no client judgment), Maja-check (thesis survives against thought-leaders in the category), BRIEF §4 thesis (negative half; positive half unfolds Screen 2), hook (implicit "if not X, then what").
+
+**Cross-cutting principle locked:** Jobs framing (JTBD over segments) — Screen 3 renamed "Jobs we close" with 5 draft jobs + competition re-frame per job.
+
+**Context loaded in `context/`:**
+- `positioning/bso-positioning-framework-v1.md`
+- `positioning/content-marketing-brief-v0.md`
+- `positioning/cascade-navigation-system-v5.1.md` (mid-session catch of canonical drift)
+- `foundation/bso-magician-not-teacher-architecture.md`
+- `market-context/` (Foundation + Sequoia articles)
+
+### Track 2 — filtered OUT for V1 (per Yegor's review of audit)
+Logo strip, outcome metrics in cases, attribution testimonials, trust/SOC2-style sections, video hero, FAQ section. BSO too early in category for enterprise-grade patterns.
+
+### Track 2 — kept FOR V1
+- Hero with thesis (locked)
+- Screen 3 Jobs we close + Comparison matrix pattern (Superside)
+- Screen 4 tab-switcher product-screens concept (Sierra/Decagon/11x pattern)
+- Target 8–10 screens, not 16
 
 ## Key Files
-- `src/index.html` — single source of truth, all CSS overrides and HTML
-- `WEBSITE-CONTENT.md` — current live-site copy (V2, synced 2026-04-20)
-- `WEBSITE-CONTENT-v1-archive.md` — historical snapshot (V1, 2026-03-17)
-- `src/css/variables.css` — design tokens
-- `src/assets/images/` — all images
-- `src/.vercel/project.json` — Vercel project ID
-- `vercel.json` — image optimization config
-- `PROJECT-CONTEXT.md` — design system tokens, portfolio cases, tech stack
+
+### Project root
+- `src/index.html` — live-site source of truth
+- `WEBSITE-CONTENT.md` — current live-site copy
+- `WEBSITE-CONTENT-v1-archive.md` — pre-2026-04-20 snapshot
+- `PROJECT-CONTEXT.md` — design tokens, portfolio cases
+- `context/` — canonical positioning + market-context cache (6 files + CANONICAL-SOURCES.md)
+- `context/new-website-v2-notion.md` — pointer to Notion V2 parent page
+
+### Notion (V2 rebuild)
+- Parent: `https://www.notion.so/New-website-V2-349402511cda8064acc2f157d1ab11b8`
+- Skeleton: `https://www.notion.so/34a402511cda81bcaf55fcc83eadd4d0`
+- Audit: `https://www.notion.so/34a402511cda81bd84c6e88f60918a05`
+- Drafts archive: `https://www.notion.so/349402511cda8171bd5bff0dc665a390`
 
 ## Open Issues
-1. **Deployment push blocked** — 5 local commits on `master` need GitHub PAT to push to `BackspaceOddity/website` (branch tracks `origin/main`)
-2. **Hero backdrop** — retrofuturistic 70s sci-fi image still unresolved; ChatGPT keeps producing synthwave
-3. **Manifesto backdrop** — `backdrop-02.webp` in place but may want refinement (warm/amber retrofuturistic)
-4. **Team section** — Artem Sologub and Siraj Hasanov to be added once photos are available (companies already in team copy)
-5. **Stale HTML comment** in Row 3 references `iki.ai` but card is removed — cosmetic, low priority
+1. **Deployment push blocked** — 5+ local commits on `master` need GitHub PAT
+2. **BRIEF §4 thesis needs tightening** — "everything called GTM strategy is tactics" doesn't survive Maja-check; proposed shift to "frameworks exist, systems to run them don't" gap-framing. Change-request belongs in parallel Content Marketing session, not here.
+3. **Screen 2–10 skeleton copy** — only Screen 1 Hero is locked. Screens 2–10 have roles/structures drafted but no copy.
+4. **Notion italic normalization gotcha** — `_italic_` at create becomes `*italic*` on storage; future `update_content` anchors must use fetched representation, not create-time source.
+5. **Hero backdrop, manifesto backdrop, team photos, stale iki.ai HTML comment** — legacy open items from Track 1 (maintenance)
 
 ## Next Steps
-1. User provides GitHub PAT → `git push origin master:main` (5 commits queued) → Vercel deploys automatically
-2. Finalize hero backdrop (user to generate, drop as `src/assets/images/hero_alt.webp` or similar)
-3. Add Artem and Siraj to team section once photos arrive
-4. Clean stale `iki.ai` comment in `src/index.html` Row 3 (~line 757)
+
+### Immediate (Track 2, next session)
+1. Screen 2 — "What real GTM strategy is" (positive half of hero thesis unfolds here). Source: BRIEF §4 + Pillar 1 methodology list (Structural JTBD, CEP, SHIFT+, Cascade Navigation).
+2. Screen 3 — already has Jobs framing principle + 5 draft jobs + Screen 3 renamed. Needs: lock 3–5 final jobs + competition-vs-what per job.
+3. Screen 4 — Approach, tab-switcher product-screens concept. Visually-unclear per Yegor's audit comment — defer until visual is decided.
+
+### Parallel (outside this project)
+- Content Marketing session: handoff proposal to tighten BRIEF §4 thesis from "everything called X is Y" to "gap between frameworks and systems" framing.
+
+### Track 1 (when PAT available)
+- Push queued commits to deploy live-site changes
 
 ## How to Resume This Project
-1. Read this STATE.md + `WEBSITE-CONTENT.md` (current) — `src/index.html` is authoritative source
-2. Main working file is `src/index.html` — all CSS overrides are in a `<style>` block at the top
-3. Before any Edit, always Read the file first
-4. To push: get GitHub PAT from user → `git push https://<PAT>@github.com/BackspaceOddity/website.git master:main`
-5. Vercel auto-deploys on push to main
+1. Read this STATE.md + `WEBSITE-CONTENT.md` + `context/CANONICAL-SOURCES.md`
+2. For V2 rebuild work — start at the Notion skeleton page (`34a402511cda81bcaf55fcc83eadd4d0`). Hero is locked; work on Screen 2.
+3. Rule from 2026-04-22 learnings: before any copy draft, quote the relevant BRIEF §4 passage verbatim. Don't generate from abstract principles under pushback — re-read canonical each pivot.
+4. Notion `update_content` — always use fetched representation for `old_str` (asterisk italic, not underscore).
+5. For Track 1 push — get GitHub PAT, run `git push https://<PAT>@github.com/BackspaceOddity/website.git master:main`.
