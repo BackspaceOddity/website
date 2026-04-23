@@ -64,7 +64,8 @@ Logo strip, outcome metrics in cases, attribution testimonials, trust/SOC2-style
 - Drafts archive: `https://www.notion.so/349402511cda8171bd5bff0dc665a390`
 
 ## Open Issues
-1. **Deployment push blocked** — 5+ local commits on `master` need GitHub PAT
+1. **BSO Figma Bridge setup friction** — forked to Second Brain session 2026-04-23 via `/move-to-session`. Full context in `Second Brain/docs/DECISIONS-INBOX/bso-figma-bridge-setup-friction.md` + paste-prompt in `HANDOFF-to-second-brain.md` at project root. Non-blocking — BSO Website V2 track продолжается (JetBrains PDF got локально).
+2. **Deployment push blocked** — 5+ local commits on `master` need GitHub PAT
 2. **BRIEF §4 thesis needs tightening** — "everything called GTM strategy is tactics" doesn't survive Maja-check; proposed shift to "frameworks exist, systems to run them don't" gap-framing. Change-request belongs in parallel Content Marketing session, not here.
 3. **Screen 2–10 skeleton copy** — only Screen 1 Hero is locked. Screens 2–10 have roles/structures drafted but no copy.
 4. **Notion italic normalization gotcha** — `_italic_` at create becomes `*italic*` on storage; future `update_content` anchors must use fetched representation, not create-time source.
