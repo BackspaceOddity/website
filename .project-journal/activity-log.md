@@ -7,3 +7,6 @@
 [2026-04-21 14:42] Edit → context/new-website-v2-notion.md
 [2026-04-21 15:33] Edit → context/CANONICAL-SOURCES.md
 [2026-04-22 19:38] Write → CLAUDE.md
+[2026-04-23 15:04] Write → README.md
+[2026-04-23 15:05] Write → docs/INTEGRATION-STRATEGY.md
+[2026-04-23 15:06] Write → docs/ROADMAP.md
