@@ -11,3 +11,4 @@
 [2026-04-23 15:05] Write → docs/INTEGRATION-STRATEGY.md
 [2026-04-23 15:06] Write → docs/ROADMAP.md
 [2026-04-23 18:46] Write → HANDOFF-to-second-brain.md
+[2026-04-23 19:31] Write → context/v2-design-prompts.md
