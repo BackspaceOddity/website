@@ -302,14 +302,15 @@
 
 - H2: *We've done this before. At companies you've heard of.*
 - Intro paragraph (2 short paragraphs — pedigree + "we stay small on purpose").
-- Team member grid (5–6 members, per Notion skeleton Screen 6 block). Each: photo, name, role, 1–2 sentence bio, optional LinkedIn.
+- Team: **2 members for V1** — Yegor Korobeynikov + Anna Barinova. Ivan / Artem / Siraj / Alena deferred to post-V1 (after photos arrive).
 
 **Composition.**
 
 - Light section (cream background).
 - Section H2 top, intro paragraph centered under (max 720px).
-- Team grid: 3-column desktop (2 rows × 3 people), 2-column tablet, 1-column mobile.
-- Each member card: square portrait photo (top), name + role below photo, bio underneath, optional LinkedIn icon.
+- Team grid: 2-column desktop (1 row × 2 people), single column mobile.
+- Each member card: square portrait photo (top), name + role below photo, bio underneath.
+- No LinkedIn icons per 2026-04-23 decision.
 
 **Typography.**
 
@@ -326,14 +327,11 @@
 
 **Visual elements.**
 
-- 5–6 portrait photos, square, edge-to-edge.
-- No placeholders for missing photos (Ivan / Artem / Siraj currently photo-pending per project STATE.md). If photo missing → stylized monogram (initials) on a dark-green background, 12px radius. Same weight and treatment as photos.
-- LinkedIn icon bottom-right of each member card (optional, small, ivory outline on dark bg).
+- 2 portrait photos, square, edge-to-edge (Yegor + Anna — both already on current live site).
 
 **Interaction.**
 
 - Member card hover: subtle elevation (shadow 0 4px 12px rgba(0,0,0,0.08)).
-- LinkedIn icon → external link, new tab.
 
 **Mobile.**
 
@@ -353,23 +351,51 @@
 
 **Open items (for Yegor to resolve before Claude Design consumes this):**
 
-- Anna vs Alena: confirm if two people or one. If two, include both in grid.
-- Photos: decide if we gate Screen 6 on photos arriving, or ship with monograms.
-- LinkedIn: provide links or omit.
+- Anna bio: current live-site minimal, needs more (where she worked, specialization).
 
 ---
 
-## Screen 7 — Insights / Writing — deferred for V1
+## Screen 7 — Insights / Writing — minimal strip (locked 2026-04-23)
 
-**Role (when eventually included).** Thought-leadership signal + newsletter acquisition.
+**Role.** Signal that writing is coming without embarrassing empty-state.
 
-**Why deferred.** Content Marketing pipeline not live yet (BRIEF v1 locked, infra Phase 1 in progress, writer-agents not configured). Empty/stale Insights section reads worse than no section. BRIEF §10 non-goal: no engagement-farming or fake-frequency posts.
+**Visitor question.** "Do these people write or publish anywhere?"
 
-**Trigger to include.** 3+ Substack posts with regular cadence (2 LinkedIn posts/week). Target: end of Q2 2026.
+**Content (locked 2026-04-23).**
 
-**V1 minimal alternative (optional, if wanting any writing signal).** Single-line footer teaser: `We write about strategy systems on Substack. [Subscribe →]`. No section needed.
+- Single line: *We write about strategy systems on Substack. Launching soon.*
 
-**Design prompt (when re-enabled):** Above-fold strip on a content-light section with 3 featured essays (thumbnail + title + date + excerpt) plus newsletter signup. IDEO / Harvey resource-hub pattern.
+**Composition.**
+
+- Narrow strip (one row) between Screen 8 (Final CTA) and Footer. Not a full section — reads as transitional.
+- Centered text, ~40px vertical padding.
+
+**Typography.**
+
+- EB Garamond Regular, 20px, line-height 120%, letter-spacing -0.01em. Color: dark-green 70% (on cream) — muted, not CTA-loud.
+- No button, no link underline (no URL to link to yet).
+
+**Color / mood.**
+
+- Background: cream (matching Footer) or subtle variation (e.g. slightly darker cream #EFECE3 to create a soft band).
+
+**Interaction.**
+
+- None — static text. No hover, no click target (no URL until Substack launches).
+
+**Mobile.**
+
+- Same strip, full width. Text centered. 24px vertical padding.
+
+**When to promote to full section.**
+
+- 3+ live Substack posts with regular cadence. Then replace this strip with a full screen: 3–4 featured posts (thumbnail + title + date + excerpt) + newsletter signup. IDEO / Harvey resource-hub pattern.
+
+**Must not.**
+
+- Add an inactive "Subscribe →" button that leads nowhere (dead CTA is worse than no CTA).
+- Add placeholder post cards ("Your first post will appear here").
+- Include date ("Launching Q2 2026") — Substack launch date may slip; text stays timeless.
 
 ---
 
@@ -446,17 +472,16 @@
 - Nav: Work (anchor to Screen 2), How we work (anchor to Screen 4), Contact (anchor to Screen 8 / Cal.com).
 - Contact: `yegor@backspaceoddity.com`.
 - Location: `Amsterdam` (city only, not full address).
-- Social: LinkedIn (BSO company page), Substack (when live).
+- Social: **omitted for V1** (LinkedIn/Substack URLs not set per 2026-04-23 decision).
 - Legal: `Privacy` link (deferred; add when needed).
 
 **Composition.**
 
-- Full-width, light section below Screen 8's dark section (or flip if Screen 8 is light).
-- Three or four columns on desktop, stacked on mobile.
+- Full-width, light section below Screen 8's dark section (preceded by Screen 7 minimal strip).
+- Three columns on desktop, stacked on mobile.
   - Col 1: logo + copyright.
   - Col 2: nav links.
   - Col 3: contact + location.
-  - Col 4 (optional): social.
 
 **Typography.**
 
@@ -495,8 +520,9 @@
 
 **Visual unity.**
 
-- Hero and Final CTA both dark → bookend composition. Screens 2 (Work), 3 (Jobs), 6 (Team) all light → middle sequence is a single "reading surface". Screen 4 (How we work) dark → breaks up middle, creates rhythm: dark → light → light → dark → light → dark → footer-light.
-- If this rhythm feels too strict, alternative: Screen 4 as cream with dark card nested inside (design call).
+- Final V1 scroll sequence: Hero (dark) → Work (light) → Jobs (light) → How we work (dark) → Team (light) → Final CTA (dark) → Insights strip (light/cream variation) → Footer (light). Hero and Final CTA bookend the experience; Screen 4 breaks up the light middle.
+- Screen 5 (Proof) skipped, Screen 7 is a thin strip not a full screen.
+- If rhythm feels too strict, alternative: Screen 4 as cream with dark card nested inside (design call).
 
 **Typographic hierarchy.**
 
@@ -512,8 +538,8 @@
 **Image assets to commission or generate.**
 
 - Hero backdrop: final retrofuturistic 70s sci-fi image (existing `hero_alt.webp` may suffice; Chris Foss / Syd Mead prompt reference).
-- Stape case card image (not currently in `src/assets/images/`).
-- Team photos: Ivan, Artem, Siraj pending (monograms as fallback).
+- Stape case card image — extract from JetBrains proposal Figma Slides file (fileKey `xoA9CS5wsoQIZLSjTRjrRo`). Requires figma-console bridge or manual export from Figma Desktop. Asset doesn't currently exist in `src/assets/images/`.
+- Team photos: only Yegor + Anna (already on live site, `Yegor Korobeynikov.webp` + `Anna Barinova.webp`). No pending photos for V1.
 - Optional: diagram/visual for Screen 4 cascade-navigation concept.
 
 **What Claude Design should output.**
