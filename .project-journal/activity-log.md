@@ -26,3 +26,4 @@
 [2026-04-29 18:48] Edit → .gitignore
 [2026-04-29 18:49] Edit → .gitignore
 [2026-04-29 19:04] Write → src/index.html
+[2026-04-29 19:30] Edit → .claude/launch.json
