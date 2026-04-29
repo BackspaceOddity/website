@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-04-29 (late) — Edit-mode wired в copy + shared-library bug fix
+
+**What happened:**
+- /resume в новой сессии после параллельного /wrap-commit `793c290` — подхватил day-entry.
+- Push разблокирован — все 74 commit'а master → origin/main (Vercel deploys V2).
+- `app/page.tsx` в worktree обёрнут `<EditableText id="...">` для всей смысловой копи (~80 нод). Schema: `screen.element[.subkey]` (например `hero.h1`, `card.miro.description`, `job.01.headline`). Скипнуты пунктуация/номера/лого/chip-ссылки.
+- Текст-режим verified end-to-end через Claude Preview MCP: scroll → click hero.h1 → typed variant → Add → Approve → toolbar показывает «1 approved · Send to Claude» → click Send → toolbar очищается до `EDIT · Text · Visual`.
+- **Root cause баг:** `Tools/edit-mode/src/context.tsx` `saveAll()` очищал только `setVisualEdits([])`, но не `threads`. Counter оставался «1 approved» хотя POST /api/save-draft вернулся 200.
+- **Fix:** добавил `setThreads({})` рядом с `setVisualEdits([])`. Rebuild via `npm run build` (tsup). Dist скопирован в три потребителя: `BSO Website/.../nextjs-migration/lib/edit-mode/`, `bso-canvas-app/lib/edit-mode/`, `Knowledge-OS-Product/web/lib/edit-mode/`.
+- **KOS surprise:** при копировании в KOS git status остался чистый — там уже была более глубокая архитектура fix'а (3 слоя per `Knowledge-OS-Product/docs/DECISIONS-INBOX/from-sb-2026-04-27-edit-queue-not-clearing-after-send-to-claude.md`, resolved 2026-04-28). Мой фикс — только слой «bundle clears». KOS дополнительно имеет server pending/processed split + bundle hydrates from server + outbox replay + 5s timeout.
+
+**Decisions made:**
+- Для page.tsx идём через `<EditableText id="...">` обёртки, не через альтернативу «только visual-mode без text-mode parity».
+- Root fix в shared library, не локальная заплатка в worktree (per «Architectural fixes over patches»).
+- KOS не трогаем — у него уже работает более полная версия. Тех долг: backport 3-слой архитектуры из KOS в bso-canvas-app + BSO Website worktree, чтобы reload-after-save не возвращал thread'ы из файла.
+
+**Errors / learnings (3 в LEARNINGS):**
+- LEARN cross-project: shared-library fix без backport KOS-архитектуры — частичный. Counter падает в memory, но reload вернёт threads из `_edit-threads.json` (нет server pending/processed split).
+- LEARN local: `preview_click` MCP не всегда триггерит React click handler; для надёжности использовать `preview_eval` с `dispatchEvent(new MouseEvent('click', {bubbles:true,cancelable:true,view:window}))`.
+- WIN cross-project: `<EditableText id="...">` wrap-pattern масштабируется на пейдж 80+ нод за один write; ID-схема `screen.element[.subkey]` читаема и стабильна для последующих edit-thread reference'ов.
+
+**Result:**
+- BSO Website master: 74 commits на origin/main, V2 деплоится.
+- worktree `nextjs-migration`: page.tsx editable end-to-end, shared lib bundle обновлён, edit-mode counter ведёт себя корректно.
+- Tools/edit-mode: src + dist готовы к коммиту.
+- bso-canvas-app: dist готов к коммиту.
+- KOS web: уже имеет полный fix, не трогаем.
+
+---
+
 ## 2026-04-29 — V2 homepage implemented + Next.js migration started
 
 **What happened:**
@@ -194,3 +224,11 @@
 ### 2026-04-28 — orphan session rolled up (PID no longer alive)
 
 - Timeline file `2026-04-28-1943-77005-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-04-29 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-04-29-2144-64752-yegorkorobeynikov.md` had 8 user prompts, 41 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-04-29 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-04-29-1815-63439-yegorkorobeynikov.md` had 12 user prompts, 121 tool calls, 0 errors. Full raw log has been deleted (retention policy).
