@@ -3,3 +3,5 @@ node_modules/
 .claude/
 .playwright-mcp/
 bugs/
+.project-journal/.session-*
+.project-journal/.last-wrap-*

@@ -1,3 +1,9 @@
+<!--
+READ-ONLY SNAPSHOT — do not edit in place.
+Canonical: Content Marketing/docs/BRIEF.md
+Re-sync via CANONICAL-SOURCES.md protocol. Last synced: 2026-04-28.
+-->
+
 # Content Marketing Brief — v0 (in progress)
 
 > Внутренний документ. Фиксирует позиционирование, аудиторию и обещание для контентной машины BSO. Отсюда всё остальное: content pillars, tone писательских агентов, метрики успеха, non-goals.

@@ -20,3 +20,7 @@
 [2026-04-24 09:22] Edit → context/v2-design-prompts.md
 [2026-04-24 09:22] Edit → context/v2-design-prompts.md
 [2026-04-24 09:22] Edit → context/v2-design-prompts.md
+[2026-04-28 22:10] Edit → context/CANONICAL-SOURCES.md
+[2026-04-28 22:10] Edit → CLAUDE.md
+[2026-04-28 22:19] Write → context/landing-skeleton-best-practice-structure.md
+[2026-04-29 18:48] Edit → .gitignore

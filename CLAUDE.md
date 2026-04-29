@@ -20,7 +20,7 @@ For this project, **Notion is the canonical source of positioning / brand / brie
 
 | Topic | Canonical (Notion) | Local staging (stale) | Rule |
 |---|---|---|---|
-| Content BRIEF v1 (locked 2026-04-21) | [Notion page `34a40251-1cda-819a-88a9-e4bce614f0d2`](https://www.notion.so/34a402511cda819a88a9e4bce614f0d2) | `context/positioning/content-marketing-brief-v0.md` + mirror in `../Content Marketing/docs/BRIEF.md` | **Always fetch Notion first** — local copy may lag by weeks. Do not rely on memory of "I read this earlier". |
+| Content BRIEF v1 (locked 2026-04-21) | [Notion page `34a40251-1cda-819a-88a9-e4bce614f0d2`](https://www.notion.so/34a402511cda819a88a9e4bce614f0d2) (view authority); **Git canonical:** `../Content Marketing/docs/BRIEF.md` (edit here) | `context/positioning/content-marketing-brief-v0.md` (read-only snapshot from Git canonical, re-synced via CANONICAL-SOURCES.md) | **Always fetch Notion first** for client-facing copy — local snapshot may lag. For authoring edits — go to Git canonical, never edit the snapshot. |
 | Landing skeleton v1.x | [Notion page `34a40251-1cda-81bc-af55-fcc83eadd4d0`](https://www.notion.so/34a402511cda81bcaf55fcc83eadd4d0) | — | Live doc; user annotates inline. Fetch before generating any content proposals. |
 | Reference sites audit | [Notion page `34a40251-1cda-81bd-84c6-e88f60918a05`](https://www.notion.so/34a402511cda81bd84c6e88f60918a05) | — | User comments live here. |
 | Tone of voice | `~/.claude/tov.md` | — | Re-read in full before every H1 / hero / tagline — NOT from memory of the rules. |

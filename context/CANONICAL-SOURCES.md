@@ -6,8 +6,8 @@
 >
 > When reality in the source project changes materially, re-sync via the protocol below.
 
-**Last synced:** 2026-04-21
-**Synced by:** /help advisor flow → Option C (snapshot + indirection)
+**Last synced:** 2026-04-28
+**Synced by:** /help advisor flow → Option C (snapshot + indirection); 2026-04-28 re-sync of `content-marketing-brief-v0.md` after canonical confirmed as `Content Marketing/docs/BRIEF.md`.
 
 ---
 
