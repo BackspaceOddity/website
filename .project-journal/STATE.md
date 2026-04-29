@@ -1,8 +1,15 @@
 # Backspace Oddity Website — Current State
 
-**Last updated:** 2026-04-23 (/wrap)
-**Status:** In Progress — **V2 content rebuild in progress** (site rewrite track); live-site maintenance track on pause
+**Last updated:** 2026-04-29 (/wrap)
+**Status:** In Progress — **V2 implemented on master; Next.js migration active in worktree** (BSO-189)
 **Client/Context:** Backspace Oddity — strategic brand growth agency, Amsterdam
+
+## Quick state — what changed 2026-04-29
+
+- **V2 homepage** (Claude Design handoff DicK6mMEcbYL + Notion-canonical copy) committed на master `2bd13cd`. Hero, Selected work (6 cards including Stape placeholder), Jobs we close (5 final JTBDs), How we work (3 principles + Map/Build/Transfer + AI-native intro), Team, Final CTA, Insights strip, Footer.
+- **Notion landing skeleton page sync-checked** (status block, AI-native intro в Screen 4, archive-block stale-comments note).
+- **Next.js migration started** в worktree `nextjs-migration` (commit `74d189e`). `lib/edit-mode/` + EditModeShell + `/api/save-draft` + `_edit-threads.json` подключены — pattern parity с BSO Canvas / Knowledge-OS-Product/web / Stape. Dev server на http://localhost:3456 верифицирован: все 8 секций рендерятся, edit toolbar монтируется. Linear: BSO-189.
+- **Push blocked на PAT** — на master 73 commit'а unpushed. На branch `nextjs-migration` тот же блок.
 
 ## What This Project Is
 Rebuilding the Backspace Oddity marketing website (backspaceoddity.com) under two tracks:

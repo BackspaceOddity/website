@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-04-29 — V2 homepage implemented + Next.js migration started
+
+**What happened:**
+- /resume → catch-up: scaffold audit OK, STATE / CHANGELOG / LEARNINGS read, graph precedent surfaced.
+- Pre-existing canonical-sources re-sync (2026-04-28) committed (`7aa9d37`).
+- Notion landing skeleton page sync-checked vs canonical context (`bso-positioning-framework-v1` + BRIEF v1) — структурного drift нет; 3 housekeeping ops применены: статус-блок `2026-04-29 (верификация)`, AI-native agency intro в Screen 4, note над архив-блоком про устаревшие inline-discussions.
+- V2 homepage написан в `src/index.html` из Claude Design handoff (`DicK6mMEcbYL`, 2026-04-24): структура/CSS/токены из дизайна, копи verbatim из Notion landing skeleton (jobs/principles/phases — заменили invented copy дизайна). Assets: 5 SouvenirGothic .otf + hero-bg-magenta-green.png + project-film.webp + project-stape.webp (placeholder backdrop-02).
+- /invite загрузил 4 агентов: tone-of-voice (primary), figma-web-pixel-perfect, typography, knowledge-architect. Surfacing: tov rule #2 anti-consultant tension в Screen 4 P1 («We embed. We don't consult from the outside.») — Notion-locked, флажок не auto-fix.
+- Архитектурное решение для edit-mode: вариант A (конвертация в Next.js) выбран против B (vanilla адаптер) и C (Stagewise CDN). Knowledge-architect rule #5d / #3 как обоснование.
+- Linear [BSO-189](https://linear.app/backspace-oddity/issue/BSO-189) создан (Medium, project [BSO] Website, labels triage + decision-trace).
+- /move-to-session → создан git worktree `.claude/worktrees/nextjs-migration/` от master `2bd13cd`. SPINOFF-CONTEXT.md / GRAPH-PRECEDENT.md / AGENTS-TO-INVITE.md / HANDOFF-prompt.md написаны.
+- Next.js bootstrap в worktree: package.json (Next 16.2.4 + React 19.2.4), tsconfig, layout/page.tsx, globals.css, app/api/save-draft, components/EditModeShell, lib/edit-mode (copied verbatim из bso-canvas-app), public/ assets, _edit-threads.json инициализирован пустым. npm install: 344 packages.
+- Dev server на http://localhost:3456 верифицирован: все 8 секций рендерятся (page height 9000px), edit toolbar смонтирован.
+
+**Decisions made:**
+- Skeleton structurally aligned с canonical → drift не требует обновления (3 housekeeping ops — это polish).
+- AI-native agency framing добавляется как italic intro в Screen 4 (не в Hero sub) — короткий, концентрированный, мотивирует три principles.
+- Wayfund swap → Stape возвращён per Notion канон. Stape gets backdrop-02 placeholder (нужен реальный screenshot).
+- Edit-mode: Next.js A > B > C. Worktree, не sibling-проект. Branch `nextjs-migration`.
+- Push не делаем — PAT-блок остаётся (LEARNINGS [RETRO 2026-04-20]).
+
+**Errors / learnings (4 в LEARNINGS):**
+- ERROR cross-project: Notion `update_content` silently no-ops на toggle-converted blocks — анкер должен быть outside `<details>` структуры.
+- LEARN local: Notion blockquote+italic escape edge case (`> *Note...*` → `> \*Note...`).
+- WIN cross-project: Skeleton-vs-canonical alignment audit pattern (4-step: read upstream → fetch live → per-section comparison → action list).
+- LEARN local: activity-log + Stop-hook architectural tension (loop на каждом Edit).
+
+**Result:**
+- master: V2 homepage live на dev (`npx serve src` → 3456). 73 commit'а unpushed.
+- worktree `nextjs-migration`: scaffold готов, edit-mode подключён, 1 commit (`74d189e`) ahead of master.
+- Linear BSO-189 backlog с 12-step scope.
+- Next session entry: `cd .claude/worktrees/nextjs-migration && claude` → пасть HANDOFF-prompt.md → /resume → /invite.
+
+---
+
 ## 2026-04-22 → 2026-04-23 — V2 content rebuild: skeleton + audit + hero locked
 
 **What happened:**
