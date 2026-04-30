@@ -36,3 +36,5 @@
 [2026-04-30 16:06] Edit → scripts/dev-server.sh
 [2026-04-30 20:11] Edit → .gitignore
 [2026-04-30 22:05] Write → context/yc-application-daily-2026-04-30.md
+[2026-05-01 01:30] Edit → CLAUDE.md
+[2026-05-01 01:32] Edit → .gitignore

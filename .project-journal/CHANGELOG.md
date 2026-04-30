@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-04-30 (evening) → 2026-05-01 — Real-time edit-mode pipeline + Three Layers + body-scale lift + GTM-reframe
+
+**What happened:**
+- ~5 часов real-time edit-cycle через visual edit-mode picker. ~20 user comments → applied → next. Pipeline: symlink master/_edit-threads.json → worktree (Layer A quick-fix BSO-236) + Hook surface-visual-edits.py → user clicks comment in browser → next user-prompt получает edits с element-attachment → Claude правит → пометка applied.
+- **New Screen 2 «Three layers of GTM strategy»** added between Hero и Selected Work. Iterations:
+  - V0: «Strategy / Tactics / Creative execution» с generic content
+  - V1: rewrote intro через strategy/execution gap (per YC application insight «разрыв между стратегией и execution»)
+  - V2: Layer 3 named pain — first version mentioned Miro 55-people-3-months → user pushback «уйти от rebrand», generalised
+  - V3: Layer 3 ещё реframe — убрать rebrand entirely → «Strategy lands as a deck. Then channels have to learn it, ship it, repeat it across hundreds of touchpoints — stuck waiting on a creative team that can't scale»
+  - V4: Layer 2 переименование Cascade/Channel architecture → user pushback «непонятно, и не отражает смысл, это буквально tactics типа PR/outreach/advertising × channels» → final framing
+  - V5: CEPs (Category Entry Points) перенесены из Layer 1 в Layer 2 как «the lens» — per user's strategic insight «наложение CEPs на тактики позволяет нам отстроиться»
+  - Layout: 3 columns side-by-side вместо vertical stacked rows (per user's request)
+- **Body-text scale bump system-wide** — USER-FLAGGED learning. --size-body 20→24, --size-body-lg 24→28, --size-card 30→32. Plus 24 per-element bumps. Editorial premium на десктопе.
+- **Edit-mode bundle bug fix** — `setThreads({})` после saveAll был too aggressive: clearing in-memory state включая activeText, displayed text revert'ился к sourceText. Fix: extended status type `'open' | 'approved' | 'applied'`, после save mark approved → applied (activeText preserved для display, counter excludes 'applied' через filter).
+- **Job headlines tightening** — point removal на all 14 заголовках. Job 02 → «Outpace competitors in a highly competitive market». Job 04 → «Treat every launch as hypotheses we test, not as a plan we execute until we die». Job 03 → short version. Multi-iterate with user.
+- **Section h2 sizing** — work__head .section-h2 уменьшен (clamp 36-56), final__h2 уменьшен (40-72).
+- **Final CTA pill button** — с underline-link на ivory pill button с padding 18×40, shadow, hover lift. Affordance явный.
+- **Final section gradient bg** — magenta-emerald радиальный градиент on dark base. Разрежает gap между Hero и подвалом.
+- **Footer body 19→21**, member__bio 19→22, member__photo 100% → 88px circle.
+- **Card backdrop swap** — Wayfund вернулся вместо Stape per user, длинный Miro title восстановлен. Notion canonical (landing skeleton) updated to match — Stape moved to backlog with note.
+- **«Worked on this with» rows** removed from all 5 jobs → BSO-244 created для restore когда client base growth justifies.
+- **«Instead of» rows** removed earlier today from jobs.
+- **«What you get» rows** removed.
+- **Logo mark в nav** added (Logo Mark.svg 44px, aligned to hero block left edge).
+- **Hero CTA крупнее** (18px → 26px), hero h1 font-size capped lower (clamp 64-160 → 44-104).
+- **Tactics body** — final formulation: «PR, cold outreach, advertising, content, partnerships, events — the moves you make, paired with the channels they live in: LinkedIn, email, podcasts, paid, owned. Category Entry Points are the lens that pulls all of this into one coherent GTM — every tactic anchored to a moment a buyer is actually in, not a slot in your campaign calendar.»
+- **Principle 1 reframe** «We embed GTM engineers, not consultants» (per YC pitch «brand engineers» reframe applied to GTM-frame).
+
+**Decisions made:**
+- Three Layers structure: Strategy (jobs/ICP/positioning/narrative/messaging) → Tactics (PR/outreach/ads × channels, CEPs as lens) → Creative execution (AI-native production)
+- CEPs живут в Layer 2 (тактическая лёнза), не в Layer 1 (per Yegor's strategic insight)
+- Cascade Navigation System остаётся в Principle 2 «How we work», не в Three Layers (отдельная BSO methodology)
+- Default body-text для editorial premium landing — 22-28px на десктопе
+- Edit-mode bundle: status='applied' для post-save threads (preserve display, counter clear)
+
+**Errors / learnings:**
+- Edit-mode bundle bug — `setThreads({})` вместо marking applied. Layer 2 fix BSO-228 был overzealous. New status `'applied'` — proper fix.
+- Body sizes 19-25px на десктопе читаются как caption — editorial premium = 22-28px (USER-FLAGGED).
+- Real-time edit-cycle pipeline + symlink + cron-poll = ~14-20 edits/сессия velocity.
+- CEPs framing: anchor tactics к buyer moments, не к calendar slots — differentiator от competitors показывается через showing, не telling.
+
+**Result:**
+- BSO Website worktree: page.tsx + globals.css + lib/edit-mode bundle обновлены, ready to commit
+- Tools/edit-mode src/context.tsx — extended status type, edit-mode bundle preservation fix
+- bso-canvas-app + KOS web — bundle propagated
+- Linear: BSO-244 (restore Worked-with) + BSO-245 (Tweaks panel) created earlier
+- Notion landing skeleton требует updates per новой Three Layers structure
+
+---
+
 ## 2026-04-30 (late) — Dev-server detach script (CC-restart resilience)
 
 **Symptom:** после рестарта CC сессии `localhost:3456` отдаёт ERR_CONNECTION_REFUSED. Process started через `preview_start` или `Bash run_in_background` привязан к жизненному циклу CC и убивается при закрытии. Каждый `/resume` ловит «refused to connect» — структурный gap, не разовая проблема.

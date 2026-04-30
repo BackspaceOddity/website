@@ -7,3 +7,4 @@ bugs/
 .project-journal/.last-wrap-*
 .project-journal/sessions/*-yegorkorobeynikov.md
 _edit-threads.json
+_edit-threads.processed.jsonl

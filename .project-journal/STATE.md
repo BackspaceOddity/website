@@ -1,10 +1,24 @@
 # Backspace Oddity Website — Current State
 
-**Last updated:** 2026-04-30 (autonomous task)
-**Status:** In Progress — **V2 live на backspaceoddity.com; Next.js worktree edit-mode 3-layer arch backported; backlog hygiene done** (BSO-189 mid-flight, BSO-228 + BSO-142 + BSO-61 closed)
+**Last updated:** 2026-05-01 (/wrap end of day 2026-04-30)
+**Status:** In Progress — **V2 evolves — Three Layers section live, real-time edit-cycle через visual edit-mode picker, brand-frame → GTM-frame reframes, +20 visual edits applied this session** (BSO-189 mid-flight, BSO-244 + BSO-245 backlog)
 **Client/Context:** Backspace Oddity — strategic brand growth agency, Amsterdam
 
-## Quick state — autonomous session 2026-04-30 (+90 мин)
+## Quick state — late session 2026-04-30 (+5 часов real-time edit cycle)
+
+- **New Screen 2 «Three layers of GTM strategy»** — landed между Hero и Selected Work. Layer 1 Strategy (jobs / ICP / positioning / narrative / messaging architecture) → Layer 2 Tactics (PR / outreach / advertising / content / partnerships × LinkedIn / email / podcasts / paid / owned, **CEPs as the lens** that pulls into coherent GTM) → Layer 3 Creative execution (AI-native production, channels-keep-up framing, no rebrand-mention per Yegor's pushback).
+- **Visual edit-mode pipeline matured** — `surface-visual-edits.py` + symlink master/_edit-threads.json → worktree (Layer A quick-fix per BSO-236) + extended thread status `'open' | 'approved' | 'applied'` (per current edit-mode bug fix — keeps activeText displayed after Send to Claude). ~20 visual edits applied real-time через picker → Claude apply → user views → next.
+- **Body-text scale system-wide bump** — --size-body 20→24, --size-body-lg 24→28, plus per-element. Editorial premium (USER-FLAGGED learning).
+- **Layer 2 reframe iterations** — Cascade/Channel architecture rejected (unclear) → user clarified: tactics = PR/outreach/advertising × channels, CEPs = the lens. Final structure tactically grounded.
+- **Logo mark added в nav** — Logo Mark.svg (44px) перед wordmark, aligned to hero block left edge.
+- **YC application context loaded** — `context/yc-application-daily-2026-04-30.md` snapshot. Strategy/execution gap added в Three Layers intro per YC pitch insights.
+
+## Open items (Notion canonical update needed)
+- Notion landing skeleton page — нужно отразить Three Layers section (новая секция, не была в skeleton)
+- Нужно отразить Layer 2 «PR/outreach/advertising × channels, CEPs as lens» framing
+- Layer 1 расширенная formulation (positioning/narrative/messaging architecture в strategy)
+
+## Quick state — earlier 2026-04-30 (autonomous task)
 
 - **BSO-228 closed** — backport KOS-main 3-layer edit-mode архитектуры в Tools/edit-mode templates + bso-canvas-app + BSO Website worktree. KOS main bundle также получил Layer 2 fix (setThreads({})). Decisions-inbox файл в KOS обновлён — был неточным (claim'ил 3 слоя на main, реально только Layer 1).
 - **BSO-142 closed** — `context/CANONICAL-SOURCES.md` расширен Notion-canonical классом + новой re-sync секцией. File index теперь имеет колонку Type (Git / Notion / Local). Каждый context/*.md явно объявляет canonical source. Снимает класс ошибок «Notion-snapshot stale, никто не знает откуда он».
