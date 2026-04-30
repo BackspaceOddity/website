@@ -27,3 +27,5 @@
 [2026-04-29 18:49] Edit → .gitignore
 [2026-04-29 19:04] Write → src/index.html
 [2026-04-29 19:30] Edit → .claude/launch.json
+[2026-04-30 12:36] Write → context/CANONICAL-SOURCES.md
+[2026-04-30 12:46] Write → context/landing-skeleton-best-practice-structure.md
