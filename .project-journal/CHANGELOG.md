@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-04-30 (late) — Dev-server detach script (CC-restart resilience)
+
+**Symptom:** после рестарта CC сессии `localhost:3456` отдаёт ERR_CONNECTION_REFUSED. Process started через `preview_start` или `Bash run_in_background` привязан к жизненному циклу CC и убивается при закрытии. Каждый `/resume` ловит «refused to connect» — структурный gap, не разовая проблема.
+
+**Root cause:** dev server lifecycle coupled с CC session lifecycle. `Bash run_in_background` создаёт процесс-ребёнок CC; при exit CC SIGHUP'ит дерево.
+
+**Fix landed:** `scripts/dev-server.sh` — start/stop/status/restart/logs wrapper, использует `nohup + </dev/null + disown` (macOS-portable, без `setsid` который отсутствует в стандартной macOS). PID-файл в `/tmp` для idempotency, port-check fallback. Server переживает CC restart-ы.
+
+**Failed first iteration:** написал скрипт с `setsid` — `command not found` на macOS. Пофикшено заменой на `nohup + </dev/null` (closed stdin = no controlling terminal to lose).
+
+**Не landed:** session-start hook автостарта (рассматривал, но over-engineering для разового манёвра — wrapper достаточно). Пользователь запускает `./scripts/dev-server.sh start` один раз, server живёт пока `stop` не вызовут.
+
+**Result:**
+- `scripts/dev-server.sh` committed (ранее лежал в `.claude/scripts/` — gitignored, не пропагировал бы; перенёс в `scripts/` в корень).
+- BSO-189 open item «CC-restart resilience» — addressed.
+
+---
+
 ## 2026-04-30 — Autonomous task: 3-layer backport + canonical-sources extension + backlog hygiene
 
 **Context:** User stepped away для 2-часового отсутствия с просьбой работать автономно над backlog. Все 4 scope-варианта одобрены через AskUserQuestion (BSO-61 close, BSO-142 doc, KOS 3-layer backport, Verify Vercel + tov-lint, Backlog hygiene). Permission mode: bypassPermissions.
@@ -278,3 +296,11 @@
 ### 2026-04-30 — orphan session rolled up (PID no longer alive)
 
 - Timeline file `2026-04-30-0839-31280-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-04-30 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-04-30-0840-31528-yegorkorobeynikov.md` had 2 user prompts, 56 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-04-30 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-04-30-1357-68338-yegorkorobeynikov.md` had 1 user prompts, 10 tool calls, 0 errors. Full raw log has been deleted (retention policy).

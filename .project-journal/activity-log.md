@@ -29,3 +29,8 @@
 [2026-04-29 19:30] Edit → .claude/launch.json
 [2026-04-30 12:36] Write → context/CANONICAL-SOURCES.md
 [2026-04-30 12:46] Write → context/landing-skeleton-best-practice-structure.md
+[2026-04-30 14:01] Write → .claude/scripts/dev-server.sh
+[2026-04-30 14:02] Edit → .claude/scripts/dev-server.sh
+[2026-04-30 14:03] Edit → .claude/scripts/dev-server.sh
+[2026-04-30 16:06] Edit → scripts/dev-server.sh
+[2026-04-30 16:06] Edit → scripts/dev-server.sh
