@@ -34,3 +34,4 @@
 [2026-04-30 14:03] Edit → .claude/scripts/dev-server.sh
 [2026-04-30 16:06] Edit → scripts/dev-server.sh
 [2026-04-30 16:06] Edit → scripts/dev-server.sh
+[2026-04-30 20:11] Edit → .gitignore
