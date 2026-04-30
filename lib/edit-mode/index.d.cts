@@ -8,7 +8,7 @@ interface EditThread {
     activeText: string;
     variants: string[];
     archived: string[];
-    status: 'open' | 'approved';
+    status: 'open' | 'approved' | 'applied';
 }
 interface VisualEditElement {
     component: string;

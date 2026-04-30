@@ -6,8 +6,11 @@ export default function HomePage() {
       {/* ============ NAV ============ */}
       <nav className="nav" aria-label="Primary">
         <a href="#top" className="nav__logo" aria-label="Backspace Oddity">
-          <span>Backspace</span>
-          <span>Oddity</span>
+          <img className="nav__logo-mark" src="/images/Logo Mark.svg" alt="" aria-hidden="true" />
+          <span className="nav__logo-text">
+            <span>Backspace</span>
+            <span>Oddity</span>
+          </span>
         </a>
         <div className="nav__right">
           <div className="nav__block">
@@ -42,7 +45,7 @@ export default function HomePage() {
         <div className="hero__bg" aria-hidden="true"></div>
         <div className="hero__inner">
           <h1 className="hero__title">
-            <EditableText id="hero.h1">GTM strategy is not a set of tactics across channels.</EditableText>
+            <EditableText id="hero.h1">GTM strategy is not a set of tactics across channels</EditableText>
           </h1>
           <p className="hero__sub">
             <EditableText id="hero.sub">{`It's what channels execute — who your audience is, the job they need done, the context they're buying in, who you compete with there, and why you fit best.`}</EditableText>
@@ -56,11 +59,75 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============ SCREEN 2 — SELECTED WORK ============ */}
-      <section className="work" id="work" data-screen-label="02 Work">
+      {/* ============ SCREEN 2 — THREE LAYERS ============ */}
+      <section className="layers" id="approach" data-screen-label="02 Three layers">
+        <div className="layers__inner">
+          <header className="layers__head">
+            <span className="layers__eyebrow">
+              <EditableText id="layers.eyebrow">What we mean by GTM strategy</EditableText>
+            </span>
+            <h2 className="section-h2">
+              <EditableText id="layers.h2">{`Three layers under every channel that actually runs`}</EditableText>
+            </h2>
+            <p className="layers__intro">
+              <EditableText id="layers.intro">{`Strategy without operationalisation drifts in a quarter. Channels without strategy underneath burn budget without compounding. We work the gap between the two — three layers, in this order.`}</EditableText>
+            </p>
+          </header>
+
+          <ol className="layers__list">
+            <li className="layer">
+              <div className="layer__num">01</div>
+              <div className="layer__body">
+                <h3 className="layer__name">
+                  <EditableText id="layer.strategy.name">Strategy</EditableText>
+                </h3>
+                <p className="layer__lead">
+                  <EditableText id="layer.strategy.lead">Which battles to fight.</EditableText>
+                </p>
+                <p className="layer__body-text">
+                  <EditableText id="layer.strategy.body">{`Underserved jobs, ICP, positioning, narrative, the messaging architecture that makes a stranger pick you on the second meeting. The decisions every channel runs on, whether you've made them explicitly or not.`}</EditableText>
+                </p>
+              </div>
+            </li>
+
+            <li className="layer">
+              <div className="layer__num">02</div>
+              <div className="layer__body">
+                <h3 className="layer__name">
+                  <EditableText id="layer.tactics.name">Tactics</EditableText>
+                </h3>
+                <p className="layer__lead">
+                  <EditableText id="layer.tactics.lead">How to run them.</EditableText>
+                </p>
+                <p className="layer__body-text">
+                  <EditableText id="layer.tactics.body">{`PR, cold outreach, advertising, content, partnerships, events — the moves you make, paired with the channels they live in: LinkedIn, email, podcasts, paid, owned. Category Entry Points are the lens that pulls all of this into one coherent GTM — every tactic anchored to a moment a buyer is actually in, not a slot in your campaign calendar.`}</EditableText>
+                </p>
+              </div>
+            </li>
+
+            <li className="layer">
+              <div className="layer__num">03</div>
+              <div className="layer__body">
+                <h3 className="layer__name">
+                  <EditableText id="layer.exec.name">Creative execution</EditableText>
+                </h3>
+                <p className="layer__lead">
+                  <EditableText id="layer.exec.lead">Making it ship — without the headcount bottleneck.</EditableText>
+                </p>
+                <p className="layer__body-text">
+                  <EditableText id="layer.exec.body">{`Strategy lands as a deck. Then channels have to learn it, ship it, and repeat it across hundreds of touchpoints — stuck waiting on a creative team that can't scale. AI-native production turns site, content, campaigns, and sales collateral from headcount-bound projects into a system that ships daily and compounds with every release.`}</EditableText>
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      {/* ============ SCREEN 3 — SELECTED WORK ============ */}
+      <section className="work" id="work" data-screen-label="03 Work">
         <header className="work__head">
           <h2 className="section-h2">
-            <EditableText id="work.h2">{`Companies we've worked with.`}</EditableText>
+            <EditableText id="work.h2">{`Companies we've worked with`}</EditableText>
           </h2>
         </header>
 
@@ -84,7 +151,7 @@ export default function HomePage() {
                 </p>
               </div>
               <h3 className="card__title">
-                <EditableText id="card.miro.title">Miro (in-house)</EditableText>
+                <EditableText id="card.miro.title">Rebrand: from RealtimeBoard to Miro (in-house)</EditableText>
               </h3>
             </a>
             <a className="card" href="#" data-case="sidekick">
@@ -105,19 +172,24 @@ export default function HomePage() {
           </div>
 
           <div className="work__row work__row--50-50">
-            <a className="card" href="#" data-case="stape">
-              <img className="card__backdrop" src="/images/project-stape.webp" alt="" loading="lazy" />
+            <a className="card" href="#" data-case="payroll">
+              <img
+                className="card__backdrop"
+                src="/images/project-global-payroll.webp"
+                alt=""
+                loading="lazy"
+              />
               <div className="card__shade"></div>
               <div className="card__overlay">
                 <p className="card__description">
-                  <EditableText id="card.stape.description">{`A fintech for cross-border payments to remote teams. Full relaunch — new name, brand platform, identity, positioning, site, tone of voice — done from inside the team, not at a distance. Paired with AI workflows that keep positioning and ToV alive in marketing, sales, and GTM at scale.`}</EditableText>
+                  <EditableText id="card.payroll.description">{`Cross-border employment is a category of compliance nightmares and lookalike brands. A new name, positioning, and identity gave this platform a reason to be chosen side-by-side. Agentic workflows behind the brand now run the parts that don't need a human.`}</EditableText>
                   <span className="card__role">
-                    <EditableText id="card.stape.role">{`Our role — brand platform + identity + positioning + site + ToV + agentic production pipelines.`}</EditableText>
+                    <EditableText id="card.payroll.role">{`Our role — brand strategy, renaming, positioning, identity, agentic workflows.`}</EditableText>
                   </span>
                 </p>
               </div>
               <h3 className="card__title">
-                <EditableText id="card.stape.title">Stape</EditableText>
+                <EditableText id="card.payroll.title">Global Payroll Platform</EditableText>
               </h3>
             </a>
             <a className="card" href="#" data-case="film">
@@ -138,24 +210,19 @@ export default function HomePage() {
           </div>
 
           <div className="work__row work__row--40-60">
-            <a className="card" href="#" data-case="payroll">
-              <img
-                className="card__backdrop"
-                src="/images/project-global-payroll.webp"
-                alt=""
-                loading="lazy"
-              />
+            <a className="card" href="#" data-case="wayfund">
+              <img className="card__backdrop" src="/images/project-wayfund.webp" alt="" loading="lazy" />
               <div className="card__shade"></div>
               <div className="card__overlay">
                 <p className="card__description">
-                  <EditableText id="card.payroll.description">{`Cross-border employment is a category of compliance nightmares and lookalike brands. A new name, positioning, and identity gave this platform a reason to be chosen side-by-side. Agentic workflows behind the brand now run the parts that don't need a human.`}</EditableText>
+                  <EditableText id="card.wayfund.description">{`Customer development, market opportunity mapping, product development, and agentic workflows for an AI-powered platform helping EU SMEs find and access government funding.`}</EditableText>
                   <span className="card__role">
-                    <EditableText id="card.payroll.role">{`Our role — brand strategy, renaming, positioning, identity, agentic workflows.`}</EditableText>
+                    <EditableText id="card.wayfund.role">{`Our role — customer development, market mapping, product, agentic workflows.`}</EditableText>
                   </span>
                 </p>
               </div>
               <h3 className="card__title">
-                <EditableText id="card.payroll.title">Global Payroll Platform</EditableText>
+                <EditableText id="card.wayfund.title">Wayfund</EditableText>
               </h3>
             </a>
             <a className="card" href="#" data-case="superabundance">
@@ -187,10 +254,10 @@ export default function HomePage() {
       <section className="jobs" id="jobs" data-screen-label="03 Jobs">
         <header className="jobs__head">
           <h2 className="section-h2">
-            <EditableText id="jobs.h2">The jobs we close.</EditableText>
+            <EditableText id="jobs.h2">The jobs we close</EditableText>
           </h2>
           <p className="jobs__intro">
-            <EditableText id="jobs.intro">Five. Pick the one that matches where you are.</EditableText>
+            <EditableText id="jobs.intro">Pick the one that matches where you are</EditableText>
           </p>
         </header>
 
@@ -199,40 +266,8 @@ export default function HomePage() {
             <div className="job__num">01</div>
             <div className="job__body">
               <h3 className="job__headline">
-                <EditableText id="job.01.headline">{`Move upmarket to enterprise buyers — when our brand still signals "scrappy startup" in every RFP, first call, and side-by-side review.`}</EditableText>
+                <EditableText id="job.01.headline">{`Move upmarket to enterprise buyers — when our brand still signals "scrappy startup"`}</EditableText>
               </h3>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.01.label.what">What you get</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.01.what">{`A repositioning that holds up when it matters most — in RFPs, first calls, side-by-sides.`}</EditableText>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.01.label.worked">Worked on this with</EditableText>
-                </div>
-                <div className="job__value">
-                  <a className="job__chip" href="#work">Miro</a>
-                  <span className="job__sep">·</span>
-                  <a className="job__chip" href="#work">Stape</a>
-                  <span className="job__sep">·</span>
-                  <a className="job__chip" href="#work">Sidekick Browser</a>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.01.label.instead">Instead of</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.01.instead.a">Brand boutiques</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.01.instead.b">In-house brand team</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.01.instead.c">Logo-level refresh.</EditableText>
-                </div>
-              </div>
             </div>
           </article>
 
@@ -240,38 +275,8 @@ export default function HomePage() {
             <div className="job__num">02</div>
             <div className="job__body">
               <h3 className="job__headline">
-                <EditableText id="job.02.headline">{`Win in a market where competitors have pretty much the same product — when every buyer asks "what's the difference" and we don't have a sharp answer.`}</EditableText>
+                <EditableText id="job.02.headline">{`Outpace competitors in a highly competitive market`}</EditableText>
               </h3>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.02.label.what">What you get</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.02.what">{`Positioning the buyer can see in the moment they decide, not on a slide.`}</EditableText>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.02.label.worked">Worked on this with</EditableText>
-                </div>
-                <div className="job__value">
-                  <a className="job__chip" href="#work">Sidekick Browser</a>
-                  <span className="job__sep">·</span>
-                  <a className="job__chip" href="#work">Global Payroll Platform</a>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.02.label.instead">Instead of</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.02.instead.a">Growth agencies</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.02.instead.b">Adding another feature</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.02.instead.c">Out-spending the incumbent.</EditableText>
-                </div>
-              </div>
             </div>
           </article>
 
@@ -279,38 +284,8 @@ export default function HomePage() {
             <div className="job__num">03</div>
             <div className="job__body">
               <h3 className="job__headline">
-                <EditableText id="job.03.headline">{`Operationalise strategy into a system that runs daily — when "we already aligned on this" keeps not translating into execution, and we're running the same re-alignment workshop every quarter.`}</EditableText>
+                <EditableText id="job.03.headline">{`Operationalise strategy into a system that runs daily`}</EditableText>
               </h3>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.03.label.what">What you get</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.03.what">{`A weekly Cascade Navigation System — one that lives outside the offsite.`}</EditableText>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.03.label.worked">Worked on this with</EditableText>
-                </div>
-                <div className="job__value">
-                  <a className="job__chip" href="#work">AI-native Film Production Company</a>
-                  <span className="job__sep">·</span>
-                  <a className="job__chip" href="#work">Superabundance</a>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.03.label.instead">Instead of</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.03.instead.a">Quarterly offsites</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.03.instead.b">Playbooks and templates</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.03.instead.c">Standing re-alignment meetings.</EditableText>
-                </div>
-              </div>
             </div>
           </article>
 
@@ -318,36 +293,8 @@ export default function HomePage() {
             <div className="job__num">04</div>
             <div className="job__body">
               <h3 className="job__headline">
-                <EditableText id="job.04.headline">{`Treat the launch plan as hypotheses we test — so when reality diverges from the plan in week three, the team updates it instead of starting over from scratch.`}</EditableText>
+                <EditableText id="job.04.headline">{`Treat every launch as hypotheses we test, not as a plan we execute until we die`}</EditableText>
               </h3>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.04.label.what">What you get</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.04.what">{`A plan where week-3 evidence updates the plan, not the team.`}</EditableText>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.04.label.worked">Worked on this with</EditableText>
-                </div>
-                <div className="job__value">
-                  <a className="job__chip" href="#work">AI-native Film Production Company</a>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.04.label.instead">Instead of</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.04.instead.a">Execute-as-written</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.04.instead.b">Pre-flight validation</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.04.instead.c">Start-over re-plans.</EditableText>
-                </div>
-              </div>
             </div>
           </article>
 
@@ -355,40 +302,8 @@ export default function HomePage() {
             <div className="job__num">05</div>
             <div className="job__body">
               <h3 className="job__headline">
-                <EditableText id="job.05.headline">{`Turn "become AI-native" from an ambition in the all-hands deck into workflows the team actually runs on a Monday morning.`}</EditableText>
+                <EditableText id="job.05.headline">{`Turn "become AI-native" from wishful thinking into workflows the team actually runs daily`}</EditableText>
               </h3>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.05.label.what">What you get</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.05.what">{`Specific workflows that earn their place in your team's week.`}</EditableText>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.05.label.worked">Worked on this with</EditableText>
-                </div>
-                <div className="job__value">
-                  <a className="job__chip" href="#work">Stape</a>
-                  <span className="job__sep">·</span>
-                  <a className="job__chip" href="#work">Superabundance</a>
-                  <span className="job__sep">·</span>
-                  <a className="job__chip" href="#work">Global Payroll Platform</a>
-                </div>
-              </div>
-              <div className="job__row">
-                <div className="job__label">
-                  <EditableText id="job.05.label.instead">Instead of</EditableText>
-                </div>
-                <div className="job__value">
-                  <EditableText id="job.05.instead.a">Notion templates</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.05.instead.b">Enterprise KM software</EditableText>
-                  <span className="job__sep">·</span>
-                  <EditableText id="job.05.instead.c">Change-management consultants.</EditableText>
-                </div>
-              </div>
             </div>
           </article>
         </div>
@@ -399,7 +314,7 @@ export default function HomePage() {
         <div className="how__inner">
           <header className="how__head">
             <h2 className="section-h2" style={{ color: "var(--color-ivory)" }}>
-              <EditableText id="how.h2">How we work.</EditableText>
+              <EditableText id="how.h2">How we work</EditableText>
             </h2>
           </header>
           <p className="how__intro">
@@ -412,15 +327,15 @@ export default function HomePage() {
           <div className="how__principles">
             <div className="principle">
               <h3 className="principle__headline">
-                <EditableText id="principle.embed.headline">{`We embed. We don't consult from the outside.`}</EditableText>
+                <EditableText id="principle.embed.headline">{`We embed GTM engineers, not consultants`}</EditableText>
               </h3>
               <p className="principle__body">
-                <EditableText id="principle.embed.body">{`One of us is in your team full-time for the engagement. In the room, in the standup, shipping alongside. A strategy that arrives as a deck drifts in a quarter; one that's built from inside the daily work doesn't.`}</EditableText>
+                <EditableText id="principle.embed.body">{`One of us is in your team full-time — in the room, in the standup, shipping alongside. We treat GTM as infrastructure, not a deck: versioned, tested, propagated across surfaces in code. A strategy that arrives as a deck drifts in a quarter; one built from inside the daily work doesn't.`}</EditableText>
               </p>
             </div>
             <div className="principle">
               <h3 className="principle__headline">
-                <EditableText id="principle.navigation.headline">We build navigation, not strategy documents.</EditableText>
+                <EditableText id="principle.navigation.headline">We build navigation, not strategy documents</EditableText>
               </h3>
               <p className="principle__body">
                 <EditableText id="principle.navigation.body">{`Every plan we leave you with behaves like a map: each result redraws the whole chart, not just the current heading. When reality diverges, the team updates the map — no re-plan from scratch. The Cascade Navigation System is the runtime.`}</EditableText>
@@ -428,7 +343,7 @@ export default function HomePage() {
             </div>
             <div className="principle">
               <h3 className="principle__headline">
-                <EditableText id="principle.system.headline">When we leave, the system keeps running.</EditableText>
+                <EditableText id="principle.system.headline">When we leave, the system keeps running</EditableText>
               </h3>
               <p className="principle__body">
                 <EditableText id="principle.system.body">{`The last thing we build is the thing that runs without us. AI-native workflows and the navigation live in your team's week — not in our shared Notion. Transfer is the deliverable, not an afterthought.`}</EditableText>
@@ -475,7 +390,7 @@ export default function HomePage() {
       <section className="team" id="team" data-screen-label="05 Team">
         <header className="team__head">
           <h2 className="section-h2">
-            <EditableText id="team.h2">{`We've done this before. At companies you've heard of.`}</EditableText>
+            <EditableText id="team.h2">{`We've done this before. At companies you've heard of`}</EditableText>
           </h2>
           <div className="team__intro">
             <p>
@@ -530,7 +445,7 @@ export default function HomePage() {
       <section className="final" id="contact" data-screen-label="06 Final CTA">
         <div className="final__inner">
           <h2 className="final__h2">
-            <EditableText id="final.h2">The first call takes 30 minutes. No deck.</EditableText>
+            <EditableText id="final.h2">The first call takes 30 minutes. No deck</EditableText>
           </h2>
           <p className="final__copy">
             <EditableText id="final.copy">{`You show us the problem. We tell you where we'd start, and whether we're the right fit. If not, we'll point you at someone who is.`}</EditableText>
