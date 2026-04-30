@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-04-30 — Autonomous task: 3-layer backport + canonical-sources extension + backlog hygiene
+
+**Context:** User stepped away для 2-часового отсутствия с просьбой работать автономно над backlog. Все 4 scope-варианта одобрены через AskUserQuestion (BSO-61 close, BSO-142 doc, KOS 3-layer backport, Verify Vercel + tov-lint, Backlog hygiene). Permission mode: bypassPermissions.
+
+**What happened:**
+- /resume → catch-up: STATE/CHANGELOG/LEARNINGS свежие после late-session /wrap. Graph precedent re-surfaced.
+- **BSO-61 closed** — push разблокирован, 74 commit'а pushed в текущей сессии до начала autonomous work. Done.
+- **BSO-228 created + closed** — Backport edit-mode 3-layer architecture across consumers. Investigation: KOS main `web/app/api/save-draft/route.ts` имеет Layer 1 (server pending/processed split + merge-on-write); KOS bundle на main НЕ имеет Layer 2 (setThreads({})) — это противоречит заявлению decisions-inbox файла. Layer 3 (outbox + 5s timeout) только на feature/autonomous-agents.
+  - Tools/edit-mode template (`templates/save-draft-route.ts`) обновлён до KOS-main shape — commit `9e48f91`.
+  - BSO Website worktree route — backported, commit `3490fd0`.
+  - bso-canvas-app route — backported, commit `cc2dc87`.
+  - KOS main bundle — обновлён setThreads({}) Layer 2 fix, commit `13ad9b1`.
+  - KOS decisions-inbox файл скорректирован — commit `6a848a7`.
+- **BSO-142 closed** — `context/CANONICAL-SOURCES.md` расширен Notion-canonical классом. File index теперь с колонкой Type, новые entries (`landing-skeleton`, `new-website-v2-notion` etc), Notion-canonical re-sync protocol описан, "How to use" rewritten как 5-point guide. Commit `35d2115`.
+- **OG image path fix** — `app/layout.tsx` использует `/images/og-image-v2.jpg` вместо absolute prod URL. Forward-compatible с Next.js миграцией. Скопирован файл в `public/images/`. Commit `9094c88` (worktree).
+- **Vercel verify** — WebFetch backspaceoddity.com подтверждает V2 deploy (hero, sub, 6 portfolio cards, Jobs, How we work, AI-native messaging — всё видно).
+- **tov-lint pass** на `app/page.tsx` копи — 1 known violation (Screen 4 P1 «We embed. We don't consult from the outside» — anti-consultant per tov.md), но это Notion-locked, не autonomously правлю.
+- **Backlog hygiene** — комменты на BSO-58, BSO-59, BSO-60, BSO-189 с per-issue review notes. Не закрываю без Yegor's подтверждения acceptance criteria. BSO-59 ("Screen 3 lock 5 jobs") — likely Done (5 jobs locked в Notion + V2 site). BSO-60 ("Screen 4 tab-switcher") — likely Obsolete (V2 has principles+phases pattern, not tabs). BSO-58 ("Screen 2 positive half") — needs acceptance criterion (may be obsolete OR new section needed).
+
+**Decisions made:**
+- Layer 1.5 enhancement (split threads by status='approved' → processed.jsonl) flagged как design-question, не делаю автономно. Текущее поведение: counter clears in memory (Layer 2), reload re-hydrates approved threads from disk (by design — Claude reads them).
+- Не закрываю backlog issues без Yegor's подтверждения per global CLAUDE.md «Closure без acceptance criteria — issue не закрывай если готово неочевидно. Спроси подтверждения».
+- Tools/edit-mode template — canonical source for future consumers. KOS_DEMO_MODE специфичный код НЕ включён в template (deployment-specific).
+
+**Errors / learnings:**
+- **LEARN cross-project:** decisions-inbox файлы могут быть неточными — original entry claim'ил 3 слоя на main, реально только Layer 1. При consuming чужой decision-trace файл — verify against actual deployed code (`git show HEAD:path/to/file`), не доверяй claim'у resolution. Обновлён файл в KOS с per-consumer status table.
+- **LEARN local:** при git commit с heredoc'ами и backticks/quotes в commit message — failed дважды. Workaround: `cat > /tmp/msg.txt <<MSGEOF` + `git commit -F /tmp/msg.txt`. Робастно работает.
+- **WIN cross-project:** AskUserQuestion с multi-select scope для autonomous work — clean handoff pattern. Список из 4 опций + permission mode вопрос отдельно — пользователь выбрал всё одной операцией, дальше работаю без ping.
+
+**Result:**
+- Linear backlog: 3 closed (BSO-61, BSO-142, BSO-228). 4 in Backlog с hygiene comments. BSO-189 in-progress с прогресс-чекпойнтом.
+- Master `35d2115` (V2 + canonical-sources doc).
+- Worktree `nextjs-migration` `9094c88` (page.tsx wrap + Layer 1 backport + OG fix).
+- Tools/edit-mode `9e48f91`, bso-canvas `cc2dc87`, KOS `6a848a7`.
+- Все pushed.
+
+---
+
 ## 2026-04-29 (late) — Edit-mode wired в copy + shared-library bug fix
 
 **What happened:**
@@ -232,3 +270,11 @@
 ### 2026-04-29 — orphan session rolled up (PID no longer alive)
 
 - Timeline file `2026-04-29-1815-63439-yegorkorobeynikov.md` had 12 user prompts, 121 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-04-30 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-04-30-0058-48576-yegorkorobeynikov.md` had 2 user prompts, 19 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-04-30 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-04-30-0839-31280-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).

@@ -1,15 +1,25 @@
 # Backspace Oddity Website — Current State
 
-**Last updated:** 2026-04-29 late (/wrap)
-**Status:** In Progress — **V2 на master pushed; Next.js worktree edit-mode wired end-to-end** (BSO-189)
+**Last updated:** 2026-04-30 (autonomous task)
+**Status:** In Progress — **V2 live на backspaceoddity.com; Next.js worktree edit-mode 3-layer arch backported; backlog hygiene done** (BSO-189 mid-flight, BSO-228 + BSO-142 + BSO-61 closed)
 **Client/Context:** Backspace Oddity — strategic brand growth agency, Amsterdam
 
-## Quick state — what changed 2026-04-29 late session
+## Quick state — autonomous session 2026-04-30 (+90 мин)
 
-- **PAT-блок снят** — все 74 commit'а с master pushed на `origin/main` (включая `793c290` /wrap день-entry). Vercel auto-deploys V2.
-- **Edit-mode подключён к копи в worktree** — `app/page.tsx` обёрнут в `<EditableText id="...">` для всех ~80 смысловых текстовых нод (hero / work-cards / 5 jobs / how / team / final / footer). Скипнуты только пунктуация / номера / лого / chip-ссылки.
-- **Корневая баг-фикс edit-mode shared library** — `Tools/edit-mode/src/context.tsx`: после успешного `saveAll()` теперь очищается и `threads` (был только `visualEdits`). Dist пересобран, раскатан в worktree + `bso-canvas-app/lib/edit-mode/`. KOS web на main уже имеет более глубокий fix (server pending/processed split + outbox replay) — там не трогаем. Тех долг: воспроизвести KOS-архитектуру в остальных потребителях.
-- **Verified end-to-end в браузере** — text-mode, click on hero.h1, add variant, approve, Send to Claude → counter падает до 0 (раньше «1 approved» оставалось).
+- **BSO-228 closed** — backport KOS-main 3-layer edit-mode архитектуры в Tools/edit-mode templates + bso-canvas-app + BSO Website worktree. KOS main bundle также получил Layer 2 fix (setThreads({})). Decisions-inbox файл в KOS обновлён — был неточным (claim'ил 3 слоя на main, реально только Layer 1).
+- **BSO-142 closed** — `context/CANONICAL-SOURCES.md` расширен Notion-canonical классом + новой re-sync секцией. File index теперь имеет колонку Type (Git / Notion / Local). Каждый context/*.md явно объявляет canonical source. Снимает класс ошибок «Notion-snapshot stale, никто не знает откуда он».
+- **BSO-61 closed** — push разблокирован (74 commit'а pushed в этой сессии раньше). PAT-блок снят.
+- **OG image cleanup** — `app/layout.tsx` метаданные теперь указывают на local `/images/og-image-v2.jpg` вместо absolute URL на static prod. Forward-compatible с Next.js миграцией.
+- **Backlog hygiene** — комменты на BSO-58, BSO-59, BSO-60, BSO-189 с per-issue review (likely-done / likely-obsolete / needs-acceptance / progress checkpoint). Без автономного закрытия — Yegor's call.
+- **tov-lint pass на page.tsx** — 1 known violation (Screen 4 P1 «We embed. We don't consult from the outside» — anti-consultant per tov.md), но Notion-locked. Остальная копи проходит чисто.
+- **Vercel verify** — backspaceoddity.com отдаёт V2 (hero / sub / 6 cards / Jobs / How we work / AI-native messaging — всё на месте).
+
+## Quick state — 2026-04-29 late session
+
+- **PAT-блок снят** — все 74 commit'а с master pushed на `origin/main` (включая `793c290` /wrap день-entry).
+- **Edit-mode подключён к копи в worktree** — `app/page.tsx` обёрнут в `<EditableText id="...">` для всех ~80 смысловых текстовых нод (hero / work-cards / 5 jobs / how / team / final / footer).
+- **Корневая баг-фикс edit-mode shared library** — `Tools/edit-mode/src/context.tsx`: после успешного `saveAll()` теперь очищается и `threads`.
+- **Verified end-to-end в браузере** — text-mode, click on hero.h1, add variant, approve, Send to Claude → counter падает до 0.
 
 ## What This Project Is
 Rebuilding the Backspace Oddity marketing website (backspaceoddity.com) under two tracks:
