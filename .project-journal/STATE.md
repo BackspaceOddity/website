@@ -1,7 +1,42 @@
 # Backspace Oddity Website — Current State
 
-**Last updated:** 2026-05-01 (/wrap end of day 2026-04-30)
-**Status:** In Progress — **V2 evolves — Three Layers section live, real-time edit-cycle через visual edit-mode picker, brand-frame → GTM-frame reframes, +20 visual edits applied this session** (BSO-189 mid-flight, BSO-244 + BSO-245 backlog)
+**Last updated:** 2026-05-01 (вечер — V2 RELEASED, public on backspaceoddity.com)
+**Status:** **🟢 V2 на проде. backspaceoddity.com + www.backspaceoddity.com → HTTP 200, V2 контент рендерится, без auth wall.**
+
+**2026-05-01 evening — релиз состоялся:**
+- Yegor отключил Vercel Authentication на project-level (`backspace-oddity` → Project Settings → Deployment Protection → Disabled)
+- `curl -I https://backspaceoddity.com` → 200 + `x-vercel-cache: HIT`, нет `_vercel_sso_nonce` cookie
+- Hero копи V2 в HTML («GTM strategy is not a set of tactics across channels…»)
+- Three Layers section, /_next chunks, Next.js production build — всё работает
+- www-домен 200, apex 200
+
+**Открытые архитектурные вопросы (не блокеры релиза):**
+1. **Option C из global CLAUDE.md всё ещё не landed** — Vercel project Production Branch = `main`, не `production`. Сейчас работает потому что push в production branch + manual `vercel promote` создаёт production target. Чтобы CLAUDE.md doctrine соответствовала инфре, нужно: Vercel Settings → Git → Production Branch: `main` → `production`.
+2. После Option C: можно перестать делать `vercel promote --yes` руками — push в production будет автоматически = live.
+
+---
+
+**Earlier 2026-05-01 (afternoon /wrap):**
+- **PR #2** `release/2026-05-01-v2 → production` — merged 6af4b85 (journal-only release, no code changes)
+- **PR #3** `fix/vercel-nextjs-config` — delete `vercel.json` (V1 static-output override). Result: 404 NOT_FOUND. Framework auto-detect не сработал т.к. project framework=null.
+- **PR #4** `fix/vercel-framework-nextjs` — добавил vercel.json с `{"framework": "nextjs"}`. Result: Next.js build OK ✅. V2 contents render: Three Layers, /_next/ chunks, EditableText pipeline, correct title.
+- **3× `vercel promote --yes`** — Vercel «Production Branch» setting = `main` (не `production`), поэтому push в production branch = preview target. Manual promote создаёт production target build.
+- **3× `vercel alias set backspaceoddity.com + www`** — alias re-binding на каждый promoted deployment (default не переходит автоматически).
+- **`PATCH /v9/projects/.../ssoProtection: null`** через vercel curl — 200 OK, но auth wall на месте (значит Deployment Protection живёт на team level).
+
+**Critical findings (root-cause architecture drift):**
+1. **Option C из global CLAUDE.md never actually landed** — Vercel project «Production Branch» = `main`, не `production`. CLAUDE.md заявляет «Option C completed 2026-04-30, domains bound to production branch» — реальность другая. Это объясняет 30-04 incident («одной командой запушил» = `git push origin master:main` → main = production target → 30s до live). И объясняет сегодняшние час debugging — я работал по PR-в-production пути который не работает в текущей Vercel конфигурации.
+2. **Project `framework: null`** — legacy от V1 static. Без явного `vercel.json` framework=nextjs билд не происходит.
+3. **Deployment Protection — team-level Vercel Authentication** — project-level PATCH не override'ит. Только Yegor в Vercel UI.
+
+**Action required from Yegor:**
+1. Vercel Team Settings → Security → Deployment Protection → Disabled (или Standard для preview only). После этого V2 будет публично доступен на backspaceoddity.com.
+2. (Optionally) Vercel project Settings → Git → Production Branch: `main` → `production`. Это реально завершит Option C — push в production branch = автодеплой live, без manual promote/alias.
+
+---
+
+**Last updated (previous):** 2026-05-01 (/wrap end of day 2026-04-30)
+**Status (previous):** In Progress — **V2 evolves — Three Layers section live, real-time edit-cycle через visual edit-mode picker, brand-frame → GTM-frame reframes, +20 visual edits applied this session** (BSO-189 mid-flight, BSO-244 + BSO-245 backlog)
 **Client/Context:** Backspace Oddity — strategic brand growth agency, Amsterdam
 
 ## Quick state — late session 2026-04-30 (+5 часов real-time edit cycle)
