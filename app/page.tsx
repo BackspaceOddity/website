@@ -467,9 +467,12 @@ export default function HomePage() {
       <footer className="footer" data-screen-label="08 Footer">
         <div>
           <div className="footer__logo">
-            Backspace
-            <br />
-            Oddity
+            <img className="footer__logo-mark" src="/images/Logo Mark.svg" alt="" aria-hidden="true" />
+            <span className="footer__logo-text">
+              Backspace
+              <br />
+              Oddity
+            </span>
           </div>
           <div className="footer__copy">
             <EditableText id="footer.copy">© Backspace Oddity 2026</EditableText>

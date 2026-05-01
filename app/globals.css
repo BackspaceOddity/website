@@ -107,7 +107,7 @@ section { scroll-margin-top: 80px; }
   gap: 40px;
 }
 .nav__logo {
-  display: flex; flex-direction: row; align-items: center;
+  display: flex; flex-direction: row; align-items: flex-start;
   gap: 14px;
   font-family: var(--font-display);
   font-weight: 700;
@@ -714,6 +714,10 @@ section { scroll-margin-top: 80px; }
   color: var(--color-dark-green);
 }
 .footer__logo {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 24px;
@@ -721,6 +725,8 @@ section { scroll-margin-top: 80px; }
   letter-spacing: -0.02em;
   margin-bottom: 14px;
 }
+.footer__logo-mark { width: 44px; height: 44px; flex-shrink: 0; }
+.footer__logo-text { display: block; }
 .footer__copy {
   color: color-mix(in oklch, var(--color-dark-green) 65%, transparent);
 }
