@@ -1,176 +1,5 @@
 # Changelog
 
-## 2026-04-30 (evening) → 2026-05-01 — Real-time edit-mode pipeline + Three Layers + body-scale lift + GTM-reframe
-
-**What happened:**
-- ~5 часов real-time edit-cycle через visual edit-mode picker. ~20 user comments → applied → next. Pipeline: symlink master/_edit-threads.json → worktree (Layer A quick-fix BSO-236) + Hook surface-visual-edits.py → user clicks comment in browser → next user-prompt получает edits с element-attachment → Claude правит → пометка applied.
-- **New Screen 2 «Three layers of GTM strategy»** added between Hero и Selected Work. Iterations:
-  - V0: «Strategy / Tactics / Creative execution» с generic content
-  - V1: rewrote intro через strategy/execution gap (per YC application insight «разрыв между стратегией и execution»)
-  - V2: Layer 3 named pain — first version mentioned Miro 55-people-3-months → user pushback «уйти от rebrand», generalised
-  - V3: Layer 3 ещё реframe — убрать rebrand entirely → «Strategy lands as a deck. Then channels have to learn it, ship it, repeat it across hundreds of touchpoints — stuck waiting on a creative team that can't scale»
-  - V4: Layer 2 переименование Cascade/Channel architecture → user pushback «непонятно, и не отражает смысл, это буквально tactics типа PR/outreach/advertising × channels» → final framing
-  - V5: CEPs (Category Entry Points) перенесены из Layer 1 в Layer 2 как «the lens» — per user's strategic insight «наложение CEPs на тактики позволяет нам отстроиться»
-  - Layout: 3 columns side-by-side вместо vertical stacked rows (per user's request)
-- **Body-text scale bump system-wide** — USER-FLAGGED learning. --size-body 20→24, --size-body-lg 24→28, --size-card 30→32. Plus 24 per-element bumps. Editorial premium на десктопе.
-- **Edit-mode bundle bug fix** — `setThreads({})` после saveAll был too aggressive: clearing in-memory state включая activeText, displayed text revert'ился к sourceText. Fix: extended status type `'open' | 'approved' | 'applied'`, после save mark approved → applied (activeText preserved для display, counter excludes 'applied' через filter).
-- **Job headlines tightening** — point removal на all 14 заголовках. Job 02 → «Outpace competitors in a highly competitive market». Job 04 → «Treat every launch as hypotheses we test, not as a plan we execute until we die». Job 03 → short version. Multi-iterate with user.
-- **Section h2 sizing** — work__head .section-h2 уменьшен (clamp 36-56), final__h2 уменьшен (40-72).
-- **Final CTA pill button** — с underline-link на ivory pill button с padding 18×40, shadow, hover lift. Affordance явный.
-- **Final section gradient bg** — magenta-emerald радиальный градиент on dark base. Разрежает gap между Hero и подвалом.
-- **Footer body 19→21**, member__bio 19→22, member__photo 100% → 88px circle.
-- **Card backdrop swap** — Wayfund вернулся вместо Stape per user, длинный Miro title восстановлен. Notion canonical (landing skeleton) updated to match — Stape moved to backlog with note.
-- **«Worked on this with» rows** removed from all 5 jobs → BSO-244 created для restore когда client base growth justifies.
-- **«Instead of» rows** removed earlier today from jobs.
-- **«What you get» rows** removed.
-- **Logo mark в nav** added (Logo Mark.svg 44px, aligned to hero block left edge).
-- **Hero CTA крупнее** (18px → 26px), hero h1 font-size capped lower (clamp 64-160 → 44-104).
-- **Tactics body** — final formulation: «PR, cold outreach, advertising, content, partnerships, events — the moves you make, paired with the channels they live in: LinkedIn, email, podcasts, paid, owned. Category Entry Points are the lens that pulls all of this into one coherent GTM — every tactic anchored to a moment a buyer is actually in, not a slot in your campaign calendar.»
-- **Principle 1 reframe** «We embed GTM engineers, not consultants» (per YC pitch «brand engineers» reframe applied to GTM-frame).
-
-**Decisions made:**
-- Three Layers structure: Strategy (jobs/ICP/positioning/narrative/messaging) → Tactics (PR/outreach/ads × channels, CEPs as lens) → Creative execution (AI-native production)
-- CEPs живут в Layer 2 (тактическая лёнза), не в Layer 1 (per Yegor's strategic insight)
-- Cascade Navigation System остаётся в Principle 2 «How we work», не в Three Layers (отдельная BSO methodology)
-- Default body-text для editorial premium landing — 22-28px на десктопе
-- Edit-mode bundle: status='applied' для post-save threads (preserve display, counter clear)
-
-**Errors / learnings:**
-- Edit-mode bundle bug — `setThreads({})` вместо marking applied. Layer 2 fix BSO-228 был overzealous. New status `'applied'` — proper fix.
-- Body sizes 19-25px на десктопе читаются как caption — editorial premium = 22-28px (USER-FLAGGED).
-- Real-time edit-cycle pipeline + symlink + cron-poll = ~14-20 edits/сессия velocity.
-- CEPs framing: anchor tactics к buyer moments, не к calendar slots — differentiator от competitors показывается через showing, не telling.
-
-**Result:**
-- BSO Website worktree: page.tsx + globals.css + lib/edit-mode bundle обновлены, ready to commit
-- Tools/edit-mode src/context.tsx — extended status type, edit-mode bundle preservation fix
-- bso-canvas-app + KOS web — bundle propagated
-- Linear: BSO-244 (restore Worked-with) + BSO-245 (Tweaks panel) created earlier
-- Notion landing skeleton требует updates per новой Three Layers structure
-
----
-
-## 2026-04-30 (late) — Dev-server detach script (CC-restart resilience)
-
-**Symptom:** после рестарта CC сессии `localhost:3456` отдаёт ERR_CONNECTION_REFUSED. Process started через `preview_start` или `Bash run_in_background` привязан к жизненному циклу CC и убивается при закрытии. Каждый `/resume` ловит «refused to connect» — структурный gap, не разовая проблема.
-
-**Root cause:** dev server lifecycle coupled с CC session lifecycle. `Bash run_in_background` создаёт процесс-ребёнок CC; при exit CC SIGHUP'ит дерево.
-
-**Fix landed:** `scripts/dev-server.sh` — start/stop/status/restart/logs wrapper, использует `nohup + </dev/null + disown` (macOS-portable, без `setsid` который отсутствует в стандартной macOS). PID-файл в `/tmp` для idempotency, port-check fallback. Server переживает CC restart-ы.
-
-**Failed first iteration:** написал скрипт с `setsid` — `command not found` на macOS. Пофикшено заменой на `nohup + </dev/null` (closed stdin = no controlling terminal to lose).
-
-**Не landed:** session-start hook автостарта (рассматривал, но over-engineering для разового манёвра — wrapper достаточно). Пользователь запускает `./scripts/dev-server.sh start` один раз, server живёт пока `stop` не вызовут.
-
-**Result:**
-- `scripts/dev-server.sh` committed (ранее лежал в `.claude/scripts/` — gitignored, не пропагировал бы; перенёс в `scripts/` в корень).
-- BSO-189 open item «CC-restart resilience» — addressed.
-
----
-
-## 2026-04-30 — Autonomous task: 3-layer backport + canonical-sources extension + backlog hygiene
-
-**Context:** User stepped away для 2-часового отсутствия с просьбой работать автономно над backlog. Все 4 scope-варианта одобрены через AskUserQuestion (BSO-61 close, BSO-142 doc, KOS 3-layer backport, Verify Vercel + tov-lint, Backlog hygiene). Permission mode: bypassPermissions.
-
-**What happened:**
-- /resume → catch-up: STATE/CHANGELOG/LEARNINGS свежие после late-session /wrap. Graph precedent re-surfaced.
-- **BSO-61 closed** — push разблокирован, 74 commit'а pushed в текущей сессии до начала autonomous work. Done.
-- **BSO-228 created + closed** — Backport edit-mode 3-layer architecture across consumers. Investigation: KOS main `web/app/api/save-draft/route.ts` имеет Layer 1 (server pending/processed split + merge-on-write); KOS bundle на main НЕ имеет Layer 2 (setThreads({})) — это противоречит заявлению decisions-inbox файла. Layer 3 (outbox + 5s timeout) только на feature/autonomous-agents.
-  - Tools/edit-mode template (`templates/save-draft-route.ts`) обновлён до KOS-main shape — commit `9e48f91`.
-  - BSO Website worktree route — backported, commit `3490fd0`.
-  - bso-canvas-app route — backported, commit `cc2dc87`.
-  - KOS main bundle — обновлён setThreads({}) Layer 2 fix, commit `13ad9b1`.
-  - KOS decisions-inbox файл скорректирован — commit `6a848a7`.
-- **BSO-142 closed** — `context/CANONICAL-SOURCES.md` расширен Notion-canonical классом. File index теперь с колонкой Type, новые entries (`landing-skeleton`, `new-website-v2-notion` etc), Notion-canonical re-sync protocol описан, "How to use" rewritten как 5-point guide. Commit `35d2115`.
-- **OG image path fix** — `app/layout.tsx` использует `/images/og-image-v2.jpg` вместо absolute prod URL. Forward-compatible с Next.js миграцией. Скопирован файл в `public/images/`. Commit `9094c88` (worktree).
-- **Vercel verify** — WebFetch backspaceoddity.com подтверждает V2 deploy (hero, sub, 6 portfolio cards, Jobs, How we work, AI-native messaging — всё видно).
-- **tov-lint pass** на `app/page.tsx` копи — 1 known violation (Screen 4 P1 «We embed. We don't consult from the outside» — anti-consultant per tov.md), но это Notion-locked, не autonomously правлю.
-- **Backlog hygiene** — комменты на BSO-58, BSO-59, BSO-60, BSO-189 с per-issue review notes. Не закрываю без Yegor's подтверждения acceptance criteria. BSO-59 ("Screen 3 lock 5 jobs") — likely Done (5 jobs locked в Notion + V2 site). BSO-60 ("Screen 4 tab-switcher") — likely Obsolete (V2 has principles+phases pattern, not tabs). BSO-58 ("Screen 2 positive half") — needs acceptance criterion (may be obsolete OR new section needed).
-
-**Decisions made:**
-- Layer 1.5 enhancement (split threads by status='approved' → processed.jsonl) flagged как design-question, не делаю автономно. Текущее поведение: counter clears in memory (Layer 2), reload re-hydrates approved threads from disk (by design — Claude reads them).
-- Не закрываю backlog issues без Yegor's подтверждения per global CLAUDE.md «Closure без acceptance criteria — issue не закрывай если готово неочевидно. Спроси подтверждения».
-- Tools/edit-mode template — canonical source for future consumers. KOS_DEMO_MODE специфичный код НЕ включён в template (deployment-specific).
-
-**Errors / learnings:**
-- **LEARN cross-project:** decisions-inbox файлы могут быть неточными — original entry claim'ил 3 слоя на main, реально только Layer 1. При consuming чужой decision-trace файл — verify against actual deployed code (`git show HEAD:path/to/file`), не доверяй claim'у resolution. Обновлён файл в KOS с per-consumer status table.
-- **LEARN local:** при git commit с heredoc'ами и backticks/quotes в commit message — failed дважды. Workaround: `cat > /tmp/msg.txt <<MSGEOF` + `git commit -F /tmp/msg.txt`. Робастно работает.
-- **WIN cross-project:** AskUserQuestion с multi-select scope для autonomous work — clean handoff pattern. Список из 4 опций + permission mode вопрос отдельно — пользователь выбрал всё одной операцией, дальше работаю без ping.
-
-**Result:**
-- Linear backlog: 3 closed (BSO-61, BSO-142, BSO-228). 4 in Backlog с hygiene comments. BSO-189 in-progress с прогресс-чекпойнтом.
-- Master `35d2115` (V2 + canonical-sources doc).
-- Worktree `nextjs-migration` `9094c88` (page.tsx wrap + Layer 1 backport + OG fix).
-- Tools/edit-mode `9e48f91`, bso-canvas `cc2dc87`, KOS `6a848a7`.
-- Все pushed.
-
----
-
-## 2026-04-29 (late) — Edit-mode wired в copy + shared-library bug fix
-
-**What happened:**
-- /resume в новой сессии после параллельного /wrap-commit `793c290` — подхватил day-entry.
-- Push разблокирован — все 74 commit'а master → origin/main (Vercel deploys V2).
-- `app/page.tsx` в worktree обёрнут `<EditableText id="...">` для всей смысловой копи (~80 нод). Schema: `screen.element[.subkey]` (например `hero.h1`, `card.miro.description`, `job.01.headline`). Скипнуты пунктуация/номера/лого/chip-ссылки.
-- Текст-режим verified end-to-end через Claude Preview MCP: scroll → click hero.h1 → typed variant → Add → Approve → toolbar показывает «1 approved · Send to Claude» → click Send → toolbar очищается до `EDIT · Text · Visual`.
-- **Root cause баг:** `Tools/edit-mode/src/context.tsx` `saveAll()` очищал только `setVisualEdits([])`, но не `threads`. Counter оставался «1 approved» хотя POST /api/save-draft вернулся 200.
-- **Fix:** добавил `setThreads({})` рядом с `setVisualEdits([])`. Rebuild via `npm run build` (tsup). Dist скопирован в три потребителя: `BSO Website/.../nextjs-migration/lib/edit-mode/`, `bso-canvas-app/lib/edit-mode/`, `Knowledge-OS-Product/web/lib/edit-mode/`.
-- **KOS surprise:** при копировании в KOS git status остался чистый — там уже была более глубокая архитектура fix'а (3 слоя per `Knowledge-OS-Product/docs/DECISIONS-INBOX/from-sb-2026-04-27-edit-queue-not-clearing-after-send-to-claude.md`, resolved 2026-04-28). Мой фикс — только слой «bundle clears». KOS дополнительно имеет server pending/processed split + bundle hydrates from server + outbox replay + 5s timeout.
-
-**Decisions made:**
-- Для page.tsx идём через `<EditableText id="...">` обёртки, не через альтернативу «только visual-mode без text-mode parity».
-- Root fix в shared library, не локальная заплатка в worktree (per «Architectural fixes over patches»).
-- KOS не трогаем — у него уже работает более полная версия. Тех долг: backport 3-слой архитектуры из KOS в bso-canvas-app + BSO Website worktree, чтобы reload-after-save не возвращал thread'ы из файла.
-
-**Errors / learnings (3 в LEARNINGS):**
-- LEARN cross-project: shared-library fix без backport KOS-архитектуры — частичный. Counter падает в memory, но reload вернёт threads из `_edit-threads.json` (нет server pending/processed split).
-- LEARN local: `preview_click` MCP не всегда триггерит React click handler; для надёжности использовать `preview_eval` с `dispatchEvent(new MouseEvent('click', {bubbles:true,cancelable:true,view:window}))`.
-- WIN cross-project: `<EditableText id="...">` wrap-pattern масштабируется на пейдж 80+ нод за один write; ID-схема `screen.element[.subkey]` читаема и стабильна для последующих edit-thread reference'ов.
-
-**Result:**
-- BSO Website master: 74 commits на origin/main, V2 деплоится.
-- worktree `nextjs-migration`: page.tsx editable end-to-end, shared lib bundle обновлён, edit-mode counter ведёт себя корректно.
-- Tools/edit-mode: src + dist готовы к коммиту.
-- bso-canvas-app: dist готов к коммиту.
-- KOS web: уже имеет полный fix, не трогаем.
-
----
-
-## 2026-04-29 — V2 homepage implemented + Next.js migration started
-
-**What happened:**
-- /resume → catch-up: scaffold audit OK, STATE / CHANGELOG / LEARNINGS read, graph precedent surfaced.
-- Pre-existing canonical-sources re-sync (2026-04-28) committed (`7aa9d37`).
-- Notion landing skeleton page sync-checked vs canonical context (`bso-positioning-framework-v1` + BRIEF v1) — структурного drift нет; 3 housekeeping ops применены: статус-блок `2026-04-29 (верификация)`, AI-native agency intro в Screen 4, note над архив-блоком про устаревшие inline-discussions.
-- V2 homepage написан в `src/index.html` из Claude Design handoff (`DicK6mMEcbYL`, 2026-04-24): структура/CSS/токены из дизайна, копи verbatim из Notion landing skeleton (jobs/principles/phases — заменили invented copy дизайна). Assets: 5 SouvenirGothic .otf + hero-bg-magenta-green.png + project-film.webp + project-stape.webp (placeholder backdrop-02).
-- /invite загрузил 4 агентов: tone-of-voice (primary), figma-web-pixel-perfect, typography, knowledge-architect. Surfacing: tov rule #2 anti-consultant tension в Screen 4 P1 («We embed. We don't consult from the outside.») — Notion-locked, флажок не auto-fix.
-- Архитектурное решение для edit-mode: вариант A (конвертация в Next.js) выбран против B (vanilla адаптер) и C (Stagewise CDN). Knowledge-architect rule #5d / #3 как обоснование.
-- Linear [BSO-189](https://linear.app/backspace-oddity/issue/BSO-189) создан (Medium, project [BSO] Website, labels triage + decision-trace).
-- /move-to-session → создан git worktree `.claude/worktrees/nextjs-migration/` от master `2bd13cd`. SPINOFF-CONTEXT.md / GRAPH-PRECEDENT.md / AGENTS-TO-INVITE.md / HANDOFF-prompt.md написаны.
-- Next.js bootstrap в worktree: package.json (Next 16.2.4 + React 19.2.4), tsconfig, layout/page.tsx, globals.css, app/api/save-draft, components/EditModeShell, lib/edit-mode (copied verbatim из bso-canvas-app), public/ assets, _edit-threads.json инициализирован пустым. npm install: 344 packages.
-- Dev server на http://localhost:3456 верифицирован: все 8 секций рендерятся (page height 9000px), edit toolbar смонтирован.
-
-**Decisions made:**
-- Skeleton structurally aligned с canonical → drift не требует обновления (3 housekeeping ops — это polish).
-- AI-native agency framing добавляется как italic intro в Screen 4 (не в Hero sub) — короткий, концентрированный, мотивирует три principles.
-- Wayfund swap → Stape возвращён per Notion канон. Stape gets backdrop-02 placeholder (нужен реальный screenshot).
-- Edit-mode: Next.js A > B > C. Worktree, не sibling-проект. Branch `nextjs-migration`.
-- Push не делаем — PAT-блок остаётся (LEARNINGS [RETRO 2026-04-20]).
-
-**Errors / learnings (4 в LEARNINGS):**
-- ERROR cross-project: Notion `update_content` silently no-ops на toggle-converted blocks — анкер должен быть outside `<details>` структуры.
-- LEARN local: Notion blockquote+italic escape edge case (`> *Note...*` → `> \*Note...`).
-- WIN cross-project: Skeleton-vs-canonical alignment audit pattern (4-step: read upstream → fetch live → per-section comparison → action list).
-- LEARN local: activity-log + Stop-hook architectural tension (loop на каждом Edit).
-
-**Result:**
-- master: V2 homepage live на dev (`npx serve src` → 3456). 73 commit'а unpushed.
-- worktree `nextjs-migration`: scaffold готов, edit-mode подключён, 1 commit (`74d189e`) ahead of master.
-- Linear BSO-189 backlog с 12-step scope.
-- Next session entry: `cd .claude/worktrees/nextjs-migration && claude` → пасть HANDOFF-prompt.md → /resume → /invite.
-
----
-
 ## 2026-04-22 → 2026-04-23 — V2 content rebuild: skeleton + audit + hero locked
 
 **What happened:**
@@ -333,24 +162,20 @@
 
 ### 2026-04-29 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-29-2144-64752-yegorkorobeynikov.md` had 8 user prompts, 41 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-29-1930-63439-yegorkorobeynikov.md` had 0 user prompts, 17 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
 ### 2026-04-29 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-29-1815-63439-yegorkorobeynikov.md` had 12 user prompts, 121 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-29-2155-64752-yegorkorobeynikov.md` had 0 user prompts, 25 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
 ### 2026-04-30 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-30-0058-48576-yegorkorobeynikov.md` had 2 user prompts, 19 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-30-0101-48576-yegorkorobeynikov.md` had 0 user prompts, 3 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
 ### 2026-04-30 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-30-0839-31280-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-30-0840-31528-yegorkorobeynikov.md` had 0 user prompts, 19 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
-### 2026-04-30 — orphan session rolled up (PID no longer alive)
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-30-0840-31528-yegorkorobeynikov.md` had 2 user prompts, 56 tool calls, 0 errors. Full raw log has been deleted (retention policy).
-
-### 2026-04-30 — orphan session rolled up (PID no longer alive)
-
-- Timeline file `2026-04-30-1357-68338-yegorkorobeynikov.md` had 1 user prompts, 10 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-30-2232-43614-yegorkorobeynikov.md` had 0 user prompts, 12 tool calls, 0 errors. Full raw log has been deleted (retention policy).
