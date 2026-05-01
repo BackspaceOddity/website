@@ -1,0 +1,40 @@
+{
+  "last_session_at": "2026-04-29T23:23:27",
+  "global_claude_md_hash": "cd26055e68c4ca64706b46b6043dba801f5f82187dbac2743d95f1971fe89c3e",
+  "global_claude_md_sections": [
+    "Architectural fixes over patches — MANDATORY",
+    "BSO Canonical Positioning — required reading for ANY strategic work",
+    "Before Any File Creation or Tool Pipeline — MANDATORY",
+    "Canon-grounding before domain-touching response — MANDATORY",
+    "Clarifying Questions — MANDATORY",
+    "Context Capture — MANDATORY",
+    "Dead-End Protocol — MANDATORY",
+    "Learning & Error Log — MANDATORY",
+    "Linear Task Dispatch — MANDATORY (AI-native)",
+    "Mid-session settings reload — MANDATORY (operational gotcha)",
+    "Notion Rules",
+    "Output Style Rules",
+    "Presentation Pipeline Rules",
+    "Self-QA — MANDATORY",
+    "Session End — MANDATORY",
+    "Session Start — MANDATORY",
+    "Subagent / Task Tool Rule",
+    "UI / Visual Hierarchy Rule",
+    "User Profile",
+    "Visual Edits Protocol — MANDATORY",
+    "Vocabulary",
+    "Writing Style — Tone of Voice (MANDATORY for all client-facing documents)",
+    "bso-figma-mcp Rules (HARDCODED — do not reinvent)",
+    "Визуальная проверка — по умолчанию, не по запросу (MANDATORY)"
+  ],
+  "claude_md_hash": "a9d4d5f621ac63df645ed48852bed1239d3e90720f0c0fb57dce1e9abcf8989e",
+  "claude_md_sections": [
+    "Autonomy (from global CLAUDE.md)",
+    "Canonical sources — Notion > local (HARD RULE)",
+    "Cross-project discipline (per global CLAUDE.md)",
+    "Hard rules for copy on this site",
+    "Language",
+    "MANDATORY session-start protocol",
+    "Sister projects"
+  ]
+}
