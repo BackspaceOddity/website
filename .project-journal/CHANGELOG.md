@@ -183,3 +183,18 @@
 ### 2026-05-01 — orphan session rolled up (PID no longer alive)
 
 - Timeline file `2026-05-01-1158-1441-yegorkorobeynikov.md` had 7 user prompts, 25 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+## 2026-05-01 (afternoon) — V2 Vercel deploy debugging via cross-project SB session
+
+Cross-project work из SB session — Yegor visit'нул что live = V1 несмотря на BSO-232 fork direction A.
+
+**4 PRs landed на production branch, V2 build достигнут:**
+- PR #2 `release/2026-05-01-v2` → journal-only, exposed что V2 код был уже в production от 30-04
+- PR #3 `fix/vercel-nextjs-config` — delete legacy `vercel.json` — caused 404 NOT_FOUND
+- PR #4 `fix/vercel-framework-nextjs` — re-add vercel.json с `framework: nextjs` — V2 builds корректно
+
+**3 manual `vercel promote --yes` + alias re-binding** для promotion preview→production target. Plus PATCH ssoProtection: null (200 OK, no effect).
+
+**Final state:** V2 deployment успешный, content renders правильно (Three Layers, /_next/ chunks). Aliases backspaceoddity.com + www → V2 prod deploy. Public access **blocked by team-level Deployment Protection** — нужен Yegor manual в Vercel Team Settings.
+
+**Architectural learning [SEVERITY:CRITICAL]:** Option C из global CLAUDE.md (Vercel decoupling main→production) **не landed** — project Production Branch всё ещё = `main`. Это создаёт сегодняшнюю ситуацию: rule блокирует push-to-main (правильный путь по rule = push-to-production), но push-to-production = preview only (Vercel сейчас деплоит main как production target). Рассинхронизация три-слойной архитектуры (rule + hook + infra). 30-04 incident («одной командой запушил» через `git push origin master:main`) сработал именно потому что main = live. Тот же путь работает и сегодня — но rule запрещает.
