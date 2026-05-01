@@ -184,6 +184,26 @@
 
 - Timeline file `2026-05-01-1158-1441-yegorkorobeynikov.md` had 7 user prompts, 25 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
+## 2026-05-01 (вечер) — 🟢 V2 RELEASED publicly
+
+**What happened:**
+- Yegor вручную в Vercel UI: Project `backspace-oddity` → Settings → Deployment Protection → Vercel Authentication: Disabled.
+- Проверка: `backspaceoddity.com` + `www.backspaceoddity.com` → HTTP 200, нет `_vercel_sso_nonce` cookie, V2 hero копи и Three Layers section в HTML, /_next chunks загружаются, x-vercel-cache: HIT.
+- Релиз закрыт без push'ей и без кода — только UI-toggle, который вчера (2026-05-01 afternoon SB-session) PATCH через API не смог переключить (team-level inheritance перекрывал).
+
+**Decisions made:**
+- Релиз через manual UI toggle, не через API. После 2026-05-01 afternoon learning «team-level setting перебивает project-level PATCH» путь оказался — project-level UI Disabled.
+
+**Open follow-ups (не блокеры live):**
+- Option C из global CLAUDE.md всё ещё не landed: Vercel Production Branch = `main`. Сейчас релиз работает через `vercel promote --yes` ручной шаг. Решение: Vercel Settings → Git → Production Branch → `production`. После этого push в production branch = автодеплой live, без manual promote.
+
+**Result:**
+- V2 публично доступен на backspaceoddity.com — впервые с момента V2 build'а.
+- BSO-189 Next.js миграция эффективно завершена в части live deploy (контент Screens 2-4 — отдельная задача BSO-58/59/60).
+- Остаётся один architectural debt: Option C completion.
+
+---
+
 ## 2026-05-01 (afternoon) — V2 Vercel deploy debugging via cross-project SB session
 
 Cross-project work из SB session — Yegor visit'нул что live = V1 несмотря на BSO-232 fork direction A.
@@ -198,3 +218,19 @@ Cross-project work из SB session — Yegor visit'нул что live = V1 не�
 **Final state:** V2 deployment успешный, content renders правильно (Three Layers, /_next/ chunks). Aliases backspaceoddity.com + www → V2 prod deploy. Public access **blocked by team-level Deployment Protection** — нужен Yegor manual в Vercel Team Settings.
 
 **Architectural learning [SEVERITY:CRITICAL]:** Option C из global CLAUDE.md (Vercel decoupling main→production) **не landed** — project Production Branch всё ещё = `main`. Это создаёт сегодняшнюю ситуацию: rule блокирует push-to-main (правильный путь по rule = push-to-production), но push-to-production = preview only (Vercel сейчас деплоит main как production target). Рассинхронизация три-слойной архитектуры (rule + hook + infra). 30-04 incident («одной командой запушил» через `git push origin master:main`) сработал именно потому что main = live. Тот же путь работает и сегодня — но rule запрещает.
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1218-11883-yegorkorobeynikov.md` had 7 user prompts, 43 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1244-25179-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1245-25522-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1253-28009-yegorkorobeynikov.md` had 2 user prompts, 23 tool calls, 0 errors. Full raw log has been deleted (retention policy).

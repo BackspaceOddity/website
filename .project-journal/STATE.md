@@ -1,9 +1,22 @@
 # Backspace Oddity Website — Current State
 
-**Last updated:** 2026-05-01 (afternoon /wrap — V2 deploy attempted via SB cross-project session, blocked on auth wall)
-**Status:** **V2 builds корректно, но не на live — auth wall блокирует public access. Action required from Yegor in Vercel UI.**
+**Last updated:** 2026-05-01 (вечер — V2 RELEASED, public on backspaceoddity.com)
+**Status:** **🟢 V2 на проде. backspaceoddity.com + www.backspaceoddity.com → HTTP 200, V2 контент рендерится, без auth wall.**
 
-**Today (cross-project work via SB session):**
+**2026-05-01 evening — релиз состоялся:**
+- Yegor отключил Vercel Authentication на project-level (`backspace-oddity` → Project Settings → Deployment Protection → Disabled)
+- `curl -I https://backspaceoddity.com` → 200 + `x-vercel-cache: HIT`, нет `_vercel_sso_nonce` cookie
+- Hero копи V2 в HTML («GTM strategy is not a set of tactics across channels…»)
+- Three Layers section, /_next chunks, Next.js production build — всё работает
+- www-домен 200, apex 200
+
+**Открытые архитектурные вопросы (не блокеры релиза):**
+1. **Option C из global CLAUDE.md всё ещё не landed** — Vercel project Production Branch = `main`, не `production`. Сейчас работает потому что push в production branch + manual `vercel promote` создаёт production target. Чтобы CLAUDE.md doctrine соответствовала инфре, нужно: Vercel Settings → Git → Production Branch: `main` → `production`.
+2. После Option C: можно перестать делать `vercel promote --yes` руками — push в production будет автоматически = live.
+
+---
+
+**Earlier 2026-05-01 (afternoon /wrap):**
 - **PR #2** `release/2026-05-01-v2 → production` — merged 6af4b85 (journal-only release, no code changes)
 - **PR #3** `fix/vercel-nextjs-config` — delete `vercel.json` (V1 static-output override). Result: 404 NOT_FOUND. Framework auto-detect не сработал т.к. project framework=null.
 - **PR #4** `fix/vercel-framework-nextjs` — добавил vercel.json с `{"framework": "nextjs"}`. Result: Next.js build OK ✅. V2 contents render: Three Layers, /_next/ chunks, EditableText pipeline, correct title.
