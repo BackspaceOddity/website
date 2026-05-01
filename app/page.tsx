@@ -426,10 +426,10 @@ export default function HomePage() {
               <EditableText id="member.anna.name">Anna Barinova</EditableText>
             </h3>
             <div className="member__role">
-              <EditableText id="member.anna.role">Head of Production</EditableText>
+              <EditableText id="member.anna.role">Product Lead</EditableText>
             </div>
             <p className="member__bio">
-              <EditableText id="member.anna.bio">{`Bio coming soon — fill in via edit-mode.`}</EditableText>
+              <EditableText id="member.anna.bio">{`Leads product. Shipped 50+ products from zero, built cross-functional processes in teams of 35+, and architected design systems scaled across products with up to 14M MAU.`}</EditableText>
             </p>
           </article>
         </div>
@@ -439,7 +439,7 @@ export default function HomePage() {
       <section className="final" id="contact" data-screen-label="06 Final CTA">
         <div className="final__inner">
           <h2 className="final__h2">
-            <EditableText id="final.h2">The first call takes 30 minutes. No deck</EditableText>
+            <EditableText id="final.h2">{`What's something that prevents you from moving the needle?`}</EditableText>
           </h2>
           <p className="final__copy">
             <EditableText id="final.copy">{`You show us the problem. We tell you where we'd start, and whether we're the right fit. If not, we'll point you at someone who is.`}</EditableText>
