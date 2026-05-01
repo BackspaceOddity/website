@@ -17,3 +17,4 @@ out/
 # Edit-mode runtime store (machine-local; gets pulled into CC sessions via hook)
 _edit-threads.json
 _edit-threads.processed.jsonl
+.project-journal/watcher-nudges/
