@@ -6,3 +6,13 @@ bugs/
 .project-journal/.session-*
 .project-journal/.last-wrap-*
 .project-journal/sessions/*-yegorkorobeynikov.md
+
+# Next.js
+.next/
+out/
+*.tsbuildinfo
+.vercel
+.env*.local
+
+# Edit-mode runtime store (machine-local; gets pulled into CC sessions via hook)
+_edit-threads.json
