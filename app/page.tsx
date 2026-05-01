@@ -321,9 +321,6 @@ export default function HomePage() {
             <EditableText id="how.intro">{`We're an AI-native agency. Strategy is a human call. The execution layer — research, drafts, repeat work — runs on AI. That split shapes the three principles below.`}</EditableText>
           </p>
 
-          <span className="how__section-label">
-            <EditableText id="how.section-label-1">Three principles</EditableText>
-          </span>
           <div className="how__principles">
             <div className="principle">
               <h3 className="principle__headline">
@@ -351,9 +348,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          <span className="how__section-label" style={{ marginTop: "72px" }}>
-            <EditableText id="how.section-label-2">Three phases, every engagement</EditableText>
-          </span>
           <div className="how__phases">
             <div className="phase">
               <div className="phase__num">Phase 01</div>
@@ -435,7 +429,7 @@ export default function HomePage() {
               <EditableText id="member.anna.role">Head of Production</EditableText>
             </div>
             <p className="member__bio">
-              <EditableText id="member.anna.bio">{`Identity, brand systems, and product-surface work. Previously on brand and product teams at Miro and with AI-native startups across Europe and the US.`}</EditableText>
+              <EditableText id="member.anna.bio">{`Bio coming soon — fill in via edit-mode.`}</EditableText>
             </p>
           </article>
         </div>
