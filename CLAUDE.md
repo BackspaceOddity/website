@@ -62,3 +62,13 @@ In addition to `~/.claude/tov.md`:
 ## Language
 
 Default conversation language: **Russian**. User-facing responses по-русски. English только для: inline-кода, CLI, технических identifier'ов, и сгенерированной английской копии (она и должна быть на английском — она для сайта).
+
+## Tooling — Magic MCP (21st.dev)
+
+`@21st-dev/magic` доступен как user-scoped MCP (`mcp__magic__*`). Natural-language → React/TSX/Tailwind генератор. Работает с Next + Tailwind стеком сайта.
+
+**Использовать для:** bootstrapping новых типов секций (hero variants, feature grids, testimonial blocks, pricing tables, FAQ accordions), стандартных UI-паттернов (формы, modals, command palette), logo wall / icon-set вставок (`mcp__magic__logo_search`).
+
+**НЕ использовать для:** копирайтинга — copy и structure НИКОГДА не из Magic, они из `bso-positioning-framework-v1` и BRIEF. Magic выдаёт визуальные обёртки, не контент. Также не трогать deploy-пайплайн (отдельные Vercel + branch-protection правила в global CLAUDE.md — push в main = production publish, hard-rule).
+
+**Tracking:** [BSO-252](https://linear.app/backspace-oddity/issue/BSO-252).
