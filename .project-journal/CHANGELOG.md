@@ -1,126 +1,5 @@
 # Changelog
 
-## 2026-04-30 (late) — Dev-server detach script (CC-restart resilience)
-
-**Symptom:** после рестарта CC сессии `localhost:3456` отдаёт ERR_CONNECTION_REFUSED. Process started через `preview_start` или `Bash run_in_background` привязан к жизненному циклу CC и убивается при закрытии. Каждый `/resume` ловит «refused to connect» — структурный gap, не разовая проблема.
-
-**Root cause:** dev server lifecycle coupled с CC session lifecycle. `Bash run_in_background` создаёт процесс-ребёнок CC; при exit CC SIGHUP'ит дерево.
-
-**Fix landed:** `scripts/dev-server.sh` — start/stop/status/restart/logs wrapper, использует `nohup + </dev/null + disown` (macOS-portable, без `setsid` который отсутствует в стандартной macOS). PID-файл в `/tmp` для idempotency, port-check fallback. Server переживает CC restart-ы.
-
-**Failed first iteration:** написал скрипт с `setsid` — `command not found` на macOS. Пофикшено заменой на `nohup + </dev/null` (closed stdin = no controlling terminal to lose).
-
-**Не landed:** session-start hook автостарта (рассматривал, но over-engineering для разового манёвра — wrapper достаточно). Пользователь запускает `./scripts/dev-server.sh start` один раз, server живёт пока `stop` не вызовут.
-
-**Result:**
-- `scripts/dev-server.sh` committed (ранее лежал в `.claude/scripts/` — gitignored, не пропагировал бы; перенёс в `scripts/` в корень).
-- BSO-189 open item «CC-restart resilience» — addressed.
-
----
-
-## 2026-04-30 — Autonomous task: 3-layer backport + canonical-sources extension + backlog hygiene
-
-**Context:** User stepped away для 2-часового отсутствия с просьбой работать автономно над backlog. Все 4 scope-варианта одобрены через AskUserQuestion (BSO-61 close, BSO-142 doc, KOS 3-layer backport, Verify Vercel + tov-lint, Backlog hygiene). Permission mode: bypassPermissions.
-
-**What happened:**
-- /resume → catch-up: STATE/CHANGELOG/LEARNINGS свежие после late-session /wrap. Graph precedent re-surfaced.
-- **BSO-61 closed** — push разблокирован, 74 commit'а pushed в текущей сессии до начала autonomous work. Done.
-- **BSO-228 created + closed** — Backport edit-mode 3-layer architecture across consumers. Investigation: KOS main `web/app/api/save-draft/route.ts` имеет Layer 1 (server pending/processed split + merge-on-write); KOS bundle на main НЕ имеет Layer 2 (setThreads({})) — это противоречит заявлению decisions-inbox файла. Layer 3 (outbox + 5s timeout) только на feature/autonomous-agents.
-  - Tools/edit-mode template (`templates/save-draft-route.ts`) обновлён до KOS-main shape — commit `9e48f91`.
-  - BSO Website worktree route — backported, commit `3490fd0`.
-  - bso-canvas-app route — backported, commit `cc2dc87`.
-  - KOS main bundle — обновлён setThreads({}) Layer 2 fix, commit `13ad9b1`.
-  - KOS decisions-inbox файл скорректирован — commit `6a848a7`.
-- **BSO-142 closed** — `context/CANONICAL-SOURCES.md` расширен Notion-canonical классом. File index теперь с колонкой Type, новые entries (`landing-skeleton`, `new-website-v2-notion` etc), Notion-canonical re-sync protocol описан, "How to use" rewritten как 5-point guide. Commit `35d2115`.
-- **OG image path fix** — `app/layout.tsx` использует `/images/og-image-v2.jpg` вместо absolute prod URL. Forward-compatible с Next.js миграцией. Скопирован файл в `public/images/`. Commit `9094c88` (worktree).
-- **Vercel verify** — WebFetch backspaceoddity.com подтверждает V2 deploy (hero, sub, 6 portfolio cards, Jobs, How we work, AI-native messaging — всё видно).
-- **tov-lint pass** на `app/page.tsx` копи — 1 known violation (Screen 4 P1 «We embed. We don't consult from the outside» — anti-consultant per tov.md), но это Notion-locked, не autonomously правлю.
-- **Backlog hygiene** — комменты на BSO-58, BSO-59, BSO-60, BSO-189 с per-issue review notes. Не закрываю без Yegor's подтверждения acceptance criteria. BSO-59 ("Screen 3 lock 5 jobs") — likely Done (5 jobs locked в Notion + V2 site). BSO-60 ("Screen 4 tab-switcher") — likely Obsolete (V2 has principles+phases pattern, not tabs). BSO-58 ("Screen 2 positive half") — needs acceptance criterion (may be obsolete OR new section needed).
-
-**Decisions made:**
-- Layer 1.5 enhancement (split threads by status='approved' → processed.jsonl) flagged как design-question, не делаю автономно. Текущее поведение: counter clears in memory (Layer 2), reload re-hydrates approved threads from disk (by design — Claude reads them).
-- Не закрываю backlog issues без Yegor's подтверждения per global CLAUDE.md «Closure без acceptance criteria — issue не закрывай если готово неочевидно. Спроси подтверждения».
-- Tools/edit-mode template — canonical source for future consumers. KOS_DEMO_MODE специфичный код НЕ включён в template (deployment-specific).
-
-**Errors / learnings:**
-- **LEARN cross-project:** decisions-inbox файлы могут быть неточными — original entry claim'ил 3 слоя на main, реально только Layer 1. При consuming чужой decision-trace файл — verify against actual deployed code (`git show HEAD:path/to/file`), не доверяй claim'у resolution. Обновлён файл в KOS с per-consumer status table.
-- **LEARN local:** при git commit с heredoc'ами и backticks/quotes в commit message — failed дважды. Workaround: `cat > /tmp/msg.txt <<MSGEOF` + `git commit -F /tmp/msg.txt`. Робастно работает.
-- **WIN cross-project:** AskUserQuestion с multi-select scope для autonomous work — clean handoff pattern. Список из 4 опций + permission mode вопрос отдельно — пользователь выбрал всё одной операцией, дальше работаю без ping.
-
-**Result:**
-- Linear backlog: 3 closed (BSO-61, BSO-142, BSO-228). 4 in Backlog с hygiene comments. BSO-189 in-progress с прогресс-чекпойнтом.
-- Master `35d2115` (V2 + canonical-sources doc).
-- Worktree `nextjs-migration` `9094c88` (page.tsx wrap + Layer 1 backport + OG fix).
-- Tools/edit-mode `9e48f91`, bso-canvas `cc2dc87`, KOS `6a848a7`.
-- Все pushed.
-
----
-
-## 2026-04-29 (late) — Edit-mode wired в copy + shared-library bug fix
-
-**What happened:**
-- /resume в новой сессии после параллельного /wrap-commit `793c290` — подхватил day-entry.
-- Push разблокирован — все 74 commit'а master → origin/main (Vercel deploys V2).
-- `app/page.tsx` в worktree обёрнут `<EditableText id="...">` для всей смысловой копи (~80 нод). Schema: `screen.element[.subkey]` (например `hero.h1`, `card.miro.description`, `job.01.headline`). Скипнуты пунктуация/номера/лого/chip-ссылки.
-- Текст-режим verified end-to-end через Claude Preview MCP: scroll → click hero.h1 → typed variant → Add → Approve → toolbar показывает «1 approved · Send to Claude» → click Send → toolbar очищается до `EDIT · Text · Visual`.
-- **Root cause баг:** `Tools/edit-mode/src/context.tsx` `saveAll()` очищал только `setVisualEdits([])`, но не `threads`. Counter оставался «1 approved» хотя POST /api/save-draft вернулся 200.
-- **Fix:** добавил `setThreads({})` рядом с `setVisualEdits([])`. Rebuild via `npm run build` (tsup). Dist скопирован в три потребителя: `BSO Website/.../nextjs-migration/lib/edit-mode/`, `bso-canvas-app/lib/edit-mode/`, `Knowledge-OS-Product/web/lib/edit-mode/`.
-- **KOS surprise:** при копировании в KOS git status остался чистый — там уже была более глубокая архитектура fix'а (3 слоя per `Knowledge-OS-Product/docs/DECISIONS-INBOX/from-sb-2026-04-27-edit-queue-not-clearing-after-send-to-claude.md`, resolved 2026-04-28). Мой фикс — только слой «bundle clears». KOS дополнительно имеет server pending/processed split + bundle hydrates from server + outbox replay + 5s timeout.
-
-**Decisions made:**
-- Для page.tsx идём через `<EditableText id="...">` обёртки, не через альтернативу «только visual-mode без text-mode parity».
-- Root fix в shared library, не локальная заплатка в worktree (per «Architectural fixes over patches»).
-- KOS не трогаем — у него уже работает более полная версия. Тех долг: backport 3-слой архитектуры из KOS в bso-canvas-app + BSO Website worktree, чтобы reload-after-save не возвращал thread'ы из файла.
-
-**Errors / learnings (3 в LEARNINGS):**
-- LEARN cross-project: shared-library fix без backport KOS-архитектуры — частичный. Counter падает в memory, но reload вернёт threads из `_edit-threads.json` (нет server pending/processed split).
-- LEARN local: `preview_click` MCP не всегда триггерит React click handler; для надёжности использовать `preview_eval` с `dispatchEvent(new MouseEvent('click', {bubbles:true,cancelable:true,view:window}))`.
-- WIN cross-project: `<EditableText id="...">` wrap-pattern масштабируется на пейдж 80+ нод за один write; ID-схема `screen.element[.subkey]` читаема и стабильна для последующих edit-thread reference'ов.
-
-**Result:**
-- BSO Website master: 74 commits на origin/main, V2 деплоится.
-- worktree `nextjs-migration`: page.tsx editable end-to-end, shared lib bundle обновлён, edit-mode counter ведёт себя корректно.
-- Tools/edit-mode: src + dist готовы к коммиту.
-- bso-canvas-app: dist готов к коммиту.
-- KOS web: уже имеет полный fix, не трогаем.
-
----
-
-## 2026-04-29 — V2 homepage implemented + Next.js migration started
-
-**What happened:**
-- /resume → catch-up: scaffold audit OK, STATE / CHANGELOG / LEARNINGS read, graph precedent surfaced.
-- Pre-existing canonical-sources re-sync (2026-04-28) committed (`7aa9d37`).
-- Notion landing skeleton page sync-checked vs canonical context (`bso-positioning-framework-v1` + BRIEF v1) — структурного drift нет; 3 housekeeping ops применены: статус-блок `2026-04-29 (верификация)`, AI-native agency intro в Screen 4, note над архив-блоком про устаревшие inline-discussions.
-- V2 homepage написан в `src/index.html` из Claude Design handoff (`DicK6mMEcbYL`, 2026-04-24): структура/CSS/токены из дизайна, копи verbatim из Notion landing skeleton (jobs/principles/phases — заменили invented copy дизайна). Assets: 5 SouvenirGothic .otf + hero-bg-magenta-green.png + project-film.webp + project-stape.webp (placeholder backdrop-02).
-- /invite загрузил 4 агентов: tone-of-voice (primary), figma-web-pixel-perfect, typography, knowledge-architect. Surfacing: tov rule #2 anti-consultant tension в Screen 4 P1 («We embed. We don't consult from the outside.») — Notion-locked, флажок не auto-fix.
-- Архитектурное решение для edit-mode: вариант A (конвертация в Next.js) выбран против B (vanilla адаптер) и C (Stagewise CDN). Knowledge-architect rule #5d / #3 как обоснование.
-- Linear [BSO-189](https://linear.app/backspace-oddity/issue/BSO-189) создан (Medium, project [BSO] Website, labels triage + decision-trace).
-- /move-to-session → создан git worktree `.claude/worktrees/nextjs-migration/` от master `2bd13cd`. SPINOFF-CONTEXT.md / GRAPH-PRECEDENT.md / AGENTS-TO-INVITE.md / HANDOFF-prompt.md написаны.
-- Next.js bootstrap в worktree: package.json (Next 16.2.4 + React 19.2.4), tsconfig, layout/page.tsx, globals.css, app/api/save-draft, components/EditModeShell, lib/edit-mode (copied verbatim из bso-canvas-app), public/ assets, _edit-threads.json инициализирован пустым. npm install: 344 packages.
-- Dev server на http://localhost:3456 верифицирован: все 8 секций рендерятся (page height 9000px), edit toolbar смонтирован.
-
-**Decisions made:**
-- Skeleton structurally aligned с canonical → drift не требует обновления (3 housekeeping ops — это polish).
-- AI-native agency framing добавляется как italic intro в Screen 4 (не в Hero sub) — короткий, концентрированный, мотивирует три principles.
-- Wayfund swap → Stape возвращён per Notion канон. Stape gets backdrop-02 placeholder (нужен реальный screenshot).
-- Edit-mode: Next.js A > B > C. Worktree, не sibling-проект. Branch `nextjs-migration`.
-- Push не делаем — PAT-блок остаётся (LEARNINGS [RETRO 2026-04-20]).
-
-**Errors / learnings (4 в LEARNINGS):**
-- ERROR cross-project: Notion `update_content` silently no-ops на toggle-converted blocks — анкер должен быть outside `<details>` структуры.
-- LEARN local: Notion blockquote+italic escape edge case (`> *Note...*` → `> \*Note...`).
-- WIN cross-project: Skeleton-vs-canonical alignment audit pattern (4-step: read upstream → fetch live → per-section comparison → action list).
-- LEARN local: activity-log + Stop-hook architectural tension (loop на каждом Edit).
-
-**Result:**
-- master: V2 homepage live на dev (`npx serve src` → 3456). 73 commit'а unpushed.
-- worktree `nextjs-migration`: scaffold готов, edit-mode подключён, 1 commit (`74d189e`) ahead of master.
-- Linear BSO-189 backlog с 12-step scope.
-- Next session entry: `cd .claude/worktrees/nextjs-migration && claude` → пасть HANDOFF-prompt.md → /resume → /invite.
-
----
-
 ## 2026-04-22 → 2026-04-23 — V2 content rebuild: skeleton + audit + hero locked
 
 **What happened:**
@@ -283,24 +162,79 @@
 
 ### 2026-04-29 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-29-2144-64752-yegorkorobeynikov.md` had 8 user prompts, 41 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-29-1930-63439-yegorkorobeynikov.md` had 0 user prompts, 17 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
 ### 2026-04-29 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-29-1815-63439-yegorkorobeynikov.md` had 12 user prompts, 121 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-29-2155-64752-yegorkorobeynikov.md` had 0 user prompts, 25 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
 ### 2026-04-30 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-30-0058-48576-yegorkorobeynikov.md` had 2 user prompts, 19 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-30-0101-48576-yegorkorobeynikov.md` had 0 user prompts, 3 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
 ### 2026-04-30 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-30-0839-31280-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-30-0840-31528-yegorkorobeynikov.md` had 0 user prompts, 19 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
-### 2026-04-30 — orphan session rolled up (PID no longer alive)
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-30-0840-31528-yegorkorobeynikov.md` had 2 user prompts, 56 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-04-30-2232-43614-yegorkorobeynikov.md` had 0 user prompts, 12 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
-### 2026-04-30 — orphan session rolled up (PID no longer alive)
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-04-30-1357-68338-yegorkorobeynikov.md` had 1 user prompts, 10 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-05-01-1158-1441-yegorkorobeynikov.md` had 7 user prompts, 25 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+## 2026-05-01 (вечер) — 🟢 V2 RELEASED publicly
+
+**What happened:**
+- Yegor вручную в Vercel UI: Project `backspace-oddity` → Settings → Deployment Protection → Vercel Authentication: Disabled.
+- Проверка: `backspaceoddity.com` + `www.backspaceoddity.com` → HTTP 200, нет `_vercel_sso_nonce` cookie, V2 hero копи и Three Layers section в HTML, /_next chunks загружаются, x-vercel-cache: HIT.
+- Релиз закрыт без push'ей и без кода — только UI-toggle, который вчера (2026-05-01 afternoon SB-session) PATCH через API не смог переключить (team-level inheritance перекрывал).
+
+**Decisions made:**
+- Релиз через manual UI toggle, не через API. После 2026-05-01 afternoon learning «team-level setting перебивает project-level PATCH» путь оказался — project-level UI Disabled.
+
+**Open follow-ups (не блокеры live):**
+- Option C из global CLAUDE.md всё ещё не landed: Vercel Production Branch = `main`. Сейчас релиз работает через `vercel promote --yes` ручной шаг. Решение: Vercel Settings → Git → Production Branch → `production`. После этого push в production branch = автодеплой live, без manual promote.
+
+**Result:**
+- V2 публично доступен на backspaceoddity.com — впервые с момента V2 build'а.
+- BSO-189 Next.js миграция эффективно завершена в части live deploy (контент Screens 2-4 — отдельная задача BSO-58/59/60).
+- Остаётся один architectural debt: Option C completion.
+
+---
+
+## 2026-05-01 (afternoon) — V2 Vercel deploy debugging via cross-project SB session
+
+Cross-project work из SB session — Yegor visit'нул что live = V1 несмотря на BSO-232 fork direction A.
+
+**4 PRs landed на production branch, V2 build достигнут:**
+- PR #2 `release/2026-05-01-v2` → journal-only, exposed что V2 код был уже в production от 30-04
+- PR #3 `fix/vercel-nextjs-config` — delete legacy `vercel.json` — caused 404 NOT_FOUND
+- PR #4 `fix/vercel-framework-nextjs` — re-add vercel.json с `framework: nextjs` — V2 builds корректно
+
+**3 manual `vercel promote --yes` + alias re-binding** для promotion preview→production target. Plus PATCH ssoProtection: null (200 OK, no effect).
+
+**Final state:** V2 deployment успешный, content renders правильно (Three Layers, /_next/ chunks). Aliases backspaceoddity.com + www → V2 prod deploy. Public access **blocked by team-level Deployment Protection** — нужен Yegor manual в Vercel Team Settings.
+
+**Architectural learning [SEVERITY:CRITICAL]:** Option C из global CLAUDE.md (Vercel decoupling main→production) **не landed** — project Production Branch всё ещё = `main`. Это создаёт сегодняшнюю ситуацию: rule блокирует push-to-main (правильный путь по rule = push-to-production), но push-to-production = preview only (Vercel сейчас деплоит main как production target). Рассинхронизация три-слойной архитектуры (rule + hook + infra). 30-04 incident («одной командой запушил» через `git push origin master:main`) сработал именно потому что main = live. Тот же путь работает и сегодня — но rule запрещает.
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1218-11883-yegorkorobeynikov.md` had 7 user prompts, 43 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1244-25179-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1245-25522-yegorkorobeynikov.md` had 1 user prompts, 0 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1253-28009-yegorkorobeynikov.md` had 2 user prompts, 23 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-01 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-01-1451-82400-yegorkorobeynikov.md` had 6 user prompts, 29 tool calls, 0 errors. Full raw log has been deleted (retention policy).

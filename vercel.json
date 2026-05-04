@@ -1,4 +1,3 @@
 {
-  "outputDirectory": "src",
-  "buildCommand": ""
+  "framework": "nextjs"
 }

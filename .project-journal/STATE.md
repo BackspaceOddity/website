@@ -1,10 +1,59 @@
 # Backspace Oddity Website — Current State
 
-**Last updated:** 2026-04-30 (autonomous task)
-**Status:** In Progress — **V2 live на backspaceoddity.com; Next.js worktree edit-mode 3-layer arch backported; backlog hygiene done** (BSO-189 mid-flight, BSO-228 + BSO-142 + BSO-61 closed)
+**Last updated:** 2026-05-01 (вечер — V2 RELEASED, public on backspaceoddity.com)
+**Status:** **🟢 V2 на проде. backspaceoddity.com + www.backspaceoddity.com → HTTP 200, V2 контент рендерится, без auth wall.**
+
+**2026-05-01 evening — релиз состоялся:**
+- Yegor отключил Vercel Authentication на project-level (`backspace-oddity` → Project Settings → Deployment Protection → Disabled)
+- `curl -I https://backspaceoddity.com` → 200 + `x-vercel-cache: HIT`, нет `_vercel_sso_nonce` cookie
+- Hero копи V2 в HTML («GTM strategy is not a set of tactics across channels…»)
+- Three Layers section, /_next chunks, Next.js production build — всё работает
+- www-домен 200, apex 200
+
+**Открытые архитектурные вопросы (не блокеры релиза):**
+1. **Option C из global CLAUDE.md всё ещё не landed** — Vercel project Production Branch = `main`, не `production`. Сейчас работает потому что push в production branch + manual `vercel promote` создаёт production target. Чтобы CLAUDE.md doctrine соответствовала инфре, нужно: Vercel Settings → Git → Production Branch: `main` → `production`.
+2. После Option C: можно перестать делать `vercel promote --yes` руками — push в production будет автоматически = live.
+
+---
+
+**Earlier 2026-05-01 (afternoon /wrap):**
+- **PR #2** `release/2026-05-01-v2 → production` — merged 6af4b85 (journal-only release, no code changes)
+- **PR #3** `fix/vercel-nextjs-config` — delete `vercel.json` (V1 static-output override). Result: 404 NOT_FOUND. Framework auto-detect не сработал т.к. project framework=null.
+- **PR #4** `fix/vercel-framework-nextjs` — добавил vercel.json с `{"framework": "nextjs"}`. Result: Next.js build OK ✅. V2 contents render: Three Layers, /_next/ chunks, EditableText pipeline, correct title.
+- **3× `vercel promote --yes`** — Vercel «Production Branch» setting = `main` (не `production`), поэтому push в production branch = preview target. Manual promote создаёт production target build.
+- **3× `vercel alias set backspaceoddity.com + www`** — alias re-binding на каждый promoted deployment (default не переходит автоматически).
+- **`PATCH /v9/projects/.../ssoProtection: null`** через vercel curl — 200 OK, но auth wall на месте (значит Deployment Protection живёт на team level).
+
+**Critical findings (root-cause architecture drift):**
+1. **Option C из global CLAUDE.md never actually landed** — Vercel project «Production Branch» = `main`, не `production`. CLAUDE.md заявляет «Option C completed 2026-04-30, domains bound to production branch» — реальность другая. Это объясняет 30-04 incident («одной командой запушил» = `git push origin master:main` → main = production target → 30s до live). И объясняет сегодняшние час debugging — я работал по PR-в-production пути который не работает в текущей Vercel конфигурации.
+2. **Project `framework: null`** — legacy от V1 static. Без явного `vercel.json` framework=nextjs билд не происходит.
+3. **Deployment Protection — team-level Vercel Authentication** — project-level PATCH не override'ит. Только Yegor в Vercel UI.
+
+**Action required from Yegor:**
+1. Vercel Team Settings → Security → Deployment Protection → Disabled (или Standard для preview only). После этого V2 будет публично доступен на backspaceoddity.com.
+2. (Optionally) Vercel project Settings → Git → Production Branch: `main` → `production`. Это реально завершит Option C — push в production branch = автодеплой live, без manual promote/alias.
+
+---
+
+**Last updated (previous):** 2026-05-01 (/wrap end of day 2026-04-30)
+**Status (previous):** In Progress — **V2 evolves — Three Layers section live, real-time edit-cycle через visual edit-mode picker, brand-frame → GTM-frame reframes, +20 visual edits applied this session** (BSO-189 mid-flight, BSO-244 + BSO-245 backlog)
 **Client/Context:** Backspace Oddity — strategic brand growth agency, Amsterdam
 
-## Quick state — autonomous session 2026-04-30 (+90 мин)
+## Quick state — late session 2026-04-30 (+5 часов real-time edit cycle)
+
+- **New Screen 2 «Three layers of GTM strategy»** — landed между Hero и Selected Work. Layer 1 Strategy (jobs / ICP / positioning / narrative / messaging architecture) → Layer 2 Tactics (PR / outreach / advertising / content / partnerships × LinkedIn / email / podcasts / paid / owned, **CEPs as the lens** that pulls into coherent GTM) → Layer 3 Creative execution (AI-native production, channels-keep-up framing, no rebrand-mention per Yegor's pushback).
+- **Visual edit-mode pipeline matured** — `surface-visual-edits.py` + symlink master/_edit-threads.json → worktree (Layer A quick-fix per BSO-236) + extended thread status `'open' | 'approved' | 'applied'` (per current edit-mode bug fix — keeps activeText displayed after Send to Claude). ~20 visual edits applied real-time через picker → Claude apply → user views → next.
+- **Body-text scale system-wide bump** — --size-body 20→24, --size-body-lg 24→28, plus per-element. Editorial premium (USER-FLAGGED learning).
+- **Layer 2 reframe iterations** — Cascade/Channel architecture rejected (unclear) → user clarified: tactics = PR/outreach/advertising × channels, CEPs = the lens. Final structure tactically grounded.
+- **Logo mark added в nav** — Logo Mark.svg (44px) перед wordmark, aligned to hero block left edge.
+- **YC application context loaded** — `context/yc-application-daily-2026-04-30.md` snapshot. Strategy/execution gap added в Three Layers intro per YC pitch insights.
+
+## Open items (Notion canonical update needed)
+- Notion landing skeleton page — нужно отразить Three Layers section (новая секция, не была в skeleton)
+- Нужно отразить Layer 2 «PR/outreach/advertising × channels, CEPs as lens» framing
+- Layer 1 расширенная formulation (positioning/narrative/messaging architecture в strategy)
+
+## Quick state — earlier 2026-04-30 (autonomous task)
 
 - **BSO-228 closed** — backport KOS-main 3-layer edit-mode архитектуры в Tools/edit-mode templates + bso-canvas-app + BSO Website worktree. KOS main bundle также получил Layer 2 fix (setThreads({})). Decisions-inbox файл в KOS обновлён — был неточным (claim'ил 3 слоя на main, реально только Layer 1).
 - **BSO-142 closed** — `context/CANONICAL-SOURCES.md` расширен Notion-canonical классом + новой re-sync секцией. File index теперь имеет колонку Type (Git / Notion / Local). Каждый context/*.md явно объявляет canonical source. Снимает класс ошибок «Notion-snapshot stale, никто не знает откуда он».
