@@ -12,18 +12,18 @@ const ebGaramond = EB_Garamond({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://backspaceoddity.com"),
-  title: "Backspace Oddity — A strategic brand growth agency",
+  title: "Backspace Oddity — AI-native GTM agency",
   description:
     "GTM strategy is not a set of tactics across channels. We build the system underneath — audience, jobs, context, competition, fit — that makes the channels worth running.",
   openGraph: {
-    title: "Backspace Oddity — A strategic brand growth agency",
+    title: "Backspace Oddity — AI-native GTM agency",
     description:
       "GTM strategy is not a set of tactics across channels. We build the system underneath — audience, jobs, context, competition, fit — that makes the channels worth running.",
     images: ["/images/og-image-v3.jpg"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Backspace Oddity — A strategic brand growth agency",
+    title: "Backspace Oddity — AI-native GTM agency",
     description:
       "GTM strategy is not a set of tactics across channels. We build the system underneath — audience, jobs, context, competition, fit — that makes the channels worth running.",
     images: ["/images/og-image-v3.jpg"],
