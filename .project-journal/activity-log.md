@@ -38,8 +38,16 @@
 [2026-04-29 19:28] Write → app/page.tsx
 [2026-04-29 19:28] Write → package.json
 [2026-04-29 19:28] Write → .gitignore
+[2026-04-29 19:30] Edit → .claude/launch.json
 [2026-04-29 22:08] Write → app/page.tsx
+[2026-04-30 12:36] Write → context/CANONICAL-SOURCES.md
 [2026-04-30 12:39] Edit → app/layout.tsx
+[2026-04-30 12:46] Write → context/landing-skeleton-best-practice-structure.md
+[2026-04-30 14:01] Write → .claude/scripts/dev-server.sh
+[2026-04-30 14:02] Edit → .claude/scripts/dev-server.sh
+[2026-04-30 14:03] Edit → .claude/scripts/dev-server.sh
+[2026-04-30 16:06] Edit → scripts/dev-server.sh
+[2026-04-30 16:06] Edit → scripts/dev-server.sh
 [2026-04-30 18:38] Edit → app/page.tsx
 [2026-04-30 18:38] Edit → app/page.tsx
 [2026-04-30 19:26] Edit → app/page.tsx
@@ -136,3 +144,4 @@
 [2026-05-01 12:29] Edit → app/globals.css
 [2026-05-01 12:38] Edit → .gitignore
 [2026-05-01 18:36] Edit → app/layout.tsx
+[2026-05-04 12:03] Edit → .gitignore
