@@ -135,6 +135,7 @@ Content Marketing pipeline BSO используется как public probe: ф�
 
 - [[ai-native-agency]] — базовая концепция категории
 - [[service-as-software]] — рыночный контекст (Foundation + Sequoia 2026)
+- [[icp-bso-v1]] — каноничный ICP (4 layers + wedge filter + negatives), harvest'нут 2026-05-05 per [[decision-bso-as-internal-client-harvest-protocol-v1]]. Закрывает gap «framework does NOT contain explicit ICP».
 - [[hitl-approval-architectural-invariant]] — прямое следствие Intelligence/Judgement split
 - [[externalization-of-expertise-open-question]] — открытая развилка, per-layer
 - [[content-marketing-pipeline]] — первая реализация рамки (этот канал + probe)
