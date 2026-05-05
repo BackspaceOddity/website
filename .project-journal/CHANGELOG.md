@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-05-04 → 2026-05-05 — og-image v3 (heavy + top-left logo) + AI-native GTM title swap
+
+**What happened:**
+- Telegram link preview surfaced two metadata bugs after V2 release: og:image URL pointed to `backspace-oddity.vercel.app` (preview-домен), и сама картинка показывала V1 brand-thesis копи («Brand is not what you look like»), не текущий GTM-thesis hero.
+- PR #5 (metadataBase fix): added `metadataBase: new URL("https://backspaceoddity.com")` в `app/layout.tsx`. og:image теперь резолвится на canonical-домен.
+- PR #7 (og-image v3 first-pass): replaced V1 brand-thesis image с composite на сайтовой палитре — hero-bg-magenta-green backdrop + SouvenirGothic Medium headline + text wordmark top-right. cairosvg fallback из-за отсутствия libcairo на macOS — Logo Mark icon потерян на этом этапе, заменён на text-only wordmark.
+- PR #9 (og-image v3 heavy + title swap): redesigned per Yegor's pushback — heavy SouvenirGothic Bold headline во всю ширину, Logo Mark (6-ellipse soundbar) восстановлен top-left через native Pillow draw (без cairo deps), wordmark рядом two-line stack. Title metadata «A strategic brand growth agency» → «AI-native GTM agency» — applied к title / og:title / twitter:title (alignment с current GTM-thesis hero + canonical positioning category в [[bso-positioning-framework-v1]] §1).
+- PR #8, #10 — main ← production sync (8 commits backported).
+- `scripts/build-og-image.py` коммичен как repeatable generator.
+- Telegram cache eventually обновился сам после двух WebpageBot refresh (description + image обе V2-aligned в финальном превью).
+
+**Decisions made:**
+- og-image versioning через filename suffix (v2 → v3), не через query-param. Cache-bust по URL надёжнее (Telegram CDN держит image cache отдельно от metadata refresh).
+- Logo Mark отрисован native через `ImageDraw.ellipse()` из bbox-координат SVG paths — без cairosvg / svglib / external rasterizer. Fallback path documented.
+- Title swap landed в одном PR с heavy og-image — концептуально связаны (оба части GTM-thesis era cleanup от brand-thesis legacy).
+
+**Errors / learnings:**
+- cairosvg / resvg-py / svglib — все требуют либо native libcairo (которого нет в default macOS) либо отдельные deps. Native Pillow + manual SVG path bbox extraction оказался самым надёжным для simple geometric SVG.
+- Pre-push hook + branch model: pre-push блокирует direct push в production; правильный flow = feature branch + PR + merge. Cycle: branch → push → `gh pr create` → `gh pr merge --merge --delete-branch` за минуту.
+- Telegram CDN holds image cache separately from preview metadata. WebpageBot refresh обновляет text сразу, картинку — может не сразу. Решение: либо подождать, либо cache-bust через filename change.
+
+**Result:**
+- og-image-v3.jpg live на canonical-домене
+- og:title, twitter:title, page title — все «AI-native GTM agency»
+- Telegram-preview соответствует текущему позиционированию + hero копи
+- main и production выровнены (no drift)
+
+---
+
+## 2026-05-01 (вечер) — V2 РЕЛИЗ: backspaceoddity.com public
+
+**What happened:**
+- Yegor вручную в Vercel UI отключил Deployment Protection (Project Settings → Vercel Authentication: Disabled) на проекте `backspace-oddity`. Auth wall снят.
+- Verify: `curl -I https://backspaceoddity.com` → 200 + `x-vercel-cache: HIT`. Cookie `_vercel_sso_nonce` исчез. V2 hero копи + Three Layers + /_next chunks — всё рендерится.
+- Релиз закрыт **без push'а в код** — только UI-toggle. После недели V2-deploy debugging это самый дешёвый exit.
+
+**Decision:** релиз через manual UI toggle, не API. После 2026-05-01 afternoon learning «team-level setting перебивает project-level PATCH» оказалось — реальный путь это project-level UI Disabled.
+
+**Open follow-ups (вошли в STATE.md):** Option C completion — Vercel Production Branch → `production`.
+
+---
+
 ## 2026-04-22 → 2026-04-23 — V2 content rebuild: skeleton + audit + hero locked
 
 **What happened:**
