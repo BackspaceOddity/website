@@ -1,9 +1,29 @@
 # Backspace Oddity Website — Current State
 
-**Last updated:** 2026-05-01 (вечер — V2 RELEASED, public on backspaceoddity.com)
-**Status:** **🟢 V2 на проде. backspaceoddity.com + www.backspaceoddity.com → HTTP 200, V2 контент рендерится, без auth wall.**
+**Last updated:** 2026-05-05 (вечер /wrap — og-image v3 heavy + AI-native GTM positioning live)
+**Status:** **🟢 V2 + новый OG live. Title meta «AI-native GTM agency», og-image hero-style (heavy serif + top-left soundbar logo). Telegram preview обновлён (description + image оба V2-aligned). main и production выровнены.**
 
-**2026-05-01 evening — релиз состоялся:**
+**2026-05-04→05 — финальный пуш позиционирования и превью:**
+- og-image v3 пересобран: hero-bg-magenta-green backdrop + heavy SouvenirGothic Bold headline во всю ширину + Logo Mark (6-ellipse soundbar) + wordmark top-left
+- Title metadata swap: «A strategic brand growth agency» → «AI-native GTM agency» (title / og:title / twitter:title)
+- metadataBase = `new URL("https://backspaceoddity.com")` — og:image теперь резолвится на canonical-домен, не preview
+- Generation script `scripts/build-og-image.py` коммичен — repeatable через `python3 scripts/build-og-image.py`
+- 5 PR'ов через feature-branch flow: #5 metadataBase, #7 og v3 first-pass, #8 main↔production sync, #9 og v3 heavy + title, #10 sync
+- Branch-aware post-observe hook landed в SB утром 2026-05-05 (advisor-relayed BSO-31, status: resolved)
+
+**Открытые follow-ups (не блокеры):**
+1. **Option C из global CLAUDE.md** — Vercel Production Branch всё ещё = `main`, не `production`. Сейчас main↔production sync через PR'ы работает; Option C завершит сделать push в production = автодеплой live (без manual promote). См. global CLAUDE.md «Push-to-main = Production Publish».
+2. **BSO-326** — install pre-push hook в BSO Website repo per CLAUDE.md doctrine (drift найден advisor'ом 2026-05-01).
+
+---
+
+**Earlier 2026-05-01 (вечер — V2 RELEASED):**
+- Yegor отключил Vercel Authentication на project-level (`backspace-oddity` → Project Settings → Deployment Protection → Disabled)
+- backspaceoddity.com → HTTP 200, public, V2 контент
+
+---
+
+**Earlier 2026-05-01 (afternoon — V2 deploy debugging):**
 - Yegor отключил Vercel Authentication на project-level (`backspace-oddity` → Project Settings → Deployment Protection → Disabled)
 - `curl -I https://backspaceoddity.com` → 200 + `x-vercel-cache: HIT`, нет `_vercel_sso_nonce` cookie
 - Hero копи V2 в HTML («GTM strategy is not a set of tactics across channels…»)
