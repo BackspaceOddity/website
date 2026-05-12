@@ -146,3 +146,5 @@
 [2026-05-01 18:36] Edit → app/layout.tsx
 [2026-05-04 12:03] Edit → .gitignore
 [2026-05-12 21:39] Edit → .gitignore
+[2026-05-12 21:52] Edit → src/index.html
+[2026-05-12 21:52] Edit → app/page.tsx
