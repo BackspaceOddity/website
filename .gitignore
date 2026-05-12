@@ -5,6 +5,7 @@ node_modules/
 bugs/
 .project-journal/.session-*
 .project-journal/.last-wrap-*
+.project-journal/.wrap-warned-*
 .project-journal/sessions/*-yegorkorobeynikov.md
 
 # Next.js
