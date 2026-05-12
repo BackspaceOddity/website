@@ -411,7 +411,7 @@ export default function HomePage() {
               <EditableText id="member.yegor.role">Founder & CEO</EditableText>
             </div>
             <p className="member__bio">
-              <EditableText id="member.yegor.bio">{`Brand, GTM, marketing, product. Ran the RealtimeBoard → Miro rebrand and led Miro's in-house brand studio. Marketing lead at Sidekick Browser. Runs the Superabundance venture studio.`}</EditableText>
+              <EditableText id="member.yegor.bio">{`Brand, GTM, marketing, product. Led the RealtimeBoard → Miro rebrand and in-house brand studio. Was in charge of marketing at Sidekick Browser (acquired by Perplexity, now Comet). Co-founded Superabundance, a venture studio for AI startups.`}</EditableText>
             </p>
           </article>
 
