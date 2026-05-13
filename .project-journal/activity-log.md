@@ -148,3 +148,9 @@
 [2026-05-12 21:39] Edit → .gitignore
 [2026-05-12 21:52] Edit → src/index.html
 [2026-05-12 21:52] Edit → app/page.tsx
+[2026-05-13 17:47] Edit → .gitignore
+[2026-05-13 22:44] Write → bso-eesti-prototype.html
+[2026-05-13 22:57] Edit → bso-eesti-prototype.html
+[2026-05-13 22:58] Edit → bso-eesti-prototype.html
+[2026-05-13 23:03] Edit → src/css/fonts.css
+[2026-05-13 23:03] Edit → src/css/variables.css
