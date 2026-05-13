@@ -72,3 +72,24 @@ Default conversation language: **Russian**. User-facing responses по-русс�
 **НЕ использовать для:** копирайтинга — copy и structure НИКОГДА не из Magic, они из `bso-positioning-framework-v1` и BRIEF. Magic выдаёт визуальные обёртки, не контент. Также не трогать deploy-пайплайн (отдельные Vercel + branch-protection правила в global CLAUDE.md — push в main = production publish, hard-rule).
 
 **Tracking:** [BSO-252](https://linear.app/backspace-oddity/issue/BSO-252).
+
+## Analytics
+
+This site uses Rybbit analytics. The tracking script must be present in the `<head>` of every page.
+
+**Tracking snippet:**
+```html
+<script
+    src="https://app.rybbit.io/api/script.js"
+    data-site-id="41dafd61e53c"
+    defer
+></script>
+```
+
+**Where it lives:** `app/layout.tsx` — injected via Next.js `<Script>` from `next/script` with `strategy="afterInteractive"` (semantic equivalent of `defer`, with proper App Router integration so the script isn't re-executed on client-side navigation). Because this is the **root layout** of the App Router, every page in `app/**/page.tsx` inherits it automatically.
+
+**When creating new pages:** nothing to do. Any new `page.tsx` placed anywhere under `app/` (including nested routes and route groups) is automatically wrapped by `app/layout.tsx` and will load the script. **Exception:** if you ever introduce a competing root layout inside a route group that defines its own `<html>` tag (e.g. `app/(marketing)/layout.tsx` with `<html>`), you must copy the `<Script>` block there too, or the tracker will be missing for routes in that group.
+
+**Subdomains:** each subdomain (e.g. `blog.backspaceoddity.com`, `app.backspaceoddity.com`) is a separate origin from Rybbit's perspective. Two options: (a) register each subdomain as its own site in Rybbit and use a distinct `data-site-id` per app, or (b) register a single Rybbit site configured to accept all `*.backspaceoddity.com` origins and reuse the same `data-site-id`. Choose (a) when you want isolated dashboards per property; choose (b) for one unified funnel across the whole brand.
+
+Do not remove this script or this section without explicit user confirmation.
