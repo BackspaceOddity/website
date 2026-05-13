@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EB_Garamond } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { EditModeShell } from "@/components/EditModeShell";
 
@@ -42,6 +43,11 @@ export default function RootLayout({
     <html lang="en" className={ebGaramond.variable}>
       <body>
         <EditModeShell>{children}</EditModeShell>
+        <Script
+          src="https://app.rybbit.io/api/script.js"
+          data-site-id="41dafd61e53c"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
