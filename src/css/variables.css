@@ -5,9 +5,9 @@
   --color-dark-green: #011C00;
   --color-black: #000000;
 
-  /* Typography — Headings (SouvenirGothic) */
-  --font-heading: 'SouvenirGothic', Georgia, serif;
-  --font-body: 'EB Garamond', Georgia, serif;
+  /* Typography — GT Eesti experiment (swap back: SouvenirGothic + EB Garamond) */
+  --font-heading: 'GT Eesti Pro Display', system-ui, sans-serif;
+  --font-body: 'GT Eesti Pro Text', system-ui, sans-serif;
 
   /* Font sizes */
   --text-hero: 160px;
