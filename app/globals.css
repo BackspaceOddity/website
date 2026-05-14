@@ -31,6 +31,15 @@
   font-weight: 700; font-style: normal; font-display: swap;
 }
 
+/* ---------- GT Eesti Pro (system-installed) ---------- */
+@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Regular");       font-weight: 400; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Medium");        font-weight: 500; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Bold");          font-weight: 700; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-RegularItalic"); font-weight: 400; font-style: italic;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-Regular");          font-weight: 400; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-Medium");           font-weight: 500; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-RegularItalic");    font-weight: 400; font-style: italic;  font-display: swap; }
+
 /* ---------- Tokens ---------- */
 :root {
   --color-cream:       #F5F2E9;
@@ -39,8 +48,9 @@
   --color-dark-green:  #011C00;
   --color-black:       #000000;
 
-  --font-display: "SouvenirGothic", "Young Serif", Georgia, serif;
-  --font-text:    "EB Garamond", Georgia, "Times New Roman", serif;
+  /* GT Eesti experiment — revert: "SouvenirGothic"... / "EB Garamond"... */
+  --font-display: "GT Eesti Pro Display", system-ui, sans-serif;
+  --font-text:    "GT Eesti Pro Text",    system-ui, sans-serif;
 
   --size-hero:      160px;
   --size-section:   80px;
