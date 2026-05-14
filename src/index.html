@@ -13,9 +13,6 @@
 <meta name="twitter:description" content="GTM strategy is not a set of tactics across channels. We build the system underneath — audience, jobs, context, competition, fit — that makes the channels worth running.">
 <meta name="twitter:image" content="https://www.backspaceoddity.com/assets/images/og-image-v2.jpg">
 <link rel="icon" type="image/svg+xml" href="assets/images/Logo Mark.svg?v=2">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    Backspace Oddity — V2 homepage
@@ -23,32 +20,15 @@
    Copy: Notion landing skeleton (locked 2026-04-22 → 04-29).
    ============================================================ */
 
-/* ---------- Fonts ---------- */
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("assets/fonts/SouvenirGothic-Regular.otf") format("opentype");
-  font-weight: 400; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("assets/fonts/SouvenirGothic-Italic.otf") format("opentype");
-  font-weight: 400; font-style: italic; font-display: swap;
-}
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("assets/fonts/SouvenirGothic-Medium.otf") format("opentype");
-  font-weight: 500; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("assets/fonts/SouvenirGothic-DemiBoldItalic.otf") format("opentype");
-  font-weight: 600; font-style: italic; font-display: swap;
-}
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("assets/fonts/SouvenirGothic_Bold.otf") format("opentype");
-  font-weight: 700; font-style: normal; font-display: swap;
-}
+/* ---------- Fonts — GT Eesti Pro (self-hosted) ---------- */
+@font-face { font-family: "GT Eesti Pro Display"; src: url("assets/fonts/GTEestiProDisplay-Regular.ttf")       format("truetype"); font-weight: 400; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: url("assets/fonts/GTEestiProDisplay-Medium.ttf")        format("truetype"); font-weight: 500; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: url("assets/fonts/GTEestiProDisplay-Bold.ttf")          format("truetype"); font-weight: 700; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: url("assets/fonts/GTEestiProDisplay-RegularItalic.ttf") format("truetype"); font-weight: 400; font-style: italic;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: url("assets/fonts/GTEestiProText-Regular.ttf")          format("truetype"); font-weight: 400; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: url("assets/fonts/GTEestiProText-Medium.ttf")           format("truetype"); font-weight: 500; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: url("assets/fonts/GTEestiProText-Bold.ttf")             format("truetype"); font-weight: 700; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: url("assets/fonts/GTEestiProText-RegularItalic.ttf")    format("truetype"); font-weight: 400; font-style: italic;  font-display: swap; }
 
 /* ---------- Tokens ---------- */
 :root {
@@ -58,8 +38,8 @@
   --color-dark-green:  #011C00;
   --color-black:       #000000;
 
-  --font-display: "SouvenirGothic", "Young Serif", Georgia, serif;
-  --font-text:    "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-display: "GT Eesti Pro Display", system-ui, sans-serif;
+  --font-text:    "GT Eesti Pro Text",    system-ui, sans-serif;
 
   --size-hero:      160px;
   --size-section:   80px;

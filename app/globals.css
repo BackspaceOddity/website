@@ -4,41 +4,15 @@
    Copy: Notion landing skeleton (locked 2026-04-22 → 04-29).
    ============================================================ */
 
-/* ---------- Fonts ---------- */
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("/fonts/SouvenirGothic-Regular.otf") format("opentype");
-  font-weight: 400; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("/fonts/SouvenirGothic-Italic.otf") format("opentype");
-  font-weight: 400; font-style: italic; font-display: swap;
-}
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("/fonts/SouvenirGothic-Medium.otf") format("opentype");
-  font-weight: 500; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("/fonts/SouvenirGothic-DemiBoldItalic.otf") format("opentype");
-  font-weight: 600; font-style: italic; font-display: swap;
-}
-@font-face {
-  font-family: "SouvenirGothic";
-  src: url("/fonts/SouvenirGothic_Bold.otf") format("opentype");
-  font-weight: 700; font-style: normal; font-display: swap;
-}
-
-/* ---------- GT Eesti Pro (system-installed) ---------- */
-@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Regular");       font-weight: 400; font-style: normal;  font-display: swap; }
-@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Medium");        font-weight: 500; font-style: normal;  font-display: swap; }
-@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Bold");          font-weight: 700; font-style: normal;  font-display: swap; }
-@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-RegularItalic"); font-weight: 400; font-style: italic;  font-display: swap; }
-@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-Regular");          font-weight: 400; font-style: normal;  font-display: swap; }
-@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-Medium");           font-weight: 500; font-style: normal;  font-display: swap; }
-@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-RegularItalic");    font-weight: 400; font-style: italic;  font-display: swap; }
+/* ---------- Fonts — GT Eesti Pro (self-hosted) ---------- */
+@font-face { font-family: "GT Eesti Pro Display"; src: url("/fonts/GTEestiProDisplay-Regular.ttf")       format("truetype"); font-weight: 400; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: url("/fonts/GTEestiProDisplay-Medium.ttf")        format("truetype"); font-weight: 500; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: url("/fonts/GTEestiProDisplay-Bold.ttf")          format("truetype"); font-weight: 700; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: url("/fonts/GTEestiProDisplay-RegularItalic.ttf") format("truetype"); font-weight: 400; font-style: italic;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: url("/fonts/GTEestiProText-Regular.ttf")          format("truetype"); font-weight: 400; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: url("/fonts/GTEestiProText-Medium.ttf")           format("truetype"); font-weight: 500; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: url("/fonts/GTEestiProText-Bold.ttf")             format("truetype"); font-weight: 700; font-style: normal;  font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: url("/fonts/GTEestiProText-RegularItalic.ttf")    format("truetype"); font-weight: 400; font-style: italic;  font-display: swap; }
 
 /* ---------- Tokens ---------- */
 :root {
@@ -48,7 +22,6 @@
   --color-dark-green:  #011C00;
   --color-black:       #000000;
 
-  /* GT Eesti experiment — revert: "SouvenirGothic"... / "EB Garamond"... */
   --font-display: "GT Eesti Pro Display", system-ui, sans-serif;
   --font-text:    "GT Eesti Pro Text",    system-ui, sans-serif;
 
