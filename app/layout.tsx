@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
-import { EB_Garamond } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { EditModeShell } from "@/components/EditModeShell";
-
-const ebGaramond = EB_Garamond({
-  variable: "--font-eb-garamond",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://backspaceoddity.com"),
@@ -40,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={ebGaramond.variable}>
+    <html lang="en">
       <body>
         <EditModeShell>{children}</EditModeShell>
         <Script
