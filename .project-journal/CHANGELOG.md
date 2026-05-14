@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-05-15 — GT Eesti Pro font swap complete + Yegor bio update
+
+**What happened:**
+- Continued from previous context-compacted session. Two tasks completed across sessions.
+- **Bio update**: Yegor's bio updated in `src/index.html` and `app/page.tsx` from canonical `yegor-bio.md` (confirmed 2026-05-12). Text: "Brand, GTM, marketing, product. Led the RealtimeBoard → Miro rebrand and in-house brand studio. Was in charge of marketing at Sidekick Browser (acquired by Perplexity, now Comet). Co-founded Superabundance, a venture studio for AI startups." Commit `92d553d`.
+- **Font swap**:
+  - Replaced SouvenirGothic (headings) + EB Garamond (body) with GT Eesti Pro Display / Text
+  - 8 TTF files self-hosted in `public/fonts/` and `src/assets/fonts/` (Display: Regular/Medium/Bold/Italic, Text: same)
+  - `app/globals.css`: removed SouvenirGothic @font-face, added GT Eesti Pro @font-face via `url()`, updated `--font-display` / `--font-text` CSS vars
+  - `src/index.html`: removed Google Fonts Garamond `<link>`, added GT Eesti Pro @font-face via local `assets/fonts/` urls
+  - **Root fix**: `app/layout.tsx` — removed `EB_Garamond` import from `next/font/google` and `className={ebGaramond.variable}` on `<html>`. The Next.js font pipeline was overriding our @font-face. Commit `e1c2b03`.
+  - Deployed to Vercel production (dpl_4NCybyi4iTbCJJ9HYoMjgUmqSNR1, READY). Preview URL confirmed GT Eesti Pro in CSS.
+  - `backspaceoddity.com` serving stale CDN cache at session end (age 28h) — expected to clear within 30 min.
+
+**Decisions made:**
+- Full font replacement (both Display for headings + Text for body), not partial
+- Self-hosted via `url()` in @font-face, not `local()` (ensures all visitors see fonts, not just machines with fonts installed)
+- Remove `next/font/google` import entirely — mixing Next.js font pipeline with custom @font-face is conflicting by design
+
+**Errors encountered:**
+- `next/font/google` EB Garamond import in `layout.tsx` was invisible root cause — CSS looked correct, font files deployed, but Next.js still injected Garamond CSS via its own pipeline. Took deploy + CDN check + CSS inspection to identify.
+- Vercel edge cache (`x-vercel-cache: HIT`, `age: 102364`) can serve stale build for 30+ min after new READY deploy — confirmed via `curl -sI`.
+
+**Result:**
+- GT Eesti Pro Display + Text deployed and verified on preview URL
+- Bio live in production
+
+---
+
 ## 2026-05-04 → 2026-05-05 — og-image v3 (heavy + top-left logo) + AI-native GTM title swap
 
 **What happened:**
@@ -311,3 +340,11 @@ Cross-project work из SB session — Yegor visit'нул что live = V1 не�
 ### 2026-05-13 — orphan session rolled up (PID no longer alive)
 
 - Timeline file `2026-05-13-1745-3044-yegorkorobeynikov.md` had 0 user prompts, 11 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-14 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-13-2304-7075-yegorkorobeynikov.md` had 0 user prompts, 7 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-14 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-14-1950-59693-yegorkorobeynikov.md` had 7 user prompts, 55 tool calls, 0 errors. Full raw log has been deleted (retention policy).

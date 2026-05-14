@@ -18,6 +18,10 @@
 
 ## Errors & Fixes
 
+- **[2026-05-15] `next/font/google` blocks self-hosted @font-face** — Fix: remove the `next/font/google` (or `next/font/local`) import from `layout.tsx` entirely when switching to self-hosted fonts via CSS @font-face. Root cause: Next.js font pipeline injects its own `<style>` and `className` on `<html>` which overrides `globals.css` declarations at a higher specificity level. Symptoms: CSS variables point to correct font names, font files serve 200 OK, but browser still renders the Next.js-managed font.
+
+- **[2026-05-15] Vercel CDN edge cache lag after new deployment** — Stale HTML served at production domain for 30+ min after new READY deploy despite `cache-control: max-age=0, must-revalidate`. Evidence: `x-vercel-cache: HIT`, `age: 102364`. Confirmation method: `curl -sI https://<domain>` — compare `age` value or check the preview deployment URL directly (`https://<deployment-id>-<org>.vercel.app`) which bypasses CDN cache.
+
 - **Edit tool "File has not been read yet"** — Fix: always call Read on the file (even just 1-3 lines around the target) before calling Edit. Root cause: Edit tool tracks whether Read was called in the session.
 - **`git add` with unlink warnings** — "unable to unlink tmp_obj" warnings during `git add` in mounted filesystem. Non-fatal, staging still works. Root cause: filesystem permissions on mount.
 
