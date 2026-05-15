@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  trailingSlash: true,
   async rewrites() {
     return [
       {
-        source: "/ai-skills",
+        source: "/ai-skills/",
         destination: "https://ai-skills-landing-wheat.vercel.app/",
       },
       {
