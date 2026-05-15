@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description:
     "GTM strategy is not a set of tactics across channels. We build the system underneath — audience, jobs, context, competition, fit — that makes the channels worth running.",
   openGraph: {
+    type: "website",
+    url: "https://backspaceoddity.com",
     title: "Backspace Oddity — AI-native GTM agency",
     description:
       "GTM strategy is not a set of tactics across channels. We build the system underneath — audience, jobs, context, competition, fit — that makes the channels worth running.",
