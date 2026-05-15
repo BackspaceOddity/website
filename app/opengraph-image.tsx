@@ -68,8 +68,8 @@ export default async function Image() {
           >
             {/* BSO logo mark — white fill */}
             <svg
-              width="48"
-              height="48"
+              width="72"
+              height="72"
               viewBox="0 0 268 268"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +86,7 @@ export default async function Image() {
                 display: "flex",
                 color: "#FDFBF4",
                 fontFamily: "GTEestiPro",
-                fontSize: 28,
+                fontSize: 38,
                 fontWeight: 700,
                 letterSpacing: "-0.01em",
               }}
