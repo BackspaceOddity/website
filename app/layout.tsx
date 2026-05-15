@@ -14,14 +14,12 @@ export const metadata: Metadata = {
     title: "Backspace Oddity — AI-native GTM agency",
     description:
       "GTM strategy is not a set of tactics across channels. We build the system underneath — audience, jobs, context, competition, fit — that makes the channels worth running.",
-    images: ["/images/og-image-v3.jpg"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Backspace Oddity — AI-native GTM agency",
     description:
       "GTM strategy is not a set of tactics across channels. We build the system underneath — audience, jobs, context, competition, fit — that makes the channels worth running.",
-    images: ["/images/og-image-v3.jpg"],
   },
   icons: {
     icon: "/images/Logo Mark.svg",
