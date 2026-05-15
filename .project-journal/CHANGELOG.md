@@ -1,5 +1,76 @@
 # Changelog
 
+## 2026-05-15 — GT Eesti Pro font swap complete + Yegor bio update
+
+**What happened:**
+- Continued from previous context-compacted session. Two tasks completed across sessions.
+- **Bio update**: Yegor's bio updated in `src/index.html` and `app/page.tsx` from canonical `yegor-bio.md` (confirmed 2026-05-12). Text: "Brand, GTM, marketing, product. Led the RealtimeBoard → Miro rebrand and in-house brand studio. Was in charge of marketing at Sidekick Browser (acquired by Perplexity, now Comet). Co-founded Superabundance, a venture studio for AI startups." Commit `92d553d`.
+- **Font swap**:
+  - Replaced SouvenirGothic (headings) + EB Garamond (body) with GT Eesti Pro Display / Text
+  - 8 TTF files self-hosted in `public/fonts/` and `src/assets/fonts/` (Display: Regular/Medium/Bold/Italic, Text: same)
+  - `app/globals.css`: removed SouvenirGothic @font-face, added GT Eesti Pro @font-face via `url()`, updated `--font-display` / `--font-text` CSS vars
+  - `src/index.html`: removed Google Fonts Garamond `<link>`, added GT Eesti Pro @font-face via local `assets/fonts/` urls
+  - **Root fix**: `app/layout.tsx` — removed `EB_Garamond` import from `next/font/google` and `className={ebGaramond.variable}` on `<html>`. The Next.js font pipeline was overriding our @font-face. Commit `e1c2b03`.
+  - Deployed to Vercel production (dpl_4NCybyi4iTbCJJ9HYoMjgUmqSNR1, READY). Preview URL confirmed GT Eesti Pro in CSS.
+  - `backspaceoddity.com` serving stale CDN cache at session end (age 28h) — expected to clear within 30 min.
+
+**Decisions made:**
+- Full font replacement (both Display for headings + Text for body), not partial
+- Self-hosted via `url()` in @font-face, not `local()` (ensures all visitors see fonts, not just machines with fonts installed)
+- Remove `next/font/google` import entirely — mixing Next.js font pipeline with custom @font-face is conflicting by design
+
+**Errors encountered:**
+- `next/font/google` EB Garamond import in `layout.tsx` was invisible root cause — CSS looked correct, font files deployed, but Next.js still injected Garamond CSS via its own pipeline. Took deploy + CDN check + CSS inspection to identify.
+- Vercel edge cache (`x-vercel-cache: HIT`, `age: 102364`) can serve stale build for 30+ min after new READY deploy — confirmed via `curl -sI`.
+
+**Result:**
+- GT Eesti Pro Display + Text deployed and verified on preview URL
+- Bio live in production
+
+---
+
+## 2026-05-04 → 2026-05-05 — og-image v3 (heavy + top-left logo) + AI-native GTM title swap
+
+**What happened:**
+- Telegram link preview surfaced two metadata bugs after V2 release: og:image URL pointed to `backspace-oddity.vercel.app` (preview-домен), и сама картинка показывала V1 brand-thesis копи («Brand is not what you look like»), не текущий GTM-thesis hero.
+- PR #5 (metadataBase fix): added `metadataBase: new URL("https://backspaceoddity.com")` в `app/layout.tsx`. og:image теперь резолвится на canonical-домен.
+- PR #7 (og-image v3 first-pass): replaced V1 brand-thesis image с composite на сайтовой палитре — hero-bg-magenta-green backdrop + SouvenirGothic Medium headline + text wordmark top-right. cairosvg fallback из-за отсутствия libcairo на macOS — Logo Mark icon потерян на этом этапе, заменён на text-only wordmark.
+- PR #9 (og-image v3 heavy + title swap): redesigned per Yegor's pushback — heavy SouvenirGothic Bold headline во всю ширину, Logo Mark (6-ellipse soundbar) восстановлен top-left через native Pillow draw (без cairo deps), wordmark рядом two-line stack. Title metadata «A strategic brand growth agency» → «AI-native GTM agency» — applied к title / og:title / twitter:title (alignment с current GTM-thesis hero + canonical positioning category в [[bso-positioning-framework-v1]] §1).
+- PR #8, #10 — main ← production sync (8 commits backported).
+- `scripts/build-og-image.py` коммичен как repeatable generator.
+- Telegram cache eventually обновился сам после двух WebpageBot refresh (description + image обе V2-aligned в финальном превью).
+
+**Decisions made:**
+- og-image versioning через filename suffix (v2 → v3), не через query-param. Cache-bust по URL надёжнее (Telegram CDN держит image cache отдельно от metadata refresh).
+- Logo Mark отрисован native через `ImageDraw.ellipse()` из bbox-координат SVG paths — без cairosvg / svglib / external rasterizer. Fallback path documented.
+- Title swap landed в одном PR с heavy og-image — концептуально связаны (оба части GTM-thesis era cleanup от brand-thesis legacy).
+
+**Errors / learnings:**
+- cairosvg / resvg-py / svglib — все требуют либо native libcairo (которого нет в default macOS) либо отдельные deps. Native Pillow + manual SVG path bbox extraction оказался самым надёжным для simple geometric SVG.
+- Pre-push hook + branch model: pre-push блокирует direct push в production; правильный flow = feature branch + PR + merge. Cycle: branch → push → `gh pr create` → `gh pr merge --merge --delete-branch` за минуту.
+- Telegram CDN holds image cache separately from preview metadata. WebpageBot refresh обновляет text сразу, картинку — может не сразу. Решение: либо подождать, либо cache-bust через filename change.
+
+**Result:**
+- og-image-v3.jpg live на canonical-домене
+- og:title, twitter:title, page title — все «AI-native GTM agency»
+- Telegram-preview соответствует текущему позиционированию + hero копи
+- main и production выровнены (no drift)
+
+---
+
+## 2026-05-01 (вечер) — V2 РЕЛИЗ: backspaceoddity.com public
+
+**What happened:**
+- Yegor вручную в Vercel UI отключил Deployment Protection (Project Settings → Vercel Authentication: Disabled) на проекте `backspace-oddity`. Auth wall снят.
+- Verify: `curl -I https://backspaceoddity.com` → 200 + `x-vercel-cache: HIT`. Cookie `_vercel_sso_nonce` исчез. V2 hero копи + Three Layers + /_next chunks — всё рендерится.
+- Релиз закрыт **без push'а в код** — только UI-toggle. После недели V2-deploy debugging это самый дешёвый exit.
+
+**Decision:** релиз через manual UI toggle, не API. После 2026-05-01 afternoon learning «team-level setting перебивает project-level PATCH» оказалось — реальный путь это project-level UI Disabled.
+
+**Open follow-ups (вошли в STATE.md):** Option C completion — Vercel Production Branch → `production`.
+
+---
+
 ## 2026-04-22 → 2026-04-23 — V2 content rebuild: skeleton + audit + hero locked
 
 **What happened:**
@@ -239,14 +310,41 @@ Cross-project work из SB session — Yegor visit'нул что live = V1 не�
 
 - Timeline file `2026-05-01-1451-82400-yegorkorobeynikov.md` had 6 user prompts, 29 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
-### 2026-05-05 — orphan session rolled up (PID no longer alive)
+### 2026-05-12 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-05-04-1718-19043-yegorkorobeynikov.md` had 6 user prompts, 35 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-05-12-2137-2423-yegorkorobeynikov.md` had 1 user prompts, 27 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
-### 2026-05-05 — orphan session rolled up (PID no longer alive)
+### 2026-05-12 — orphan session rolled up (PID no longer alive)
 
-- Timeline file `2026-05-05-1113-45605-yegorkorobeynikov.md` had 1 user prompts, 11 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Timeline file `2026-05-12-2141-3431-yegorkorobeynikov.md` had 4 user prompts, 50 tool calls, 0 errors. Full raw log has been deleted (retention policy).
 
-### 2026-05-05 — orphan session rolled up (PID no longer alive)
+### 2026-05-04 — session timeline rolled up (7-day retention)
 
-- Timeline file `2026-05-05-1113-45605-yegorkorobeynikov.md` had 1 user prompts, 11 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+- Session file `2026-05-04-1228-1-yegorkorobeynikov.md` summarised: 2 user prompts, 0
+0 tool calls, 0
+0 errors, 0
+0 intent markers. Raw file deleted per retention policy.
+
+### 2026-05-13 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-13-0853-21788-yegorkorobeynikov.md` had 1 user prompts, 14 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-13 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-13-0853-21788-yegorkorobeynikov.md` had 1 user prompts, 14 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-13 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-13-1745-3044-yegorkorobeynikov.md` had 0 user prompts, 11 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-13 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-13-1745-3044-yegorkorobeynikov.md` had 0 user prompts, 11 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-14 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-13-2304-7075-yegorkorobeynikov.md` had 0 user prompts, 7 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-14 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-14-1950-59693-yegorkorobeynikov.md` had 7 user prompts, 55 tool calls, 0 errors. Full raw log has been deleted (retention policy).

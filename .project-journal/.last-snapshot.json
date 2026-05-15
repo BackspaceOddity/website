@@ -1,6 +1,6 @@
 {
-  "last_session_at": "2026-05-08T08:18:04",
-  "global_claude_md_hash": "6079a7a99b1ab9702732b41765cb26dae9edf7afcc2278a8bb2f0931301f2db4",
+  "last_session_at": "2026-05-12T22:09:08",
+  "global_claude_md_hash": "90443a364f32b73150e34ba7dc7e0e30f9d7f3c824a3de0c8421c5114b23890f",
   "global_claude_md_sections": [
     "Architectural fixes over patches — MANDATORY",
     "Architectural-claim provenance — MANDATORY",
@@ -14,6 +14,8 @@
     "Critical thinking & no-bullshit — MANDATORY",
     "Data-derived numerical claims in client deliverables — MANDATORY same-turn pipeline run",
     "Dead-End Protocol — MANDATORY",
+    "Hook message authoring — MANDATORY (prevent autonomous agent execution)",
+    "Language rule — MANDATORY (BSO English, personal Russian)",
     "Learning & Error Log — MANDATORY",
     "Linear Issue Lookup — MANDATORY",
     "Linear Task Dispatch — MANDATORY (AI-native)",
@@ -27,6 +29,7 @@
     "Secret Handling — MANDATORY (NEVER request secrets in chat)",
     "Self-QA — MANDATORY",
     "Session End — MANDATORY",
+    "Session Naming Convention — MANDATORY",
     "Session Start — MANDATORY",
     "Subagent / Task Tool Rule",
     "UI / Visual Hierarchy Rule",

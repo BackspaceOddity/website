@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BSO — GT Eesti Pro prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+<style>
+/* ─── GT Eesti Pro (system-installed) ─── */
+@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Regular");   font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Medium");    font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-Bold");      font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Display"; src: local("GTEestiProDisplay-RegularItalic"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-Regular");      font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-Medium");       font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "GT Eesti Pro Text";    src: local("GTEestiProText-RegularItalic");font-weight: 400; font-style: italic; font-display: swap; }
+
+/* ─── SouvenirGothic (current site) ─── */
+@font-face { font-family: "SouvenirGothic"; src: url("/fonts/SouvenirGothic-Regular.otf")         format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "SouvenirGothic"; src: url("/fonts/SouvenirGothic-Italic.otf")          format("opentype"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "SouvenirGothic"; src: url("/fonts/SouvenirGothic-Medium.otf")          format("opentype"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "SouvenirGothic"; src: url("/fonts/SouvenirGothic-DemiBoldItalic.otf")  format("opentype"); font-weight: 600; font-style: italic; font-display: swap; }
+@font-face { font-family: "SouvenirGothic"; src: url("/fonts/SouvenirGothic_Bold.otf")            format("opentype"); font-weight: 700; font-style: normal; font-display: swap; }
+
+/* ─── A/B switcher ─── */
+:root {
+  --display-font-EESTI:    "GT Eesti Pro Display", system-ui, sans-serif;
+  --display-font-SOUVENIR: "SouvenirGothic", "Young Serif", Georgia, serif;
+  --text-font-EESTI:       "GT Eesti Pro Text", system-ui, sans-serif;
+  --text-font-SOUVENIR:    "EB Garamond", Georgia, "Times New Roman", serif;
+
+  /* active selection — toggled by JS */
+  --font-display: var(--display-font-EESTI);
+  --font-text:    var(--text-font-EESTI);
+
+  /* site tokens (verbatim from globals.css) */
+  --color-cream:       #F5F2E9;
+  --color-cream-soft:  #EFECE3;
+  --color-ivory:       #FDFBF4;
+  --color-dark-green:  #011C00;
+  --color-black:       #000000;
+
+  --size-hero:     160px;
+  --size-section:  80px;
+  --size-job:      48px;
+  --size-card:     32px;
+  --size-body-lg:  28px;
+  --size-body:     24px;
+  --size-small:    16px;
+
+  --track-display: -0.03em;
+  --track-hero:    -0.02em;
+  --track-text:    -0.02em;
+
+  --radius-block: 22px;
+  --radius-card:  12px;
+
+  --page-max:     1440px;
+  --pad-outer:    20px;
+  --pad-content:  80px;
+
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ─── Switcher bar ─── */
+#switcher {
+  position: fixed;
+  top: 16px; left: 50%; transform: translateX(-50%);
+  z-index: 9999;
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(1,28,0,0.88);
+  backdrop-filter: blur(12px);
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-size: 13px; color: #F5F2E9;
+  font-family: system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+#switcher span { opacity: 0.55; }
+#switcher button {
+  background: none; border: none; cursor: pointer;
+  font-family: system-ui, sans-serif;
+  font-size: 13px; letter-spacing: 0.02em;
+  padding: 4px 14px; border-radius: 999px;
+  color: #F5F2E9; opacity: 0.6;
+  transition: opacity 160ms, background 160ms;
+}
+#switcher button.active {
+  background: rgba(245,242,233,0.15);
+  opacity: 1;
+}
+
+/* ─── Site styles (verbatim globals.css) ─── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--color-cream);
+  color: var(--color-dark-green);
+  font-family: var(--font-text);
+  font-size: var(--size-body);
+  line-height: 1.12;
+  letter-spacing: var(--track-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+p { margin: 0; }
+
+.page {
+  width: 100%; max-width: var(--page-max);
+  margin: 0 auto; padding: 0 var(--pad-outer);
+  display: flex; flex-direction: column; gap: 20px;
+}
+
+section { scroll-margin-top: 80px; }
+
+/* Nav */
+.nav {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  padding: 28px 0 24px; gap: 40px;
+}
+.nav__logo {
+  display: flex; flex-direction: row; align-items: flex-start;
+  gap: 14px;
+  font-family: var(--font-display);
+  font-weight: 700; font-size: 22px;
+  line-height: 0.9; letter-spacing: -0.02em;
+}
+.nav__logo-mark { width: 44px; height: 44px; flex-shrink: 0; }
+.nav__logo-text { display: flex; flex-direction: column; align-items: flex-start; }
+.nav__logo-text span { display: block; }
+.nav__right {
+  display: flex; gap: 80px;
+  font-family: var(--font-text);
+  font-size: var(--size-small); line-height: 1.3;
+}
+.nav__block-label { display: block; opacity: 0.55; margin-bottom: 2px; }
+.nav__block a:hover { text-decoration: underline; }
+
+/* Hero */
+.hero {
+  position: relative; border-radius: var(--radius-block);
+  overflow: hidden; background: var(--color-dark-green);
+  color: var(--color-ivory); min-height: 85vh;
+  padding: 120px var(--pad-content) 100px;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center; isolation: isolate;
+}
+.hero__bg {
+  position: absolute; inset: 0;
+  background-image: url("/images/hero-bg-magenta-green.png");
+  background-size: cover; background-position: center; z-index: 0;
+}
+.hero__bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 55%, rgba(1,28,0,0) 0%, rgba(1,28,0,0.15) 55%, rgba(1,28,0,0.45) 100%);
+}
+.hero__inner {
+  position: relative; z-index: 1;
+  max-width: 1200px; width: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 40px;
+}
+.hero__title {
+  margin: 0; font-family: var(--font-display);
+  font-weight: 700; font-size: clamp(44px, 7vw, 104px);
+  line-height: 0.92; letter-spacing: var(--track-hero);
+  text-wrap: balance; color: var(--color-ivory);
+}
+.hero__sub {
+  max-width: 900px; font-family: var(--font-text);
+  font-size: clamp(25px, 2.6vw, 36px); line-height: 1.18;
+  letter-spacing: var(--track-text);
+  color: color-mix(in oklch, var(--color-ivory) 82%, transparent);
+  text-wrap: pretty;
+}
+.hero__cta {
+  margin-top: 48px; display: inline-block;
+  font-family: var(--font-text); font-weight: 500;
+  font-size: 26px; letter-spacing: 0.02em;
+  color: var(--color-ivory); position: relative;
+  padding: 6px 0; transition: transform 220ms var(--ease-standard);
+}
+.hero__cta::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1px; background: currentColor;
+  transform: scaleX(0.25); transform-origin: left;
+  opacity: 0.5; transition: transform 280ms var(--ease-standard), opacity 280ms var(--ease-standard);
+}
+.hero__cta:hover { transform: scale(1.02); }
+.hero__cta:hover::after { transform: scaleX(1); opacity: 1; }
+.hero__cta-arrow { margin-left: 8px; display: inline-block; transition: transform 220ms var(--ease-standard); }
+.hero__cta:hover .hero__cta-arrow { transform: translateX(4px); }
+
+/* Layers */
+.layers { background: var(--color-cream); padding: 140px var(--pad-content) 120px; }
+.layers__inner { max-width: 1200px; }
+.layers__head { max-width: 880px; margin-bottom: 96px; display: flex; flex-direction: column; gap: 28px; }
+.layers__eyebrow {
+  font-family: var(--font-text); font-style: italic;
+  font-size: 20px; letter-spacing: 0.02em;
+  color: color-mix(in oklch, var(--color-dark-green) 55%, transparent);
+}
+.layers__intro {
+  font-family: var(--font-text); font-size: 28px;
+  line-height: 1.4; color: color-mix(in oklch, var(--color-dark-green) 78%, transparent);
+  text-wrap: pretty; margin: 0; max-width: 780px;
+}
+.layers__list {
+  list-style: none; margin: 0;
+  padding: 56px 0 0;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 56px;
+  border-top: 1px solid color-mix(in oklch, var(--color-dark-green) 18%, transparent);
+}
+.layer { display: flex; flex-direction: column; gap: 24px; align-items: start; }
+.layer__num {
+  font-family: var(--font-text); font-style: italic;
+  font-size: 16px; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--color-dark-green) 50%, transparent);
+}
+.layer__body { display: flex; flex-direction: column; gap: 14px; align-items: start; }
+.layer__name {
+  margin: 0; font-family: var(--font-display);
+  font-weight: 700; font-size: clamp(32px, 2.6vw, 44px);
+  line-height: 0.95; letter-spacing: var(--track-hero);
+  color: var(--color-dark-green);
+}
+.layer__lead {
+  margin: 0; font-family: var(--font-text);
+  font-style: italic; font-size: 24px; line-height: 1.3;
+  color: color-mix(in oklch, var(--color-dark-green) 70%, transparent);
+}
+.layer__body-text {
+  margin: 8px 0 0; font-family: var(--font-text);
+  font-size: 22px; line-height: 1.45;
+  color: color-mix(in oklch, var(--color-dark-green) 88%, transparent);
+  text-wrap: pretty;
+}
+
+/* Work */
+.work { padding: 160px var(--pad-content) 120px; background: var(--color-cream); }
+.work__head { margin-bottom: 56px; max-width: 1200px; }
+.section-h2 {
+  margin: 0; font-family: var(--font-display);
+  font-weight: 700; font-size: clamp(48px, 7vw, var(--size-section));
+  line-height: 0.88; letter-spacing: var(--track-display);
+  color: var(--color-dark-green); text-wrap: balance;
+}
+.work__head .section-h2 { font-size: clamp(36px, 4.5vw, 56px); line-height: 1.0; }
+.work__grid { display: grid; gap: 20px; }
+.work__row { display: grid; gap: 20px; height: 300px; }
+.work__row--60-40 { grid-template-columns: 3fr 2fr; }
+.work__row--50-50 { grid-template-columns: 1fr 1fr; }
+.work__row--40-60 { grid-template-columns: 2fr 3fr; }
+.card {
+  position: relative; border-radius: var(--radius-card);
+  overflow: hidden; background: var(--color-dark-green);
+  color: var(--color-ivory); display: block;
+  isolation: isolate; height: 100%;
+}
+.card__backdrop {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  transition: transform 700ms var(--ease-standard); display: block;
+}
+.card:hover .card__backdrop { transform: scale(1.04); }
+.card__shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%);
+  z-index: 1; pointer-events: none;
+}
+.card__title {
+  position: absolute; left: 28px; bottom: 24px;
+  margin: 0; font-family: var(--font-display);
+  font-weight: 700; font-size: var(--size-card);
+  line-height: 0.9; letter-spacing: var(--track-display);
+  color: var(--color-ivory); z-index: 3;
+  max-width: calc(100% - 56px); text-wrap: balance;
+}
+.card__overlay {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; align-items: center;
+  padding: 32px 40px 80px;
+  background: linear-gradient(to bottom, rgba(1,18,0,0.94) 0%, rgba(1,18,0,0.97) 100%);
+  opacity: 0; transition: opacity 320ms var(--ease-standard); pointer-events: none;
+}
+.card:hover .card__overlay, .card:focus-visible .card__overlay { opacity: 1; }
+.card__description {
+  margin: 0; font-family: var(--font-text);
+  font-size: 19px; line-height: 1.3;
+  color: var(--color-ivory); max-width: 560px; text-wrap: pretty;
+}
+.card__role {
+  display: block; margin-top: 10px;
+  font-style: italic; font-size: 15px; line-height: 1.2;
+  color: color-mix(in oklch, var(--color-ivory) 78%, transparent);
+}
+
+/* Jobs */
+.jobs { padding: 140px var(--pad-content) 140px; background: var(--color-cream); }
+.jobs__head { margin-bottom: 80px; max-width: 900px; }
+.jobs__intro {
+  margin-top: 28px; font-family: var(--font-text);
+  font-size: var(--size-body-lg); line-height: 1.2;
+  color: color-mix(in oklch, var(--color-dark-green) 70%, transparent);
+}
+.jobs__list { display: flex; flex-direction: column; }
+.job {
+  display: grid; grid-template-columns: 60px 1fr;
+  gap: 40px; padding: 56px 0;
+  border-top: 1px solid color-mix(in oklch, var(--color-dark-green) 18%, transparent);
+}
+.job:last-child { border-bottom: 1px solid color-mix(in oklch, var(--color-dark-green) 18%, transparent); }
+.job__num {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 22px; line-height: 1; padding-top: 14px;
+  color: color-mix(in oklch, var(--color-dark-green) 55%, transparent);
+  letter-spacing: 0.02em;
+}
+.job__body { display: flex; flex-direction: column; gap: 24px; }
+.job__headline {
+  margin: 0; font-family: var(--font-text);
+  font-weight: 500; font-size: clamp(24px, 2.8vw, 36px);
+  line-height: 1.2; letter-spacing: var(--track-text);
+  color: var(--color-dark-green); text-wrap: balance; max-width: 1040px;
+}
+
+/* How */
+.how {
+  position: relative; border-radius: var(--radius-block);
+  background: var(--color-dark-green); color: var(--color-ivory);
+  padding: 140px var(--pad-content) 140px;
+  overflow: hidden; isolation: isolate;
+}
+.how::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(248,191,88,0.12), transparent 60%),
+              radial-gradient(circle at 15% 80%, rgba(30,132,237,0.10), transparent 55%);
+  z-index: 0; pointer-events: none;
+}
+.how__inner { position: relative; z-index: 1; }
+.how__head { margin-bottom: 24px; max-width: 900px; color: var(--color-ivory); }
+.how__intro {
+  max-width: 880px; margin-bottom: 96px;
+  font-family: var(--font-text); font-style: italic;
+  font-size: 28px; line-height: 1.4;
+  color: color-mix(in oklch, var(--color-ivory) 78%, transparent); text-wrap: pretty;
+}
+.how__principles {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 60px; padding-bottom: 96px;
+  border-bottom: 1px solid color-mix(in oklch, var(--color-ivory) 25%, transparent);
+}
+.principle__headline {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: var(--size-card); line-height: 1.0;
+  letter-spacing: var(--track-hero); margin: 0 0 24px;
+  color: var(--color-ivory); text-wrap: balance;
+}
+.principle__body {
+  font-family: var(--font-text); font-size: 24px;
+  line-height: 1.4; color: color-mix(in oklch, var(--color-ivory) 85%, transparent);
+  text-wrap: pretty;
+}
+.how__phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; padding-top: 72px; }
+.phase { display: flex; flex-direction: column; gap: 16px; }
+.phase__num {
+  font-family: var(--font-text); font-style: italic;
+  font-size: 16px; color: color-mix(in oklch, var(--color-ivory) 55%, transparent);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.phase__name {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 26px; line-height: 1.0;
+  letter-spacing: var(--track-hero); color: var(--color-ivory); margin: 0;
+}
+.phase__body {
+  font-family: var(--font-text); font-size: 24px;
+  line-height: 1.4; color: color-mix(in oklch, var(--color-ivory) 80%, transparent);
+}
+
+/* Team */
+.team { padding: 160px var(--pad-content) 140px; background: var(--color-cream); }
+.team__head { max-width: 1100px; margin-bottom: 40px; }
+.team__intro {
+  max-width: 760px; margin-top: 40px;
+  display: flex; flex-direction: column; gap: 18px;
+  font-family: var(--font-text); font-size: 25px;
+  line-height: 1.25; color: var(--color-dark-green);
+}
+.team__grid {
+  margin-top: 96px; display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 80px 60px; max-width: 1100px;
+}
+.member { display: flex; flex-direction: column; }
+.member__photo {
+  aspect-ratio: 1 / 1; width: 88px; border-radius: 50%;
+  background-color: color-mix(in oklch, var(--color-dark-green) 85%, var(--color-cream));
+  background-size: cover; background-position: center;
+  margin-bottom: 24px;
+  transition: transform 400ms var(--ease-standard), box-shadow 400ms var(--ease-standard);
+}
+.member:hover .member__photo { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.member__name {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 26px; line-height: 1.0;
+  letter-spacing: var(--track-hero); color: var(--color-dark-green); margin: 0 0 6px;
+}
+.member__role {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: 15px; text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: color-mix(in oklch, var(--color-dark-green) 55%, transparent);
+  margin-bottom: 14px;
+}
+.member__bio {
+  font-family: var(--font-text); font-size: 22px;
+  line-height: 1.45;
+  color: color-mix(in oklch, var(--color-dark-green) 85%, transparent);
+  max-width: 480px;
+}
+
+/* Final CTA */
+.final {
+  position: relative; border-radius: var(--radius-block);
+  background:
+    radial-gradient(ellipse 90% 70% at 70% 20%, rgba(190,90,200,0.55), transparent 60%),
+    radial-gradient(ellipse 80% 80% at 20% 80%, rgba(40,140,90,0.6), transparent 65%),
+    linear-gradient(135deg, var(--color-black) 0%, #0a2a1c 50%, #1a0c2c 100%);
+  color: var(--color-ivory);
+  padding: 180px var(--pad-content) 180px;
+  overflow: hidden; isolation: isolate; text-align: center;
+}
+.final::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.25), transparent 70%);
+  z-index: 0; pointer-events: none;
+}
+.final__inner {
+  position: relative; z-index: 1; max-width: 860px;
+  margin: 0 auto; display: flex; flex-direction: column;
+  align-items: center; gap: 32px;
+}
+.final__h2 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(40px, 5vw, 72px); line-height: 1.0;
+  letter-spacing: var(--track-hero); color: var(--color-ivory);
+  margin: 0; text-wrap: balance;
+}
+.final__copy {
+  font-family: var(--font-text); font-size: 28px;
+  line-height: 1.25;
+  color: color-mix(in oklch, var(--color-ivory) 90%, transparent);
+  max-width: 720px; text-wrap: pretty;
+}
+.final__cta {
+  margin-top: 24px; display: inline-flex;
+  align-items: center; gap: 10px;
+  font-family: var(--font-text); font-weight: 600;
+  font-size: 24px; letter-spacing: 0.01em;
+  color: var(--color-dark-green); background: var(--color-ivory);
+  padding: 18px 40px; border-radius: 999px;
+  transition: transform 220ms var(--ease-standard), background 220ms var(--ease-standard), box-shadow 220ms var(--ease-standard);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+}
+.final__cta:hover { background: var(--color-cream); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
+.final__email {
+  font-family: var(--font-text); font-size: 19px;
+  color: color-mix(in oklch, var(--color-ivory) 60%, transparent);
+  transition: color 200ms var(--ease-standard);
+}
+.final__email:hover { color: var(--color-ivory); text-decoration: underline; }
+
+/* Insights */
+.insights { background: var(--color-cream-soft); padding: 44px var(--pad-content); text-align: center; border-radius: var(--radius-block); }
+.insights__text {
+  font-family: var(--font-text); font-size: 22px;
+  line-height: 1.2; letter-spacing: -0.01em;
+  color: color-mix(in oklch, var(--color-dark-green) 70%, transparent);
+}
+
+/* Footer */
+.footer {
+  padding: 80px var(--pad-content) 60px;
+  border-top: 1px solid color-mix(in oklch, var(--color-dark-green) 10%, transparent);
+  display: grid; grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 60px; font-family: var(--font-text);
+  font-size: 21px; line-height: 1.4; color: var(--color-dark-green);
+}
+.footer__logo {
+  display: flex; flex-direction: row; align-items: flex-start;
+  gap: 14px; font-family: var(--font-display);
+  font-weight: 700; font-size: 24px;
+  line-height: 0.9; letter-spacing: -0.02em; margin-bottom: 14px;
+}
+.footer__logo-mark { width: 44px; height: 44px; flex-shrink: 0; }
+.footer__logo-text { display: block; }
+.footer__copy { color: color-mix(in oklch, var(--color-dark-green) 65%, transparent); }
+.footer__nav { display: flex; flex-direction: column; gap: 8px; }
+.footer__nav a:hover { text-decoration: underline; }
+.footer__col-label {
+  display: block; font-style: italic;
+  color: color-mix(in oklch, var(--color-dark-green) 55%, transparent);
+  margin-bottom: 10px;
+}
+.footer__contact { display: flex; flex-direction: column; gap: 8px; }
+
+@media (max-width: 1024px) {
+  :root { --pad-content: 40px; }
+  .work__row { height: 300px; }
+  .team__grid { gap: 60px 40px; }
+}
+@media (max-width: 768px) {
+  :root { --pad-content: 24px; }
+  .nav { flex-direction: column; gap: 20px; padding: 24px var(--pad-content) 16px; }
+  .nav__right { flex-direction: column; gap: 12px; }
+  .hero { padding: 100px 24px 80px; min-height: 78vh; }
+  .hero__title { font-size: 44px; line-height: 0.96; }
+  .hero__sub { font-size: 22px; }
+  .work, .jobs, .team, .layers { padding: 100px 24px 80px; }
+  .layers__list { grid-template-columns: 1fr; gap: 40px; padding-top: 40px; }
+  .layer__name { font-size: 28px; }
+  .work__grid { grid-template-columns: 1fr; }
+  .work__row { grid-template-columns: 1fr !important; height: auto; }
+  .work__row .card { height: 260px; }
+  .job { grid-template-columns: 1fr; gap: 20px; padding: 40px 0; }
+  .job__num { padding-top: 0; }
+  .job__headline { font-size: 22px; line-height: 1.25; }
+  .how { padding: 100px 24px; }
+  .how__principles, .how__phases { grid-template-columns: 1fr; gap: 48px; padding-bottom: 56px; padding-top: 56px; }
+  .team__grid { grid-template-columns: 1fr; gap: 60px; margin-top: 60px; }
+  .final { padding: 120px 24px 120px; }
+  .footer { grid-template-columns: 1fr; gap: 40px; padding: 60px 24px 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- A/B switcher -->
+<div id="switcher">
+  <span>Display font:</span>
+  <button id="btn-eesti"    class="active" onclick="setFont('eesti')">GT Eesti Pro</button>
+  <button id="btn-souvenir"             onclick="setFont('souvenir')">SouvenirGothic</button>
+</div>
+
+<div class="page">
+
+  <!-- NAV -->
+  <nav class="nav" aria-label="Primary">
+    <a href="#top" class="nav__logo" aria-label="Backspace Oddity">
+      <img class="nav__logo-mark" src="/images/Logo Mark.svg" alt="" aria-hidden="true" />
+      <span class="nav__logo-text">
+        <span>Backspace</span>
+        <span>Oddity</span>
+      </span>
+    </a>
+    <div class="nav__right">
+      <div class="nav__block">
+        <span class="nav__block-label">Contact us:</span>
+        <a href="mailto:yegor@backspaceoddity.com">yegor@backspaceoddity.com</a>
+        <div><a href="https://cal.com/krbnkv/30min">Book a call</a></div>
+      </div>
+      <div class="nav__block">
+        <span class="nav__block-label">Office:</span>
+        <div>Vijzelstraat 68-78</div>
+        <div>1017 ES Amsterdam</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="hero__inner">
+      <h1 class="hero__title">GTM strategy is not a set of tactics across channels</h1>
+      <p class="hero__sub">It's what channels execute — who your audience is, the job they need done, the context they're buying in, who you compete with there, and why you fit best.</p>
+      <a class="hero__cta" href="https://cal.com/krbnkv/30min">
+        Book a call
+        <span class="hero__cta-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- THREE LAYERS -->
+  <section class="layers" id="approach">
+    <div class="layers__inner">
+      <header class="layers__head">
+        <span class="layers__eyebrow">What we mean by GTM strategy</span>
+        <h2 class="section-h2">Three layers under every channel that actually runs</h2>
+        <p class="layers__intro">Strategy without operationalisation drifts in a quarter. Channels without strategy underneath burn budget without compounding. We work the gap between the two — three layers, in this order.</p>
+      </header>
+      <ol class="layers__list">
+        <li class="layer">
+          <div class="layer__num">01</div>
+          <div class="layer__body">
+            <h3 class="layer__name">Strategy</h3>
+            <p class="layer__lead">Which battles to fight.</p>
+            <p class="layer__body-text">Underserved jobs, ICP, positioning, narrative, the messaging architecture that makes a stranger pick you on the second meeting. The decisions every channel runs on, whether you've made them explicitly or not.</p>
+          </div>
+        </li>
+        <li class="layer">
+          <div class="layer__num">02</div>
+          <div class="layer__body">
+            <h3 class="layer__name">Tactics</h3>
+            <p class="layer__lead">How to run them.</p>
+            <p class="layer__body-text">PR, cold outreach, advertising, content, partnerships, events — the moves you make, paired with the channels they live in: LinkedIn, email, podcasts, paid, owned. Category Entry Points are the lens that pulls all of this into one coherent GTM.</p>
+          </div>
+        </li>
+        <li class="layer">
+          <div class="layer__num">03</div>
+          <div class="layer__body">
+            <h3 class="layer__name">Creative execution</h3>
+            <p class="layer__lead">Making it ship — without the headcount bottleneck.</p>
+            <p class="layer__body-text">Strategy lands as a deck. Then channels have to learn it, ship it, and repeat it across hundreds of touchpoints — stuck waiting on a creative team that can't scale. AI-native production turns site, content, campaigns, and sales collateral from headcount-bound projects into a system that ships daily and compounds with every release.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="work" id="work">
+    <header class="work__head">
+      <h2 class="section-h2">Companies we've worked with</h2>
+    </header>
+    <div class="work__grid">
+      <div class="work__row work__row--60-40">
+        <a class="card" href="https://miro.com" target="_blank" rel="noopener">
+          <img class="card__backdrop" src="/images/project-miro.webp" alt="" loading="lazy" style="object-position:50% 25%;" />
+          <div class="card__shade"></div>
+          <div class="card__overlay">
+            <p class="card__description">From RealtimeBoard to Miro: new name, identity, and brand architecture. Then an in-house studio built to keep the brand running, not just documented — so any internal request could close with the same predictability, without heroics. Path to a $17.5B valuation followed.<span class="card__role">Our role — full rebrand + in-house studio setup.</span></p>
+          </div>
+          <h3 class="card__title">Rebrand: from RealtimeBoard to Miro (in-house)</h3>
+        </a>
+        <a class="card" href="#">
+          <img class="card__backdrop" src="/images/project-sidekick.webp" alt="" loading="lazy" />
+          <div class="card__shade"></div>
+          <div class="card__overlay">
+            <p class="card__description">Product repositioning and category creation: the productivity browser as a distinct class for power users. Acquired by Perplexity in 2025, relaunched as Comet Browser.<span class="card__role">Our role — product repositioning, category creation.</span></p>
+          </div>
+          <h3 class="card__title">Sidekick Browser (in-house)</h3>
+        </a>
+      </div>
+      <div class="work__row work__row--50-50">
+        <a class="card" href="#">
+          <img class="card__backdrop" src="/images/project-global-payroll.webp" alt="" loading="lazy" />
+          <div class="card__shade"></div>
+          <div class="card__overlay">
+            <p class="card__description">Cross-border employment is a category of compliance nightmares and lookalike brands. A new name, positioning, and identity gave this platform a reason to be chosen side-by-side.<span class="card__role">Our role — brand strategy, renaming, positioning, identity, agentic workflows.</span></p>
+          </div>
+          <h3 class="card__title">Global Payroll Platform</h3>
+        </a>
+        <a class="card" href="#">
+          <img class="card__backdrop" src="/images/project-film.webp" alt="" loading="lazy" />
+          <div class="card__shade"></div>
+          <div class="card__overlay">
+            <p class="card__description">Stage-gate architecture for content-IP investment decisions. Every experiment doesn't just test one hypothesis — it updates the whole map.<span class="card__role">Our role — governance model + Cascade Navigation System (v5.1 origin).</span></p>
+          </div>
+          <h3 class="card__title">AI-native Film Production Company</h3>
+        </a>
+      </div>
+      <div class="work__row work__row--40-60">
+        <a class="card" href="#">
+          <img class="card__backdrop" src="/images/project-wayfund.webp" alt="" loading="lazy" />
+          <div class="card__shade"></div>
+          <div class="card__overlay">
+            <p class="card__description">Customer development, market opportunity mapping, product development, and agentic workflows for an AI-powered platform helping EU SMEs find and access government funding.<span class="card__role">Our role — customer development, market mapping, product, agentic workflows.</span></p>
+          </div>
+          <h3 class="card__title">Wayfund</h3>
+        </a>
+        <a class="card" href="#">
+          <img class="card__backdrop" src="/images/project-superabundance.webp" alt="" loading="lazy" style="object-position:50% 8%;" />
+          <div class="card__shade"></div>
+          <div class="card__overlay">
+            <p class="card__description">A studio running multiple portfolio companies at once needed a shared methodology for when to push, when to kill, and when to hand off.<span class="card__role">Our role — market-product fit methodology + agentic workflows + brand identity + positioning + website.</span></p>
+          </div>
+          <h3 class="card__title">Superabundance</h3>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOBS -->
+  <section class="jobs" id="jobs">
+    <header class="jobs__head">
+      <h2 class="section-h2">The jobs we close</h2>
+      <p class="jobs__intro">Pick the one that matches where you are</p>
+    </header>
+    <div class="jobs__list">
+      <article class="job"><div class="job__num">01</div><div class="job__body"><h3 class="job__headline">Move upmarket to enterprise buyers — when our brand still signals "scrappy startup"</h3></div></article>
+      <article class="job"><div class="job__num">02</div><div class="job__body"><h3 class="job__headline">Outpace competitors in a highly competitive market</h3></div></article>
+      <article class="job"><div class="job__num">03</div><div class="job__body"><h3 class="job__headline">Operationalise strategy into a system that runs daily</h3></div></article>
+      <article class="job"><div class="job__num">04</div><div class="job__body"><h3 class="job__headline">Treat every launch as hypotheses we test, not as a plan we execute until we die</h3></div></article>
+      <article class="job"><div class="job__num">05</div><div class="job__body"><h3 class="job__headline">Turn "become AI-native" from wishful thinking into workflows the team actually runs daily</h3></div></article>
+    </div>
+  </section>
+
+  <!-- HOW WE WORK -->
+  <section class="how" id="how">
+    <div class="how__inner">
+      <header class="how__head">
+        <h2 class="section-h2" style="color:var(--color-ivory);">How we work</h2>
+      </header>
+      <p class="how__intro">We're an AI-native agency. Strategy is a human call. The execution layer — research, drafts, repeat work — runs on AI. That split shapes the three principles below.</p>
+      <div class="how__principles">
+        <div class="principle">
+          <h3 class="principle__headline">We embed GTM engineers, not consultants</h3>
+          <p class="principle__body">One of us is in your team full-time — in the room, in the standup, shipping alongside. We treat GTM as infrastructure, not a deck: versioned, tested, propagated across surfaces in code.</p>
+        </div>
+        <div class="principle">
+          <h3 class="principle__headline">We build navigation, not strategy documents</h3>
+          <p class="principle__body">Every plan we leave you with behaves like a map: each result redraws the whole chart, not just the current heading. When reality diverges, the team updates the map — no re-plan from scratch.</p>
+        </div>
+        <div class="principle">
+          <h3 class="principle__headline">When we leave, the system keeps running</h3>
+          <p class="principle__body">The last thing we build is the thing that runs without us. AI-native workflows and the navigation live in your team's week — not in our shared Notion. Transfer is the deliverable, not an afterthought.</p>
+        </div>
+      </div>
+      <div class="how__phases">
+        <div class="phase"><div class="phase__num">Phase 01</div><h4 class="phase__name">Map</h4><p class="phase__body">We embed, learn your production cycle, name the breakpoints, build the hypothesis graph.</p></div>
+        <div class="phase"><div class="phase__num">Phase 02</div><h4 class="phase__name">Build</h4><p class="phase__body">Together we design the new processes, the navigation system, the AI-native infrastructure. Weekly cycles. Stage-gates. Confidence × Opportunity scoring.</p></div>
+        <div class="phase"><div class="phase__num">Phase 03</div><h4 class="phase__name">Transfer</h4><p class="phase__body">The system starts running without us. We tune, we document, we hand over. When we step back, the team doesn't miss a beat.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="team" id="team">
+    <header class="team__head">
+      <h2 class="section-h2">We've done this before. At companies you've heard of</h2>
+      <div class="team__intro">
+        <p>Built by people who've shipped brands and products at Miro, Sidekick Browser, Meta, McKinsey, R/GA, Metalab, Stink Studios, Your Majesty, ONY, and Action.</p>
+        <p>We stay small on purpose. An AI-native stack lets us take on the volume that used to need thirty people.</p>
+      </div>
+    </header>
+    <div class="team__grid">
+      <article class="member">
+        <div class="member__photo" role="img" aria-label="Yegor Korobeynikov" style="background-image:url('/images/Yegor Korobeynikov.webp');"></div>
+        <h3 class="member__name">Yegor Korobeynikov</h3>
+        <div class="member__role">Founder &amp; CEO</div>
+        <p class="member__bio">Brand, GTM, marketing, product. Led the RealtimeBoard → Miro rebrand and in-house brand studio. Was in charge of marketing at Sidekick Browser (acquired by Perplexity, now Comet). Co-founded Superabundance.</p>
+      </article>
+      <article class="member">
+        <div class="member__photo" role="img" aria-label="Anna Barinova" style="background-image:url('/images/Anna Barinova.webp');"></div>
+        <h3 class="member__name">Anna Barinova</h3>
+        <div class="member__role">Product Lead</div>
+        <p class="member__bio">Leads product. Shipped 50+ products from zero, built cross-functional processes in teams of 35+, and architected design systems scaled across products with up to 14M MAU.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final" id="contact">
+    <div class="final__inner">
+      <h2 class="final__h2">What's something that prevents you from moving the needle?</h2>
+      <p class="final__copy">You show us the problem. We tell you where we'd start, and whether we're the right fit. If not, we'll point you at someone who is.</p>
+      <a class="final__cta" href="https://cal.com/krbnkv/30min">Book a call →</a>
+      <a class="final__email" href="mailto:yegor@backspaceoddity.com">yegor@backspaceoddity.com</a>
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <aside class="insights">
+    <p class="insights__text">We write about strategy systems on Substack. Launching soon.</p>
+  </aside>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>
+      <div class="footer__logo">
+        <img class="footer__logo-mark" src="/images/Logo Mark.svg" alt="" aria-hidden="true" />
+        <span class="footer__logo-text">Backspace<br/>Oddity</span>
+      </div>
+      <div class="footer__copy">© Backspace Oddity 2026</div>
+    </div>
+    <div class="footer__nav">
+      <span class="footer__col-label">Site</span>
+      <a href="#work">Work</a>
+      <a href="#how">How we work</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="footer__contact">
+      <span class="footer__col-label">Reach us</span>
+      <a href="mailto:yegor@backspaceoddity.com">yegor@backspaceoddity.com</a>
+      <div>Amsterdam</div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+function setFont(variant) {
+  const root = document.documentElement;
+  if (variant === 'eesti') {
+    root.style.setProperty('--font-display', '"GT Eesti Pro Display", system-ui, sans-serif');
+    root.style.setProperty('--font-text',    '"GT Eesti Pro Text", system-ui, sans-serif');
+    document.getElementById('btn-eesti').classList.add('active');
+    document.getElementById('btn-souvenir').classList.remove('active');
+  } else {
+    root.style.setProperty('--font-display', '"SouvenirGothic", "Young Serif", Georgia, serif');
+    root.style.setProperty('--font-text',    '"EB Garamond", Georgia, "Times New Roman", serif');
+    document.getElementById('btn-souvenir').classList.add('active');
+    document.getElementById('btn-eesti').classList.remove('active');
+  }
+}
+</script>
+</body>
+</html>
