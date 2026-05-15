@@ -10,6 +10,10 @@ export default async function Image() {
   const fontBold = readFileSync(
     join(process.cwd(), "public/fonts/GTEestiProDisplay-Bold.ttf")
   );
+  const heroBg = readFileSync(
+    join(process.cwd(), "public/images/hero-bg-og.png")
+  );
+  const heroBgBase64 = `data:image/png;base64,${heroBg.toString("base64")}`;
 
   return new ImageResponse(
     (
@@ -18,14 +22,31 @@ export default async function Image() {
           width: "100%",
           height: "100%",
           display: "flex",
-          // Approximate the hero gradient: dark green base + green + purple orbs
-          background:
-            "radial-gradient(ellipse at 10% 90%, rgba(34,197,94,0.75) 0%, transparent 55%), " +
-            "radial-gradient(ellipse at 90% 10%, rgba(124,58,237,0.65) 0%, transparent 50%), " +
-            "radial-gradient(ellipse at 55% 55%, rgba(22,163,74,0.25) 0%, transparent 40%), " +
-            "#011C00",
+          position: "relative",
+          background: "#011C00",
         }}
       >
+        {/* Actual hero background image */}
+        <img
+          src={heroBgBase64}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+        {/* Same dark vignette overlay as on the site */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            background:
+              "radial-gradient(ellipse at 50% 55%, rgba(1,28,0,0) 0%, rgba(1,28,0,0.15) 55%, rgba(1,28,0,0.45) 100%)",
+          }}
+        />
         <div
           style={{
             display: "flex",
@@ -33,6 +54,8 @@ export default async function Image() {
             justifyContent: "space-between",
             padding: "56px 64px",
             width: "100%",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           {/* Logo: mark + wordmark */}
