@@ -1,12 +1,13 @@
 {
-  "last_session_at": "2026-05-12T22:09:08",
-  "global_claude_md_hash": "90443a364f32b73150e34ba7dc7e0e30f9d7f3c824a3de0c8421c5114b23890f",
+  "last_session_at": "2026-05-14T22:38:31",
+  "global_claude_md_hash": "c398a83cb5d75b3a0737084ec391b3e0b438444cc9e09e913b5362765172472b",
   "global_claude_md_sections": [
     "Architectural fixes over patches — MANDATORY",
     "Architectural-claim provenance — MANDATORY",
     "Auto Post-Mortem on Failure — MANDATORY",
     "BSO Canonical Positioning — required reading for ANY strategic work",
     "Before Any File Creation or Tool Pipeline — MANDATORY",
+    "CC Desktop File-Link Editing — MANDATORY",
     "Canon-grounding before domain-touching response — MANDATORY",
     "Clarifying Questions — MANDATORY",
     "Closure discipline — MANDATORY (incident 2026-04-30 BSO-187)",
@@ -41,8 +42,9 @@
     "bso-figma-mcp Rules (HARDCODED — do not reinvent)",
     "Визуальная проверка — по умолчанию, не по запросу (MANDATORY)"
   ],
-  "claude_md_hash": "018902368ff6df160394fa780bbaf7219f0c044070acd054663b756d4254bd3d",
+  "claude_md_hash": "a8c012792cbc5dffc8da088003a9fc60e1bddae299881eb354d08d16ab48a574",
   "claude_md_sections": [
+    "Analytics",
     "Autonomy (from global CLAUDE.md)",
     "Canonical sources — Notion > local (HARD RULE)",
     "Cross-project discipline (per global CLAUDE.md)",
