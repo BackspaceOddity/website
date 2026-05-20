@@ -9,10 +9,12 @@ _(picked up by next /resume — surface for re-decision or drop)_
 
 - [2026-05-01] /wrap-all session-activity-marker | context: 1 CC transcript(s) touched today. Plan-extraction not yet implemented (BSO-263). Manually inspect transcripts for unfiled approved tasks until then.
 
+- [2026-05-20 /wrap] Kleos / Stape pilot strategy | context: CC + Webflow MCP two-question assessment completed. Strategic direction: defer BSO Website Webflow migration, use Kleos as CMS-first pilot. No explicit "start building" approval — Yegor said "continue from where you left off" but didn't confirm next step on Kleos. Verify: should we kick off Kleos Webflow CMS architecture session?
+
 ## Approved, awaiting Linear filing
 _(filled only if /wrap detects approved-without-issue and fails to file — anomaly state)_
 
 - (none)
 
 ---
-_Last updated by /wrap-all on 2026-05-01._
+_Last updated by /wrap on 2026-05-20._
