@@ -1,5 +1,19 @@
 # Learnings
 
+## Session 2026-05-20 — OG image + Webflow MCP assessment
+
+[2026-05-20] [LEARN] [CROSS-PROJECT]: **next/og (Satori) has an ~8MB base64 image buffer limit.** Attempting to embed a 2800×1840 PNG (~8.3MB) as base64 in ImageResponse causes "Buffer size limit exceeded". Fix: resize to final render dimensions (1200×630) first — `sips --resampleHeightWidth 630 1200 source.png -o dest.png` on macOS. Result: 1.2MB, safely under limit. Rule: pre-resize any background image to exact OG dimensions before embedding as base64.
+
+[2026-05-20] [LEARN] [CROSS-PROJECT]: **Vercel PRERENDER cache is keyed per-route and doesn't invalidate on new deployment.** Even after a READY deployment, `curl -sI https://domain.com/opengraph-image` can return stale content. Fix: `vercel cache purge "/opengraph-image" --yes`. Applies to any route served via Vercel's prerender cache layer.
+
+[2026-05-20] [LEARN] [CROSS-PROJECT]: **next/og file convention — `app/opengraph-image.tsx`** — is the correct way to generate dynamic OG images in Next.js App Router. Exports: `alt`, `size`, `contentType`, default async function returning `ImageResponse`. No route handler needed. Font and asset loading via `readFileSync` at server time (not dynamic import). Layout metadata `openGraph.images` array should be REMOVED when using file convention — Next.js generates the meta tag automatically.
+
+[2026-05-20] [LEARN] [CROSS-PROJECT]: **Webflow MCP is API-layer only — no visual Designer access.** It can: create/update CMS items, duplicate pages, publish, inject custom code. It cannot: drag/rearrange sections in Designer, create new component structures, modify CSS visually. Marketer self-serve via CC+Webflow MCP is only viable if the site is built CMS-first (every configurable section = CMS field). Traditional Webflow builds (hardcoded Designer blocks) can't be assembled via API. This architectural decision must be made during the build phase — can't be retrofitted.
+
+[2026-05-20] [LEARN] [CROSS-PROJECT]: **Facebook OG Debugger error class: 403 on og:image vs missing optional fields.** Two distinct failure modes: (1) image returns 403 — actual broken OG, fix auth/URL. (2) missing `og:type`, `og:url`, `fb:app_id` — warnings only, don't block preview rendering. Compound problem decomposition: test the image URL directly in a browser first to confirm 200 before chasing metadata fields.
+
+[2026-05-20] [WIN] [LOCAL]: **Stash-vs-commit for project-journal files on feature branches.** When CC Desktop shows "Uncommitted changes — handle before switching to main", check if the changes are just `.project-journal/` files (STATE.md, CHANGELOG.md, .last-snapshot.json). These are safe to commit directly to the feature branch — no functional impact. `git add .project-journal/ && git commit -m "chore: flush project-journal state"` resolves the dialog without losing any work.
+
 ## What Works
 
 - **CSS subgrid for multi-column card alignment** — when card titles have variable heights, `display: grid; grid-template-rows: subgrid; grid-row: span 2` on child cards syncs row alignment across all columns. Set `row-gap` on the parent grid, not the child.
