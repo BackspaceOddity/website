@@ -1,5 +1,26 @@
 # Backspace Oddity Website — Current State
 
+**Last updated:** 2026-05-21
+**Status:** 🟢 **Mobile card overlap fix live on backspaceoddity.com. GT Eesti Pro fonts + dynamic OG image active. Branch: `main` (staging), deploy via `main → production` PR flow.**
+
+## Session summary — 2026-05-21
+
+**What was done:**
+
+1. **Mobile card layout fix (shipped to production)** — `.card__title` (absolute, bottom-left, z-index 3) was overlapping `.card__overlay` description on mobile because overlay was `opacity: 1` always (no hover on touch) with `align-items: flex-end` — both occupying the bottom zone.
+   - Fix: `align-items: flex-start`, gradient flipped `to bottom` (dark at top → description readable pinned to top), padding adjusted to 18px 20px
+   - `.card__title` stays at bottom with `.card__shade` (z-index 1, gradient `to top`) ensuring readability
+   - Also: `card { height: 280px }` (was 260px), `card__title { font-size: 22px }`, responsive fixes to `.how__head .section-h2`, `.final`, `.final__h2`
+   - New breakpoint `@media (max-width: 390px)` added for 390px phones (iPhone 14 form factor)
+
+2. **Deploy pipeline**: commit `db432f9` → PR #18 (`feat/ai-skills-proxy-rewrite → main`) → PR #19 (`main → production`) → Vercel `dpl_ExyhmH33pUGArymuiT9Rco8Z5nGD` READY
+   - Confirmed: backspaceoddity.com HTTP 200
+
+**Open items from this session:**
+- Main is ahead of origin/main by 1 commit (`d0b6ff3 wrap: 2026-05-21 — auto-batch via /wrap-all`) — push when ready
+- DECISIONS-INBOX: add typography section to `nodes/backspace-oddity-brand.md` in Second Brain (GT Eesti Pro for all, PT-Emil retired 2026-05-20)
+- BSO-232: Next.js migration finish line decision still open
+
 **Last updated:** 2026-05-20
 **Status:** 🟢 **Dynamic OG image live (GT Eesti Pro + hero-bg). Font swap confirmed. Site clean on `main`. Production deploys via `main → production` PR flow.**
 
