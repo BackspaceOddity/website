@@ -749,17 +749,30 @@ section { scroll-margin-top: 80px; }
   .layer__body-text { font-size: 17px; margin-top: 4px; }
   .work__grid { grid-template-columns: 1fr; }
   .work__row { grid-template-columns: 1fr !important; height: auto; }
-  .work__row .card { height: 260px; }
-  .card__title { font-size: 26px; left: 24px; bottom: 22px; }
-  .card__overlay { opacity: 1; background: linear-gradient(to top, rgba(1,28,0,0.92) 40%, rgba(1,28,0,0) 100%); padding: 24px; align-items: flex-end; }
-  .card__description { font-size: 15px; }
+  .work__row .card { height: 280px; }
+  .card__title { font-size: 22px; left: 20px; bottom: 18px; max-width: calc(100% - 40px); }
+
+  /* Mobile card: no hover exists, so overlay is always shown.
+     Description pinned to TOP (dark gradient from top), title stays at BOTTOM.
+     Removes the overlap where both were anchored at the bottom (z-index 3 title
+     rendered on top of z-index 2 description text). The existing .card__shade
+     (gradient to-bottom, transparent→dark) keeps the title readable at bottom. */
+  .card__overlay {
+    opacity: 1;
+    background: linear-gradient(to bottom, rgba(1,28,0,0.92) 0%, rgba(1,28,0,0.55) 45%, rgba(1,28,0,0) 100%);
+    padding: 18px 20px;
+    align-items: flex-start;
+  }
+  .card__description { font-size: 13px; line-height: 1.3; max-width: 100%; }
+  .card__role { font-size: 13px; }
+
   .job { grid-template-columns: 1fr; gap: 20px; padding: 40px 0; }
   .job__num { padding-top: 0; }
   .job__headline { font-size: 22px; line-height: 1.25; }
   .job__row { grid-template-columns: 1fr; gap: 4px; font-size: 18px; }
   .job__label { margin-top: 4px; }
   .how { padding: 100px 24px; border-radius: var(--radius-block); }
-  .how__head .section-h2 { font-size: 56px; }
+  .how__head .section-h2 { font-size: 48px; }
   .how__intro { font-size: 19px; margin-bottom: 56px; }
   .how__principles, .how__phases { grid-template-columns: 1fr; gap: 48px; padding-bottom: 56px; padding-top: 56px; }
   .principle__headline { font-size: 24px; }
@@ -767,9 +780,19 @@ section { scroll-margin-top: 80px; }
   .phase__body { font-size: 16px; }
   .team__grid { grid-template-columns: 1fr; gap: 60px; margin-top: 60px; }
   .team__intro { font-size: 19px; }
-  .final { padding: 120px 24px 120px; }
-  .final__h2 { font-size: 56px; }
+  .final { padding: 100px 24px 100px; }
+  .final__h2 { font-size: clamp(36px, 10vw, 52px); }
   .final__copy { font-size: 20px; }
   .insights { padding: 32px 24px; }
   .footer { grid-template-columns: 1fr; gap: 40px; padding: 60px 24px 40px; }
+}
+
+/* ---- Extra-small phones (≤ 390px) ---- */
+@media (max-width: 390px) {
+  .hero__title { font-size: 38px; }
+  .hero__sub   { font-size: 20px; }
+  .hero__cta   { font-size: 22px; }
+  .section-h2  { font-size: 38px; }
+  .how__head .section-h2 { font-size: 42px; }
+  .job__headline { font-size: 20px; }
 }
