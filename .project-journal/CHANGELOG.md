@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-05-20 — Dynamic OG image live + CC+Webflow strategic assessment
+
+**What happened:**
+- Created `app/opengraph-image.tsx` — next/og dynamic image with GT Eesti Pro Bold, hero-bg-og.png background (resized from 2800×1840 to 1200×630 via `sips`), BSO logo mark SVG, wordmark, 74px headline
+- `app/layout.tsx` updated: added `og:type/og:url`, removed static `images` array, let file convention handle it
+- `public/images/hero-bg-og.png` created (1.2MB, fits Satori 8MB buffer limit)
+- Removed dead SouvenirGothic `.otf` files from `public/fonts/`
+- `.gitignore` updated to include `.mcp.json`; Figma Bridge config created for BSO Website and Stape project
+- CC + Webflow MCP assessment completed for Kleos (Stape client): two strategic questions answered
+- Git working tree cleanup: project-journal files committed on `feat/ai-skills-proxy-rewrite`, pushed
+
+**Decisions made:**
+- Defer BSO Website → Webflow migration; use Kleos (Stape client) as pilot project to prove Figma→Webflow MCP workflow
+- AI-native = CC as orchestrator (Figma + Webflow + Notion via MCP), not "everything from CC"
+- OG image uses file convention (`app/opengraph-image.tsx`), not static image in layout metadata
+- `main` = staging, `production` = live — push production with `--no-verify` per user approval
+
+**Errors encountered:**
+- Satori "Buffer size limit exceeded": original hero-bg (8.3MB) too large as base64. Fix: `sips --resampleHeightWidth 630 1200` to create `hero-bg-og.png` (1.2MB)
+- Facebook OG 403: missing `og:type`/`og:url` fields (not blocking, just warnings)
+- PRERENDER cache served old OG image after deployment: `vercel cache purge "/opengraph-image" --yes` required
+- PR #15 merge conflict: `main → production` had local merge state. Resolved locally, pushed directly with `--no-verify`
+
+**Result:**
+- Dynamic OG image live at backspaceoddity.com (Facebook Debugger confirmed, only `fb:app_id` optional warning remains)
+- GT Eesti Pro font + hero-bg gradient as OG card — matches site visual identity
+- Strategic direction set for Kleos pilot
+
+---
+
 ## 2026-05-15 — GT Eesti Pro font swap complete + Yegor bio update
 
 **What happened:**
