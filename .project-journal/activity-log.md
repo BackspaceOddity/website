@@ -170,3 +170,5 @@
 [2026-05-16 00:09] Edit → next.config.ts
 [2026-05-16 00:11] Edit → next.config.ts
 [2026-05-16 00:35] Edit → next.config.ts
+[2026-05-21 01:27] Edit → app/globals.css
+[2026-05-21 01:28] Write → .claude/launch.json
