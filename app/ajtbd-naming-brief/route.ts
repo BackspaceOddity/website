@@ -5,6 +5,15 @@ const html = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  (function() {
+    var saved = localStorage.getItem('theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
 <title>Methodology — Naming</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -449,6 +458,68 @@ const html = `<!DOCTYPE html>
     text-transform: uppercase;
     color: var(--accent);
   }
+
+  /* ── Dark theme ──────────────────────────────────── */
+  html.dark {
+    --ink: #ede8e0;
+    --paper: #111010;
+    --warm-mid: #6e6258;
+    --accent: #d4562a;
+    --accent-soft: #2a1a12;
+    --rule: #2a2520;
+  }
+
+  /* Hardcoded text colors */
+  html.dark p { color: #c8c0b6; }
+  html.dark .criterion-desc { color: #9a9088; }
+  html.dark .limit-text { color: #c8c0b6; }
+  html.dark .comp-card p { color: #b8b0a6; }
+  html.dark .strategy-rationale { color: #9a9088; }
+  html.dark .positioning-text { color: #c8c0b6; }
+
+  /* Surface colors */
+  html.dark .criterion { background: #1c1916; }
+  html.dark .comp-card { background: #1c1916; }
+  html.dark .comp-card.theirs { background: #161310; }
+  html.dark .limit-row { background: #1a1210; }
+  html.dark .adjective { background: #1c1916; }
+  html.dark .strategy-card { background: #1c1916; }
+  html.dark .tov-summary { background: #1c1916; }
+
+  /* Inline background: white on section-02 arrow rows */
+  html.dark [style*="background: white"] { background: #1c1916 !important; }
+
+  /* Check section inverts to cream in dark mode — adjust text inside it */
+  html.dark .check-section p { color: #3a3530; }
+  html.dark .check-list li { color: #2a2724; }
+  html.dark .check-question { color: #2a2724; }
+  html.dark .check-note { color: #5a534c; }
+  html.dark .check-box { border-color: #9a9088; }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid var(--rule);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 17px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    z-index: 999;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    line-height: 1;
+  }
+  .theme-toggle:hover { border-color: var(--warm-mid); }
+
+  @media print { .theme-toggle { display: none; } }
 </style>
 </head>
 <body>
@@ -769,6 +840,15 @@ const html = `<!DOCTYPE html>
   <span>Working Document · Not for Publication</span>
   <span>zamesin.ru · Methodology v0.1</span>
 </div>
+
+<button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">&#x25D0;</button>
+
+<script>
+  function toggleTheme() {
+    var isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }
+</script>
 
 </body>
 </html>`;

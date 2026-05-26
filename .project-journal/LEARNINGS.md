@@ -1,5 +1,13 @@
 # Learnings
 
+## Session 2026-05-27 — standalone HTML page deployment pattern
+
+[2026-05-27] [WIN] [CROSS-PROJECT]: **Next.js route handler is the cleanest way to serve a self-contained HTML page without global layout interference.** Create `app/[slug]/route.ts` that returns `new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })`. The page completely bypasses the Next.js layout tree — no nav, no global CSS, no `<html>`/`<head>` collision. Correct pattern for standalone shareable docs, working documents, client briefs. Alternative (putting HTML in `public/`) works but gives `.html` extension in the URL unless middleware rewrites are added — route handler gives a clean slug natively.
+
+[2026-05-27] [LEARN] [CROSS-PROJECT]: **Vercel deployment list: `target: production` = serving custom domain; `target: null` = preview.** When PR `main → production` merges, Vercel creates TWO entries: (1) `target: production` built from main commit — this IS serving backspaceoddity.com; (2) `target: null` built from the production branch ref — preview only. The `target: production` one goes READY first (< 60s). Confirmed by checking `list_deployments` and seeing the `target: production` entry READY while `target: null` still BUILDING. Use this to verify live state without waiting.
+
+[2026-05-27] [LEARN] [LOCAL]: **CSS `content` property with special chars in TypeScript template literals needs Unicode escapes.** In `route.ts`, the CSS `content: '✓ resolved'` inside a backtick template literal caused a linting issue. Fix: use `content: '\\2713 resolved'` (Unicode code point for ✓). Applies to any CSS `content` value with non-ASCII characters inside JS/TS template strings.
+
 ## Session 2026-05-20 — OG image + Webflow MCP assessment
 
 [2026-05-20] [LEARN] [CROSS-PROJECT]: **next/og (Satori) has an ~8MB base64 image buffer limit.** Attempting to embed a 2800×1840 PNG (~8.3MB) as base64 in ImageResponse causes "Buffer size limit exceeded". Fix: resize to final render dimensions (1200×630) first — `sips --resampleHeightWidth 630 1200 source.png -o dest.png` on macOS. Result: 1.2MB, safely under limit. Rule: pre-resize any background image to exact OG dimensions before embedding as base64.

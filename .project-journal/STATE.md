@@ -1,5 +1,21 @@
 # Backspace Oddity Website — Current State
 
+**Last updated:** 2026-05-27
+**Status:** 🟢 **`/ajtbd-naming-brief` standalone page live on backspaceoddity.com. Ivan Zamesin naming methodology brief (EN). Route handler pattern confirmed working.**
+
+## Session summary — 2026-05-27
+
+**What was done:**
+
+1. **`/ajtbd-naming-brief` deployed to production** — translated Ivan Zamesin's naming methodology brief (RU→EN) and deployed as a standalone page on the BSO Website.
+   - Route: `app/ajtbd-naming-brief/route.ts` — Next.js route handler returning raw HTML with `Content-Type: text/html`
+   - This pattern completely bypasses the global layout/nav — correct for standalone shareable documents
+   - Flow: `feature/ajtbd-naming-brief` → [PR #20](https://github.com/BackspaceOddity/website/pull/20) → main → [PR #21](https://github.com/BackspaceOddity/website/pull/21) → production
+   - Vercel `dpl_4ESzsUMuQzXp5dshpMiRZYbbUvWi` (`target: production`, `state: READY`) confirmed serving backspaceoddity.com/ajtbd-naming-brief
+
+**Open items:**
+- `/ajtbd-naming-brief` dark theme requested by Yegor — pending
+
 **Last updated:** 2026-05-21
 **Status:** 🟢 **Mobile card overlap fix live on backspaceoddity.com. GT Eesti Pro fonts + dynamic OG image active. Branch: `main` (staging), deploy via `main → production` PR flow.**
 
