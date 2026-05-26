@@ -14,26 +14,83 @@ const html = `<!DOCTYPE html>
     }
   })();
 </script>
-<title>Methodology — Naming</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Roboto+Mono:wght@400;500&family=Roboto+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<title>Methodology — Naming Brief</title>
 <style>
+  @font-face {
+    font-family: 'GT Eesti Pro Display';
+    src: url('/fonts/GTEestiProDisplay-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'GT Eesti Pro Display';
+    src: url('/fonts/GTEestiProDisplay-RegularItalic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'GT Eesti Pro Text';
+    src: url('/fonts/GTEestiProText-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'GT Eesti Pro Text';
+    src: url('/fonts/GTEestiProText-RegularItalic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'GT Eesti Pro Text';
+    src: url('/fonts/GTEestiProText-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --ink: #0f0e0d;
-    --paper: #f5f2ee;
-    --warm-mid: #9c8b78;
-    --accent: #c2440f;
-    --accent-soft: #f0e0d8;
-    --rule: #d9d2c8;
-    --mono: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
-    --serif: 'Roboto Serif', 'New York', Georgia, serif;
-    --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    --ink: #011C00;
+    --paper: #F5F2E9;
+    --paper-soft: #EFECE3;
+    --surface: #FDFBF4;
+    --rule: rgba(1, 28, 0, 0.12);
+    --rule-strong: rgba(1, 28, 0, 0.22);
+    --ink-55: rgba(1, 28, 0, 0.55);
+    --ink-40: rgba(1, 28, 0, 0.40);
+    --ink-25: rgba(1, 28, 0, 0.25);
+    /* Tokens for text on inverted (dark-ink) surfaces — auto-flip in dark mode */
+    --on-dark-primary:    rgba(245, 242, 233, 0.92);
+    --on-dark-secondary:  rgba(245, 242, 233, 0.65);
+    --on-dark-muted:      rgba(245, 242, 233, 0.42);
+    --on-dark-border:     rgba(245, 242, 233, 0.22);
+    --display: 'GT Eesti Pro Display', system-ui, sans-serif;
+    --text:    'GT Eesti Pro Text',    system-ui, sans-serif;
+    --mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   }
 
-  html { background: var(--paper); color: var(--ink); font-family: var(--sans); }
+  html.dark {
+    --ink: #e8e2d6;
+    --paper: #0d1209;
+    --paper-soft: #111810;
+    --surface: #172014;
+    --rule: rgba(232, 226, 214, 0.12);
+    --rule-strong: rgba(232, 226, 214, 0.22);
+    --ink-55: rgba(232, 226, 214, 0.55);
+    --ink-40: rgba(232, 226, 214, 0.40);
+    --ink-25: rgba(232, 226, 214, 0.25);
+    --on-dark-primary:    rgba(13, 18, 9, 0.88);
+    --on-dark-secondary:  rgba(13, 18, 9, 0.65);
+    --on-dark-muted:      rgba(13, 18, 9, 0.42);
+    --on-dark-border:     rgba(13, 18, 9, 0.22);
+  }
+
+  html { background: var(--paper); color: var(--ink); font-family: var(--text); }
 
   body {
     max-width: 860px;
@@ -41,6 +98,7 @@ const html = `<!DOCTYPE html>
     padding: 60px 40px 100px;
   }
 
+  /* ── Header ─────────────────────────────────────── */
   .doc-header {
     display: flex;
     justify-content: space-between;
@@ -54,45 +112,54 @@ const html = `<!DOCTYPE html>
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--warm-mid);
+    color: var(--ink-40);
+  }
+  .doc-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-40);
+    margin-top: 5px;
   }
   .doc-date {
     font-family: var(--mono);
     font-size: 11px;
-    color: var(--warm-mid);
+    color: var(--ink-40);
     text-align: right;
+    line-height: 1.7;
   }
 
+  /* ── Typography ─────────────────────────────────── */
   .section-num {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 8px;
+    font-family: var(--text);
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--ink-55);
+    margin-bottom: 10px;
     display: block;
   }
   h2 {
-    font-family: var(--serif);
-    font-size: 28px;
+    font-family: var(--display);
+    font-size: 27px;
     font-weight: 400;
-    line-height: 1.15;
+    line-height: 1.18;
     margin-bottom: 20px;
-  }
-  h3 {
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
     color: var(--ink);
   }
-
+  h3 {
+    font-family: var(--text);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    color: var(--ink-55);
+  }
   p {
+    font-family: var(--text);
     font-size: 15px;
     line-height: 1.7;
-    color: #2a2724;
+    color: var(--ink);
   }
   p + p { margin-top: 12px; }
 
@@ -102,23 +169,26 @@ const html = `<!DOCTYPE html>
     margin: 48px 0;
   }
 
+  /* ── Statement / pull quote ─────────────────────── */
   .statement {
-    font-family: var(--serif);
-    font-size: 21px;
+    font-family: var(--display);
+    font-size: 20px;
     line-height: 1.55;
     font-style: italic;
     color: var(--ink);
-    border-left: 3px solid var(--accent);
+    border-left: 3px solid var(--rule-strong);
     padding-left: 24px;
     margin: 28px 0;
   }
 
+  /* ── Layout ─────────────────────────────────────── */
   .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 32px;
   }
 
+  /* ── Pills ──────────────────────────────────────── */
   .pill-group {
     display: flex;
     flex-wrap: wrap;
@@ -129,12 +199,80 @@ const html = `<!DOCTYPE html>
     font-family: var(--mono);
     font-size: 11px;
     padding: 5px 12px;
-    border: 1px solid var(--warm-mid);
+    border: 1px solid var(--rule-strong);
     border-radius: 2px;
-    color: var(--warm-mid);
+    color: var(--ink-55);
     letter-spacing: 0.04em;
   }
 
+  /* ── Emotional Job section ──────────────────────── */
+  .ba-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin: 28px 0;
+  }
+  .ba-col {
+    padding: 24px;
+    background: var(--surface);
+  }
+  .ba-col.ba-before {
+    background: var(--paper-soft);
+  }
+  .ba-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-40);
+    display: block;
+    margin-bottom: 14px;
+  }
+  .ba-core {
+    font-family: var(--display);
+    font-size: 18px;
+    line-height: 1.35;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .ba-col p {
+    font-family: var(--text);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink-55);
+  }
+  .ej-frame {
+    background: var(--ink);
+    padding: 28px 32px;
+    margin: 28px 0 20px;
+  }
+  .ej-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--on-dark-muted);
+    display: block;
+    margin-bottom: 12px;
+  }
+  .ej-frame p {
+    font-family: var(--display);
+    font-size: 21px;
+    line-height: 1.5;
+    font-style: italic;
+    color: var(--on-dark-primary);
+  }
+  .note-small {
+    font-family: var(--text);
+    font-size: 13px;
+    color: var(--ink-40);
+    font-style: italic;
+    line-height: 1.6;
+    margin-top: 4px;
+  }
+
+  /* ── Criteria grid ──────────────────────────────── */
   .criteria-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -142,27 +280,29 @@ const html = `<!DOCTYPE html>
     margin-top: 8px;
   }
   .criterion {
-    background: white;
+    background: var(--surface);
     padding: 18px 20px;
     position: relative;
   }
   .criterion-num {
     font-family: var(--mono);
     font-size: 10px;
-    color: var(--warm-mid);
+    color: var(--ink-40);
     display: block;
     margin-bottom: 6px;
   }
   .criterion-title {
+    font-family: var(--text);
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     margin-bottom: 6px;
     line-height: 1.3;
+    color: var(--ink);
   }
   .criterion-desc {
     font-size: 13px;
     line-height: 1.55;
-    color: #5a534c;
+    color: var(--ink-55);
   }
   .criterion-check {
     position: absolute;
@@ -170,40 +310,42 @@ const html = `<!DOCTYPE html>
     right: 18px;
     width: 22px;
     height: 22px;
-    border: 1.5px solid var(--rule);
+    border: 1.5px solid var(--rule-strong);
     border-radius: 2px;
   }
 
+  /* ── Hard limits ────────────────────────────────── */
   .limits {
     margin-top: 8px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
   .limit-row {
     display: flex;
     gap: 14px;
     align-items: flex-start;
     padding: 14px 16px;
-    background: #fdf6f3;
-    border-left: 3px solid var(--accent);
+    background: var(--paper-soft);
+    border-left: 3px solid var(--rule-strong);
   }
   .limit-label {
     font-family: var(--mono);
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--accent);
+    color: var(--ink-55);
     white-space: nowrap;
     padding-top: 1px;
-    min-width: 70px;
+    min-width: 90px;
   }
   .limit-text {
     font-size: 13.5px;
     line-height: 1.55;
-    color: #2a2724;
+    color: var(--ink);
   }
 
+  /* ── Comparison ─────────────────────────────────── */
   .comp-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -211,87 +353,28 @@ const html = `<!DOCTYPE html>
     margin-top: 8px;
   }
   .comp-card {
-    padding: 16px 18px;
-    background: white;
+    padding: 20px 22px;
+    background: var(--surface);
   }
   .comp-card.theirs {
-    background: #f5f2ee;
+    background: var(--paper-soft);
   }
   .comp-card-label {
     font-family: var(--mono);
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--warm-mid);
-    margin-bottom: 8px;
+    color: var(--ink-40);
+    margin-bottom: 10px;
     display: block;
   }
   .comp-card p {
-    font-size: 13px;
+    font-size: 13.5px;
     line-height: 1.6;
-    color: #3a3530;
+    color: var(--ink-55);
   }
 
-  .check-section {
-    background: var(--ink);
-    color: var(--paper);
-    padding: 36px 40px;
-    margin-top: 48px;
-  }
-  .check-section .section-num { color: #c2440f; }
-  .check-section h2 { color: var(--paper); margin-bottom: 24px; }
-  .check-section p { color: #b8b0a6; font-size: 14px; }
-  .check-list {
-    list-style: none;
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .check-list li {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    font-size: 14px;
-    line-height: 1.55;
-    color: #e8e0d6;
-  }
-  .check-box {
-    width: 20px;
-    height: 20px;
-    border: 1.5px solid #6b6560;
-    border-radius: 2px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .check-question { color: #e8e0d6; }
-  .check-note {
-    display: block;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: #7a7068;
-    margin-top: 3px;
-  }
-
-  .doc-footer {
-    margin-top: 60px;
-    padding-top: 20px;
-    border-top: 1px solid var(--rule);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .doc-footer span {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--warm-mid);
-  }
-
-  @media print {
-    body { padding: 30px; }
-    .check-section { break-inside: avoid; }
-  }
-
+  /* ── Positioning ────────────────────────────────── */
   .positioning-block {
     display: grid;
     grid-template-columns: 130px 1fr;
@@ -304,24 +387,26 @@ const html = `<!DOCTYPE html>
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--accent);
+    color: var(--ink-40);
     padding-top: 4px;
     border-top: 1px solid var(--rule);
   }
   .positioning-text {
+    font-family: var(--text);
     font-size: 15px;
     line-height: 1.65;
-    color: #2a2724;
+    color: var(--ink);
     padding: 16px 0 22px;
     border-top: 1px solid var(--rule);
   }
-  .positioning-text strong { font-weight: 600; color: var(--ink); }
+  .positioning-text strong { font-weight: 500; }
   .positioning-text em {
-    font-family: var(--serif);
+    font-family: var(--display);
     font-style: italic;
     font-size: 17px;
   }
 
+  /* ── Brand character ────────────────────────────── */
   .brand-adjectives {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -329,19 +414,20 @@ const html = `<!DOCTYPE html>
     margin-top: 8px;
   }
   .adjective {
-    background: white;
+    background: var(--surface);
     padding: 18px 14px;
     text-align: center;
+    font-family: var(--text);
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--ink);
     position: relative;
   }
   .adjective.en {
-    font-family: var(--serif);
+    font-family: var(--display);
     font-style: italic;
-    font-size: 17px;
-    color: var(--accent);
+    font-size: 16px;
+    color: var(--ink-55);
   }
   .adjective::after {
     content: '';
@@ -350,7 +436,7 @@ const html = `<!DOCTYPE html>
     right: 8px;
     width: 4px;
     height: 4px;
-    background: var(--rule);
+    background: var(--rule-strong);
     border-radius: 50%;
   }
 
@@ -368,18 +454,18 @@ const html = `<!DOCTYPE html>
     border-bottom: 1px solid var(--rule);
   }
   .brand-slider:last-child { border-bottom: none; }
-  .brand-slider-label { font-size: 13.5px; font-family: var(--sans); }
-  .brand-slider-label.active { font-weight: 600; color: var(--ink); }
-  .brand-slider-label.muted { color: var(--warm-mid); font-weight: 300; }
+  .brand-slider-label { font-family: var(--text); font-size: 13.5px; }
+  .brand-slider-label.active { font-weight: 500; color: var(--ink); }
+  .brand-slider-label.muted { color: var(--ink-40); font-weight: 400; }
   .brand-slider-label:first-child { text-align: left; }
   .brand-slider-label:last-child { text-align: right; }
   .brand-slider-track { position: relative; height: 1px; background: var(--rule); }
   .brand-slider-dot {
     position: absolute;
     top: 50%;
-    width: 11px;
-    height: 11px;
-    background: var(--accent);
+    width: 10px;
+    height: 10px;
+    background: var(--ink);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     box-shadow: 0 0 0 4px var(--paper);
@@ -388,15 +474,14 @@ const html = `<!DOCTYPE html>
     content: '';
     position: absolute;
     inset: -8px;
-    border: 1px solid var(--accent);
+    border: 1px solid var(--ink-25);
     border-radius: 50%;
-    opacity: 0.25;
   }
 
   .tov-summary {
     margin-top: 32px;
     padding: 22px 26px;
-    background: white;
+    background: var(--surface);
     border-left: 3px solid var(--ink);
   }
   .tov-summary-label {
@@ -404,28 +489,29 @@ const html = `<!DOCTYPE html>
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--warm-mid);
+    color: var(--ink-40);
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
   .tov-summary p {
-    font-family: var(--serif);
+    font-family: var(--display);
     font-size: 18px;
     line-height: 1.55;
     font-style: italic;
     color: var(--ink);
   }
 
+  /* ── Naming strategy grid ───────────────────────── */
   .strategy-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 2px;
     margin-top: 8px;
   }
   .strategy-card {
-    background: white;
+    background: var(--surface);
     padding: 22px 24px;
-    border-top: 2px solid var(--accent);
+    border-top: 2px solid var(--rule-strong);
     position: relative;
   }
   .strategy-tag {
@@ -433,20 +519,20 @@ const html = `<!DOCTYPE html>
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--warm-mid);
+    color: var(--ink-40);
     display: block;
     margin-bottom: 10px;
   }
   .strategy-decision {
-    font-family: var(--serif);
-    font-size: 20px;
-    line-height: 1.25;
+    font-family: var(--display);
+    font-size: 19px;
+    line-height: 1.3;
     color: var(--ink);
     margin-bottom: 12px;
     font-style: italic;
   }
-  .strategy-rationale { font-size: 13.5px; line-height: 1.6; color: #5a534c; }
-  .strategy-rationale strong { color: var(--ink); font-weight: 600; }
+  .strategy-rationale { font-family: var(--text); font-size: 13.5px; line-height: 1.6; color: var(--ink-55); }
+  .strategy-rationale strong { color: var(--ink); font-weight: 500; }
   .strategy-card.resolved::after {
     content: '\\2713 resolved';
     position: absolute;
@@ -456,47 +542,67 @@ const html = `<!DOCTYPE html>
     font-size: 9px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--ink-40);
   }
 
-  /* ── Dark theme ──────────────────────────────────── */
-  html.dark {
-    --ink: #ede8e0;
-    --paper: #111010;
-    --warm-mid: #6e6258;
-    --accent: #d4562a;
-    --accent-soft: #2a1a12;
-    --rule: #2a2520;
+  /* ── Inverted section (dark-ink bg) ─────────────── */
+  .check-section {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 36px 40px;
+    margin-top: 48px;
+  }
+  .check-section .section-num { color: var(--on-dark-muted); font-style: italic; }
+  .check-section h2 { color: var(--on-dark-primary); margin-bottom: 24px; }
+  .check-section p { color: var(--on-dark-secondary); font-size: 14px; }
+  .check-list {
+    list-style: none;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .check-list li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--on-dark-primary);
+  }
+  .check-box {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--on-dark-border);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .check-question { color: var(--on-dark-primary); }
+  .check-note {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--on-dark-muted);
+    margin-top: 3px;
   }
 
-  /* Hardcoded text colors */
-  html.dark p { color: #c8c0b6; }
-  html.dark .criterion-desc { color: #9a9088; }
-  html.dark .limit-text { color: #c8c0b6; }
-  html.dark .comp-card p { color: #b8b0a6; }
-  html.dark .strategy-rationale { color: #9a9088; }
-  html.dark .positioning-text { color: #c8c0b6; }
+  /* ── Footer ─────────────────────────────────────── */
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .doc-footer span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-40);
+  }
 
-  /* Surface colors */
-  html.dark .criterion { background: #1c1916; }
-  html.dark .comp-card { background: #1c1916; }
-  html.dark .comp-card.theirs { background: #161310; }
-  html.dark .limit-row { background: #1a1210; }
-  html.dark .adjective { background: #1c1916; }
-  html.dark .strategy-card { background: #1c1916; }
-  html.dark .tov-summary { background: #1c1916; }
-
-  /* Inline background: white on section-02 arrow rows */
-  html.dark [style*="background: white"] { background: #1c1916 !important; }
-
-  /* Check section inverts to cream in dark mode — adjust text inside it */
-  html.dark .check-section p { color: #3a3530; }
-  html.dark .check-list li { color: #2a2724; }
-  html.dark .check-question { color: #2a2724; }
-  html.dark .check-note { color: #5a534c; }
-  html.dark .check-box { border-color: #9a9088; }
-
-  /* Theme toggle button */
+  /* ── Theme toggle ───────────────────────────────── */
   .theme-toggle {
     position: fixed;
     bottom: 24px;
@@ -504,7 +610,7 @@ const html = `<!DOCTYPE html>
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 1.5px solid var(--rule);
+    border: 1.5px solid var(--rule-strong);
     background: var(--paper);
     color: var(--ink);
     font-size: 17px;
@@ -514,24 +620,42 @@ const html = `<!DOCTYPE html>
     justify-content: center;
     transition: border-color 0.15s, background 0.15s, color 0.15s;
     z-index: 999;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
     line-height: 1;
   }
-  .theme-toggle:hover { border-color: var(--warm-mid); }
+  .theme-toggle:hover { border-color: var(--ink-55); }
 
-  @media print { .theme-toggle { display: none; } }
+  @media print {
+    body { padding: 30px; }
+    .check-section { break-inside: avoid; }
+    .theme-toggle { display: none; }
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 32px 20px 80px; }
+    .two-col,
+    .criteria-grid,
+    .comp-row,
+    .strategy-grid,
+    .ba-grid { grid-template-columns: 1fr; }
+    .brand-adjectives { grid-template-columns: repeat(2, 1fr); }
+    .positioning-block { grid-template-columns: 1fr; }
+    .brand-slider { grid-template-columns: 90px 1fr 90px; }
+    h2 { font-size: 22px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="doc-header">
   <div>
-    <div class="doc-label">Working Document · Methodology Naming</div>
-    <div style="font-family: var(--mono); font-size: 11px; color: var(--warm-mid); margin-top: 4px;">Author: Ivan Zamesin · zamesin.ru</div>
+    <div class="doc-label">Naming Brief · A Hundred Monkeys</div>
+    <div class="doc-meta">Ivan Zamesin's Methodology · Naming strategy by Backspace Oddity</div>
   </div>
-  <div class="doc-date">Version 0.1<br>May 2026</div>
+  <div class="doc-date">Version 0.2<br>May 2026</div>
 </div>
 
+<!-- 01 ─────────────────────────────────────────────── -->
 <section>
   <span class="section-num">01 — What the Methodology Is</span>
   <h2>An Integral Algorithm for Any Product and Business Challenge</h2>
@@ -554,36 +678,68 @@ const html = `<!DOCTYPE html>
 
 <hr class="divider">
 
+<!-- 02 — NEW ─────────────────────────────────────────── -->
 <section>
-  <span class="section-num">02 — What It Does</span>
+  <span class="section-num">02 — The Emotional Job</span>
+  <h2>The Condition the Name Must Resolve</h2>
+  <p>The person who needs this methodology isn't struggling because they're not working hard enough. They're competent. They're fast. They have frameworks — JTBD, Lean, unit economics. What they lack is a system that ties these together into a sequence for their specific situation.</p>
+  <p>When asked about their deepest fear, they say "I don't know." But the fear is specific:</p>
+
+  <div class="ba-grid">
+    <div class="ba-col ba-before">
+      <span class="ba-label">Before — The Fear</span>
+      <div class="ba-core">Being the competent executor of the wrong strategy.</div>
+      <p>Working hard, moving fast — in exactly the wrong direction. Smart enough to build the machine perfectly. Not yet equipped to know which machine to build.</p>
+    </div>
+    <div class="ba-col">
+      <span class="ba-label">After — The Relief</span>
+      <div class="ba-core">"I want to be the person who sees what others miss — not through talent, but through system."</div>
+      <p>What students say after finishing the course: <em>"I exited the Matrix."</em> Not a metaphor for enlightenment. A description of finally seeing the structure beneath the noise.</p>
+    </div>
+  </div>
+
+  <div class="ej-frame">
+    <span class="ej-label">The Emotional Job</span>
+    <p>"I want to stop being the person who finds out they were wrong after it's too late to change direction."</p>
+  </div>
+
+  <p class="note-small">The name must carry this — not inspiration, not acceleration. The quiet authority of finally seeing the full board. The relief of clarity in a world of noise.</p>
+</section>
+
+<hr class="divider">
+
+<!-- 03 (was 02) ──────────────────────────────────────── -->
+<section>
+  <span class="section-num">03 — What It Does</span>
   <h2>Algorithms for Problems Previously Solved by Intuition</h2>
   <div class="two-col">
     <div>
       <h3>Problems with Algorithms</h3>
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
-        <div style="font-size: 14px; padding: 10px 14px; background: white; display: flex; gap: 10px;"><span style="font-family: var(--mono); font-size: 10px; color: var(--accent); padding-top: 2px;">→</span>Launch a product</div>
-        <div style="font-size: 14px; padding: 10px 14px; background: white; display: flex; gap: 10px;"><span style="font-family: var(--mono); font-size: 10px; color: var(--accent); padding-top: 2px;">→</span>Escape direct competition</div>
-        <div style="font-size: 14px; padding: 10px 14px; background: white; display: flex; gap: 10px;"><span style="font-family: var(--mono); font-size: 10px; color: var(--accent); padding-top: 2px;">→</span>Define positioning</div>
-        <div style="font-size: 14px; padding: 10px 14px; background: white; display: flex; gap: 10px;"><span style="font-family: var(--mono); font-size: 10px; color: var(--accent); padding-top: 2px;">→</span>Grow average order value</div>
-        <div style="font-size: 14px; padding: 10px 14px; background: white; display: flex; gap: 10px;"><span style="font-family: var(--mono); font-size: 10px; color: var(--accent); padding-top: 2px;">→</span>Improve conversion</div>
-        <div style="font-size: 14px; padding: 10px 14px; background: white; display: flex; gap: 10px;"><span style="font-family: var(--mono); font-size: 10px; color: var(--accent); padding-top: 2px;">→</span>Reduce churn</div>
-        <div style="font-size: 14px; padding: 10px 14px; background: white; display: flex; gap: 10px;"><span style="font-family: var(--mono); font-size: 10px; color: var(--accent); padding-top: 2px;">→</span>Build an acquisition channel</div>
-        <div style="font-size: 14px; padding: 10px 14px; background: white; display: flex; gap: 10px;"><span style="font-family: var(--mono); font-size: 10px; color: var(--accent); padding-top: 2px;">→</span>Scale to a new segment</div>
+        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Launch a product</div>
+        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Escape direct competition</div>
+        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Define positioning</div>
+        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Grow average order value</div>
+        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Improve conversion</div>
+        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Reduce churn</div>
+        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Build an acquisition channel</div>
+        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Scale to a new segment</div>
       </div>
     </div>
     <div>
       <h3>What You Get</h3>
-      <p style="font-size: 14px; margin-bottom: 16px;">The core feeling after mastering it:</p>
-      <div class="statement" style="font-size: 17px; margin: 0 0 16px;">From any business situation, at any moment, I will find a way out. Understand where I stand. Make an informed decision. And model the future as a set of possible outcomes of my choices.</div>
-      <p style="font-size: 13.5px; color: #5a534c; line-height: 1.65;">Clarity of position. Visibility of options. The ability to model consequences. Confidence in your choice — not as self-suggestion, but as the outcome of an algorithm you've run.</p>
+      <p style="font-size: 14px; margin-bottom: 16px; color: var(--ink-55);">The core feeling after mastering it:</p>
+      <div class="statement" style="font-size: 18px; margin: 0 0 16px;">From any business situation, at any moment, I will find a way out. Understand where I stand. Make an informed decision. And model the future as a set of possible outcomes of my choices.</div>
+      <p style="font-size: 13.5px; color: var(--ink-55); line-height: 1.65;">Clarity of position. Visibility of options. Confidence that comes not from self-suggestion, but from an algorithm you've run — and can run again. For many, this is the first time strategy and intuition finally agree.</p>
     </div>
   </div>
 </section>
 
 <hr class="divider">
 
+<!-- 04 (was 03) ──────────────────────────────────────── -->
 <section>
-  <span class="section-num">03 — What Makes It Different</span>
+  <span class="section-num">04 — What Makes It Different</span>
   <h2>Uniqueness lies not in the components — but in the fact that they're assembled together for the first time</h2>
   <div class="comp-row">
     <div class="comp-card theirs">
@@ -599,8 +755,9 @@ const html = `<!DOCTYPE html>
 
 <hr class="divider">
 
+<!-- 05 (was 04) ──────────────────────────────────────── -->
 <section>
-  <span class="section-num">04 — Positioning</span>
+  <span class="section-num">05 — Positioning</span>
   <h2>How the Methodology Occupies the Mind</h2>
   <p style="margin-bottom: 28px;">A statement for the outside world — what it is, who it's for, what makes it different. Not a marketing slogan, but the axis around which everything is built: name, packaging, education, product.</p>
   <div class="positioning-block">
@@ -629,8 +786,9 @@ const html = `<!DOCTYPE html>
 
 <hr class="divider">
 
+<!-- 06 (was 05) ──────────────────────────────────────── -->
 <section>
-  <span class="section-num">05 — Brand Character</span>
+  <span class="section-num">06 — Brand Character</span>
   <h2>What Kind of Person This Brand Would Be</h2>
   <p style="margin-bottom: 24px;">The name must convey this character — depth, seriousness, power. Not loud, not inspiring — foundational.</p>
   <h3>Eight Qualities</h3>
@@ -693,8 +851,9 @@ const html = `<!DOCTYPE html>
 
 <hr class="divider">
 
+<!-- 07 (was 06) ──────────────────────────────────────── -->
 <section>
-  <span class="section-num">06 — Naming Strategy</span>
+  <span class="section-num">07 — Naming Strategy</span>
   <h2>Four Decisions That Frame the Search for a Name</h2>
   <p style="margin-bottom: 24px;">These decisions have already been aligned. They set the direction of the search — what to look for, what to avoid, which benchmarks to aim for.</p>
   <div class="strategy-grid">
@@ -723,8 +882,9 @@ const html = `<!DOCTYPE html>
 
 <hr class="divider">
 
+<!-- 08 (was 07) ──────────────────────────────────────── -->
 <section>
-  <span class="section-num">07 — Naming Criteria</span>
+  <span class="section-num">08 — Naming Criteria</span>
   <h2>What the Name Must Do</h2>
   <p style="margin-bottom: 24px;">Benchmarks: <strong>Lean Startup</strong>, <strong>Six Sigma</strong>, <strong>Theory of Constraints</strong>, <strong>Antifragile</strong>. What they share — they name the new, not describe the existing. Antifragile gave a name to a state of systems that had no word. Lean Startup named a genre that didn't exist.</p>
   <div class="criteria-grid">
@@ -769,8 +929,9 @@ const html = `<!DOCTYPE html>
 
 <hr class="divider">
 
+<!-- 09 (was 08) ──────────────────────────────────────── -->
 <section>
-  <span class="section-num">08 — Hard Limits</span>
+  <span class="section-num">09 — Hard Limits</span>
   <h2>What Definitely Won't Work</h2>
   <div class="limits">
     <div class="limit-row">
@@ -790,11 +951,12 @@ const html = `<!DOCTYPE html>
       <span class="limit-text">Any name with an existing trademark in classes 35, 41, 42 in the US or EU.</span>
     </div>
   </div>
-  <p style="margin-top: 20px; font-size: 13px; color: var(--warm-mid); font-style: italic;">Note: constructions like <strong>"Theory of …"</strong> are a valid reference (Theory of Constraints), not a stop factor.</p>
+  <p style="margin-top: 20px; font-size: 13px; color: var(--ink-40); font-style: italic;">Note: constructions like <strong>"Theory of …"</strong> are a valid reference (Theory of Constraints), not a stop factor.</p>
 </section>
 
+<!-- 10 (was 09) ──────────────────────────────────────── -->
 <div class="check-section">
-  <span class="section-num">09 — Validation</span>
+  <span class="section-num">10 — Validation</span>
   <h2>Questions for Discussion</h2>
   <p>A checklist to align on before generating name options.</p>
   <ul class="check-list">
@@ -802,20 +964,27 @@ const html = `<!DOCTYPE html>
       <div class="check-box"></div>
       <div>
         <span class="check-question">Is the methodology description accurate? What would you change or add?</span>
-        <span class="check-note">Sections 01–02 are statements for the outside world, not internal use</span>
+        <span class="check-note">Sections 01–03 are statements for the outside world, not internal use</span>
       </div>
     </li>
     <li>
       <div class="check-box"></div>
       <div>
-        <span class="check-question">Is the core feeling formulated accurately? "I will find a way out of any situation, understand where I am, make an informed decision, model the future."</span>
+        <span class="check-question">Does the emotional job formulation land? "I want to stop being the person who finds out they were wrong after it's too late to change direction."</span>
+        <span class="check-note">This is the condition the name must resolve — not describe, but resolve. Does this feel true?</span>
+      </div>
+    </li>
+    <li>
+      <div class="check-box"></div>
+      <div>
+        <span class="check-question">Is the core functional feeling accurate? "I will find a way out of any situation, understand where I am, make an informed decision, model the future."</span>
         <span class="check-note">This is what must grow into the name — not literally, but in its energy</span>
       </div>
     </li>
     <li>
       <div class="check-box"></div>
       <div>
-        <span class="check-question">Does the positioning (Section 04) accurately describe the category and differentiation? What would you reformulate?</span>
+        <span class="check-question">Does the positioning (Section 05) accurately describe the category and differentiation? What would you reformulate?</span>
         <span class="check-note">Especially: the formulation "the first methodology that assembles…" — is that the right grounding for uniqueness?</span>
       </div>
     </li>
@@ -838,7 +1007,7 @@ const html = `<!DOCTYPE html>
 
 <div class="doc-footer">
   <span>Working Document · Not for Publication</span>
-  <span>zamesin.ru · Methodology v0.1</span>
+  <span>zamesin.ru · backspaceoddity.com · v0.2</span>
 </div>
 
 <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">&#x25D0;</button>
