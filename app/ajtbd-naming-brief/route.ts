@@ -140,10 +140,10 @@ const html = `<!DOCTYPE html>
   }
   h2 {
     font-family: var(--display);
-    font-size: 27px;
+    font-size: 32px;
     font-weight: 400;
-    line-height: 1.18;
-    margin-bottom: 20px;
+    line-height: 1.15;
+    margin-bottom: 22px;
     color: var(--ink);
   }
   h3 {
@@ -157,7 +157,7 @@ const html = `<!DOCTYPE html>
   }
   p {
     font-family: var(--text);
-    font-size: 15px;
+    font-size: 17px;
     line-height: 1.7;
     color: var(--ink);
   }
@@ -172,8 +172,8 @@ const html = `<!DOCTYPE html>
   /* ── Statement / pull quote ─────────────────────── */
   .statement {
     font-family: var(--display);
-    font-size: 20px;
-    line-height: 1.55;
+    font-size: 22px;
+    line-height: 1.5;
     font-style: italic;
     color: var(--ink);
     border-left: 3px solid var(--rule-strong);
@@ -230,7 +230,7 @@ const html = `<!DOCTYPE html>
   }
   .ba-core {
     font-family: var(--display);
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1.35;
     font-style: italic;
     color: var(--ink);
@@ -238,8 +238,8 @@ const html = `<!DOCTYPE html>
   }
   .ba-col p {
     font-family: var(--text);
-    font-size: 13.5px;
-    line-height: 1.6;
+    font-size: 15px;
+    line-height: 1.65;
     color: var(--ink-55);
   }
   .ej-frame {
@@ -258,7 +258,7 @@ const html = `<!DOCTYPE html>
   }
   .ej-frame p {
     font-family: var(--display);
-    font-size: 21px;
+    font-size: 24px;
     line-height: 1.5;
     font-style: italic;
     color: var(--on-dark-primary);
@@ -293,14 +293,14 @@ const html = `<!DOCTYPE html>
   }
   .criterion-title {
     font-family: var(--text);
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     margin-bottom: 6px;
     line-height: 1.3;
     color: var(--ink);
   }
   .criterion-desc {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.55;
     color: var(--ink-55);
   }
@@ -340,7 +340,7 @@ const html = `<!DOCTYPE html>
     min-width: 90px;
   }
   .limit-text {
-    font-size: 13.5px;
+    font-size: 15px;
     line-height: 1.55;
     color: var(--ink);
   }
@@ -369,7 +369,7 @@ const html = `<!DOCTYPE html>
     display: block;
   }
   .comp-card p {
-    font-size: 13.5px;
+    font-size: 15px;
     line-height: 1.6;
     color: var(--ink-55);
   }
@@ -393,7 +393,7 @@ const html = `<!DOCTYPE html>
   }
   .positioning-text {
     font-family: var(--text);
-    font-size: 15px;
+    font-size: 17px;
     line-height: 1.65;
     color: var(--ink);
     padding: 16px 0 22px;
@@ -495,7 +495,7 @@ const html = `<!DOCTYPE html>
   }
   .tov-summary p {
     font-family: var(--display);
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1.55;
     font-style: italic;
     color: var(--ink);
@@ -525,13 +525,13 @@ const html = `<!DOCTYPE html>
   }
   .strategy-decision {
     font-family: var(--display);
-    font-size: 19px;
+    font-size: 22px;
     line-height: 1.3;
     color: var(--ink);
     margin-bottom: 12px;
     font-style: italic;
   }
-  .strategy-rationale { font-family: var(--text); font-size: 13.5px; line-height: 1.6; color: var(--ink-55); }
+  .strategy-rationale { font-family: var(--text); font-size: 15px; line-height: 1.6; color: var(--ink-55); }
   .strategy-rationale strong { color: var(--ink); font-weight: 500; }
   .strategy-card.resolved::after {
     content: '\\2713 resolved';
@@ -641,7 +641,7 @@ const html = `<!DOCTYPE html>
     .brand-adjectives { grid-template-columns: repeat(2, 1fr); }
     .positioning-block { grid-template-columns: 1fr; }
     .brand-slider { grid-template-columns: 90px 1fr 90px; }
-    h2 { font-size: 22px; }
+    h2 { font-size: 26px; }
   }
 </style>
 </head>
@@ -716,21 +716,21 @@ const html = `<!DOCTYPE html>
     <div>
       <h3>Problems with Algorithms</h3>
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
-        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Launch a product</div>
-        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Escape direct competition</div>
-        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Define positioning</div>
-        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Grow average order value</div>
-        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Improve conversion</div>
-        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Reduce churn</div>
-        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Build an acquisition channel</div>
-        <div style="font-family: var(--text); font-size: 14px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Scale to a new segment</div>
+        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Launch a product</div>
+        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Escape direct competition</div>
+        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Define positioning</div>
+        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Grow average order value</div>
+        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Improve conversion</div>
+        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Reduce churn</div>
+        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Build an acquisition channel</div>
+        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Scale to a new segment</div>
       </div>
     </div>
     <div>
       <h3>What You Get</h3>
-      <p style="font-size: 14px; margin-bottom: 16px; color: var(--ink-55);">The core feeling after mastering it:</p>
-      <div class="statement" style="font-size: 18px; margin: 0 0 16px;">From any business situation, at any moment, I will find a way out. Understand where I stand. Make an informed decision. And model the future as a set of possible outcomes of my choices.</div>
-      <p style="font-size: 13.5px; color: var(--ink-55); line-height: 1.65;">Clarity of position. Visibility of options. Confidence that comes not from self-suggestion, but from an algorithm you've run — and can run again. For many, this is the first time strategy and intuition finally agree.</p>
+      <p style="font-size: 16px; margin-bottom: 16px; color: var(--ink-55);">The core feeling after mastering it:</p>
+      <div class="statement" style="font-size: 20px; margin: 0 0 16px;">From any business situation, at any moment, I will find a way out. Understand where I stand. Make an informed decision. And model the future as a set of possible outcomes of my choices.</div>
+      <p style="font-size: 15px; color: var(--ink-55); line-height: 1.65;">Clarity of position. Visibility of options. Confidence that comes not from self-suggestion, but from an algorithm you've run — and can run again. For many, this is the first time strategy and intuition finally agree.</p>
     </div>
   </div>
 </section>
@@ -970,7 +970,7 @@ const html = `<!DOCTYPE html>
     <li>
       <div class="check-box"></div>
       <div>
-        <span class="check-question">Does the emotional job formulation land? "I want to stop being the person who finds out they were wrong after it's too late to change direction."</span>
+        <span class="check-question">Does the emotional job formulation land? "Talented. Smart. Hardworking. Executing the wrong strategy."</span>
         <span class="check-note">This is the condition the name must resolve — not describe, but resolve. Does this feel true?</span>
       </div>
     </li>
