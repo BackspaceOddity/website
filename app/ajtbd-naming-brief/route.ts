@@ -700,10 +700,10 @@ const html = `<!DOCTYPE html>
 
   <div class="ej-frame">
     <span class="ej-label">The Emotional Job</span>
-    <p>"I want to stop being the person who finds out they were wrong after it's too late to change direction."</p>
+    <p>Talented. Smart. Hardworking. Executing the wrong strategy.</p>
   </div>
 
-  <p class="note-small">The name must carry this — not inspiration, not acceleration. The quiet authority of finally seeing the full board. The relief of clarity in a world of noise.</p>
+  <p class="note-small">The name must carry this paradox — not "get faster" or "get smarter." The relief of finally knowing which direction to run before committing everything you have.</p>
 </section>
 
 <hr class="divider">
