@@ -1,5 +1,17 @@
 # Learnings
 
+## Session 2026-05-28 — ej-frame copy iteration + font sizes
+
+[2026-05-28] [LEARN] [COPY]: **"Perfectly executed wrong bet" is the sharpest articulation of the emotional job for Ivan Zamesin's methodology.** The phrase captures the paradox (competence + wrong direction) in 4 words. Final ej-frame: "When I give everything — because the stakes demand it, or because that's my ethos — know the direction is right. Not waste it all on a perfectly executed wrong bet." Job statement syntax per Kalbach.
+
+[2026-05-28] [ERROR] [COPY]: **Misread "articulated against Jim Kalbach's syntax" as "rewrite away from Kalbach syntax."** The user wanted the quote rewritten IN Kalbach's job statement format. Wasted two iterations (metaphor "The engine runs perfectly. The road is wrong." + revert) before understanding the actual ask. Root cause: ambiguous English preposition "against" + assumption instead of clarification.
+
+[2026-05-28] [LEARN] [COPY]: **Kalbach emotional job statement syntax: [When situation] + [want/need] + [goal] + [not fear].** For high-stakes emotional jobs, the "not [feared outcome]" clause carries more weight than the positive. Keep it concrete and personal — "not waste it all on a perfectly executed wrong bet" > abstract "not execute the wrong strategy."
+
+[2026-05-28] [LEARN] [LOCAL]: **Font size bump ratio ~10-15% across the board** improves legibility at 100% zoom without breaking layout proportions. h2: 27→32px, body: 15→17px, statement: 20→22px, ba-core: 18→20px, ej-frame: stays 24px, tov-summary: 18→20px, strategy-decision: 19→22px. Mobile h2: 22→26px.
+
+[2026-05-28] [USER-PREF]: **"ethic" → "ethos"** — user corrected word choice in the ej-frame job statement. "Ethos" = character/values (Greek), "ethic" = moral principle. For personal identity framing ("because that's who I am"), "ethos" is the right word.
+
 ## Session 2026-05-27 — standalone HTML page deployment pattern
 
 [2026-05-27] [WIN] [CROSS-PROJECT]: **Next.js route handler is the cleanest way to serve a self-contained HTML page without global layout interference.** Create `app/[slug]/route.ts` that returns `new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })`. The page completely bypasses the Next.js layout tree — no nav, no global CSS, no `<html>`/`<head>` collision. Correct pattern for standalone shareable docs, working documents, client briefs. Alternative (putting HTML in `public/`) works but gives `.html` extension in the URL unless middleware rewrites are added — route handler gives a clean slug natively.
