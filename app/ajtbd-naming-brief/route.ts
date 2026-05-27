@@ -72,6 +72,24 @@ const html = `<!DOCTYPE html>
     --display: 'GT Eesti Pro Display', system-ui, sans-serif;
     --text:    'GT Eesti Pro Text',    system-ui, sans-serif;
     --mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    /* ── Font size tokens — adjustable via Tweaks panel ── */
+    --fs-h2:          42px;
+    --fs-body:        22px;
+    --fs-statement:   22px;
+    --fs-ba-core:     22px;
+    --fs-ej-frame:    26px;
+    --fs-strategy:    26px;
+    --fs-tov-summary: 26px;
+    --fs-secondary:   15px;  /* ba-col p, criterion-title, limit-text, comp-card p, strategy-rationale */
+    --fs-small:       16px;  /* criterion-desc, check-list li, check-section p */
+    --fs-positioning: 17px;
+    --fs-note:        16px;
+    --fs-list-item:   19px;  /* two-col items */
+    /* ── Line-height tokens ── */
+    --lh-body:    1.50;
+    --lh-heading: 1.15;
+    --lh-quote:   1.5;
+    --lh-ba-core: 1.35;
   }
 
   html.dark {
@@ -140,9 +158,9 @@ const html = `<!DOCTYPE html>
   }
   h2 {
     font-family: var(--display);
-    font-size: 32px;
+    font-size: var(--fs-h2);
     font-weight: 400;
-    line-height: 1.15;
+    line-height: var(--lh-heading);
     margin-bottom: 22px;
     color: var(--ink);
   }
@@ -157,8 +175,8 @@ const html = `<!DOCTYPE html>
   }
   p {
     font-family: var(--text);
-    font-size: 17px;
-    line-height: 1.7;
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
     color: var(--ink);
   }
   p + p { margin-top: 12px; }
@@ -172,8 +190,8 @@ const html = `<!DOCTYPE html>
   /* ── Statement / pull quote ─────────────────────── */
   .statement {
     font-family: var(--display);
-    font-size: 22px;
-    line-height: 1.5;
+    font-size: var(--fs-statement);
+    line-height: var(--lh-quote);
     font-style: italic;
     color: var(--ink);
     border-left: 3px solid var(--rule-strong);
@@ -230,16 +248,16 @@ const html = `<!DOCTYPE html>
   }
   .ba-core {
     font-family: var(--display);
-    font-size: 20px;
-    line-height: 1.35;
+    font-size: var(--fs-ba-core);
+    line-height: var(--lh-ba-core);
     font-style: italic;
     color: var(--ink);
     margin-bottom: 12px;
   }
   .ba-col p {
     font-family: var(--text);
-    font-size: 15px;
-    line-height: 1.65;
+    font-size: var(--fs-secondary);
+    line-height: var(--lh-body);
     color: var(--ink-55);
   }
   .ej-frame {
@@ -258,14 +276,14 @@ const html = `<!DOCTYPE html>
   }
   .ej-frame p {
     font-family: var(--display);
-    font-size: 24px;
-    line-height: 1.5;
+    font-size: var(--fs-ej-frame);
+    line-height: var(--lh-quote);
     font-style: italic;
     color: var(--on-dark-primary);
   }
   .note-small {
     font-family: var(--text);
-    font-size: 13px;
+    font-size: var(--fs-note);
     color: var(--ink-40);
     font-style: italic;
     line-height: 1.6;
@@ -293,14 +311,14 @@ const html = `<!DOCTYPE html>
   }
   .criterion-title {
     font-family: var(--text);
-    font-size: 15px;
+    font-size: var(--fs-secondary);
     font-weight: 500;
     margin-bottom: 6px;
     line-height: 1.3;
     color: var(--ink);
   }
   .criterion-desc {
-    font-size: 14px;
+    font-size: var(--fs-small);
     line-height: 1.55;
     color: var(--ink-55);
   }
@@ -340,7 +358,7 @@ const html = `<!DOCTYPE html>
     min-width: 90px;
   }
   .limit-text {
-    font-size: 15px;
+    font-size: var(--fs-secondary);
     line-height: 1.55;
     color: var(--ink);
   }
@@ -369,7 +387,7 @@ const html = `<!DOCTYPE html>
     display: block;
   }
   .comp-card p {
-    font-size: 15px;
+    font-size: var(--fs-secondary);
     line-height: 1.6;
     color: var(--ink-55);
   }
@@ -393,7 +411,7 @@ const html = `<!DOCTYPE html>
   }
   .positioning-text {
     font-family: var(--text);
-    font-size: 17px;
+    font-size: var(--fs-positioning);
     line-height: 1.65;
     color: var(--ink);
     padding: 16px 0 22px;
@@ -403,7 +421,7 @@ const html = `<!DOCTYPE html>
   .positioning-text em {
     font-family: var(--display);
     font-style: italic;
-    font-size: 17px;
+    font-size: var(--fs-positioning);
   }
 
   /* ── Brand character ────────────────────────────── */
@@ -495,7 +513,7 @@ const html = `<!DOCTYPE html>
   }
   .tov-summary p {
     font-family: var(--display);
-    font-size: 20px;
+    font-size: var(--fs-tov-summary);
     line-height: 1.55;
     font-style: italic;
     color: var(--ink);
@@ -525,13 +543,13 @@ const html = `<!DOCTYPE html>
   }
   .strategy-decision {
     font-family: var(--display);
-    font-size: 22px;
+    font-size: var(--fs-strategy);
     line-height: 1.3;
     color: var(--ink);
     margin-bottom: 12px;
     font-style: italic;
   }
-  .strategy-rationale { font-family: var(--text); font-size: 15px; line-height: 1.6; color: var(--ink-55); }
+  .strategy-rationale { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
   .strategy-rationale strong { color: var(--ink); font-weight: 500; }
   .strategy-card.resolved::after {
     content: '\\2713 resolved';
@@ -554,7 +572,7 @@ const html = `<!DOCTYPE html>
   }
   .check-section .section-num { color: var(--on-dark-muted); font-style: italic; }
   .check-section h2 { color: var(--on-dark-primary); margin-bottom: 24px; }
-  .check-section p { color: var(--on-dark-secondary); font-size: 14px; }
+  .check-section p { color: var(--on-dark-secondary); font-size: var(--fs-small); }
   .check-list {
     list-style: none;
     margin-top: 20px;
@@ -566,7 +584,7 @@ const html = `<!DOCTYPE html>
     display: flex;
     gap: 16px;
     align-items: flex-start;
-    font-size: 14px;
+    font-size: var(--fs-small);
     line-height: 1.55;
     color: var(--on-dark-primary);
   }
@@ -641,7 +659,7 @@ const html = `<!DOCTYPE html>
     .brand-adjectives { grid-template-columns: repeat(2, 1fr); }
     .positioning-block { grid-template-columns: 1fr; }
     .brand-slider { grid-template-columns: 90px 1fr 90px; }
-    h2 { font-size: 26px; }
+    h2 { font-size: 34px; }
   }
 </style>
 </head>
@@ -716,21 +734,21 @@ const html = `<!DOCTYPE html>
     <div>
       <h3>Problems with Algorithms</h3>
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
-        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Launch a product</div>
-        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Escape direct competition</div>
-        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Define positioning</div>
-        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Grow average order value</div>
-        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Improve conversion</div>
-        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Reduce churn</div>
-        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Build an acquisition channel</div>
-        <div style="font-family: var(--text); font-size: 16px; padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Scale to a new segment</div>
+        <div style="font-family: var(--text); font-size: var(--fs-list-item); padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Launch a product</div>
+        <div style="font-family: var(--text); font-size: var(--fs-list-item); padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Escape direct competition</div>
+        <div style="font-family: var(--text); font-size: var(--fs-list-item); padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Define positioning</div>
+        <div style="font-family: var(--text); font-size: var(--fs-list-item); padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Grow average order value</div>
+        <div style="font-family: var(--text); font-size: var(--fs-list-item); padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Improve conversion</div>
+        <div style="font-family: var(--text); font-size: var(--fs-list-item); padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Reduce churn</div>
+        <div style="font-family: var(--text); font-size: var(--fs-list-item); padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Build an acquisition channel</div>
+        <div style="font-family: var(--text); font-size: var(--fs-list-item); padding: 10px 14px; background: var(--surface); display: flex; gap: 10px; color: var(--ink);"><span style="font-family: var(--mono); font-size: 10px; color: var(--ink-55); padding-top: 2px;">→</span>Scale to a new segment</div>
       </div>
     </div>
     <div>
       <h3>What You Get</h3>
-      <p style="font-size: 16px; margin-bottom: 16px; color: var(--ink-55);">The core feeling after mastering it:</p>
-      <div class="statement" style="font-size: 20px; margin: 0 0 16px;">From any business situation, at any moment, I will find a way out. Understand where I stand. Make an informed decision. And model the future as a set of possible outcomes of my choices.</div>
-      <p style="font-size: 15px; color: var(--ink-55); line-height: 1.65;">Clarity of position. Visibility of options. Confidence that comes not from self-suggestion, but from an algorithm you've run — and can run again. For many, this is the first time strategy and intuition finally agree.</p>
+      <p style="font-size: var(--fs-secondary); margin-bottom: 16px; color: var(--ink-55);">The core feeling after mastering it:</p>
+      <div class="statement" style="margin: 0 0 16px;">From any business situation, at any moment, I will find a way out. Understand where I stand. Make an informed decision. And model the future as a set of possible outcomes of my choices.</div>
+      <p style="font-size: var(--fs-secondary); color: var(--ink-55); line-height: var(--lh-body);">Clarity of position. Visibility of options. Confidence that comes not from self-suggestion, but from an algorithm you've run — and can run again. For many, this is the first time strategy and intuition finally agree.</p>
     </div>
   </div>
 </section>
@@ -1017,6 +1035,156 @@ const html = `<!DOCTYPE html>
     var isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
   }
+</script>
+
+<script>
+/* ── Font Tweaks Panel ──────────────────────────────── */
+(function () {
+  var SIZES = [
+    { key: '--fs-h2',          label: 'H2 headings',      def: 32, min: 20, max: 56 },
+    { key: '--fs-body',        label: 'Body text',         def: 17, min: 12, max: 28 },
+    { key: '--fs-statement',   label: 'Pull quote',        def: 22, min: 14, max: 40 },
+    { key: '--fs-ba-core',     label: 'Before/After head', def: 20, min: 14, max: 36 },
+    { key: '--fs-ej-frame',    label: 'EJ frame',          def: 24, min: 16, max: 44 },
+    { key: '--fs-strategy',    label: 'Strategy card',     def: 22, min: 14, max: 40 },
+    { key: '--fs-tov-summary', label: 'TOV summary',       def: 20, min: 14, max: 36 },
+    { key: '--fs-secondary',   label: 'Secondary body',    def: 15, min: 12, max: 24 },
+    { key: '--fs-small',       label: 'Small / captions',  def: 14, min: 11, max: 20 },
+    { key: '--fs-positioning', label: 'Positioning text',  def: 17, min: 12, max: 24 },
+    { key: '--fs-note',        label: 'Notes',             def: 13, min: 10, max: 18 },
+    { key: '--fs-list-item',   label: 'List items',        def: 16, min: 12, max: 24 },
+  ];
+  /* line-heights stored as integers ×100 (e.g. 170 = 1.70) */
+  var LINE_HEIGHTS = [
+    { key: '--lh-body',    label: 'Body line-height',    def: 170, min: 130, max: 220 },
+    { key: '--lh-heading', label: 'Heading line-height', def: 115, min: 100, max: 160 },
+    { key: '--lh-quote',   label: 'Quote line-height',   def: 150, min: 120, max: 200 },
+    { key: '--lh-ba-core', label: 'B/A line-height',     def: 135, min: 110, max: 180 },
+  ];
+  var STORE = 'naming-brief-tweaks';
+  var INBOX = 'http://localhost:8002/inbox';
+
+  function loadSaved() {
+    try { return JSON.parse(localStorage.getItem(STORE) || '{}'); } catch(e) { return {}; }
+  }
+  function applyPx(k, v) {
+    document.documentElement.style.setProperty(k, v + 'px');
+    var s = loadSaved(); s[k] = Number(v);
+    localStorage.setItem(STORE, JSON.stringify(s));
+  }
+  function applyLh(k, v) {
+    document.documentElement.style.setProperty(k, (v / 100).toFixed(2));
+    var s = loadSaved(); s[k] = Number(v);
+    localStorage.setItem(STORE, JSON.stringify(s));
+  }
+
+  /* Apply saved on load */
+  var saved = loadSaved();
+  SIZES.forEach(function(s) {
+    if (saved[s.key] !== undefined) document.documentElement.style.setProperty(s.key, saved[s.key] + 'px');
+  });
+  LINE_HEIGHTS.forEach(function(lh) {
+    if (saved[lh.key] !== undefined) document.documentElement.style.setProperty(lh.key, (saved[lh.key] / 100).toFixed(2));
+  });
+
+  function sectionLabel(text) {
+    return '<p style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;' +
+      'text-transform:uppercase;color:var(--ink-40);margin:12px 0 4px;">' + text + '</p>';
+  }
+  function pxRow(s) {
+    var cur = saved[s.key] !== undefined ? saved[s.key] : s.def;
+    var sid = 'tw' + s.key.replace(/[^a-z0-9]/gi, '_');
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--rule);">' +
+      '<span style="font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-40);white-space:nowrap;min-width:96px;">' + s.label + '</span>' +
+      '<div style="display:flex;align-items:center;gap:5px;">' +
+      '<input type="range" data-type="px" min="' + s.min + '" max="' + s.max + '" value="' + cur + '" data-key="' + s.key + '" style="width:68px;cursor:pointer;accent-color:var(--ink);">' +
+      '<span id="' + sid + '" style="font-family:var(--mono);font-size:9px;color:var(--ink-55);min-width:28px;text-align:right;">' + cur + 'px</span>' +
+      '</div></div>';
+  }
+  function lhRow(lh) {
+    var cur = saved[lh.key] !== undefined ? saved[lh.key] : lh.def;
+    var sid = 'tw' + lh.key.replace(/[^a-z0-9]/gi, '_');
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--rule);">' +
+      '<span style="font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-40);white-space:nowrap;min-width:96px;">' + lh.label + '</span>' +
+      '<div style="display:flex;align-items:center;gap:5px;">' +
+      '<input type="range" data-type="lh" min="' + lh.min + '" max="' + lh.max + '" value="' + cur + '" data-key="' + lh.key + '" style="width:68px;cursor:pointer;accent-color:var(--ink);">' +
+      '<span id="' + sid + '" style="font-family:var(--mono);font-size:9px;color:var(--ink-55);min-width:28px;text-align:right;">' + (cur/100).toFixed(2) + '</span>' +
+      '</div></div>';
+  }
+
+  var panel = document.createElement('div');
+  panel.style.cssText = 'position:fixed;bottom:74px;right:24px;z-index:9998;display:none;' +
+    'background:var(--paper);border:1.5px solid var(--rule-strong);padding:14px 16px;width:248px;' +
+    'max-height:80vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,.16);';
+
+  panel.innerHTML =
+    sectionLabel('Font sizes') +
+    SIZES.map(pxRow).join('') +
+    sectionLabel('Line heights') +
+    LINE_HEIGHTS.map(lhRow).join('') +
+    '<div style="display:flex;gap:6px;margin-top:14px;">' +
+    '<button id="tw-save" style="flex:2;background:var(--ink);color:var(--paper);border:none;' +
+    'padding:7px 0;font-family:var(--mono);font-size:10px;letter-spacing:.06em;' +
+    'text-transform:uppercase;cursor:pointer;">&#8594; Save to Claude</button>' +
+    '<button id="tw-reset" style="flex:1;background:transparent;border:1px solid var(--rule-strong);' +
+    'padding:7px 0;font-family:var(--mono);font-size:10px;letter-spacing:.06em;' +
+    'text-transform:uppercase;color:var(--ink-55);cursor:pointer;">&#8635; Reset</button>' +
+    '</div>';
+
+  document.body.appendChild(panel);
+
+  panel.querySelectorAll('input[type="range"]').forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      var sid = 'tw' + inp.dataset.key.replace(/[^a-z0-9]/gi, '_');
+      var sp = document.getElementById(sid);
+      if (inp.dataset.type === 'lh') {
+        if (sp) sp.textContent = (inp.value / 100).toFixed(2);
+        applyLh(inp.dataset.key, inp.value);
+      } else {
+        if (sp) sp.textContent = inp.value + 'px';
+        applyPx(inp.dataset.key, inp.value);
+      }
+    });
+  });
+
+  document.getElementById('tw-reset').addEventListener('click', function() {
+    localStorage.removeItem(STORE);
+    SIZES.forEach(function(s) { document.documentElement.style.setProperty(s.key, s.def + 'px'); });
+    LINE_HEIGHTS.forEach(function(lh) { document.documentElement.style.setProperty(lh.key, (lh.def/100).toFixed(2)); });
+    panel.remove(); btn.remove();
+  });
+
+  document.getElementById('tw-save').addEventListener('click', function() {
+    var saveBtn = document.getElementById('tw-save');
+    var current = loadSaved();
+    var payload = { type: 'font-tweaks', source: 'naming-brief', values: current, savedAt: new Date().toISOString() };
+    fetch(INBOX, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function() {
+        saveBtn.textContent = '✓ Sent!';
+        setTimeout(function() { saveBtn.textContent = '→ Save to Claude'; }, 2000);
+      })
+      .catch(function() {
+        saveBtn.textContent = '✗ Server off';
+        saveBtn.style.background = '#a00';
+        setTimeout(function() { saveBtn.textContent = '→ Save to Claude'; saveBtn.style.background = 'var(--ink)'; }, 2500);
+      });
+  });
+
+  var btn = document.createElement('button');
+  btn.textContent = 'Aa';
+  btn.title = 'Font tweaks';
+  btn.style.cssText = 'position:fixed;bottom:24px;right:70px;z-index:9999;width:40px;height:40px;' +
+    'border-radius:50%;border:1.5px solid var(--rule-strong);background:var(--paper);' +
+    'color:var(--ink);font-size:15px;cursor:pointer;display:flex;align-items:center;' +
+    'justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.10);' +
+    'font-family:var(--display);line-height:1;transition:border-color .15s;';
+
+  btn.addEventListener('click', function() {
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.body.appendChild(btn);
+})();
 </script>
 
 </body>
