@@ -700,7 +700,7 @@ const html = `<!DOCTYPE html>
 
   <div class="ej-frame">
     <span class="ej-label">The Emotional Job</span>
-    <p>Talented. Smart. Hardworking. Executing the wrong strategy.</p>
+    <p>When I give everything — because the stakes demand it, or because that's my ethic — know the direction is right. Not waste it all on a perfectly executed wrong bet.</p>
   </div>
 
   <p class="note-small">The name must carry this paradox — not "get faster" or "get smarter." The relief of finally knowing which direction to run before committing everything you have.</p>
@@ -970,7 +970,7 @@ const html = `<!DOCTYPE html>
     <li>
       <div class="check-box"></div>
       <div>
-        <span class="check-question">Does the emotional job formulation land? "Talented. Smart. Hardworking. Executing the wrong strategy."</span>
+        <span class="check-question">Does the emotional job formulation land? "When I give everything — because the stakes demand it, or because that's my ethic — know the direction is right. Not waste it all on a perfectly executed wrong bet."</span>
         <span class="check-note">This is the condition the name must resolve — not describe, but resolve. Does this feel true?</span>
       </div>
     </li>
