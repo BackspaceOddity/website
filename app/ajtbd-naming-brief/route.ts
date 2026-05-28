@@ -1,4 +1,185 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
+
+const ACCESS_KEY = process.env.NB_PASSWORD || '';
+const COOKIE   = 'nb-auth';
+
+function token() {
+  return crypto.createHash('sha256').update(ACCESS_KEY + 'nb-2026').digest('hex').slice(0, 40);
+}
+
+function getCookie(req: Request, name: string) {
+  return (req.headers.get('cookie') || '')
+    .split(';').map(s => s.trim())
+    .find(s => s.startsWith(name + '='))
+    ?.slice(name.length + 1) ?? '';
+}
+
+const loginHtml = (err = false) => `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Access Required</title>
+<style>
+  @font-face {
+    font-family: 'GT Eesti Pro Text';
+    src: url('/fonts/GTEestiProText-Regular.ttf') format('truetype');
+    font-weight: 400; font-style: normal;
+  }
+  @font-face {
+    font-family: 'GT Eesti Pro Text';
+    src: url('/fonts/GTEestiProText-Medium.ttf') format('truetype');
+    font-weight: 500; font-style: normal;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Left panel — splash background + logo ── */
+  .panel-left {
+    flex: 1;
+    position: relative;
+    background: #060a06 url('/images/hero-bg-magenta-green.png') center / cover no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 40px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo svg { display: block; width: 36px; height: 36px; flex-shrink: 0; }
+  .logo-name {
+    font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.25;
+    color: rgba(245, 242, 233, 0.80);
+    font-weight: 400;
+  }
+
+  /* ── Right panel — DS form ── */
+  .panel-right {
+    width: 420px;
+    flex-shrink: 0;
+    background: #FAF9F6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 64px 48px;
+  }
+
+  .form-title {
+    font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: #1A1A1A;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .form-sub {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9A9A9A;
+    margin-bottom: 32px;
+  }
+
+  input[type="password"] {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
+    font-size: 16px;
+    background: #F1EFE9;
+    border: 1.5px solid #E5E3DC;
+    border-radius: 0;
+    color: #1A1A1A;
+    outline: none;
+    margin-bottom: 10px;
+    transition: border-color 0.12s, background 0.12s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="password"]::placeholder { color: #9A9A9A; }
+  input[type="password"]:focus {
+    border-color: #1A1A1A;
+    background: #FAF9F6;
+  }
+
+  button {
+    display: block;
+    width: 100%;
+    padding: 13px 0;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    background: #1A1A1A;
+    color: #FAF9F6;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.12s;
+  }
+  button:hover { opacity: 0.78; }
+
+  .err {
+    font-size: 12px;
+    color: rgba(26, 26, 26, 0.50);
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  /* ── Mobile: stack vertically ── */
+  @media (max-width: 640px) {
+    body { flex-direction: column; }
+    .panel-left { flex: none; height: 220px; padding: 24px; justify-content: flex-end; }
+    .panel-right { width: 100%; padding: 40px 24px 48px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Left: splash background + Backspace Oddity logo -->
+  <div class="panel-left">
+    <div class="logo">
+      <svg width="268" height="268" viewBox="0 0 268 268" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M267.18 133.339C267.18 157.332 260.58 176.783 256.42 176.783C252.26 176.783 252.116 157.332 252.116 133.339C252.116 109.345 252.26 89.8948 256.42 89.8948C260.58 89.8948 267.18 109.345 267.18 133.339Z" fill="#F5F2E9"/>
+        <path d="M233.305 134.008C233.305 183.194 228.15 223.068 225.773 223.068C223.396 223.068 224.697 183.194 224.697 134.008C224.697 84.8212 223.396 44.9476 225.773 44.9476C228.15 44.9476 233.305 84.8212 233.305 134.008Z" fill="#F5F2E9"/>
+        <path d="M201.543 133.5C201.543 197.683 197.464 249.713 195.087 249.713C192.71 249.713 192.935 197.683 192.935 133.5C192.935 69.3177 192.71 17.2875 195.087 17.2875C197.464 17.2875 201.543 69.3177 201.543 133.5Z" fill="#F5F2E9"/>
+        <ellipse cx="159.024" cy="133.59" rx="11.8362" ry="133.59" fill="#F5F2E9"/>
+        <path d="M128.375 133.313C128.375 204.393 125.569 262.015 116.061 262.015C106.552 262.015 93.9424 204.393 93.9424 133.313C93.9424 62.2321 106.552 4.60986 116.061 4.60986C125.569 4.60986 128.375 62.2321 128.375 133.313Z" fill="#F5F2E9"/>
+        <path d="M75.3212 133.754C75.3212 190.438 70.2526 236.39 49.1561 236.39C28.0596 236.39 0 190.438 0 133.754C0 77.0693 28.0596 31.1174 49.1561 31.1174C70.2526 31.1174 75.3212 77.0693 75.3212 133.754Z" fill="#F5F2E9"/>
+      </svg>
+      <div class="logo-name">Backspace<br>Oddity</div>
+    </div>
+  </div>
+
+  <!-- Right: DS-styled password form -->
+  <div class="panel-right">
+    <p class="form-title">Naming Brief</p>
+    <p class="form-sub">A Hundred Monkeys</p>
+    <form method="POST" action="/ajtbd-naming-brief">
+      <input type="password" name="code" placeholder="Enter password" autofocus autocomplete="current-password">
+      <button type="submit">Enter →</button>
+      ${err ? '<p class="err">Incorrect password.</p>' : ''}
+    </form>
+  </div>
+
+</body>
+</html>`;
 
 const html = `<!DOCTYPE html>
 <html lang="en">
@@ -1462,10 +1643,29 @@ const html = `<!DOCTYPE html>
 </body>
 </html>`;
 
-export async function GET() {
-  return new NextResponse(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-    },
-  });
+export async function GET(req: Request) {
+  if (!ACCESS_KEY) {
+    return new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  }
+  if (getCookie(req, COOKIE) !== token()) {
+    return new NextResponse(loginHtml(), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  }
+  return new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
+
+export async function POST(req: Request) {
+  const body    = await req.text();
+  const entered = new URLSearchParams(body).get('code') ?? '';
+  if (entered === ACCESS_KEY) {
+    const res = NextResponse.redirect(new URL('/ajtbd-naming-brief', req.url), 303);
+    res.cookies.set(COOKIE, token(), {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 90, // 90 days
+      path: '/ajtbd-naming-brief',
+    });
+    return res;
+  }
+  return new NextResponse(loginHtml(true), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
