@@ -80,7 +80,8 @@ const html = `<!DOCTYPE html>
     --fs-ej-frame:    26px;
     --fs-strategy:    26px;
     --fs-tov-summary: 26px;
-    --fs-secondary:   15px;  /* ba-col p, criterion-title, limit-text, comp-card p, strategy-rationale */
+    --fs-secondary:        15px;  /* ba-col p, criterion-title, limit-text, comp-card p */
+    --fs-strategy-rationale: 17px;  /* strategy card body text */
     --fs-small:       16px;  /* criterion-desc, check-list li, check-section p */
     --fs-positioning: 17px;
     --fs-note:        16px;
@@ -553,7 +554,7 @@ const html = `<!DOCTYPE html>
     margin-bottom: 12px;
     font-style: italic;
   }
-  .strategy-rationale { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
+  .strategy-rationale { font-family: var(--text); font-size: var(--fs-strategy-rationale); line-height: var(--lh-body); color: var(--ink-55); }
   .strategy-rationale strong { color: var(--ink); font-weight: 500; }
   .strategy-card.resolved::after {
     content: '\\2713 resolved';
@@ -973,7 +974,7 @@ const html = `<!DOCTYPE html>
       <span class="limit-text">Any name with an existing trademark in classes 35, 41, 42 in the US or EU.</span>
     </div>
   </div>
-  <p style="margin-top: 20px; font-size: 13px; color: var(--ink-40); font-style: italic;">Note: constructions like <strong>"Theory of …"</strong> are a valid reference (Theory of Constraints), not a stop factor.</p>
+  <p style="margin-top: 20px; font-size: var(--fs-note); color: var(--ink-40); font-style: italic;">Note: constructions like <strong>"Theory of …"</strong> are a valid reference (Theory of Constraints), not a stop factor.</p>
 </section>
 
 <!-- 10 (was 09) ──────────────────────────────────────── -->
@@ -1281,6 +1282,7 @@ const html = `<!DOCTYPE html>
     }
     fetch(INBOX, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
       .then(function() {
+        persist({ threads: {} }); syncBadge();
         sendBtn.textContent = '✓ Sent!';
         setTimeout(function() { sendBtn.innerHTML = '&#8594; Send to Claude'; }, 2000);
       }).catch(function() {
@@ -1320,8 +1322,9 @@ const html = `<!DOCTYPE html>
     { key: '--fs-list-item',   label: 'List items',        def: 16, min: 12, max: 24 },
     { key: '--fs-section-num',  label: 'Section labels',    def: 13, min: 10, max: 18 },
     { key: '--fs-pos-label',    label: 'Positioning labels',def: 12, min: 10, max: 18 },
-    { key: '--fs-adjective',    label: 'Brand adjectives',  def: 14, min: 11, max: 22 },
-    { key: '--fs-adjective-en', label: 'Adj. EN italic',    def: 16, min: 12, max: 24 },
+    { key: '--fs-adjective',         label: 'Brand adjectives',   def: 14, min: 11, max: 22 },
+    { key: '--fs-adjective-en',      label: 'Adj. EN italic',     def: 16, min: 12, max: 24 },
+    { key: '--fs-strategy-rationale',label: 'Strategy rationale', def: 17, min: 13, max: 26 },
   ];
   /* line-heights stored as integers ×100 (e.g. 170 = 1.70) */
   var LINE_HEIGHTS = [
