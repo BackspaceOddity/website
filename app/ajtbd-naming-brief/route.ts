@@ -72,45 +72,45 @@ const loginHtml = (err = false) => `<!DOCTYPE html>
 
   /* ── Right panel — DS form ── */
   .panel-right {
-    width: 420px;
+    width: 520px;
     flex-shrink: 0;
     background: #FAF9F6;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 64px 48px;
+    padding: 72px 64px;
   }
 
   .form-title {
     font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
-    font-size: 22px;
+    font-size: 30px;
     font-weight: 400;
     color: #1A1A1A;
     line-height: 1.3;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .form-sub {
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #9A9A9A;
-    margin-bottom: 32px;
+    margin-bottom: 40px;
   }
 
   input[type="password"] {
     display: block;
     width: 100%;
-    padding: 12px 14px;
+    padding: 16px 18px;
     font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
-    font-size: 16px;
+    font-size: 20px;
     background: #F1EFE9;
     border: 1.5px solid #E5E3DC;
     border-radius: 0;
     color: #1A1A1A;
     outline: none;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
     transition: border-color 0.12s, background 0.12s;
     -webkit-appearance: none;
     appearance: none;
@@ -124,9 +124,9 @@ const loginHtml = (err = false) => `<!DOCTYPE html>
   button {
     display: block;
     width: 100%;
-    padding: 13px 0;
+    padding: 18px 0;
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.10em;
     text-transform: uppercase;
@@ -139,9 +139,9 @@ const loginHtml = (err = false) => `<!DOCTYPE html>
   button:hover { opacity: 0.78; }
 
   .err {
-    font-size: 12px;
+    font-size: 14px;
     color: rgba(26, 26, 26, 0.50);
-    margin-top: 12px;
+    margin-top: 14px;
     font-style: italic;
   }
 
