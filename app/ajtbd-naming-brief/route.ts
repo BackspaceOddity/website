@@ -1,4 +1,64 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
+
+const ACCESS_KEY = process.env.NB_PASSWORD || '';
+const COOKIE   = 'nb-auth';
+
+function token() {
+  return crypto.createHash('sha256').update(ACCESS_KEY + 'nb-2026').digest('hex').slice(0, 40);
+}
+
+function getCookie(req: Request, name: string) {
+  return (req.headers.get('cookie') || '')
+    .split(';').map(s => s.trim())
+    .find(s => s.startsWith(name + '='))
+    ?.slice(name.length + 1) ?? '';
+}
+
+const loginHtml = (err = false) => `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Access Required</title>
+<style>
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #F5F2E9; color: #011C00; font-family: 'GT Eesti Pro Text', system-ui, sans-serif; height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; }
+  .wrap { width: 100%; max-width: 320px; }
+  .label { font-family: ui-monospace,'SF Mono',monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(1,28,0,.40); margin-bottom: 20px; }
+  input[type="password"] {
+    display: block; width: 100%; padding: 12px 14px;
+    font-family: 'GT Eesti Pro Text', system-ui, sans-serif; font-size: 16px;
+    background: #FDFBF4; border: 1.5px solid rgba(1,28,0,.22); border-radius: 0;
+    color: #011C00; outline: none; margin-bottom: 10px;
+    transition: border-color .12s;
+  }
+  input[type="password"]:focus { border-color: #011C00; }
+  button {
+    display: block; width: 100%; padding: 12px 0;
+    font-family: ui-monospace,'SF Mono',monospace; font-size: 11px; font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase;
+    background: #011C00; color: #F5F2E9; border: none; cursor: pointer;
+    transition: opacity .12s;
+  }
+  button:hover { opacity: .85; }
+  .err { font-size: 12px; color: rgba(1,28,0,.55); margin-top: 10px; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="label">Naming Brief · A Hundred Monkeys</p>
+  <form method="POST" action="/ajtbd-naming-brief">
+    <input type="password" name="code" placeholder="Password" autofocus autocomplete="current-password">
+    <button type="submit">Enter →</button>
+    ${err ? '<p class="err">Incorrect password.</p>' : ''}
+  </form>
+</div>
+</body>
+</html>`;
 
 const html = `<!DOCTYPE html>
 <html lang="en">
@@ -1462,10 +1522,29 @@ const html = `<!DOCTYPE html>
 </body>
 </html>`;
 
-export async function GET() {
-  return new NextResponse(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-    },
-  });
+export async function GET(req: Request) {
+  if (!ACCESS_KEY) {
+    return new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  }
+  if (getCookie(req, COOKIE) !== token()) {
+    return new NextResponse(loginHtml(), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  }
+  return new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
+
+export async function POST(req: Request) {
+  const body    = await req.text();
+  const entered = new URLSearchParams(body).get('code') ?? '';
+  if (entered === ACCESS_KEY) {
+    const res = NextResponse.redirect(new URL('/ajtbd-naming-brief', req.url), 303);
+    res.cookies.set(COOKIE, token(), {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 90, // 90 days
+      path: '/ajtbd-naming-brief',
+    });
+    return res;
+  }
+  return new NextResponse(loginHtml(true), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
