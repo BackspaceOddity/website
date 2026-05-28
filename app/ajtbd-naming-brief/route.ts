@@ -46,7 +46,7 @@ const loginHtml = (err = false) => `<!DOCTYPE html>
   .panel-left {
     flex: 1;
     position: relative;
-    background: #060a06 url('/images/hero-bg-magenta-green.png') center / cover no-repeat;
+    background: #060a06 url('/images/hero-bg-magenta-green.webp') center / cover no-repeat;
     display: flex;
     flex-direction: column;
     align-items: center;
