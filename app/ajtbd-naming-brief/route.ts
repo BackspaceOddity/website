@@ -22,41 +22,138 @@ const loginHtml = (err = false) => `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Access Required</title>
 <style>
-  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; }
-  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; }
+  @font-face {
+    font-family: 'GT Eesti Pro Text';
+    src: url('/fonts/GTEestiProText-Regular.ttf') format('truetype');
+    font-weight: 400; font-style: normal;
+  }
+  @font-face {
+    font-family: 'GT Eesti Pro Text';
+    src: url('/fonts/GTEestiProText-Medium.ttf') format('truetype');
+    font-weight: 500; font-style: normal;
+  }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { background: #F5F2E9; color: #011C00; font-family: 'GT Eesti Pro Text', system-ui, sans-serif; height: 100%; }
-  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; }
-  .wrap { width: 100%; max-width: 320px; }
-  .label { font-family: ui-monospace,'SF Mono',monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(1,28,0,.40); margin-bottom: 20px; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #060a06 url('/images/hero-bg-magenta-green.png') center / cover no-repeat;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Logo — bottom-left, matching the Figma cover */
+  .logo {
+    position: fixed;
+    bottom: 32px;
+    left: 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    opacity: 0.75;
+  }
+  .logo svg { display: block; width: 28px; height: 28px; }
+  .logo-text {
+    font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.25;
+    color: #F5F2E9;
+    font-weight: 400;
+  }
+
+  /* Form card — light surface per BSO Web DS tokens */
+  .card {
+    position: relative;
+    z-index: 1;
+    width: calc(100% - 48px);
+    max-width: 340px;
+    padding: 32px;
+    background: #FAF9F6;
+    border-top: 2px solid #4A7C5E;
+  }
+
+  .eyebrow {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(26, 26, 26, 0.40);
+    margin-bottom: 24px;
+  }
+
   input[type="password"] {
-    display: block; width: 100%; padding: 12px 14px;
-    font-family: 'GT Eesti Pro Text', system-ui, sans-serif; font-size: 16px;
-    background: #FDFBF4; border: 1.5px solid rgba(1,28,0,.22); border-radius: 0;
-    color: #011C00; outline: none; margin-bottom: 10px;
-    transition: border-color .12s;
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
+    font-size: 16px;
+    background: transparent;
+    border: 1.5px solid #E5E3DC;
+    border-radius: 0;
+    color: #1A1A1A;
+    outline: none;
+    margin-bottom: 10px;
+    transition: border-color 0.12s;
+    -webkit-appearance: none;
+    appearance: none;
   }
-  input[type="password"]:focus { border-color: #011C00; }
+  input[type="password"]::placeholder { color: #9A9A9A; }
+  input[type="password"]:focus { border-color: #1A1A1A; }
+
   button {
-    display: block; width: 100%; padding: 12px 0;
-    font-family: ui-monospace,'SF Mono',monospace; font-size: 11px; font-weight: 500;
-    letter-spacing: .1em; text-transform: uppercase;
-    background: #011C00; color: #F5F2E9; border: none; cursor: pointer;
-    transition: opacity .12s;
+    display: block;
+    width: 100%;
+    padding: 12px 0;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    background: #1A1A1A;
+    color: #FAF9F6;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.12s;
   }
-  button:hover { opacity: .85; }
-  .err { font-size: 12px; color: rgba(1,28,0,.55); margin-top: 10px; font-style: italic; }
+  button:hover { opacity: 0.80; }
+
+  .err {
+    font-size: 12px;
+    color: rgba(26, 26, 26, 0.50);
+    margin-top: 10px;
+    font-style: italic;
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <p class="label">Naming Brief · A Hundred Monkeys</p>
-  <form method="POST" action="/ajtbd-naming-brief">
-    <input type="password" name="code" placeholder="Password" autofocus autocomplete="current-password">
-    <button type="submit">Enter →</button>
-    ${err ? '<p class="err">Incorrect password.</p>' : ''}
-  </form>
-</div>
+
+  <!-- Logo mark — bottom-left, like the Figma splash -->
+  <div class="logo">
+    <svg width="268" height="268" viewBox="0 0 268 268" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M267.18 133.339C267.18 157.332 260.58 176.783 256.42 176.783C252.26 176.783 252.116 157.332 252.116 133.339C252.116 109.345 252.26 89.8948 256.42 89.8948C260.58 89.8948 267.18 109.345 267.18 133.339Z" fill="#F5F2E9"/>
+      <path d="M233.305 134.008C233.305 183.194 228.15 223.068 225.773 223.068C223.396 223.068 224.697 183.194 224.697 134.008C224.697 84.8212 223.396 44.9476 225.773 44.9476C228.15 44.9476 233.305 84.8212 233.305 134.008Z" fill="#F5F2E9"/>
+      <path d="M201.543 133.5C201.543 197.683 197.464 249.713 195.087 249.713C192.71 249.713 192.935 197.683 192.935 133.5C192.935 69.3177 192.71 17.2875 195.087 17.2875C197.464 17.2875 201.543 69.3177 201.543 133.5Z" fill="#F5F2E9"/>
+      <ellipse cx="159.024" cy="133.59" rx="11.8362" ry="133.59" fill="#F5F2E9"/>
+      <path d="M128.375 133.313C128.375 204.393 125.569 262.015 116.061 262.015C106.552 262.015 93.9424 204.393 93.9424 133.313C93.9424 62.2321 106.552 4.60986 116.061 4.60986C125.569 4.60986 128.375 62.2321 128.375 133.313Z" fill="#F5F2E9"/>
+      <path d="M75.3212 133.754C75.3212 190.438 70.2526 236.39 49.1561 236.39C28.0596 236.39 0 190.438 0 133.754C0 77.0693 28.0596 31.1174 49.1561 31.1174C70.2526 31.1174 75.3212 77.0693 75.3212 133.754Z" fill="#F5F2E9"/>
+    </svg>
+    <div class="logo-text">Backspace<br>Oddity</div>
+  </div>
+
+  <!-- Password gate — DS-styled card -->
+  <div class="card">
+    <p class="eyebrow">Naming Brief · A Hundred Monkeys</p>
+    <form method="POST" action="/ajtbd-naming-brief">
+      <input type="password" name="code" placeholder="Password" autofocus autocomplete="current-password">
+      <button type="submit">Enter →</button>
+      ${err ? '<p class="err">Incorrect password.</p>' : ''}
+    </form>
+  </div>
+
 </body>
 </html>`;
 
