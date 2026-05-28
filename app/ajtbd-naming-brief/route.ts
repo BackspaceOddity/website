@@ -49,22 +49,25 @@ const loginHtml = (err = false) => `<!DOCTYPE html>
     background: #060a06 url('/images/hero-bg-magenta-green.png') center / cover no-repeat;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: center;
     padding: 40px;
   }
 
   .logo {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 24px;
   }
-  .logo svg { display: block; width: 36px; height: 36px; flex-shrink: 0; }
+  .logo svg { display: block; width: 140px; height: 140px; }
   .logo-name {
     font-family: 'GT Eesti Pro Text', system-ui, sans-serif;
-    font-size: 15px;
-    line-height: 1.25;
-    color: rgba(245, 242, 233, 0.80);
-    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.2;
+    color: #F5F2E9;
+    font-weight: 500;
+    text-align: center;
   }
 
   /* ── Right panel — DS form ── */
