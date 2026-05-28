@@ -21,6 +21,9 @@ _edit-threads.json
 _edit-threads.processed.jsonl
 .project-journal/watcher-nudges/
 
+# Font tweaks panel — runtime inbox files (local-only, written by inbox-server.py)
+_edit-inbox.json
+
 # Per-session ephemera written by Second Brain hooks and /wrap skill (local-only by design).
 # `**/` prefix matches at any depth (root + nested sub-projects).
 # Canonical source: SB `_system/git-config/gitignore-project-journal-rules.txt`.

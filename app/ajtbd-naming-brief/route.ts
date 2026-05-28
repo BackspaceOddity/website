@@ -80,11 +80,16 @@ const html = `<!DOCTYPE html>
     --fs-ej-frame:    26px;
     --fs-strategy:    26px;
     --fs-tov-summary: 26px;
-    --fs-secondary:   15px;  /* ba-col p, criterion-title, limit-text, comp-card p, strategy-rationale */
+    --fs-secondary:        15px;  /* ba-col p, criterion-title, limit-text, comp-card p */
+    --fs-strategy-rationale: 17px;  /* strategy card body text */
     --fs-small:       16px;  /* criterion-desc, check-list li, check-section p */
     --fs-positioning: 17px;
     --fs-note:        16px;
     --fs-list-item:   19px;  /* two-col items */
+    --fs-section-num: 13px;  /* section labels (01 — What the Methodology Is) */
+    --fs-pos-label:   12px;  /* positioning row labels (For Whom, Unlike, etc.) */
+    --fs-adjective:   14px;  /* brand character adjective cards (RU) */
+    --fs-adjective-en:16px;  /* brand character adjective cards (EN italic) */
     /* ── Line-height tokens ── */
     --lh-body:    1.50;
     --lh-heading: 1.15;
@@ -150,7 +155,7 @@ const html = `<!DOCTYPE html>
   .section-num {
     font-family: var(--text);
     font-style: italic;
-    font-size: 11px;
+    font-size: var(--fs-section-num);
     letter-spacing: 0.05em;
     color: var(--ink-55);
     margin-bottom: 10px;
@@ -402,7 +407,7 @@ const html = `<!DOCTYPE html>
   .positioning-row { display: contents; }
   .positioning-label {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: var(--fs-pos-label);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--ink-40);
@@ -436,7 +441,7 @@ const html = `<!DOCTYPE html>
     padding: 18px 14px;
     text-align: center;
     font-family: var(--text);
-    font-size: 14px;
+    font-size: var(--fs-adjective);
     font-weight: 400;
     color: var(--ink);
     position: relative;
@@ -444,7 +449,7 @@ const html = `<!DOCTYPE html>
   .adjective.en {
     font-family: var(--display);
     font-style: italic;
-    font-size: 16px;
+    font-size: var(--fs-adjective-en);
     color: var(--ink-55);
   }
   .adjective::after {
@@ -549,7 +554,7 @@ const html = `<!DOCTYPE html>
     margin-bottom: 12px;
     font-style: italic;
   }
-  .strategy-rationale { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
+  .strategy-rationale { font-family: var(--text); font-size: var(--fs-strategy-rationale); line-height: var(--lh-body); color: var(--ink-55); }
   .strategy-rationale strong { color: var(--ink); font-weight: 500; }
   .strategy-card.resolved::after {
     content: '\\2713 resolved';
@@ -969,7 +974,7 @@ const html = `<!DOCTYPE html>
       <span class="limit-text">Any name with an existing trademark in classes 35, 41, 42 in the US or EU.</span>
     </div>
   </div>
-  <p style="margin-top: 20px; font-size: 13px; color: var(--ink-40); font-style: italic;">Note: constructions like <strong>"Theory of …"</strong> are a valid reference (Theory of Constraints), not a stop factor.</p>
+  <p style="margin-top: 20px; font-size: var(--fs-note); color: var(--ink-40); font-style: italic;">Note: constructions like <strong>"Theory of …"</strong> are a valid reference (Theory of Constraints), not a stop factor.</p>
 </section>
 
 <!-- 10 (was 09) ──────────────────────────────────────── -->
@@ -1038,6 +1043,268 @@ const html = `<!DOCTYPE html>
 </script>
 
 <script>
+/* ── Edit Mode Panel ────────────────────────────────── */
+(function () {
+  var INBOX = 'http://localhost:8002/inbox';
+  var STORE = 'naming-brief-edit-threads';
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE) || '{"threads":{}}'); }
+    catch(e) { return { threads: {} }; }
+  }
+  function persist(d) { d.savedAt = new Date().toISOString(); localStorage.setItem(STORE, JSON.stringify(d)); }
+  function cssSel(el) {
+    if (el.id) return '#' + el.id;
+    var path = [], n = el;
+    while (n && n !== document.body && path.length < 4) {
+      if (n.id) { path.unshift('#' + n.id); break; }
+      var seg = n.tagName.toLowerCase();
+      if (n.classList && n.classList.length) seg += '.' + n.classList[0];
+      path.unshift(seg); n = n.parentElement;
+    }
+    return path.join(' > ');
+  }
+  function mk(tag) { return document.createElement(tag); }
+
+  /* ── Toggle button ── */
+  var editBtn = mk('button');
+  editBtn.innerHTML = '&#9998; Edit';
+  editBtn.style.cssText = 'position:fixed;top:14px;right:16px;z-index:10000;' +
+    'background:var(--paper);color:var(--ink-55);' +
+    'border:1px solid var(--rule-strong);border-radius:6px;padding:5px 12px;' +
+    'font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;' +
+    'cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);' +
+    'box-shadow:0 1px 6px rgba(0,0,0,.10);transition:all .12s;line-height:1;white-space:nowrap;';
+  document.body.appendChild(editBtn);
+
+  /* ── Count badge ── */
+  var badge = mk('span');
+  badge.style.cssText = 'position:fixed;top:8px;right:8px;z-index:10001;' +
+    'background:var(--ink);color:var(--paper);' +
+    'border-radius:50%;min-width:18px;height:18px;padding:0 3px;' +
+    'font-size:10px;font-weight:600;text-align:center;line-height:18px;' +
+    'display:none;pointer-events:none;font-family:var(--mono);';
+  document.body.appendChild(badge);
+
+  /* ── Hover ring ── */
+  var ring = mk('div');
+  ring.style.cssText = 'position:fixed;pointer-events:none;z-index:9997;display:none;' +
+    'outline:2px solid rgba(1,28,0,.35);outline-offset:2px;' +
+    'background:rgba(1,28,0,.03);border-radius:4px;';
+  document.body.appendChild(ring);
+
+  /* ── Comment dialog ── */
+  var dlg = mk('div');
+  dlg.style.cssText = 'position:fixed;z-index:10002;display:none;' +
+    'background:var(--paper);border:1.5px solid var(--rule-strong);' +
+    'border-radius:12px;padding:14px;width:300px;' +
+    'box-shadow:0 16px 48px rgba(0,0,0,.20);font-family:var(--text);';
+  var MODE_BTN_BASE = 'flex:1;border:none;border-radius:4px;padding:3px 0;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;';
+  dlg.innerHTML = [
+    '<div style="display:flex;gap:4px;margin-bottom:10px;background:var(--paper-soft);border-radius:6px;padding:3px;">',
+    '<button id="em-mode-v" style="' + MODE_BTN_BASE + 'background:transparent;color:var(--ink-40);">Visual</button>',
+    '<button id="em-mode-c" style="' + MODE_BTN_BASE + 'background:var(--ink);color:var(--paper);">Copy</button>',
+    '</div>',
+    '<p id="em-lbl" style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;',
+    'text-transform:uppercase;color:var(--ink-40);margin-bottom:8px;',
+    'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></p>',
+    '<textarea id="em-ta" rows="3" style="display:block;width:100%;box-sizing:border-box;',
+    'border:1px solid var(--rule-strong);border-radius:6px;padding:9px 10px;',
+    'font-family:var(--text);font-size:14px;line-height:1.5;resize:vertical;',
+    'background:var(--surface);color:var(--ink);outline:none;"></textarea>',
+    '<div style="display:flex;gap:8px;margin-top:8px;">',
+    '<button id="em-ok" style="flex:2;background:var(--ink);color:var(--paper);border:none;',
+    'border-radius:6px;padding:8px 0;font-family:var(--mono);font-size:10px;font-weight:500;',
+    'letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Save &#8629;</button>',
+    '<button id="em-cancel" style="flex:1;background:transparent;color:var(--ink-55);',
+    'border:1px solid var(--rule-strong);border-radius:6px;padding:8px 0;',
+    'font-family:var(--mono);font-size:10px;font-weight:500;',
+    'letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Cancel</button>',
+    '</div>'
+  ].join('');
+  document.body.appendChild(dlg);
+
+  /* ── Sidebar panel ── */
+  var sidePanel = mk('div');
+  sidePanel.style.cssText = 'position:fixed;z-index:9999;display:none;' +
+    'top:50px;right:16px;width:272px;max-height:calc(100vh - 80px);overflow-y:auto;' +
+    'background:var(--paper);border:1.5px solid var(--rule-strong);' +
+    'border-radius:12px;padding:12px 14px;' +
+    'box-shadow:0 16px 48px rgba(0,0,0,.20);font-family:var(--text);';
+  sidePanel.innerHTML = [
+    '<div style="display:flex;gap:6px;margin-bottom:10px;">',
+    '<button id="em-clear" style="flex:1;background:transparent;color:var(--ink-40);',
+    'border:1px solid var(--rule-strong);border-radius:6px;',
+    'padding:5px 0;font-family:var(--mono);font-size:9px;',
+    'letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">Clear all</button>',
+    '<button id="em-send" style="flex:2;background:var(--ink);color:var(--paper);',
+    'border:none;border-radius:6px;padding:5px 12px;',
+    'font-family:var(--mono);font-size:9px;font-weight:500;',
+    'letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">&#8594; Send to Claude</button>',
+    '</div>',
+    '<div id="em-list"></div>'
+  ].join('');
+  document.body.appendChild(sidePanel);
+
+  /* ── Helpers ── */
+  function ours(el) {
+    return el && (editBtn.contains(el) || badge.contains(el) || ring.contains(el) ||
+                  dlg.contains(el) || sidePanel.contains(el));
+  }
+  function syncBadge() {
+    var n = Object.keys(load().threads).length;
+    badge.textContent = n; badge.style.display = n ? 'block' : 'none';
+    if (n && active && sidePanel.style.display === 'none') sidePanel.style.display = 'block';
+    if (!n && !active) sidePanel.style.display = 'none';
+    renderPanel();
+  }
+  function renderPanel() {
+    var threads = load().threads, list = document.getElementById('em-list');
+    var ids = Object.keys(threads);
+    if (!ids.length) {
+      list.innerHTML = '<p style="font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-40);text-align:center;padding:16px 0;line-height:1.8;">No edits yet.<br>Click any element to comment.</p>';
+      return;
+    }
+    list.innerHTML = ids.map(function(id) {
+      var t = threads[id], e = t.element;
+      var snip = e.textContent.slice(0, 52) + (e.textContent.length > 52 ? '…' : '');
+      var time = new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      var typeLabel = t.type === 'copy' ? 'copy' : 'visual';
+      return '<div style="border-top:1px solid var(--rule);padding:10px 0;">' +
+        '<p style="font-family:var(--mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-40);margin-bottom:4px;">' + e.tag + ' · ' + time + ' · ' + typeLabel + '</p>' +
+        (snip ? '<p style="font-family:var(--text);font-size:12px;color:var(--ink-55);margin-bottom:4px;line-height:1.4;font-style:italic;">“' + snip + '”</p>' : '') +
+        '<p style="font-family:var(--text);font-size:13px;line-height:1.5;color:var(--ink);">' + t.prompt + '</p>' +
+        '<button data-rm="' + id + '" style="background:none;border:none;color:var(--ink-40);font-family:var(--mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;padding:4px 0;">× remove</button>' +
+        '</div>';
+    }).join('');
+    list.querySelectorAll('[data-rm]').forEach(function(b) {
+      b.addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        var d = load(); delete d.threads[b.dataset.rm]; persist(d); syncBadge();
+      });
+    });
+  }
+
+  /* ── Edit mode state ── */
+  var active = false, pending = null, editMode = 'copy';
+
+  function activate() {
+    active = true;
+    editBtn.innerHTML = '✕ Exit';
+    editBtn.style.background = 'var(--ink)'; editBtn.style.color = 'var(--paper)';
+    document.body.style.cursor = 'crosshair';
+    sidePanel.style.display = 'block'; renderPanel();
+    document.addEventListener('mouseover', onHover, true);
+    document.addEventListener('mouseout', onUnhover, true);
+    document.addEventListener('click', onPick, true);
+  }
+  function deactivate() {
+    active = false;
+    editBtn.innerHTML = '&#9998; Edit';
+    editBtn.style.background = 'var(--paper)'; editBtn.style.color = 'var(--ink-55)';
+    document.body.style.cursor = '';
+    ring.style.display = 'none'; closeDlg();
+    document.removeEventListener('mouseover', onHover, true);
+    document.removeEventListener('mouseout', onUnhover, true);
+    document.removeEventListener('click', onPick, true);
+    if (!Object.keys(load().threads).length) sidePanel.style.display = 'none';
+  }
+
+  editBtn.addEventListener('click', function(ev) { ev.stopPropagation(); active ? deactivate() : activate(); });
+
+  function onHover(ev) {
+    if (ours(ev.target)) { ring.style.display = 'none'; return; }
+    var r = ev.target.getBoundingClientRect();
+    ring.style.top = r.top + 'px'; ring.style.left = r.left + 'px';
+    ring.style.width = r.width + 'px'; ring.style.height = r.height + 'px';
+    ring.style.display = 'block';
+  }
+  function onUnhover() { ring.style.display = 'none'; }
+
+  function onPick(ev) {
+    if (ours(ev.target)) return;
+    ev.preventDefault(); ev.stopPropagation();
+    pending = ev.target;
+    var r = ev.target.getBoundingClientRect();
+    var top = r.bottom + 8;
+    if (top + 230 > window.innerHeight) top = Math.max(8, r.top - 240);
+    var left = Math.min(ev.clientX, window.innerWidth - 316);
+    if (left < 8) left = 8;
+    dlg.style.top = top + 'px'; dlg.style.left = left + 'px'; dlg.style.display = 'block';
+    var tag = ev.target.tagName.toLowerCase();
+    var cls = ev.target.classList[0] ? '.' + ev.target.classList[0] : '';
+    var text = ev.target.textContent.trim().slice(0, 42);
+    document.getElementById('em-lbl').textContent = tag + cls + ': "' + text + '"';
+    var ta = document.getElementById('em-ta');
+    ta.value = ''; ta.placeholder = editMode === 'copy' ? 'What copy change?' : 'What layout/style change?';
+    setTimeout(function() { ta.focus(); }, 40);
+    ta.onkeydown = function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); saveEdit(); }
+      if (e.key === 'Escape') closeDlg();
+    };
+  }
+  function closeDlg() { dlg.style.display = 'none'; pending = null; }
+  function saveEdit() {
+    var ta = document.getElementById('em-ta'), txt = ta.value.trim();
+    if (!txt) { closeDlg(); return; }
+    var id = 'edit-' + Date.now(), d = load();
+    d.threads[id] = { id: id, type: editMode, prompt: txt,
+      element: { tag: pending.tagName.toLowerCase(), className: pending.className || '',
+        textContent: pending.textContent.trim().slice(0, 100), selector: cssSel(pending), styles: {} },
+      status: 'pending', createdAt: new Date().toISOString() };
+    persist(d); closeDlg(); syncBadge();
+    var prev = pending.style.outline;
+    pending.style.outline = '2px solid var(--ink)';
+    var el = pending;
+    setTimeout(function() { el.style.outline = prev; }, 700);
+  }
+
+  document.getElementById('em-ok').addEventListener('click', function(ev) { ev.stopPropagation(); saveEdit(); });
+  document.getElementById('em-cancel').addEventListener('click', function(ev) { ev.stopPropagation(); closeDlg(); });
+
+  function setMode(m) {
+    editMode = m;
+    var mv = document.getElementById('em-mode-v'), mc = document.getElementById('em-mode-c');
+    if (!mv || !mc) return;
+    mv.style.background = m === 'visual' ? 'var(--ink)' : 'transparent';
+    mv.style.color      = m === 'visual' ? 'var(--paper)' : 'var(--ink-40)';
+    mc.style.background = m === 'copy'   ? 'var(--ink)' : 'transparent';
+    mc.style.color      = m === 'copy'   ? 'var(--paper)' : 'var(--ink-40)';
+  }
+  document.getElementById('em-mode-v').addEventListener('click', function(ev) { ev.stopPropagation(); setMode('visual'); });
+  document.getElementById('em-mode-c').addEventListener('click', function(ev) { ev.stopPropagation(); setMode('copy'); });
+
+  document.getElementById('em-send').addEventListener('click', function(ev) {
+    ev.stopPropagation();
+    var sendBtn = document.getElementById('em-send'), data = load();
+    if (!Object.keys(data.threads).length) {
+      sendBtn.textContent = '— no edits'; setTimeout(function() { sendBtn.innerHTML = '&#8594; Send to Claude'; }, 1200); return;
+    }
+    fetch(INBOX, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+      .then(function() {
+        persist({ threads: {} }); syncBadge();
+        sendBtn.textContent = '✓ Sent!';
+        setTimeout(function() { sendBtn.innerHTML = '&#8594; Send to Claude'; }, 2000);
+      }).catch(function() {
+        sendBtn.textContent = '✗ Server off';
+        setTimeout(function() { sendBtn.innerHTML = '&#8594; Send to Claude'; }, 2500);
+      });
+  });
+  document.getElementById('em-clear').addEventListener('click', function(ev) {
+    ev.stopPropagation();
+    if (confirm('Remove all pending edits?')) { persist({ threads: {} }); syncBadge(); }
+  });
+
+  document.addEventListener('keydown', function(ev) {
+    if (ev.key !== 'Escape') return;
+    if (dlg.style.display !== 'none') closeDlg(); else if (active) deactivate();
+  });
+
+  syncBadge();
+}());
+</script>
+
+<script>
 /* ── Font Tweaks Panel ──────────────────────────────── */
 (function () {
   var SIZES = [
@@ -1053,6 +1320,11 @@ const html = `<!DOCTYPE html>
     { key: '--fs-positioning', label: 'Positioning text',  def: 17, min: 12, max: 24 },
     { key: '--fs-note',        label: 'Notes',             def: 13, min: 10, max: 18 },
     { key: '--fs-list-item',   label: 'List items',        def: 16, min: 12, max: 24 },
+    { key: '--fs-section-num',  label: 'Section labels',    def: 13, min: 10, max: 18 },
+    { key: '--fs-pos-label',    label: 'Positioning labels',def: 12, min: 10, max: 18 },
+    { key: '--fs-adjective',         label: 'Brand adjectives',   def: 14, min: 11, max: 22 },
+    { key: '--fs-adjective-en',      label: 'Adj. EN italic',     def: 16, min: 12, max: 24 },
+    { key: '--fs-strategy-rationale',label: 'Strategy rationale', def: 17, min: 13, max: 26 },
   ];
   /* line-heights stored as integers ×100 (e.g. 170 = 1.70) */
   var LINE_HEIGHTS = [

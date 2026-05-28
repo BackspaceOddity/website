@@ -1,5 +1,15 @@
 # Learnings
 
+## Session 2026-05-28 — Font tweaks panel + ej-frame copy
+
+[2026-05-28] [WIN] [CROSS-PROJECT]: **Live CSS var tweaks panel pattern.** Self-contained vanilla JS IIFE before `</body>` — sliders update CSS custom properties in `:root` in real-time, persisted to localStorage. "Save to Claude" POSTs payload to `localhost:8002/inbox` (inbox-server.py), which writes `_edit-inbox.json`. CC Monitor watches the file; fires INBOX_READY with full payload. Zero round-trips for iterating typography. `inbox-server.py` lives at project root; `_edit-inbox.json` gitignored as runtime artifact.
+
+[2026-05-28] [LEARN] [LOCAL]: **CSS custom properties must replace ALL hardcoded values** — both in CSS classes AND inline `style=""` attributes in the HTML. Missed inline styles initially (`.ba-core p` had `font-size:18px` inline); panel sliders had no effect on those elements until converted to `style="font-size: var(--fs-ba-core)"`. Pattern: search for `font-size:` and `line-height:` in the HTML string before assuming CSS vars cover everything.
+
+[2026-05-28] [LEARN] [LOCAL]: **Line-heights stored as integers ×100 in localStorage** to keep the slider range integer-friendly (100–200 = 1.00–2.00). When reading back: `stored_value / 100`. When setting CSS var: `document.documentElement.style.setProperty('--lh-body', String(val / 100))`. Avoids float precision issues in range inputs.
+
+[2026-05-28] [LEARN] [LOCAL]: **inbox-server.py write path is relative to the script's own location**, not the CC session CWD. Start it with `cd <project-root> && python3 inbox-server.py 8002` to ensure `_edit-inbox.json` lands at project root, which is what the Monitor watch path expects.
+
 ## Session 2026-05-28 — ej-frame copy iteration + font sizes
 
 [2026-05-28] [LEARN] [COPY]: **"Perfectly executed wrong bet" is the sharpest articulation of the emotional job for Ivan Zamesin's methodology.** The phrase captures the paradox (competence + wrong direction) in 4 words. Final ej-frame: "When I give everything — because the stakes demand it, or because that's my ethos — know the direction is right. Not waste it all on a perfectly executed wrong bet." Job statement syntax per Kalbach.

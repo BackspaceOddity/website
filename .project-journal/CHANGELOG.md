@@ -402,3 +402,35 @@ Cross-project work из SB session — Yegor visit'нул что live = V1 не�
 ### 2026-05-21 — orphan session rolled up (PID no longer alive)
 
 - Timeline file `2026-05-21-0122-85931-yegorkorobeynikov.md` had 3 user prompts, 76 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-26 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-26-1250-91303-yegorkorobeynikov.md` had 1 user prompts, 9 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-27 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-27-0059-38013-yegorkorobeynikov.md` had 0 user prompts, 47 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-27 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-27-0150-42622-yegorkorobeynikov.md` had 0 user prompts, 8 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-27 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-27-0143-45686-yegorkorobeynikov.md` had 3 user prompts, 45 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-27 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-27-0217-50948-yegorkorobeynikov.md` had 0 user prompts, 10 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-27 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-27-0202-50119-yegorkorobeynikov.md` had 2 user prompts, 36 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-27 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-27-1033-1481-yegorkorobeynikov.md` had 5 user prompts, 16 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-05-28 — orphan session rolled up (PID no longer alive)
+
+- Timeline file `2026-05-28-0041-11800-yegorkorobeynikov.md` had 0 user prompts, 5 tool calls, 0 errors. Full raw log has been deleted (retention policy).
