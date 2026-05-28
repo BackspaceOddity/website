@@ -85,6 +85,10 @@ const html = `<!DOCTYPE html>
     --fs-positioning: 17px;
     --fs-note:        16px;
     --fs-list-item:   19px;  /* two-col items */
+    --fs-section-num: 13px;  /* section labels (01 — What the Methodology Is) */
+    --fs-pos-label:   12px;  /* positioning row labels (For Whom, Unlike, etc.) */
+    --fs-adjective:   14px;  /* brand character adjective cards (RU) */
+    --fs-adjective-en:16px;  /* brand character adjective cards (EN italic) */
     /* ── Line-height tokens ── */
     --lh-body:    1.50;
     --lh-heading: 1.15;
@@ -150,7 +154,7 @@ const html = `<!DOCTYPE html>
   .section-num {
     font-family: var(--text);
     font-style: italic;
-    font-size: 11px;
+    font-size: var(--fs-section-num);
     letter-spacing: 0.05em;
     color: var(--ink-55);
     margin-bottom: 10px;
@@ -402,7 +406,7 @@ const html = `<!DOCTYPE html>
   .positioning-row { display: contents; }
   .positioning-label {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: var(--fs-pos-label);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--ink-40);
@@ -436,7 +440,7 @@ const html = `<!DOCTYPE html>
     padding: 18px 14px;
     text-align: center;
     font-family: var(--text);
-    font-size: 14px;
+    font-size: var(--fs-adjective);
     font-weight: 400;
     color: var(--ink);
     position: relative;
@@ -444,7 +448,7 @@ const html = `<!DOCTYPE html>
   .adjective.en {
     font-family: var(--display);
     font-style: italic;
-    font-size: 16px;
+    font-size: var(--fs-adjective-en);
     color: var(--ink-55);
   }
   .adjective::after {
@@ -1314,6 +1318,10 @@ const html = `<!DOCTYPE html>
     { key: '--fs-positioning', label: 'Positioning text',  def: 17, min: 12, max: 24 },
     { key: '--fs-note',        label: 'Notes',             def: 13, min: 10, max: 18 },
     { key: '--fs-list-item',   label: 'List items',        def: 16, min: 12, max: 24 },
+    { key: '--fs-section-num',  label: 'Section labels',    def: 13, min: 10, max: 18 },
+    { key: '--fs-pos-label',    label: 'Positioning labels',def: 12, min: 10, max: 18 },
+    { key: '--fs-adjective',    label: 'Brand adjectives',  def: 14, min: 11, max: 22 },
+    { key: '--fs-adjective-en', label: 'Adj. EN italic',    def: 16, min: 12, max: 24 },
   ];
   /* line-heights stored as integers ×100 (e.g. 170 = 1.70) */
   var LINE_HEIGHTS = [
