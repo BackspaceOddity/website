@@ -11,6 +11,7 @@
 
 import type { ClientPage } from '../types';
 import { demoPage } from './_demo';
+import { uremboPage } from './urembo';
 
 export interface ClientEntry {
   page: ClientPage;
@@ -22,7 +23,7 @@ export interface ClientEntry {
 
 export const clients: Record<string, ClientEntry> = {
   _demo: { page: demoPage, passwordEnv: 'WS_PW_DEMO' },
-  // urembo: { page: uremboPage, passwordEnv: 'WS_PW_UREMBO' },  // BSO-560
+  urembo: { page: uremboPage, passwordEnv: 'WS_PW_UREMBO' },  // BSO-560 — DRAFT, ungated until WS_PW_UREMBO set
 };
 
 export function getClient(slug: string): ClientEntry | undefined {
