@@ -73,7 +73,7 @@ export const uremboPage: ClientPage = {
       sectionNum: '03 — Where we’d start',
       heading: 'Our read on the first move',
       body: [
-        'Of the five entry points on the page you looked at, this is Workflow transformation: we find where the team loses the most time, pick one workflow, and rebuild it. Our approach is simple — take the one repetitive job that’s blocking growth and make it run without you, on the stack you already own.',
+        'The approach is the one we call Workflow transformation on the page you looked at: pick the one high-frequency workflow where the most time disappears, and rebuild it with AI as a native part — so within a few weeks you run it without us. For Urembo, that workflow is merchant onboarding. Built on the stack you already own.',
         'You’re in a stronger starting position than most businesses at this stage. The infrastructure is yours — GitHub, your own database, your own back office. Your data sits in one place. And you already think in systems. That means an automation can be built on top of what exists, not bolted on from outside.',
         'The first build is the onboarding approval flow: read the submitted documents, run the verification and authenticity checks, set up the Paystack sub-account, and activate the merchant — escalating to you only when something is genuinely unclear. Support tickets follow the same pattern once volume is real.',
       ],
