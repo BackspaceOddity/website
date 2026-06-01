@@ -32,6 +32,21 @@ export const styles = `
     src: url('/fonts/GTEestiProText-Medium.ttf') format('truetype');
     font-weight: 500; font-style: normal; font-display: swap;
   }
+  @font-face {
+    font-family: 'GT Eesti Pro Text';
+    src: url('/fonts/GTEestiProText-Bold.ttf') format('truetype');
+    font-weight: 700; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'GT Eesti Pro Display';
+    src: url('/fonts/GTEestiProDisplay-Medium.ttf') format('truetype');
+    font-weight: 500; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'GT Eesti Pro Display';
+    src: url('/fonts/GTEestiProDisplay-Bold.ttf') format('truetype');
+    font-weight: 700; font-style: normal; font-display: swap;
+  }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -67,6 +82,14 @@ export const styles = `
     --lh-heading: 1.15;
     --lh-quote:   1.5;
     --lh-ba-core: 1.35;
+    /* ── Weight + style tokens (adjustable via Tweaks panel) ── */
+    --w-h2: 400;          --st-h2: normal;
+    --w-body: 400;        --st-body: normal;
+    --w-statement: 400;   --st-statement: italic;
+    --w-ba-core: 400;     --st-ba-core: italic;
+    --w-ej-frame: 400;    --st-ej-frame: italic;
+    --w-list-item: 500;   --st-list-item: normal;
+    --w-section-num: 400; --st-section-num: italic;
   }
 
   html.dark {
@@ -99,10 +122,10 @@ export const styles = `
   .doc-date { font-family: var(--mono); font-size: 11px; color: var(--ink-40); text-align: right; line-height: 1.7; }
 
   /* ── Typography ── */
-  .section-num { font-family: var(--text); font-style: italic; font-size: var(--fs-section-num); letter-spacing: 0.05em; color: var(--ink-55); margin-bottom: 10px; display: block; }
-  h2 { font-family: var(--display); font-size: var(--fs-h2); font-weight: 400; line-height: var(--lh-heading); margin-bottom: 22px; color: var(--ink); }
+  .section-num { font-family: var(--text); font-weight: var(--w-section-num); font-style: var(--st-section-num); font-size: var(--fs-section-num); letter-spacing: 0.05em; color: var(--ink-55); margin-bottom: 10px; display: block; }
+  h2 { font-family: var(--display); font-size: var(--fs-h2); font-weight: var(--w-h2); font-style: var(--st-h2); line-height: var(--lh-heading); margin-bottom: 22px; color: var(--ink); }
   h3 { font-family: var(--text); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; color: var(--ink-55); }
-  p { font-family: var(--text); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); }
+  p { font-family: var(--text); font-weight: var(--w-body); font-style: var(--st-body); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); }
   p + p { margin-top: 12px; }
   a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
   a:hover { text-decoration-color: var(--ink); }
@@ -112,7 +135,7 @@ export const styles = `
   /* ── Statement / pull quote ── */
   .statement {
     font-family: var(--display); font-size: var(--fs-statement); line-height: var(--lh-quote);
-    font-style: italic; color: var(--ink); border-left: 3px solid var(--rule-strong);
+    font-weight: var(--w-statement); font-style: var(--st-statement); color: var(--ink); border-left: 3px solid var(--rule-strong);
     padding-left: 24px; margin: 28px 0;
   }
 
@@ -125,13 +148,13 @@ export const styles = `
   .ba-col { padding: 24px; background: var(--surface); }
   .ba-col.ba-before { background: var(--paper-soft); }
   .ba-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-40); display: block; margin-bottom: 14px; }
-  .ba-core { font-family: var(--display); font-size: var(--fs-ba-core); line-height: var(--lh-ba-core); font-style: italic; color: var(--ink); margin-bottom: 12px; }
+  .ba-core { font-family: var(--display); font-size: var(--fs-ba-core); line-height: var(--lh-ba-core); font-weight: var(--w-ba-core); font-style: var(--st-ba-core); color: var(--ink); margin-bottom: 12px; }
   .ba-col p { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
 
   /* ── Emphasis frame (dark) ── */
   .ej-frame { background: var(--ink); padding: 28px 32px; margin: 28px 0 20px; }
   .ej-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--on-dark-muted); display: block; margin-bottom: 12px; }
-  .ej-frame p { font-family: var(--display); font-size: var(--fs-ej-frame); line-height: var(--lh-quote); font-style: italic; color: var(--on-dark-primary); }
+  .ej-frame p { font-family: var(--display); font-size: var(--fs-ej-frame); line-height: var(--lh-quote); font-weight: var(--w-ej-frame); font-style: var(--st-ej-frame); color: var(--on-dark-primary); }
   .note-small { font-family: var(--text); font-size: var(--fs-note); color: var(--ink-40); font-style: italic; line-height: 1.6; margin-top: 4px; }
 
   /* ── Two-column ── */
@@ -141,7 +164,7 @@ export const styles = `
   .steps { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
   .step-row { display: flex; gap: 14px; align-items: flex-start; padding: 16px 18px; background: var(--surface); border-left: 3px solid var(--rule-strong); }
   .step-num { font-family: var(--mono); font-size: 11px; color: var(--ink-40); padding-top: 3px; min-width: 26px; }
-  .step-body .step-title { font-family: var(--text); font-size: var(--fs-list-item); font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .step-body .step-title { font-family: var(--text); font-size: var(--fs-list-item); font-weight: var(--w-list-item); font-style: var(--st-list-item); color: var(--ink); margin-bottom: 4px; }
   .step-body .step-desc { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
   .next-link { display: inline-block; margin-top: 20px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
 
