@@ -134,6 +134,12 @@ export const styles = `
 
   .divider { border: none; border-top: 1px solid var(--rule); margin: 48px 0; }
 
+  /* Each section owns its top gap so spacing is uniform whether or not a
+     divider precedes it. Margins collapse with an adjacent .divider, so
+     divider'd sections keep the same rhythm. First section's gap collapses
+     with .doc-header margin-bottom. */
+  body > section { margin-top: 48px; }
+
   /* ── Statement / pull quote ── */
   .statement {
     font-family: var(--display); font-size: var(--fs-statement); line-height: var(--lh-quote);
