@@ -1,21 +1,22 @@
 /**
  * Interactive Proposal Workspace — generic gated route (v1)
  *
- * /w/<client> → resolves the slug in the client registry, applies the
- * per-client password gate (same sha256-cookie scheme as ajtbd-naming-brief),
- * and renders the page from its block data file.
+ * /w/<client>  or  <client>.backspaceoddity.com (via middleware rewrite)
  *
- * Per-client password lives in the env var named by the registry entry
- * (e.g. WS_PW_UREMBO). If that var is unset, the page serves ungated — a dev
- * convenience that mirrors the ajtbd route.
+ * Password source (in priority order):
+ *   1. Supabase `workspaces` table — authoritative in production
+ *   2. WS_PW_{SLUG} env var         — dev fallback / CI without Supabase
  *
- * BSO-558 (parent BSO-557).
+ * Empty password → serve ungated (dev convenience).
+ *
+ * BSO-558 (parent BSO-557). Supabase auth: BSO-577.
  */
 
 import { NextResponse } from 'next/server';
 import { getClient } from '@/lib/proposal-workspace/clients';
 import { renderPage } from '@/lib/proposal-workspace/render';
 import { token, getCookie, cookieName, loginHtml } from '@/lib/proposal-workspace/chrome';
+import { getWorkspacePassword } from '@/lib/proposal-workspace/auth';
 
 const editMode = () => process.env.WS_EDIT_MODE === '1';
 const htmlHeaders = { 'Content-Type': 'text/html; charset=utf-8' };
@@ -29,10 +30,9 @@ export async function GET(req: Request, ctx: { params: Promise<{ client: string 
   const entry = getClient(client);
   if (!entry) return notFound();
 
-  const accessKey = process.env[entry.passwordEnv] || '';
+  const accessKey = await getWorkspacePassword(client);
   const renderHtml = () => new NextResponse(renderPage(entry.page, { editMode: editMode() }), { headers: htmlHeaders });
 
-  // No password configured → serve ungated (dev convenience).
   if (!accessKey) return renderHtml();
 
   if (getCookie(req, cookieName(client)) !== token(accessKey, client)) {
@@ -49,7 +49,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ client: string
   const entry = getClient(client);
   if (!entry) return notFound();
 
-  const accessKey = process.env[entry.passwordEnv] || '';
+  const accessKey = await getWorkspacePassword(client);
   const body = await req.text();
   const entered = new URLSearchParams(body).get('code') ?? '';
 
