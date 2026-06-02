@@ -35,9 +35,9 @@ export const uremboPage: ClientPage = {
       statement:
         'You’ve built a real marketplace. The thing slowing you down isn’t the product — it’s that the operation still runs through you.',
       body: [
-        'Urembo Hub is a beauty marketplace for Kenya — verified vendors, authentic products, booking and live shopping in one place, with a merchant dashboard for the businesses you onboard. The platform is built and live, and you’re in the acquisition phase: first merchants on, first stores trading.',
+        'Urembo Hub is a beauty marketplace for Kenya — the platform is built and live, and you’re onboarding your first merchants.',
         'The bottleneck right now is operational. Every merchant sign-up passes through you by hand — document checks, business verification, Paystack sub-account approval — and a new merchant waits three to five days before they can start. As traffic grows, that queue grows with you in the middle of it.',
-        'You came in with two larger ambitions. We’re holding both — but the one that fits where Urembo actually is today is automating the onboarding and support work. The growth-and-content side is real, and we’ll come back to it; it’s a separate, harder project to scope before the operation underneath it runs on its own.',
+        'You came in with two bigger goals. The one that fits Urembo today is automating the onboarding and support work. The growth side is real too — but it lands better once the operation underneath runs on its own.',
       ],
       pills: ['Beauty marketplace', 'Kenya', 'Merchant onboarding', 'Operational wedge'],
     },
@@ -73,12 +73,12 @@ export const uremboPage: ClientPage = {
       sectionNum: '03 — Where we’d start',
       heading: 'Our read on the first move',
       body: [
-        'It’s the same way we work on the engagements you saw on the page: pick the one high-frequency workflow where the most time disappears, and rebuild it with AI as a native part — so within a few weeks you run it without us. For Urembo, that workflow is merchant onboarding. Built on the stack you already own.',
-        'You’re in a stronger starting position than most businesses at this stage. The infrastructure is yours — GitHub, your own database, your own back office. Your data sits in one place. And you already think in systems. That means an automation can be built on top of what exists, not bolted on from outside.',
+        'It’s the same way we work on the engagements you saw on the page: take the one workflow that eats the most time and rebuild it with AI built in — so within a few weeks you run it without us. For Urembo, that workflow is merchant onboarding, on the stack you already own.',
+        'You own your stack — GitHub, your own database, your own back office — and your data sits in one place. The automation builds on what you already have, instead of bolting on from outside.',
         'The first build is the onboarding approval flow: read the submitted documents, run the verification and authenticity checks, set up the Paystack sub-account, and activate the merchant — escalating to you only when something is genuinely unclear. Support tickets follow the same pattern once volume is real.',
       ],
       example:
-        'The same engine that clears a merchant in minutes also gives you the audit trail — every approval, every reason — so the operation stays trustworthy as it scales.',
+        'The same engine that clears a merchant in minutes also gives you the audit trail — every approval, every reason, on record.',
     },
 
     { block: 'divider' },
@@ -105,7 +105,6 @@ export const uremboPage: ClientPage = {
       heading: 'Why this is a good place to build',
       body: [
         'Fifteen years in the beauty industry before you built the platform — you’re not solving a problem you read about, you’re solving one you lived. That shows in how specifically you described the gap in the market and the merchants you’re onboarding.',
-        'And you own your stack, your data is in one place, and you’re already reaching for the right tools. That’s a much better foundation to automate on than most businesses your size have.',
       ],
     },
 
