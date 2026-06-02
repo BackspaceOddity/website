@@ -35,9 +35,9 @@ export const uremboPage: ClientPage = {
       statement:
         'You’ve built a real marketplace. The thing slowing you down isn’t the product — it’s that the operation still runs through you.',
       body: [
-        'Urembo Hub is a beauty marketplace for Kenya — the platform is built and live, and you’re onboarding your first merchants.',
+        'Urembo Hub is a beauty marketplace for Kenya — the platform is built and live, and you’re bringing merchants onto it.',
         'The bottleneck right now is operational. Every merchant sign-up passes through you by hand — document checks, business verification, Paystack sub-account approval — and a new merchant waits three to five days before they can start. As traffic grows, that queue grows with you in the middle of it.',
-        'You came in with two bigger goals. The one that fits Urembo today is automating the onboarding and support work. The growth side is real too — but it lands better once the operation underneath runs on its own.',
+        'Across the business, we see real room to streamline the operational work. The place to start is merchant onboarding — the back-office approvals that gate every new store. Once that runs on its own, the same approach extends to the rest: support as volume grows, and the bigger growth goals you came in with.',
       ],
       pills: ['Beauty marketplace', 'Kenya', 'Merchant onboarding', 'Operational wedge'],
     },
