@@ -15,11 +15,21 @@
  * Re-running for an existing slug rotates the password (upsert).
  * Pass --keep to leave an existing password untouched (idempotent re-run).
  *
+ * The access code is ALWAYS written to .workspace-secrets/<slug>.txt
+ * (gitignored, mode 0600). By default it's also echoed to stdout. Pass
+ * --no-echo to suppress the echo — lets an agent run this without the code
+ * landing in a transcript; you open the file to read it.
+ *
  * BSO-583. Reads SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY from env.
  */
 
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const [, , slug, clientName, ...flags] = process.argv;
 
@@ -74,11 +84,24 @@ async function main() {
     process.exit(1);
   }
 
+  // Always write to a gitignored file (mode 0600) so the code survives even
+  // when not echoed.
+  const dir = path.join(__dirname, '..', '.workspace-secrets');
+  fs.mkdirSync(dir, { recursive: true });
+  const outFile = path.join(dir, `${slug}.txt`);
+  fs.writeFileSync(outFile, accessCode + '\n', { mode: 0o600 });
+
   console.log(`\n✓ Workspace "${slug}" ready.`);
   console.log(`  Client:   ${clientName}`);
   console.log(`  Page:     https://${slug}.backspaceoddity.com   (or /w/${slug})`);
-  console.log(`\n  ACCESS CODE (send to client, shown once):\n`);
-  console.log(`      ${accessCode}\n`);
+  console.log(`  Code file: .workspace-secrets/${slug}.txt`);
+
+  if (flags.includes('--no-echo')) {
+    console.log(`\n  Access code written to the file above (open it to read).\n`);
+  } else {
+    console.log(`\n  ACCESS CODE (send to client):\n`);
+    console.log(`      ${accessCode}\n`);
+  }
 }
 
 main();
