@@ -62,6 +62,7 @@ export const styles = `
     --ink-25: rgba(1, 28, 0, 0.25);
     --on-dark-primary:    rgba(245, 242, 233, 0.92);
     --on-dark-secondary:  rgba(245, 242, 233, 0.65);
+    --em-ring: #3D6A4E;
     --on-dark-muted:      rgba(245, 242, 233, 0.42);
     --on-dark-border:     rgba(245, 242, 233, 0.22);
     --display: 'GT Eesti Pro Display', system-ui, sans-serif;
@@ -106,6 +107,7 @@ export const styles = `
     --on-dark-secondary:  rgba(13, 18, 9, 0.65);
     --on-dark-muted:      rgba(13, 18, 9, 0.42);
     --on-dark-border:     rgba(13, 18, 9, 0.22);
+    --em-ring: #E8F0EA;
   }
 
   html { background: var(--paper); color: var(--ink); font-family: var(--text); }
