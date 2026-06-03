@@ -51,13 +51,13 @@ export const styles = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    /* Brand colour tokens — aligned to approved AI Skills Landing palette
-       (cream #F2F2F0 / cream-soft #E8E8E6 / ivory #FAFAF8 / dark-green #011C00). */
+    /* Brand colour tokens — approved AI Skills Landing CORE palette
+       (cream #F2F2F0 / cream-soft #E8E8E6 / ivory #FAFAF8 / dark-green #011C00).
+       No accent colour — the landing's amber #C07800 is landing-specific, not brand. */
     --ink: #011C00;
     --paper: #F2F2F0;
     --paper-soft: #E8E8E6;
     --surface: #FAFAF8;
-    --signal: #C07800;
     --rule: rgba(1, 28, 0, 0.12);
     --rule-strong: rgba(1, 28, 0, 0.22);
     --ink-55: rgba(1, 28, 0, 0.55);
