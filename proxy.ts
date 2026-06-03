@@ -1,11 +1,16 @@
 /**
- * Subdomain routing — routes <slug>.backspaceoddity.com to /w/<slug>.
+ * Subdomain routing — serves <slug>.backspaceoddity.com as a client workspace.
  *
- * urembo.backspaceoddity.com/    → rewrite to /w/urembo
- * backspaceoddity.com/w/urembo  → passes through unchanged
+ * urembo.backspaceoddity.com/           → rewrite to /w/urembo/
+ * urembo.backspaceoddity.com/proposal   → rewrite to /w/urembo/  (vanity entry)
+ * urembo.backspaceoddity.com/w/urembo/  → passthrough (login POST + post-login)
+ * urembo.backspaceoddity.com/fonts/…    → passthrough (static assets)
  *
- * Local dev and Vercel preview URLs (.vercel.app) are skipped so existing
- * /w/<slug> paths continue to work without DNS changes.
+ * Apex/www, localhost, and *.vercel.app are skipped so the main site and
+ * existing /w/<slug> paths keep working without DNS changes.
+ *
+ * One wildcard DNS record (*.backspaceoddity.com) lights up every client
+ * subdomain — no per-client DNS. BSO-583.
  */
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -14,20 +19,15 @@ const ROOT_DOMAIN = 'backspaceoddity.com';
 export function proxy(request: NextRequest) {
   const host = (request.headers.get('host') ?? '').split(':')[0];
 
-  const isRootOrWww =
+  const skip =
     host === ROOT_DOMAIN ||
-    host === `www.${ROOT_DOMAIN}`;
-
-  const isLocalOrPreview =
+    host === `www.${ROOT_DOMAIN}` ||
     host === 'localhost' ||
     host === '127.0.0.1' ||
     host.endsWith('.vercel.app');
 
-  if (isRootOrWww || isLocalOrPreview) {
-    return NextResponse.next();
-  }
+  if (skip) return NextResponse.next();
 
-  // It's a client subdomain — extract slug.
   const slug = host.endsWith(`.${ROOT_DOMAIN}`)
     ? host.slice(0, -(`.${ROOT_DOMAIN}`.length))
     : null;
@@ -36,13 +36,16 @@ export function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Don't double-rewrite if the path is already under /w/ (e.g. POST to
-  // /w/<slug> from the login form while on a subdomain).
-  if (path.startsWith('/w/')) return NextResponse.next();
+  // Vanity entry points → the client page. Everything else (assets, the /w/
+  // login POST + post-login GET) is served by the same app on this host.
+  const isEntry = path === '/' || path === '/proposal' || path === '/proposal/';
+  if (isEntry) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/w/${slug}/`;
+    return NextResponse.rewrite(url);
+  }
 
-  const url = request.nextUrl.clone();
-  url.pathname = `/w/${slug}${path === '/' ? '' : path}`;
-  return NextResponse.rewrite(url);
+  return NextResponse.next();
 }
 
 export const config = {
