@@ -51,20 +51,23 @@ export const styles = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
+    /* Brand colour tokens — aligned to approved AI Skills Landing palette
+       (cream #F2F2F0 / cream-soft #E8E8E6 / ivory #FAFAF8 / dark-green #011C00). */
     --ink: #011C00;
-    --paper: #F5F2E9;
-    --paper-soft: #EFECE3;
-    --surface: #FDFBF4;
+    --paper: #F2F2F0;
+    --paper-soft: #E8E8E6;
+    --surface: #FAFAF8;
+    --signal: #C07800;
     --rule: rgba(1, 28, 0, 0.12);
     --rule-strong: rgba(1, 28, 0, 0.22);
     --ink-55: rgba(1, 28, 0, 0.55);
     --ink-40: rgba(1, 28, 0, 0.40);
     --ink-25: rgba(1, 28, 0, 0.25);
-    --on-dark-primary:    rgba(245, 242, 233, 0.92);
-    --on-dark-secondary:  rgba(245, 242, 233, 0.65);
+    --on-dark-primary:    rgba(242, 242, 240, 0.92);
+    --on-dark-secondary:  rgba(242, 242, 240, 0.65);
     --em-ring: #3D6A4E;
-    --on-dark-muted:      rgba(245, 242, 233, 0.42);
-    --on-dark-border:     rgba(245, 242, 233, 0.22);
+    --on-dark-muted:      rgba(242, 242, 240, 0.42);
+    --on-dark-border:     rgba(242, 242, 240, 0.22);
     --display: 'GT Eesti Pro Display', system-ui, sans-serif;
     --text:    'GT Eesti Pro Text',    system-ui, sans-serif;
     --mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
