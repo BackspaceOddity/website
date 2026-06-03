@@ -108,9 +108,29 @@ export const uremboPage: ClientPage = {
       ],
     },
 
+    { block: 'divider' },
+
+    {
+      block: 'exerciseMatrix',
+      sectionNum: '06 — Over to you',
+      heading: 'Which of these slow you down most?',
+      intro:
+        'We pulled these from our call. Drag each onto the grid — how important it is to you, and how well it’s handled today. The ones high up and to the left are where the time really goes. Tap ＋ note on any card to tell us why (type or record a voice note).',
+      exerciseId: 'jtbd-matrix',
+      axisY: { label: 'How important to you', low: 'Minor', high: 'Critical' },
+      axisX: { label: 'How well it’s handled today', low: 'Painful', high: 'Handled' },
+      jobs: [
+        { id: 'approve', label: 'Approve a new merchant without the 3–5 day wait' },
+        { id: 'verify', label: 'Check documents and business authenticity' },
+        { id: 'paystack', label: 'Set up the Paystack sub-account for each merchant' },
+        { id: 'support', label: 'Handle support tickets as volume grows' },
+        { id: 'audit', label: 'Keep a clear record of every approval and reason' },
+      ],
+    },
+
     {
       block: 'nextSteps',
-      sectionNum: '06 — From our side',
+      sectionNum: '07 — From our side',
       heading: 'What happens next',
       intro:
         'This is our read, not a proposal yet. The next step is a short call to pressure-test it together and agree where to actually start.',
@@ -133,7 +153,7 @@ export const uremboPage: ClientPage = {
 
     {
       block: 'discussion',
-      sectionNum: '07 — To align on',
+      sectionNum: '08 — To align on',
       heading: 'Questions for our next call',
       intro: 'Add your own — this page is yours, and we’ll keep building on it as we go.',
       questions: [

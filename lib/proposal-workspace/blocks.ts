@@ -10,7 +10,7 @@
 import type {
   DocHeaderBlock, DividerBlock, StatementBlock, HeardItBlock, BeforeAfterBlock,
   EmphasisFrameBlock, NarrativeBlock, DemoBlock, WhatStayedBlock, NextStepsBlock,
-  DiscussionBlock, DocFooterBlock,
+  DiscussionBlock, ExerciseMatrixBlock, DocFooterBlock,
 } from './types';
 
 /** Escape plain-text fields. Rich fields (documented in types.ts) are inserted raw. */
@@ -141,6 +141,149 @@ export function discussion(b: DiscussionBlock): string {
     ${items}
   </ul>
 </div>`;
+}
+
+export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
+  const ax = b.axisX ?? { label: 'How well it’s handled today', low: 'Badly served', high: 'Well served' };
+  const ay = b.axisY ?? { label: 'How important to you', low: 'Minor', high: 'Critical' };
+  const cards = b.jobs.map(j =>
+    `<div class="exm-card" data-id="${esc(j.id)}" data-label="${esc(j.label)}"><span class="exm-card-label">${esc(j.label)}</span><button class="exm-note-btn" type="button" title="Add a note" aria-label="Add a note">＋ note</button></div>`
+  ).join('\n      ');
+
+  const css = `
+  .exm-wrap { margin-top: 18px; }
+  .exm-intro { font-family: var(--text); font-size: var(--fs-secondary); color: var(--ink-55); line-height: 1.6; margin-bottom: 20px; max-width: 640px; }
+  .exm-stage { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
+  .exm-ylab { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-40); text-align: center; align-self: center; }
+  .exm-matrix { position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; border: 1.5px solid var(--rule-strong); background: var(--surface); }
+  .exm-matrix::before, .exm-matrix::after { content: ''; position: absolute; background: var(--rule); }
+  .exm-matrix::before { left: 50%; top: 0; bottom: 0; width: 1px; }
+  .exm-matrix::after { top: 50%; left: 0; right: 0; height: 1px; }
+  .exm-hot { position: absolute; left: 0; top: 0; width: 50%; height: 50%; background: rgba(1,28,0,.05); }
+  .exm-hot span { position: absolute; left: 10px; top: 8px; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); }
+  .exm-end { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); }
+  .exm-end.lo-x { bottom: -16px; left: 0; } .exm-end.hi-x { bottom: -16px; right: 0; }
+  .exm-end.lo-y { left: -2px; bottom: -16px; } .exm-end.hi-y { left: -2px; top: -2px; }
+  .exm-xlab { grid-column: 2; text-align: center; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-40); margin-top: 22px; }
+  .exm-tray { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+  .exm-tray-label { width: 100%; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); margin-bottom: 2px; }
+  .exm-card { display: inline-flex; align-items: center; gap: 8px; background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 7px; padding: 8px 10px; font-family: var(--text); font-size: 13px; line-height: 1.3; color: var(--ink); cursor: grab; max-width: 230px; touch-action: none; box-shadow: 0 1px 2px rgba(1,28,0,.06); }
+  .exm-card.placed { position: absolute; z-index: 2; max-width: 190px; font-size: 12px; padding: 6px 8px; }
+  .exm-card.has-note { border-color: var(--ink); }
+  .exm-note-btn { display: none; background: none; border: none; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-40); cursor: pointer; padding: 0; white-space: nowrap; }
+  .exm-card.placed .exm-note-btn { display: inline; }
+  .exm-panel { margin-top: 18px; border-top: 1px solid var(--rule); padding-top: 14px; display: none; }
+  .exm-panel.open { display: block; }
+  .exm-panel-h { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-55); margin-bottom: 8px; }
+  .exm-panel textarea { display: block; width: 100%; box-sizing: border-box; border: 1px solid var(--rule-strong); border-radius: 6px; padding: 9px 10px; font-family: var(--text); font-size: 14px; line-height: 1.5; resize: vertical; background: var(--surface); color: var(--ink); outline: none; min-height: 58px; }
+  .exm-panel-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .exm-mic { background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 6px; padding: 7px 11px; font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-55); cursor: pointer; }
+  .exm-mic.rec { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .exm-mic-note { font-family: var(--mono); font-size: 10px; color: var(--ink-40); }
+  .exm-actions { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+  .exm-save { background: var(--ink); color: var(--paper); border: none; border-radius: 7px; padding: 11px 22px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .exm-save:disabled { opacity: .4; cursor: default; }
+  .exm-status { font-family: var(--mono); font-size: 11px; color: var(--ink-40); }
+  `;
+
+  const root = `exm-${esc(b.exerciseId)}`;
+  const js =
+`(function(){
+  var root=document.getElementById('${root}'); if(!root) return;
+  var matrix=root.querySelector('.exm-matrix'), tray=root.querySelector('.exm-tray');
+  var panel=root.querySelector('.exm-panel'), panelH=root.querySelector('.exm-panel-h');
+  var ta=root.querySelector('.exm-ta'), mic=root.querySelector('.exm-mic'), micNote=root.querySelector('.exm-mic-note');
+  var saveBtn=root.querySelector('.exm-save'), statusEl=root.querySelector('.exm-status');
+  var P={}, active=null, drag=null, ox=0, oy=0, moved=false;
+  function place(card){
+    var mr=matrix.getBoundingClientRect(), cr=card.getBoundingClientRect();
+    var sx=Math.max(0,Math.min(1,(cr.left+cr.width/2-mr.left)/mr.width));
+    var sy=Math.max(0,Math.min(1,(cr.top+cr.height/2-mr.top)/mr.height));
+    var id=card.getAttribute('data-id');
+    P[id]=P[id]||{label:card.getAttribute('data-label')};
+    P[id].satisfaction=Math.round(sx*100); P[id].importance=Math.round((1-sy)*100);
+    status();
+  }
+  function status(){ var n=Object.keys(P).length, t=${b.jobs.length}; statusEl.textContent=n+' of '+t+' placed'; saveBtn.disabled=n===0; }
+  function down(e){ var card=e.target.closest('.exm-card'); if(!card) return;
+    if(e.target.closest('.exm-note-btn')){ openNote(card); return; }
+    drag=card; moved=false; card.setPointerCapture(e.pointerId);
+    var r=card.getBoundingClientRect(); ox=e.clientX-r.left; oy=e.clientY-r.top; card.style.cursor='grabbing'; }
+  function move(e){ if(!drag) return; moved=true;
+    if(!drag.classList.contains('placed')){ drag.classList.add('placed'); matrix.appendChild(drag); }
+    var mr=matrix.getBoundingClientRect();
+    drag.style.left=(e.clientX-mr.left-ox)+'px'; drag.style.top=(e.clientY-mr.top-oy)+'px'; }
+  function up(){ if(!drag) return; if(drag.classList.contains('placed')) place(drag); drag.style.cursor='grab'; drag=null; }
+  function openNote(card){ active=card.getAttribute('data-id'); P[active]=P[active]||{label:card.getAttribute('data-label')};
+    panelH.textContent='Why that rating — '+card.getAttribute('data-label'); ta.value=P[active].comment||'';
+    micNote.textContent=P[active].audio?'voice note saved':''; panel.classList.add('open'); ta.focus();
+    panel.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  ta && ta.addEventListener('input',function(){ if(active){ P[active].comment=ta.value; mark(active); } });
+  function mark(id){ var c=matrix.querySelector('.exm-card[data-id="'+id+'"]'); if(c){ var has=(P[id].comment&&P[id].comment.trim())||P[id].audio; c.classList.toggle('has-note',!!has); } }
+  matrix.addEventListener('pointerdown',down); tray.addEventListener('pointerdown',down);
+  document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
+  // voice — best-effort
+  var mr_=null, chunks=[];
+  mic && mic.addEventListener('click',function(){
+    if(!active) return;
+    if(mr_&&mr_.state==='recording'){ mr_.stop(); return; }
+    if(!navigator.mediaDevices||!window.MediaRecorder){ micNote.textContent='voice not supported here'; return; }
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
+      chunks=[]; mr_=new MediaRecorder(s); mic.classList.add('rec'); mic.textContent='■ Stop';
+      mr_.ondataavailable=function(ev){ chunks.push(ev.data); };
+      mr_.onstop=function(){ s.getTracks().forEach(function(t){t.stop();}); mic.classList.remove('rec'); mic.textContent='● Record';
+        var blob=new Blob(chunks,{type:'audio/webm'}); var fr=new FileReader();
+        fr.onload=function(){ if(active){ P[active].audio=fr.result; micNote.textContent='voice note saved'; mark(active); } }; fr.readAsDataURL(blob); };
+      mr_.start();
+    }).catch(function(){ micNote.textContent='mic blocked'; });
+  });
+  saveBtn.addEventListener('click',function(){
+    saveBtn.disabled=true; statusEl.textContent='saving…';
+    var items=Object.keys(P).map(function(id){ return {id:id,label:P[id].label,importance:P[id].importance,satisfaction:P[id].satisfaction,comment:P[id].comment||'',hasAudio:!!P[id].audio,audio:P[id].audio||null}; });
+    fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{placements:items}})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ statusEl.textContent=j.ok?'✓ Saved — thank you':'Save failed'; saveBtn.disabled=!j.ok; })
+      .catch(function(){ statusEl.textContent='Save failed — check connection'; saveBtn.disabled=false; });
+  });
+  status();
+})();`;
+
+  return `<section id="${root}">
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<p class="exm-intro">${b.intro}</p>` : ''}
+  <style>${css}</style>
+  <div class="exm-wrap">
+    <div class="exm-stage">
+      <div class="exm-ylab">${esc(ay.label)}</div>
+      <div class="exm-matrix">
+        <div class="exm-hot"><span>Underserved</span></div>
+        <span class="exm-end hi-y">${esc(ay.high)}</span>
+        <span class="exm-end lo-y">${esc(ay.low)}</span>
+        <span class="exm-end lo-x">${esc(ax.low)}</span>
+        <span class="exm-end hi-x">${esc(ax.high)}</span>
+      </div>
+      <div class="exm-xlab">${esc(ax.label)}</div>
+    </div>
+    <div class="exm-tray">
+      <div class="exm-tray-label">Drag each onto the grid — height = importance, left/right = how well it’s handled today</div>
+      ${cards}
+    </div>
+    <div class="exm-panel">
+      <div class="exm-panel-h"></div>
+      <textarea class="exm-ta" placeholder="Optional: why did you place it there?"></textarea>
+      <div class="exm-panel-row">
+        <button type="button" class="exm-mic">● Record</button>
+        <span class="exm-mic-note"></span>
+      </div>
+    </div>
+    <div class="exm-actions">
+      <button type="button" class="exm-save" disabled>Save</button>
+      <span class="exm-status"></span>
+    </div>
+  </div>
+  <script>${js}</script>
+</section>`;
 }
 
 export function docFooter(b: DocFooterBlock): string {

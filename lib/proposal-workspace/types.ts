@@ -38,6 +38,7 @@ export type Block =
   | WhatStayedBlock
   | NextStepsBlock
   | DiscussionBlock
+  | ExerciseMatrixBlock
   | DocFooterBlock;
 
 export interface DocHeaderBlock {
@@ -128,6 +129,25 @@ export interface DiscussionBlock {
   intro?: Rich;
   /** v1: static checklist. v2: form that persists + client adds their own. */
   questions: { q: Rich; note?: Rich }[];
+}
+
+/** One-way workshop, Exercise 1: place pre-filled underserved-job cards on a
+ *  2-axis matrix (importance × satisfaction). Each placed card takes an
+ *  optional comment (typed; voice best-effort). Save persists to the
+ *  exercise endpoint. Maps to cascade-hypotheses Block 1 (Underserved JTBD). */
+export interface ExerciseMatrixBlock {
+  block: 'exerciseMatrix';
+  sectionNum?: string;
+  heading: string;
+  intro?: Rich;
+  /** stable id stored with the response, e.g. 'jtbd-matrix' */
+  exerciseId: string;
+  /** x-axis (left→right). Default: satisfaction with current solution */
+  axisX?: { label: string; low: string; high: string };
+  /** y-axis (bottom→top). Default: importance */
+  axisY?: { label: string; low: string; high: string };
+  /** pre-filled job cards the client positions */
+  jobs: { id: string; label: string }[];
 }
 
 export interface DocFooterBlock {

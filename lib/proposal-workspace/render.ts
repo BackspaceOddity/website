@@ -10,20 +10,21 @@ import { styles } from './styles';
 import { themeHeadScript, themeToggle, editModeScript } from './chrome';
 import * as B from './blocks';
 
-export function renderBlock(block: Block): string {
+export function renderBlock(block: Block, slug: string): string {
   switch (block.block) {
-    case 'docHeader':     return B.docHeader(block);
-    case 'divider':       return B.divider(block);
-    case 'statement':     return B.statement(block);
-    case 'heardIt':       return B.heardIt(block);
-    case 'beforeAfter':   return B.beforeAfter(block);
-    case 'emphasisFrame': return B.emphasisFrame(block);
-    case 'narrative':     return B.narrative(block);
-    case 'demo':          return B.demo(block);
-    case 'whatStayed':    return B.whatStayed(block);
-    case 'nextSteps':     return B.nextSteps(block);
-    case 'discussion':    return B.discussion(block);
-    case 'docFooter':     return B.docFooter(block);
+    case 'docHeader':      return B.docHeader(block);
+    case 'divider':        return B.divider(block);
+    case 'statement':      return B.statement(block);
+    case 'heardIt':        return B.heardIt(block);
+    case 'beforeAfter':    return B.beforeAfter(block);
+    case 'emphasisFrame':  return B.emphasisFrame(block);
+    case 'narrative':      return B.narrative(block);
+    case 'demo':           return B.demo(block);
+    case 'whatStayed':     return B.whatStayed(block);
+    case 'nextSteps':      return B.nextSteps(block);
+    case 'discussion':     return B.discussion(block);
+    case 'exerciseMatrix': return B.exerciseMatrix(block, slug);
+    case 'docFooter':      return B.docFooter(block);
     default: {
       // Exhaustiveness guard — a new Block variant must be handled above.
       const _never: never = block;
@@ -33,7 +34,7 @@ export function renderBlock(block: Block): string {
 }
 
 export function renderPage(page: ClientPage, opts: { editMode: boolean }): string {
-  const body = page.blocks.map(renderBlock).join('\n\n');
+  const body = page.blocks.map((b) => renderBlock(b, page.slug)).join('\n\n');
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

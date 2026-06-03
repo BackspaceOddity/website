@@ -38,3 +38,6 @@ _edit-inbox.json
 
 # Per-client access codes — never commit
 .workspace-secrets/
+
+# One-way workshop dev fallback storage
+.workspace-data/
