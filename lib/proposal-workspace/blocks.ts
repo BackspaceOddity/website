@@ -168,15 +168,16 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   .exm-xaxis .ttl { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); text-align: center; }
   .exm-tray { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
   .exm-tray-label { width: 100%; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); margin-bottom: 2px; }
-  .exm-card { display: inline-flex; align-items: center; gap: 9px; background: #FFFFFF; border: 1px solid rgba(1,28,0,.10); border-radius: 3px; padding: 13px 14px; font-family: var(--text); font-size: 13px; line-height: 1.35; color: var(--ink); cursor: grab; max-width: 216px; touch-action: none; box-shadow: 0 3px 9px rgba(1,28,0,.13), 0 1px 2px rgba(1,28,0,.10); transition: box-shadow .12s ease, transform .12s ease; }
-  .exm-tray .exm-card { transform: rotate(-1.1deg); }
-  .exm-tray .exm-card:nth-of-type(3n) { transform: rotate(1.5deg); }
-  .exm-tray .exm-card:nth-of-type(3n+2) { transform: rotate(.4deg); }
-  .exm-card:active { cursor: grabbing; box-shadow: 0 9px 20px rgba(1,28,0,.20); }
-  .exm-card.placed { position: absolute; z-index: 2; max-width: 182px; transform: none !important; box-shadow: 0 5px 13px rgba(1,28,0,.17); }
-  .exm-card.placed:active { box-shadow: 0 10px 22px rgba(1,28,0,.22); }
+  .exm-card { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; width: 152px; min-height: 152px; box-sizing: border-box; background: #FCF4A8; border: 1px solid rgba(150,130,40,.22); border-radius: 1px; padding: 14px; font-family: var(--text); font-size: 13px; line-height: 1.35; color: var(--ink); cursor: grab; touch-action: none; box-shadow: 0 4px 10px rgba(1,28,0,.16), 0 1px 2px rgba(1,28,0,.10); transition: box-shadow .12s ease, transform .12s ease; }
+  .exm-card-label { flex: 1; }
+  .exm-tray .exm-card { transform: rotate(-1.4deg); }
+  .exm-tray .exm-card:nth-of-type(3n) { transform: rotate(1.8deg); }
+  .exm-tray .exm-card:nth-of-type(3n+2) { transform: rotate(.6deg); }
+  .exm-card:active { cursor: grabbing; box-shadow: 0 10px 22px rgba(1,28,0,.22); }
+  .exm-card.placed { position: absolute; z-index: 2; width: 134px; min-height: 134px; transform: none !important; box-shadow: 0 6px 14px rgba(1,28,0,.18); }
+  .exm-card.placed:active { box-shadow: 0 11px 24px rgba(1,28,0,.24); }
   .exm-card.has-note { border-color: var(--ink); }
-  .exm-note-btn { display: none; background: none; border: none; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-40); cursor: pointer; padding: 0; white-space: nowrap; }
+  .exm-note-btn { display: none; align-self: flex-end; background: none; border: none; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-55); cursor: pointer; padding: 0; white-space: nowrap; }
   .exm-card.placed .exm-note-btn { display: inline; }
   .exm-panel { margin-top: 18px; border-top: 1px solid var(--rule); padding-top: 14px; display: none; }
   .exm-panel.open { display: block; }
