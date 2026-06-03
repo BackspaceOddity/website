@@ -51,9 +51,9 @@ export const styles = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    /* Brand colour tokens — approved AI Skills Landing CORE palette
-       (cream #F2F2F0 / cream-soft #E8E8E6 / ivory #FAFAF8 / dark-green #011C00).
-       No accent colour — the landing's amber #C07800 is landing-specific, not brand. */
+    /* Brand colour tokens — approved AI Skills Landing CORE palette:
+       cream #F2F2F0 / cream-soft #E8E8E6 / ivory #FAFAF8 / dark-green #011C00.
+       No accent colour (the landing's amber signal is landing-specific, not brand). */
     --ink: #011C00;
     --paper: #F2F2F0;
     --paper-soft: #E8E8E6;
