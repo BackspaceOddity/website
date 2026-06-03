@@ -21,6 +21,13 @@ import { getWorkspacePassword } from '@/lib/proposal-workspace/auth';
 const editMode = () => process.env.WS_EDIT_MODE === '1';
 const htmlHeaders = { 'Content-Type': 'text/html; charset=utf-8' };
 
+/** Secure cookies only over HTTPS. On local http dev a `secure` cookie is
+ *  silently dropped by the browser → login loop. Detect the real protocol. */
+function isSecureReq(req: Request): boolean {
+  if (req.headers.get('x-forwarded-proto') === 'https') return true;
+  try { return new URL(req.url).protocol === 'https:'; } catch { return false; }
+}
+
 function notFound(): NextResponse {
   return new NextResponse('Not found', { status: 404 });
 }
@@ -37,7 +44,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ client: string 
 
   if (getCookie(req, cookieName(client)) !== token(accessKey, client)) {
     return new NextResponse(
-      loginHtml({ clientName: entry.page.title, subtitle: 'Backspace Oddity', actionPath: `/w/${client}` }),
+      loginHtml({ clientName: entry.page.title, subtitle: 'Backspace Oddity', actionPath: `/w/${client}/` }),
       { headers: htmlHeaders },
     );
   }
@@ -54,19 +61,19 @@ export async function POST(req: Request, ctx: { params: Promise<{ client: string
   const entered = new URLSearchParams(body).get('code') ?? '';
 
   if (accessKey && entered === accessKey) {
-    const res = NextResponse.redirect(new URL(`/w/${client}`, req.url), 303);
+    const res = NextResponse.redirect(new URL(`/w/${client}/`, req.url), 303);
     res.cookies.set(cookieName(client), token(accessKey, client), {
       httpOnly: true,
-      secure: true,
+      secure: isSecureReq(req),
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 90, // 90 days
-      path: `/w/${client}`,
+      path: `/w/${client}/`,
     });
     return res;
   }
 
   return new NextResponse(
-    loginHtml({ clientName: entry.page.title, subtitle: 'Backspace Oddity', actionPath: `/w/${client}`, err: true }),
+    loginHtml({ clientName: entry.page.title, subtitle: 'Backspace Oddity', actionPath: `/w/${client}/`, err: true }),
     { headers: htmlHeaders },
   );
 }
