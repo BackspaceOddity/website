@@ -123,7 +123,7 @@ export const styles = `
     padding-bottom: 28px; border-bottom: 1.5px solid var(--ink); margin-bottom: 48px;
   }
   .doc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-40); }
-  .doc-meta { font-family: var(--mono); font-size: 11px; color: var(--ink-40); margin-top: 5px; }
+  .doc-meta { font-family: var(--mono); font-size: 11px; color: var(--ink-40); margin-top: 4px; }
   .doc-date { font-family: var(--mono); font-size: 11px; color: var(--ink-40); text-align: right; line-height: 1.7; }
 
   /* ── Typography ── */
@@ -152,7 +152,7 @@ export const styles = `
 
   /* ── Pills ── */
   .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-  .pill { font-family: var(--mono); font-size: 11px; padding: 5px 12px; border: 1px solid var(--rule-strong); border-radius: 2px; color: var(--ink-55); letter-spacing: 0.04em; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 6px 12px; border: 1px solid var(--rule-strong); border-radius: 2px; color: var(--ink-55); letter-spacing: 0.04em; }
 
   /* ── Before / After ── */
   .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin: 28px 0; }

@@ -35,10 +35,15 @@ export type Block =
   | EmphasisFrameBlock
   | NarrativeBlock
   | DemoBlock
+  | ProcessFlowBlock
+  | PhasesBlock
   | WhatStayedBlock
   | NextStepsBlock
   | DiscussionBlock
   | ExerciseMatrixBlock
+  | ExerciseRankBlock
+  | ExerciseChipsBlock
+  | ExerciseSolutionsBlock
   | DocFooterBlock;
 
 export interface DocHeaderBlock {
@@ -106,6 +111,30 @@ export interface DemoBlock {
   html: Rich;
 }
 
+/** Visual process-flow infographic: a numbered editorial "spine" of steps.
+ *  A step may carry branches (e.g. a decision point) rendered as inset paths.
+ *  v1 static; replaces a plain text walkthrough with a scannable diagram. */
+export interface ProcessFlowBlock {
+  block: 'processFlow';
+  sectionNum?: string;
+  heading: string;
+  intro?: Rich;
+  steps: {
+    title: string;
+    desc: Rich;
+    /** optional branch paths shown under the step (e.g. decision outcomes).
+     *  `primary: true` marks the happy path (heavier left rule). */
+    branches?: { label: string; body: Rich; primary?: boolean }[];
+  }[];
+}
+
+/** Now / Next / Later horizon — a row of phase cards showing how scope expands.
+ *  `emphasis: true` marks the current phase (inverted/dark). Editorial, static. */
+export interface PhasesBlock {
+  block: 'phases';
+  phases: { tag: string; title: string; body: Rich; emphasis?: boolean }[];
+}
+
 export interface WhatStayedBlock {
   block: 'whatStayed';
   sectionNum?: string;
@@ -148,6 +177,41 @@ export interface ExerciseMatrixBlock {
   axisY?: { label: string; low: string; high: string };
   /** pre-filled job cards the client positions */
   jobs: { id: string; label: string }[];
+}
+
+/** Exercise 2 — Problems (cascade block 3). For each underserved job, a short
+ *  list of problems (max 5) the client drags into rank order, most painful at
+ *  top. Saves a per-job ranking. */
+export interface ExerciseRankBlock {
+  block: 'exerciseRank';
+  sectionNum?: string;
+  heading: string;
+  intro?: Rich;
+  exerciseId: string;
+  groups: { jobId: string; jobLabel: string; problems: { id: string; label: string }[] }[];
+}
+
+/** Exercise 3 — Category Entry Points (cascade block 4). The Sharp & Romaniuk
+ *  five W-questions (Why / When / Where / With whom / With what). Each question
+ *  offers quick-pick chips + add-your-own; multi-select. Saves picks per W. */
+export interface ExerciseChipsBlock {
+  block: 'exerciseChips';
+  sectionNum?: string;
+  heading: string;
+  intro?: Rich;
+  exerciseId: string;
+  questions: { id: string; q: string; example?: string; options: string[] }[];
+}
+
+/** Exercise 4 — Current solutions / competition (cascade block 5). For each job,
+ *  "what do you do today?" — a text field per row. Saves { jobId: text }. */
+export interface ExerciseSolutionsBlock {
+  block: 'exerciseSolutions';
+  sectionNum?: string;
+  heading: string;
+  intro?: Rich;
+  exerciseId: string;
+  jobs: { id: string; label: string; placeholder?: string }[];
 }
 
 export interface DocFooterBlock {

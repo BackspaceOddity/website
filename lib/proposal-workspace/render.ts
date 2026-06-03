@@ -20,10 +20,15 @@ export function renderBlock(block: Block, slug: string): string {
     case 'emphasisFrame':  return B.emphasisFrame(block);
     case 'narrative':      return B.narrative(block);
     case 'demo':           return B.demo(block);
+    case 'processFlow':    return B.processFlow(block);
+    case 'phases':         return B.phases(block);
     case 'whatStayed':     return B.whatStayed(block);
     case 'nextSteps':      return B.nextSteps(block);
     case 'discussion':     return B.discussion(block);
     case 'exerciseMatrix': return B.exerciseMatrix(block, slug);
+    case 'exerciseRank':   return B.exerciseRank(block, slug);
+    case 'exerciseChips':  return B.exerciseChips(block, slug);
+    case 'exerciseSolutions': return B.exerciseSolutions(block, slug);
     case 'docFooter':      return B.docFooter(block);
     default: {
       // Exhaustiveness guard — a new Block variant must be handled above.

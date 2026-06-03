@@ -9,8 +9,9 @@
 
 import type {
   DocHeaderBlock, DividerBlock, StatementBlock, HeardItBlock, BeforeAfterBlock,
-  EmphasisFrameBlock, NarrativeBlock, DemoBlock, WhatStayedBlock, NextStepsBlock,
-  DiscussionBlock, ExerciseMatrixBlock, DocFooterBlock,
+  EmphasisFrameBlock, NarrativeBlock, DemoBlock, ProcessFlowBlock, PhasesBlock,
+  WhatStayedBlock, NextStepsBlock, DiscussionBlock, ExerciseMatrixBlock, ExerciseRankBlock,
+  ExerciseChipsBlock, ExerciseSolutionsBlock, DocFooterBlock,
 } from './types';
 
 /** Escape plain-text fields. Rich fields (documented in types.ts) are inserted raw. */
@@ -97,6 +98,77 @@ export function demo(b: DemoBlock): string {
 </section>`;
 }
 
+export function processFlow(b: ProcessFlowBlock): string {
+  const steps = b.steps.map((s, i) => {
+    const branches = s.branches?.length
+      ? `<div class="pf-branches">
+        ${s.branches.map(br => `<div class="pf-branch${br.primary ? ' pf-primary' : ''}">
+          <span class="pf-branch-label">${esc(br.label)}</span>
+          <p>${br.body}</p>
+        </div>`).join('\n        ')}
+      </div>`
+      : '';
+    return `<div class="pf-step${branches ? ' pf-has-branches' : ''}">
+      <div class="pf-num">${String(i + 1).padStart(2, '0')}</div>
+      <div class="pf-body">
+        <div class="pf-title">${esc(s.title)}</div>
+        <div class="pf-desc">${s.desc}</div>
+        ${branches}
+      </div>
+    </div>`;
+  }).join('\n    ');
+
+  const css = `
+  .pf { margin-top: 8px; }
+  .pf-step { display: grid; grid-template-columns: 44px 1fr; gap: 16px; position: relative; }
+  .pf-step:not(:last-child) { margin-bottom: 28px; }
+  /* connector spine — runs from below each node into the next step's gap */
+  .pf-step:not(:last-child)::before { content: ''; position: absolute; left: 21px; top: 44px; bottom: -28px; width: 1px; background: var(--rule-strong); }
+  .pf-num { width: 44px; height: 44px; border: 1.5px solid var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 13px; color: var(--ink); background: var(--paper); position: relative; z-index: 1; }
+  .pf-body { padding-top: 2px; min-width: 0; }
+  .pf-title { font-family: var(--text); font-weight: 500; font-size: var(--fs-list-item); color: var(--ink); margin-bottom: 4px; }
+  .pf-desc { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
+  .pf-branches { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 16px; }
+  .pf-branch { padding: 16px 18px; background: var(--surface); border-left: 3px solid var(--rule); }
+  .pf-branch.pf-primary { border-left-color: var(--ink); }
+  .pf-branch-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-40); display: block; margin-bottom: 8px; }
+  .pf-branch p { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
+  @media (max-width: 640px) { .pf-branches { grid-template-columns: 1fr; } }`;
+
+  return `<section>
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<p>${b.intro}</p>` : ''}
+  <style>${css}</style>
+  <div class="pf">
+    ${steps}
+  </div>
+</section>`;
+}
+
+export function phases(b: PhasesBlock): string {
+  const cols = b.phases.map(p => `<div class="phx-col${p.emphasis ? ' phx-now' : ''}">
+      <span class="phx-tag">${esc(p.tag)}</span>
+      <div class="phx-title">${esc(p.title)}</div>
+      <div class="phx-body">${p.body}</div>
+    </div>`).join('\n    ');
+  const css = `
+  .phx { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 24px; }
+  .phx-col { padding: 20px; background: var(--surface); }
+  .phx-col.phx-now { background: var(--ink); }
+  .phx-tag { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-40); margin-bottom: 10px; }
+  .phx-col.phx-now .phx-tag { color: var(--on-dark-muted); }
+  .phx-title { font-family: var(--text); font-weight: 500; font-size: var(--fs-list-item); color: var(--ink); margin-bottom: 6px; }
+  .phx-col.phx-now .phx-title { color: var(--on-dark-primary); }
+  .phx-body { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
+  .phx-col.phx-now .phx-body { color: var(--on-dark-secondary); }
+  @media (max-width: 640px) { .phx { grid-template-columns: 1fr; } }`;
+  return `<style>${css}</style>
+<div class="phx">
+    ${cols}
+  </div>`;
+}
+
 export function whatStayed(b: WhatStayedBlock): string {
   return `<section>
   ${sectionNum(b.sectionNum)}
@@ -146,49 +218,59 @@ export function discussion(b: DiscussionBlock): string {
 export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   const ax = b.axisX ?? { label: 'How well it’s handled today', low: 'Badly served', high: 'Well served' };
   const ay = b.axisY ?? { label: 'How important to you', low: 'Minor', high: 'Critical' };
+  const xnums = Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('');
+  const ynums = Array.from({ length: 10 }, (_, i) => `<span>${10 - i}</span>`).join('');
   const cards = b.jobs.map(j =>
-    `<div class="exm-card" data-id="${esc(j.id)}" data-label="${esc(j.label)}"><span class="exm-card-label">${esc(j.label)}</span><button class="exm-note-btn" type="button" title="Add a note" aria-label="Add a note">＋ note</button></div>`
+    `<div class="exm-card" data-id="${esc(j.id)}" data-label="${esc(j.label)}"><span class="exm-card-label">${esc(j.label)}</span><div class="exm-card-foot"><span class="exm-val" aria-hidden="true"></span><button class="exm-note-btn" type="button" title="Add a note" aria-label="Add a note">＋ note</button></div></div>`
   ).join('\n      ');
 
   const css = `
   .exm-wrap { margin-top: 18px; }
   .exm-intro { font-family: var(--text); font-size: var(--fs-secondary); color: var(--ink-55); line-height: 1.6; margin-bottom: 20px; max-width: 640px; }
-  .exm-stage { display: grid; grid-template-columns: 60px 1fr; grid-template-rows: auto auto; gap: 6px 12px; max-width: 632px; }
-  .exm-yaxis { grid-row: 1; grid-column: 1; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; padding: 2px 0; text-align: right; }
-  .exm-yaxis .hi, .exm-yaxis .lo { font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); max-width: 58px; line-height: 1.2; }
-  .exm-yaxis .ttl { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); margin: 8px 0; }
-  .exm-matrix { grid-row: 1; grid-column: 2; position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; border: 1.5px solid var(--rule-strong); background: var(--surface); }
-  .exm-matrix::before, .exm-matrix::after { content: ''; position: absolute; background: var(--rule); }
+  .exm-stage { display: grid; grid-template-columns: 76px 1fr; grid-template-rows: auto auto; gap: 6px 8px; max-width: 644px; }
+  .exm-yaxis { grid-row: 1; grid-column: 1; display: flex; flex-direction: row; align-items: stretch; gap: 4px; }
+  .exm-yaxis .ttl { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); text-align: center; }
+  .exm-ynums { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; font-family: var(--mono); font-size: 9px; line-height: 1; color: var(--ink-40); padding: 1px 0; }
+  .exm-matrix { grid-row: 1; grid-column: 2; position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; border: 1.5px solid var(--ink-40); background-color: var(--surface); background-image: repeating-linear-gradient(to right, var(--rule) 0 1px, transparent 1px calc(100%/9)), repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px calc(100%/9)); }
+  .exm-matrix::before, .exm-matrix::after { content: ''; position: absolute; background: var(--ink-25); }
   .exm-matrix::before { left: 50%; top: 0; bottom: 0; width: 1px; }
   .exm-matrix::after { top: 50%; left: 0; right: 0; height: 1px; }
-  .exm-hot { position: absolute; left: 0; top: 0; width: 50%; height: 50%; background: rgba(1,28,0,.05); }
+  /* Underserved = high importance (right) + low satisfaction (bottom) */
+  .exm-hot { position: absolute; left: 50%; top: 50%; width: 50%; height: 50%; background: rgba(1,28,0,.05); }
   .exm-hot span { position: absolute; left: 11px; top: 9px; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-40); }
-  .exm-xaxis { grid-row: 2; grid-column: 2; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 8px; }
-  .exm-xaxis .hi, .exm-xaxis .lo { font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); white-space: nowrap; }
+  .exm-xaxis { grid-row: 2; grid-column: 2; display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
+  .exm-xnums { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; line-height: 1; color: var(--ink-40); }
   .exm-xaxis .ttl { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); text-align: center; }
-  .exm-tray { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-  .exm-tray-label { width: 100%; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); margin-bottom: 2px; }
-  .exm-card { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px; width: 152px; min-height: 152px; box-sizing: border-box; background: #FCF4A8; border: 1px solid rgba(150,130,40,.22); border-radius: 1px; padding: 14px; font-family: var(--text); font-size: 13px; line-height: 1.35; color: var(--ink); cursor: grab; touch-action: none; box-shadow: 0 4px 10px rgba(1,28,0,.16), 0 1px 2px rgba(1,28,0,.10); transition: box-shadow .12s ease, transform .12s ease; }
+  .exm-tray { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .exm-tray-label { width: 100%; font-family: var(--mono); font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink); margin-bottom: 12px; }
+  .exm-card { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 6px; width: 120px; min-height: 120px; box-sizing: border-box; background: #F6EFC4; border: 1px solid rgba(150,130,40,.20); border-radius: 1px; padding: 11px; font-family: var(--text); font-size: 12px; line-height: 1.3; color: #011C00; cursor: grab; touch-action: none; box-shadow: 0 4px 10px rgba(1,28,0,.16), 0 1px 2px rgba(1,28,0,.10); transition: box-shadow .12s ease, transform .12s ease; }
   .exm-card-label { flex: 1; }
+  .exm-card-foot { display: none; }
+  .exm-card.placed .exm-card-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 8px; width: 100%; padding-top: 6px; border-top: 1px solid rgba(1,28,0,.14); }
+  .exm-val { font-family: var(--mono); font-size: 9px; letter-spacing: .02em; color: rgba(1,28,0,.72); white-space: nowrap; }
+  .exm-guide { position: absolute; background: var(--ink-40); opacity: 0; transition: opacity .08s; pointer-events: none; z-index: 1; }
+  .exm-guide.on { opacity: 1; }
+  .exm-guide-v { top: 0; bottom: 0; width: 1px; }
+  .exm-guide-h { left: 0; right: 0; height: 1px; }
   .exm-tray .exm-card { transform: rotate(-1.4deg); }
   .exm-tray .exm-card:nth-of-type(3n) { transform: rotate(1.8deg); }
   .exm-tray .exm-card:nth-of-type(3n+2) { transform: rotate(.6deg); }
   .exm-card:active { cursor: grabbing; box-shadow: 0 10px 22px rgba(1,28,0,.22); }
-  .exm-card.placed { position: absolute; z-index: 2; width: 134px; min-height: 134px; transform: none !important; box-shadow: 0 6px 14px rgba(1,28,0,.18); }
+  .exm-card.placed { position: absolute; z-index: 2; width: 136px; min-height: 0; height: auto; font-size: 11px; transform: none !important; box-shadow: 0 6px 14px rgba(1,28,0,.18); }
   .exm-card.placed:active { box-shadow: 0 11px 24px rgba(1,28,0,.24); }
-  .exm-card.has-note { border-color: var(--ink); }
-  .exm-note-btn { display: none; align-self: flex-end; background: none; border: none; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-55); cursor: pointer; padding: 0; white-space: nowrap; }
-  .exm-card.placed .exm-note-btn { display: inline; }
+  .exm-card.has-note { border-color: #011C00; }
+  .exm-note-btn { background: none; border: none; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; line-height: 1; color: rgba(1,28,0,.55); cursor: pointer; padding: 0; white-space: nowrap; flex-shrink: 0; }
+  .exm-note-btn:hover { color: #011C00; }
   .exm-panel { margin-top: 18px; border-top: 1px solid var(--rule); padding-top: 14px; display: none; }
   .exm-panel.open { display: block; }
   .exm-panel-h { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-55); margin-bottom: 8px; }
-  .exm-panel textarea { display: block; width: 100%; box-sizing: border-box; border: 1px solid var(--rule-strong); border-radius: 6px; padding: 9px 10px; font-family: var(--text); font-size: 14px; line-height: 1.5; resize: vertical; background: var(--surface); color: var(--ink); outline: none; min-height: 58px; }
+  .exm-panel textarea { display: block; width: 100%; box-sizing: border-box; border: 1px solid var(--rule-strong); border-radius: 6px; padding: 8px 10px; font-family: var(--text); font-size: 14px; line-height: 1.5; resize: vertical; background: var(--surface); color: var(--ink); outline: none; min-height: 58px; }
   .exm-panel-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-  .exm-mic { background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 6px; padding: 7px 11px; font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-55); cursor: pointer; }
+  .exm-mic { background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 6px; padding: 8px 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-55); cursor: pointer; }
   .exm-mic.rec { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .exm-mic-note { font-family: var(--mono); font-size: 10px; color: var(--ink-40); }
   .exm-actions { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
-  .exm-save { background: var(--ink); color: var(--paper); border: none; border-radius: 7px; padding: 11px 22px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .exm-save { background: var(--ink); color: var(--paper); border: none; border-radius: 7px; padding: 12px 22px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
   .exm-save:disabled { opacity: .4; cursor: default; }
   .exm-status { font-family: var(--mono); font-size: 11px; color: var(--ink-40); }
   `;
@@ -198,20 +280,24 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
 `(function(){
   var root=document.getElementById('${root}'); if(!root) return;
   var matrix=root.querySelector('.exm-matrix'), tray=root.querySelector('.exm-tray');
+  var guideV=root.querySelector('.exm-guide-v'), guideH=root.querySelector('.exm-guide-h');
   var panel=root.querySelector('.exm-panel'), panelH=root.querySelector('.exm-panel-h');
   var ta=root.querySelector('.exm-ta'), mic=root.querySelector('.exm-mic'), micNote=root.querySelector('.exm-mic-note');
   var saveBtn=root.querySelector('.exm-save'), statusEl=root.querySelector('.exm-status');
   var P={}, active=null, drag=null, ox=0, oy=0, moved=false;
-  function place(card){
+  /* X = importance (left→right), Y = satisfaction (top→bottom). 1–10 scale. */
+  function coords(card){
     var mr=matrix.getBoundingClientRect(), cr=card.getBoundingClientRect();
     var sx=Math.max(0,Math.min(1,(cr.left+cr.width/2-mr.left)/mr.width));
     var sy=Math.max(0,Math.min(1,(cr.top+cr.height/2-mr.top)/mr.height));
-    var id=card.getAttribute('data-id');
-    P[id]=P[id]||{label:card.getAttribute('data-label')};
-    P[id].satisfaction=Math.round(sx*100); P[id].importance=Math.round((1-sy)*100);
-    status();
+    return {sx:sx, sy:sy, imp:Math.round(sx*9)+1, sat:Math.round((1-sy)*9)+1};
   }
-  function status(){ var n=Object.keys(P).length, t=${b.jobs.length}; statusEl.textContent=n+' of '+t+' placed'; saveBtn.disabled=n===0; }
+  function setVal(card,imp,sat){ var v=card.querySelector('.exm-val'); if(v){ v.textContent='IMP '+imp+' · SAT '+sat; } }
+  function record(card,c){ var id=card.getAttribute('data-id'); P[id]=P[id]||{label:card.getAttribute('data-label')};
+    P[id].importance=c.imp; P[id].satisfaction=c.sat; setVal(card,c.imp,c.sat); }
+  function place(card){ record(card,coords(card)); status(); }
+  function status(){ var n=Object.keys(P).length, t=${b.jobs.length}; statusEl.textContent=n+' of '+t+' placed'; saveBtn.disabled=n===0; persist(); }
+  function persist(){ try{ localStorage.setItem('ws:${slug}:jtbd', JSON.stringify(Object.keys(P).map(function(id){ return {id:id,label:P[id].label,importance:P[id].importance,satisfaction:P[id].satisfaction}; }))); window.dispatchEvent(new CustomEvent('ws:jtbd-changed')); }catch(_){} }
   function down(e){ var card=e.target.closest('.exm-card'); if(!card) return;
     if(e.target.closest('.exm-note-btn')){ openNote(card); return; }
     drag=card; moved=false; card.setPointerCapture(e.pointerId);
@@ -219,8 +305,13 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   function move(e){ if(!drag) return; moved=true;
     if(!drag.classList.contains('placed')){ drag.classList.add('placed'); matrix.appendChild(drag); }
     var mr=matrix.getBoundingClientRect();
-    drag.style.left=(e.clientX-mr.left-ox)+'px'; drag.style.top=(e.clientY-mr.top-oy)+'px'; }
-  function up(){ if(!drag) return; if(drag.classList.contains('placed')) place(drag); drag.style.cursor='grab'; drag=null; }
+    drag.style.left=(e.clientX-mr.left-ox)+'px'; drag.style.top=(e.clientY-mr.top-oy)+'px';
+    var c=coords(drag);
+    guideV.style.left=(c.sx*100)+'%'; guideH.style.top=(c.sy*100)+'%';
+    guideV.classList.add('on'); guideH.classList.add('on');
+    record(drag,c); }
+  function up(){ if(!drag) return; if(drag.classList.contains('placed')){ place(drag); }
+    guideV.classList.remove('on'); guideH.classList.remove('on'); drag.style.cursor='grab'; drag=null; }
   function openNote(card){ active=card.getAttribute('data-id'); P[active]=P[active]||{label:card.getAttribute('data-label')};
     panelH.textContent='Why that rating — '+card.getAttribute('data-label'); ta.value=P[active].comment||'';
     micNote.textContent=P[active].audio?'voice note saved':''; panel.classList.add('open'); ta.focus();
@@ -263,21 +354,21 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   <div class="exm-wrap">
     <div class="exm-stage">
       <div class="exm-yaxis">
-        <span class="hi">${esc(ay.high)}</span>
         <span class="ttl">${esc(ay.label)}</span>
-        <span class="lo">${esc(ay.low)}</span>
+        <div class="exm-ynums">${ynums}</div>
       </div>
       <div class="exm-matrix">
         <div class="exm-hot"><span>Underserved</span></div>
+        <div class="exm-guide exm-guide-v"></div>
+        <div class="exm-guide exm-guide-h"></div>
       </div>
       <div class="exm-xaxis">
-        <span class="lo">${esc(ax.low)}</span>
+        <div class="exm-xnums">${xnums}</div>
         <span class="ttl">${esc(ax.label)}</span>
-        <span class="hi">${esc(ax.high)}</span>
       </div>
     </div>
     <div class="exm-tray">
-      <div class="exm-tray-label">Drag each onto the grid — height = importance, left/right = how well it’s handled today</div>
+      <div class="exm-tray-label">Drag each onto the grid — left/right = importance, up/down = how well it’s handled today</div>
       ${cards}
     </div>
     <div class="exm-panel">
@@ -291,6 +382,190 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
     <div class="exm-actions">
       <button type="button" class="exm-save" disabled>Save</button>
       <span class="exm-status"></span>
+    </div>
+  </div>
+  <script>${js}</script>
+</section>`;
+}
+
+export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
+  const root = `exr-${esc(b.exerciseId)}`;
+  const groups = b.groups.map(g => `<div class="exr-group">
+      <div class="exr-job">${esc(g.jobLabel)}</div>
+      <ol class="exr-list" data-job="${esc(g.jobId)}">
+        ${g.problems.slice(0, 5).map(p => `<li class="exr-row" data-id="${esc(p.id)}"><span class="exr-rank"></span><span class="exr-label">${esc(p.label)}</span><span class="exr-handle" aria-hidden="true">⠿</span></li>`).join('\n        ')}
+      </ol>
+    </div>`).join('\n    ');
+  const css = `
+  .exr { margin-top: 18px; max-width: 580px; }
+  .exr-intro { font-family: var(--text); font-size: var(--fs-secondary); color: var(--ink-55); line-height: 1.6; margin-bottom: 24px; }
+  .exr-group { margin-bottom: 26px; }
+  .exr-job { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-55); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  .exr-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .exr-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: var(--surface); border: 1px solid var(--rule); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .exr-row.dragging { opacity: .9; box-shadow: 0 8px 20px rgba(1,28,0,.18); cursor: grabbing; }
+  .exr-rank { font-family: var(--mono); font-size: 12px; color: var(--ink-40); min-width: 16px; text-align: right; }
+  .exr-label { font-family: var(--text); font-size: var(--fs-small); color: var(--ink); flex: 1; }
+  .exr-handle { color: var(--ink-25); font-size: 13px; letter-spacing: -2px; }
+  .exr-actions { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .exr-save { background: var(--ink); color: var(--paper); border: none; border-radius: 7px; padding: 12px 22px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .exr-save:disabled { opacity: .4; cursor: default; }
+  .exr-status { font-family: var(--mono); font-size: 11px; color: var(--ink-40); }`;
+  const js =
+`(function(){
+  var root=document.getElementById('${root}'); if(!root) return;
+  var saveBtn=root.querySelector('.exr-save'), statusEl=root.querySelector('.exr-status');
+  var drag=null, dragList=null;
+  function rowsIn(l){ return Array.prototype.slice.call(l.querySelectorAll('.exr-row')); }
+  function lists(){ return Array.prototype.slice.call(root.querySelectorAll('.exr-list')); }
+  function renum(l){ rowsIn(l).forEach(function(r,i){ r.querySelector('.exr-rank').textContent=(i+1); }); }
+  function down(e){ var r=e.target.closest('.exr-row'); if(!r) return; e.preventDefault(); drag=r; dragList=r.closest('.exr-list'); r.classList.add('dragging'); try{ r.setPointerCapture(e.pointerId); }catch(_){} }
+  function move(e){ if(!drag||!dragList) return;
+    var after=null, rs=rowsIn(dragList);
+    for(var i=0;i<rs.length;i++){ if(rs[i]===drag) continue; var bb=rs[i].getBoundingClientRect(); if(e.clientY < bb.top + bb.height/2){ after=rs[i]; break; } }
+    if(after){ dragList.insertBefore(drag, after); } else { dragList.appendChild(drag); }
+    renum(dragList);
+  }
+  function up(){ if(!drag) return; drag.classList.remove('dragging'); drag=null; dragList=null; saveBtn.disabled=false; }
+  root.addEventListener('pointerdown',down); document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
+  // Phase A: show only the client's top-3 underserved jobs from Ex1 (fallback to a default triad).
+  function topJobs(){ try{ var d=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]'); if(d.length){ d.sort(function(a,b){ return (b.importance+(11-b.satisfaction))-(a.importance+(11-a.satisfaction)); }); return d.slice(0,3).map(function(x){ return x.id; }); } }catch(_){} return ['approve','verify','paystack']; }
+  function applyTop(){ var keep=topJobs(); Array.prototype.slice.call(root.querySelectorAll('.exr-group')).forEach(function(g){ var l=g.querySelector('.exr-list'); g.style.display = (l && keep.indexOf(l.getAttribute('data-job'))>=0) ? '' : 'none'; }); }
+  saveBtn.addEventListener('click',function(){
+    saveBtn.disabled=true; statusEl.textContent='saving…';
+    var rankings=lists().filter(function(l){ return l.closest('.exr-group').style.display!=='none'; }).map(function(l){ return {job:l.getAttribute('data-job'), order:rowsIn(l).map(function(r,i){ return {id:r.getAttribute('data-id'), rank:i+1}; })}; });
+    fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{rankings:rankings}})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ statusEl.textContent=j.ok?'✓ Saved — thank you':'Save failed'; saveBtn.disabled=!j.ok; })
+      .catch(function(){ statusEl.textContent='Save failed — check connection'; saveBtn.disabled=false; });
+  });
+  lists().forEach(renum); applyTop();
+  window.addEventListener('ws:jtbd-changed', applyTop);
+})();`;
+  return `<section id="${root}">
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<p class="exr-intro">${b.intro}</p>` : ''}
+  <style>${css}</style>
+  <div class="exr">
+    ${groups}
+  </div>
+  <div class="exr-actions">
+    <button class="exr-save" type="button">Save ranking</button>
+    <span class="exr-status"></span>
+  </div>
+  <script>${js}</script>
+</section>`;
+}
+
+export function exerciseChips(b: ExerciseChipsBlock, slug: string): string {
+  const root = `exc-${esc(b.exerciseId)}`;
+  const qs = b.questions.map(q => `<div class="exc-q" data-q="${esc(q.id)}">
+      <div class="exc-q-h">${esc(q.q)}${q.example ? `<span class="exc-q-ex"> — e.g. ${esc(q.example)}</span>` : ''}</div>
+      <div class="exc-chips">
+        ${q.options.map(o => `<button type="button" class="exc-chip">${esc(o)}</button>`).join('\n        ')}
+      </div>
+      <div class="exc-add"><input class="exc-inp" type="text" placeholder="Add your own…" /><button class="exc-add-btn" type="button">Add</button></div>
+    </div>`).join('\n    ');
+  const css = `
+  .exc { margin-top: 18px; max-width: 620px; }
+  .exc-intro { font-family: var(--text); font-size: var(--fs-secondary); color: var(--ink-55); line-height: 1.6; margin-bottom: 24px; }
+  .exc-q { margin-bottom: 24px; }
+  .exc-q-h { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-55); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  .exc-q-ex { color: var(--ink-40); text-transform: none; letter-spacing: 0; }
+  .exc-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .exc-chip { font-family: var(--text); font-size: 14px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--rule-strong); color: var(--ink); cursor: pointer; transition: background .12s, color .12s, border-color .12s; }
+  .exc-chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .exc-add { display: flex; gap: 8px; margin-top: 10px; }
+  .exc-add input { flex: 1; max-width: 320px; border: 1px solid var(--rule-strong); border-radius: 6px; padding: 8px 11px; font-family: var(--text); font-size: 14px; background: var(--surface); color: var(--ink); outline: none; }
+  .exc-add button { background: none; border: 1px solid var(--rule-strong); border-radius: 6px; padding: 8px 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-55); cursor: pointer; }
+  .exc-actions { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .exc-save { background: var(--ink); color: var(--paper); border: none; border-radius: 7px; padding: 12px 22px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .exc-save:disabled { opacity: .4; cursor: default; }
+  .exc-status { font-family: var(--mono); font-size: 11px; color: var(--ink-40); }`;
+  const js =
+`(function(){
+  var root=document.getElementById('${root}'); if(!root) return;
+  var saveBtn=root.querySelector('.exc-save'), statusEl=root.querySelector('.exc-status');
+  function touch(){ saveBtn.disabled=false; }
+  root.addEventListener('click',function(e){
+    var c=e.target.closest('.exc-chip'); if(c){ c.classList.toggle('on'); touch(); return; }
+    var add=e.target.closest('.exc-add-btn'); if(add){ var box=add.closest('.exc-add'); var inp=box.querySelector('.exc-inp'); var v=(inp.value||'').trim(); if(v){ var chips=add.closest('.exc-q').querySelector('.exc-chips'); var nb=document.createElement('button'); nb.type='button'; nb.className='exc-chip on'; nb.textContent=v; chips.appendChild(nb); inp.value=''; touch(); } }
+  });
+  root.addEventListener('keydown',function(e){ if(e.key==='Enter' && e.target.classList.contains('exc-inp')){ e.preventDefault(); e.target.parentNode.querySelector('.exc-add-btn').click(); } });
+  saveBtn.addEventListener('click',function(){
+    saveBtn.disabled=true; statusEl.textContent='saving…';
+    var cep=Array.prototype.slice.call(root.querySelectorAll('.exc-q')).map(function(q){
+      return { q:q.getAttribute('data-q'), picks:Array.prototype.slice.call(q.querySelectorAll('.exc-chip.on')).map(function(c){ return c.textContent; }) };
+    });
+    fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{cep:cep}})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ statusEl.textContent=j.ok?'✓ Saved — thank you':'Save failed'; saveBtn.disabled=!j.ok; })
+      .catch(function(){ statusEl.textContent='Save failed — check connection'; saveBtn.disabled=false; });
+  });
+})();`;
+  return `<section id="${root}">
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<p class="exc-intro">${b.intro}</p>` : ''}
+  <style>${css}</style>
+  <div class="exc">
+    ${qs}
+    <div class="exc-actions">
+      <button class="exc-save" type="button">Save</button>
+      <span class="exc-status"></span>
+    </div>
+  </div>
+  <script>${js}</script>
+</section>`;
+}
+
+export function exerciseSolutions(b: ExerciseSolutionsBlock, slug: string): string {
+  const root = `exs-${esc(b.exerciseId)}`;
+  const rows = b.jobs.map(j =>
+    `<div class="exs-row" data-id="${esc(j.id)}">
+      <div class="exs-label">${esc(j.label)}</div>
+      <textarea class="exs-ta" rows="2" placeholder="${esc(j.placeholder || 'What do you do about this today?')}"></textarea>
+    </div>`
+  ).join('\n      ');
+  const css = `
+  .exs { margin-top: 18px; max-width: 600px; }
+  .exs-intro { font-family: var(--text); font-size: var(--fs-secondary); color: var(--ink-55); line-height: 1.6; margin-bottom: 20px; }
+  .exs-row { margin-bottom: 18px; }
+  .exs-label { font-family: var(--text); font-weight: 500; font-size: var(--fs-list-item); color: var(--ink); margin-bottom: 8px; }
+  .exs-ta { display: block; width: 100%; box-sizing: border-box; border: 1px solid var(--rule-strong); border-radius: 6px; padding: 10px 12px; font-family: var(--text); font-size: 15px; line-height: 1.5; resize: vertical; background: var(--surface); color: var(--ink); outline: none; }
+  .exs-actions { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+  .exs-save { background: var(--ink); color: var(--paper); border: none; border-radius: 7px; padding: 12px 22px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .exs-save:disabled { opacity: .4; cursor: default; }
+  .exs-status { font-family: var(--mono); font-size: 11px; color: var(--ink-40); }`;
+  const js =
+`(function(){
+  var root=document.getElementById('${root}'); if(!root) return;
+  var saveBtn=root.querySelector('.exs-save'), statusEl=root.querySelector('.exs-status');
+  root.addEventListener('input',function(e){ if(e.target.classList.contains('exs-ta')) saveBtn.disabled=false; });
+  // Phase A: show only the client's top-3 underserved jobs from Ex1 (fallback triad).
+  function topJobs(){ try{ var d=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]'); if(d.length){ d.sort(function(a,b){ return (b.importance+(11-b.satisfaction))-(a.importance+(11-a.satisfaction)); }); return d.slice(0,3).map(function(x){ return x.id; }); } }catch(_){} return ['approve','verify','paystack']; }
+  function applyTop(){ var keep=topJobs(); Array.prototype.slice.call(root.querySelectorAll('.exs-row')).forEach(function(r){ r.style.display = keep.indexOf(r.getAttribute('data-id'))>=0 ? '' : 'none'; }); }
+  applyTop(); window.addEventListener('ws:jtbd-changed', applyTop);
+  saveBtn.addEventListener('click',function(){
+    saveBtn.disabled=true; statusEl.textContent='saving…';
+    var ans=Array.prototype.slice.call(root.querySelectorAll('.exs-row')).filter(function(r){ return r.style.display!=='none'; }).map(function(r){ return {id:r.getAttribute('data-id'), text:(r.querySelector('.exs-ta').value||'').trim()}; });
+    fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{solutions:ans}})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ statusEl.textContent=j.ok?'✓ Saved — thank you':'Save failed'; saveBtn.disabled=!j.ok; })
+      .catch(function(){ statusEl.textContent='Save failed — check connection'; saveBtn.disabled=false; });
+  });
+})();`;
+  return `<section id="${root}">
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<p class="exs-intro">${b.intro}</p>` : ''}
+  <style>${css}</style>
+  <div class="exs">
+      ${rows}
+    <div class="exs-actions">
+      <button class="exs-save" type="button">Save</button>
+      <span class="exs-status"></span>
     </div>
   </div>
   <script>${js}</script>

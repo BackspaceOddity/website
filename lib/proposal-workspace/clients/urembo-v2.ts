@@ -84,17 +84,43 @@ export const uremboV2Page: ClientPage = {
     { block: 'divider' },
 
     {
-      block: 'demo',
+      block: 'processFlow',
       sectionNum: '04 — What it looks like',
       heading: 'Your onboarding flow, automated',
-      intro: 'A static walk-through of the first build, on your actual process. We’d tailor this together.',
-      html: `<p style="font-size:var(--fs-secondary);color:var(--ink-55);line-height:1.7;">
-        <strong>1 · Merchant signs up</strong> → uploads business documents.<br>
-        <strong>2 · Automatic checks</strong> → documents read and validated, business details verified, authenticity flagged.<br>
-        <strong>3 · Payment setup</strong> → Paystack sub-account created and confirmed.<br>
-        <strong>4 · Decision</strong> → clean application activates in minutes; anything ambiguous routes to you with the reason attached.<br>
-        <strong>5 · Merchant live</strong> → activation email sent, dashboard open — no manual step in between.
-      </p>`,
+      intro: 'A walk-through of the first build, on your actual process. We’d tailor this together.',
+      steps: [
+        {
+          title: 'Merchant signs up',
+          desc: 'They upload their business documents through the same sign-up they use today — nothing changes on their side.',
+        },
+        {
+          title: 'Automatic checks',
+          desc: 'The documents are read and validated, the business details verified, and anything that looks off is flagged.',
+        },
+        {
+          title: 'Payment setup',
+          desc: 'The Paystack sub-account is created and confirmed — no manual setup step.',
+        },
+        {
+          title: 'Decision',
+          desc: 'Every application sorts itself into one of two paths.',
+          branches: [
+            {
+              label: 'Clean application',
+              body: 'Activates in minutes — no one has to touch it.',
+              primary: true,
+            },
+            {
+              label: 'Needs a look',
+              body: 'Routes to you with the reason attached, so the call is quick to make.',
+            },
+          ],
+        },
+        {
+          title: 'Merchant live',
+          desc: 'Activation email sent, dashboard open — no manual step in between.',
+        },
+      ],
     },
 
     { block: 'divider' },
@@ -115,10 +141,10 @@ export const uremboV2Page: ClientPage = {
       sectionNum: '06 — Over to you',
       heading: 'Which of these slow you down most?',
       intro:
-        'We pulled these from our call. Drag each onto the grid — how important it is to you, and how well it’s handled today. The ones high up and to the left are where the time really goes. Tap ＋ note on any card to tell us why (type or record a voice note).',
+        'We pulled these from our call. Drag each onto the grid — left to right is how important it is to you (1–10), bottom to top is how well it’s handled today (1–10). The ones that matter most but still run painfully are where the time really goes. Tap ＋ note on any card to tell us why (type or record a voice note).',
       exerciseId: 'jtbd-matrix',
-      axisY: { label: 'How important to you', low: 'Minor', high: 'Critical' },
-      axisX: { label: 'How well it’s handled today', low: 'Painful', high: 'Handled' },
+      axisX: { label: 'How important to you', low: 'Minor', high: 'Critical' },
+      axisY: { label: 'How well it’s handled today', low: 'Painful', high: 'Handled' },
       jobs: [
         { id: 'approve', label: 'Approve a new merchant without the 3–5 day wait' },
         { id: 'verify', label: 'Check documents and business authenticity' },
@@ -128,9 +154,127 @@ export const uremboV2Page: ClientPage = {
       ],
     },
 
+    { block: 'divider' },
+
+    {
+      block: 'exerciseRank',
+      sectionNum: '07 — Where each part hurts',
+      heading: 'Within each job, what hurts most?',
+      intro:
+        'We grouped the problems under each part of the operation. Inside each group, drag them so the one that bites most sits on top. (Draft problem lists — we’ll refine these together.)',
+      exerciseId: 'problem-rank',
+      groups: [
+        {
+          jobId: 'approve',
+          jobLabel: 'Approving a new merchant',
+          problems: [
+            { id: 'approve-wait', label: '3–5 day wait before they can start' },
+            { id: 'approve-desk', label: 'Only moves when you’re at the desk' },
+            { id: 'approve-eta', label: 'Merchants don’t know when they’ll be live' },
+          ],
+        },
+        {
+          jobId: 'verify',
+          jobLabel: 'Checking documents & authenticity',
+          problems: [
+            { id: 'verify-byhand', label: 'Reading every document by hand' },
+            { id: 'verify-fakes', label: 'Hard to spot fake or low-quality docs' },
+            { id: 'verify-formats', label: 'Every merchant submits a different format' },
+          ],
+        },
+        {
+          jobId: 'paystack',
+          jobLabel: 'Setting up the Paystack sub-account',
+          problems: [
+            { id: 'paystack-manual', label: 'Manual setup for each merchant' },
+            { id: 'paystack-errors', label: 'A mistake means redoing it' },
+            { id: 'paystack-status', label: 'No clear view of what’s done' },
+          ],
+        },
+        {
+          jobId: 'support',
+          jobLabel: 'Handling support as volume grows',
+          problems: [
+            { id: 'support-repeat', label: 'The same questions over and over' },
+            { id: 'support-pileup', label: 'Tickets pile up when you’re busy' },
+            { id: 'support-triage', label: 'No way to sort urgent from routine' },
+          ],
+        },
+        {
+          jobId: 'audit',
+          jobLabel: 'Keeping a record of every approval',
+          problems: [
+            { id: 'audit-why', label: 'No log of why a merchant was approved' },
+            { id: 'audit-trace', label: 'Hard to answer “why this one?” later' },
+          ],
+        },
+      ],
+    },
+
+    { block: 'divider' },
+
+    {
+      block: 'exerciseChips',
+      sectionNum: '08 — The moment it lands',
+      heading: 'When does the need actually arise?',
+      intro:
+        'A category entry point is the exact moment the work shows up — mapped across five questions (Sharp & Romaniuk). For merchant onboarding, pick what fits and add your own.',
+      exerciseId: 'entry-points',
+      questions: [
+        {
+          id: 'why',
+          q: 'Why',
+          example: 'a new merchant is ready to start selling',
+          options: ['A new merchant signs up', 'A merchant is ready to sell', 'You promised a fast launch', 'A partner referred them'],
+        },
+        {
+          id: 'when',
+          q: 'When',
+          example: 'after a marketing push',
+          options: ['Right after a marketing push', 'End of the day', 'Over the weekend', 'The moment documents land'],
+        },
+        {
+          id: 'where',
+          q: 'Where',
+          example: 'on your phone, away from the desk',
+          options: ['At your desk', 'On your phone', 'Away from the office', 'Inside the admin dashboard'],
+        },
+        {
+          id: 'with-whom',
+          q: 'With whom',
+          example: 'with the merchant waiting on you',
+          options: ['Just you', 'With a VA or assistant', 'With the merchant waiting', 'With your co-founder'],
+        },
+        {
+          id: 'with-what',
+          q: 'With what',
+          example: 'alongside the dashboard and WhatsApp',
+          options: ['The admin dashboard', 'WhatsApp / chat', 'Paystack', 'Spreadsheets or email'],
+        },
+      ],
+    },
+
+    { block: 'divider' },
+
+    {
+      block: 'exerciseSolutions',
+      sectionNum: '09 — What you do today',
+      heading: 'How do you handle each one now?',
+      intro:
+        'For each step, tell us how it works today — the tool, the workaround, the manual step. This is how we learn what to build around.',
+      exerciseId: 'current-solutions',
+      jobs: [
+        { id: 'approve', label: 'Approving a new merchant' },
+        { id: 'verify', label: 'Checking documents & business authenticity' },
+        { id: 'paystack', label: 'Setting up the Paystack sub-account' },
+        { id: 'support', label: 'Handling merchant support questions' },
+        { id: 'audit', label: 'Keeping a record of every approval' },
+      ],
+    },
+
     {
       block: 'nextSteps',
-      sectionNum: '07 — From our side',
+      sectionNum: '10 — From our side',
       heading: 'What happens next',
       intro:
         'This is our read, not a proposal yet. The next step is a short call to pressure-test it together and agree where to actually start.',
@@ -153,7 +297,7 @@ export const uremboV2Page: ClientPage = {
 
     {
       block: 'discussion',
-      sectionNum: '08 — To align on',
+      sectionNum: '11 — To align on',
       heading: 'Questions for our next call',
       intro: 'Add your own — this page is yours, and we’ll keep building on it as we go.',
       questions: [

@@ -18,7 +18,11 @@ import { renderPage } from '@/lib/proposal-workspace/render';
 import { token, getCookie, cookieName, loginHtml } from '@/lib/proposal-workspace/chrome';
 import { getWorkspacePassword } from '@/lib/proposal-workspace/auth';
 
-const editMode = () => process.env.WS_EDIT_MODE === '1';
+// Edit Mode auto-enables in local dev (NODE_ENV !== 'production'); Vercel
+// preview/prod builds run as 'production' so the panel never ships to a client.
+// WS_EDIT_MODE=1 forces it on regardless (escape hatch). Per BSO-563 +
+// "Edit Mode on every localhost deploy" rule.
+const editMode = () => process.env.WS_EDIT_MODE === '1' || process.env.NODE_ENV !== 'production';
 const htmlHeaders = { 'Content-Type': 'text/html; charset=utf-8' };
 
 /** Secure cookies only over HTTPS. On local http dev a `secure` cookie is
