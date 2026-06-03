@@ -153,22 +153,28 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   const css = `
   .exm-wrap { margin-top: 18px; }
   .exm-intro { font-family: var(--text); font-size: var(--fs-secondary); color: var(--ink-55); line-height: 1.6; margin-bottom: 20px; max-width: 640px; }
-  .exm-stage { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
-  .exm-ylab { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-40); text-align: center; align-self: center; }
-  .exm-matrix { position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; border: 1.5px solid var(--rule-strong); background: var(--surface); }
+  .exm-stage { display: grid; grid-template-columns: 60px 1fr; grid-template-rows: auto auto; gap: 6px 12px; max-width: 632px; }
+  .exm-yaxis { grid-row: 1; grid-column: 1; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; padding: 2px 0; text-align: right; }
+  .exm-yaxis .hi, .exm-yaxis .lo { font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); max-width: 58px; line-height: 1.2; }
+  .exm-yaxis .ttl { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); margin: 8px 0; }
+  .exm-matrix { grid-row: 1; grid-column: 2; position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; border: 1.5px solid var(--rule-strong); background: var(--surface); }
   .exm-matrix::before, .exm-matrix::after { content: ''; position: absolute; background: var(--rule); }
   .exm-matrix::before { left: 50%; top: 0; bottom: 0; width: 1px; }
   .exm-matrix::after { top: 50%; left: 0; right: 0; height: 1px; }
   .exm-hot { position: absolute; left: 0; top: 0; width: 50%; height: 50%; background: rgba(1,28,0,.05); }
-  .exm-hot span { position: absolute; left: 10px; top: 8px; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); }
-  .exm-end { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); }
-  .exm-end.lo-x { bottom: -16px; left: 0; } .exm-end.hi-x { bottom: -16px; right: 0; }
-  .exm-end.lo-y { left: -2px; bottom: -16px; } .exm-end.hi-y { left: -2px; top: -2px; }
-  .exm-xlab { grid-column: 2; text-align: center; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-40); margin-top: 22px; }
-  .exm-tray { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+  .exm-hot span { position: absolute; left: 11px; top: 9px; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-40); }
+  .exm-xaxis { grid-row: 2; grid-column: 2; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 8px; }
+  .exm-xaxis .hi, .exm-xaxis .lo { font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); white-space: nowrap; }
+  .exm-xaxis .ttl { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); text-align: center; }
+  .exm-tray { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
   .exm-tray-label { width: 100%; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-40); margin-bottom: 2px; }
-  .exm-card { display: inline-flex; align-items: center; gap: 8px; background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 7px; padding: 8px 10px; font-family: var(--text); font-size: 13px; line-height: 1.3; color: var(--ink); cursor: grab; max-width: 230px; touch-action: none; box-shadow: 0 1px 2px rgba(1,28,0,.06); }
-  .exm-card.placed { position: absolute; z-index: 2; max-width: 190px; font-size: 12px; padding: 6px 8px; }
+  .exm-card { display: inline-flex; align-items: center; gap: 9px; background: #FFFFFF; border: 1px solid rgba(1,28,0,.10); border-radius: 3px; padding: 13px 14px; font-family: var(--text); font-size: 13px; line-height: 1.35; color: var(--ink); cursor: grab; max-width: 216px; touch-action: none; box-shadow: 0 3px 9px rgba(1,28,0,.13), 0 1px 2px rgba(1,28,0,.10); transition: box-shadow .12s ease, transform .12s ease; }
+  .exm-tray .exm-card { transform: rotate(-1.1deg); }
+  .exm-tray .exm-card:nth-of-type(3n) { transform: rotate(1.5deg); }
+  .exm-tray .exm-card:nth-of-type(3n+2) { transform: rotate(.4deg); }
+  .exm-card:active { cursor: grabbing; box-shadow: 0 9px 20px rgba(1,28,0,.20); }
+  .exm-card.placed { position: absolute; z-index: 2; max-width: 182px; transform: none !important; box-shadow: 0 5px 13px rgba(1,28,0,.17); }
+  .exm-card.placed:active { box-shadow: 0 10px 22px rgba(1,28,0,.22); }
   .exm-card.has-note { border-color: var(--ink); }
   .exm-note-btn { display: none; background: none; border: none; font-family: var(--mono); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-40); cursor: pointer; padding: 0; white-space: nowrap; }
   .exm-card.placed .exm-note-btn { display: inline; }
@@ -255,15 +261,19 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   <style>${css}</style>
   <div class="exm-wrap">
     <div class="exm-stage">
-      <div class="exm-ylab">${esc(ay.label)}</div>
+      <div class="exm-yaxis">
+        <span class="hi">${esc(ay.high)}</span>
+        <span class="ttl">${esc(ay.label)}</span>
+        <span class="lo">${esc(ay.low)}</span>
+      </div>
       <div class="exm-matrix">
         <div class="exm-hot"><span>Underserved</span></div>
-        <span class="exm-end hi-y">${esc(ay.high)}</span>
-        <span class="exm-end lo-y">${esc(ay.low)}</span>
-        <span class="exm-end lo-x">${esc(ax.low)}</span>
-        <span class="exm-end hi-x">${esc(ax.high)}</span>
       </div>
-      <div class="exm-xlab">${esc(ax.label)}</div>
+      <div class="exm-xaxis">
+        <span class="lo">${esc(ax.low)}</span>
+        <span class="ttl">${esc(ax.label)}</span>
+        <span class="hi">${esc(ax.high)}</span>
+      </div>
     </div>
     <div class="exm-tray">
       <div class="exm-tray-label">Drag each onto the grid — height = importance, left/right = how well it’s handled today</div>
