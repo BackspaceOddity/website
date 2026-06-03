@@ -23,6 +23,7 @@ const KNOWN_EXERCISES = new Set([
   'problem-rank',
   'current-solutions',
   'entry-points',
+  'client-questions',
 ]);
 
 export async function POST(req: Request, ctx: { params: Promise<{ client: string }> }) {

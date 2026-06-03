@@ -84,17 +84,43 @@ export const uremboPage: ClientPage = {
     { block: 'divider' },
 
     {
-      block: 'demo',
+      block: 'processFlow',
       sectionNum: '04 — What it looks like',
       heading: 'Your onboarding flow, automated',
-      intro: 'A static walk-through of the first build, on your actual process. We’d tailor this together.',
-      html: `<p style="font-size:var(--fs-secondary);color:var(--ink-55);line-height:1.7;">
-        <strong>1 · Merchant signs up</strong> → uploads business documents.<br>
-        <strong>2 · Automatic checks</strong> → documents read and validated, business details verified, authenticity flagged.<br>
-        <strong>3 · Payment setup</strong> → Paystack sub-account created and confirmed.<br>
-        <strong>4 · Decision</strong> → clean application activates in minutes; anything ambiguous routes to you with the reason attached.<br>
-        <strong>5 · Merchant live</strong> → activation email sent, dashboard open — no manual step in between.
-      </p>`,
+      intro: 'A walk-through of the first build, on your actual process. We’d tailor this together.',
+      steps: [
+        {
+          title: 'Merchant signs up',
+          desc: 'They upload their business documents through the same sign-up they use today — nothing changes on their side.',
+        },
+        {
+          title: 'Automatic checks',
+          desc: 'The documents are read and validated, the business details verified, and anything that looks off is flagged.',
+        },
+        {
+          title: 'Payment setup',
+          desc: 'The Paystack sub-account is created and confirmed — no manual setup step.',
+        },
+        {
+          title: 'Decision',
+          desc: 'Every application sorts itself into one of two paths.',
+          branches: [
+            {
+              label: 'Clean application',
+              body: 'Activates in minutes — no one has to touch it.',
+              primary: true,
+            },
+            {
+              label: 'Needs a look',
+              body: 'Routes to you with the reason attached, so the call is quick to make.',
+            },
+          ],
+        },
+        {
+          title: 'Merchant live',
+          desc: 'Activation email sent, dashboard open — no manual step in between.',
+        },
+      ],
     },
 
     { block: 'divider' },

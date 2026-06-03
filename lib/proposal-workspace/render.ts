@@ -24,7 +24,7 @@ export function renderBlock(block: Block, slug: string): string {
     case 'phases':         return B.phases(block);
     case 'whatStayed':     return B.whatStayed(block);
     case 'nextSteps':      return B.nextSteps(block);
-    case 'discussion':     return B.discussion(block);
+    case 'discussion':     return B.discussion(block, slug);
     case 'exerciseMatrix': return B.exerciseMatrix(block, slug);
     case 'exerciseRank':   return B.exerciseRank(block, slug);
     case 'exerciseChips':  return B.exerciseChips(block, slug);

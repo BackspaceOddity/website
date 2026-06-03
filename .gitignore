@@ -41,3 +41,4 @@ _edit-inbox.json
 
 # One-way workshop dev fallback storage
 .workspace-data/
+.supabase-setup.env

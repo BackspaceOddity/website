@@ -197,7 +197,7 @@ export function nextSteps(b: NextStepsBlock): string {
 </section>`;
 }
 
-export function discussion(b: DiscussionBlock): string {
+export function discussion(b: DiscussionBlock, slug: string): string {
   const items = b.questions.map(q => `<li>
       <div class="check-box"></div>
       <div>
@@ -205,13 +205,72 @@ export function discussion(b: DiscussionBlock): string {
         ${q.note ? `<span class="check-note">${q.note}</span>` : ''}
       </div>
     </li>`).join('\n    ');
-  return `<div class="check-section">
+
+  // v2: client can add their own questions. They persist in localStorage
+  // (so they stay on this device across reloads) and POST to the exercise
+  // endpoint (so Backspace Oddity receives them once Supabase is configured —
+  // BSO-583; until then the server falls back to a gitignored dev JSONL).
+  // Styled with the same --on-dark-* tokens as .check-section so it matches
+  // the inverted panel in either theme.
+  const css = `
+  .cq-add { margin-top: 26px; border-top: 1px solid var(--on-dark-border); padding-top: 20px; }
+  .cq-add-label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--on-dark-muted); margin-bottom: 10px; }
+  .cq-ta { display: block; width: 100%; box-sizing: border-box; background: transparent; border: 1px solid var(--on-dark-border); border-radius: 6px; padding: 10px 12px; font-family: var(--text); font-size: var(--fs-small); line-height: 1.5; color: var(--on-dark-primary); resize: vertical; min-height: 52px; outline: none; }
+  .cq-ta::placeholder { color: var(--on-dark-muted); }
+  .cq-ta:focus { border-color: var(--on-dark-primary); }
+  .cq-row { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+  .cq-btn { background: var(--on-dark-primary); color: var(--ink); border: none; border-radius: 7px; padding: 10px 20px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .cq-btn:disabled { opacity: .4; cursor: default; }
+  .cq-status { font-family: var(--mono); font-size: 11px; color: var(--on-dark-muted); }
+  .check-list li.cq-own .check-box { background: var(--on-dark-primary); border-color: var(--on-dark-primary); }
+  `;
+
+  const js =
+`(function(){
+  var root=document.getElementById('cq-${esc(slug)}'); if(!root) return;
+  var list=root.querySelector('.check-list');
+  var ta=root.querySelector('.cq-ta'), btn=root.querySelector('.cq-btn'), st=root.querySelector('.cq-status');
+  var KEY='ws:${slug}:questions';
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(_){ return []; } }
+  function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(_){} }
+  function li(text){ var el=document.createElement('li'); el.className='cq-own';
+    var box=document.createElement('div'); box.className='check-box';
+    var wrap=document.createElement('div');
+    var q=document.createElement('span'); q.className='check-question'; q.textContent=text;
+    var note=document.createElement('span'); note.className='check-note'; note.textContent='Added by you';
+    wrap.appendChild(q); wrap.appendChild(note); el.appendChild(box); el.appendChild(wrap); return el; }
+  load().forEach(function(t){ list.appendChild(li(t)); });
+  function update(){ btn.disabled = ta.value.trim().length===0; }
+  ta.addEventListener('input',update); update();
+  function add(){ var t=ta.value.trim(); if(!t) return;
+    list.appendChild(li(t)); var a=load(); a.push(t); save(a); ta.value=''; update();
+    st.textContent='Saved';
+    fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'client-questions',payload:{questions:a}})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ st.textContent=j.ok?'✓ Saved — we’ll see this before our call':'Saved on this device'; })
+      .catch(function(){ st.textContent='Saved on this device'; });
+  }
+  btn.addEventListener('click',add);
+  ta.addEventListener('keydown',function(e){ if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){ e.preventDefault(); add(); } });
+})();`;
+
+  return `<div class="check-section" id="cq-${esc(slug)}">
   ${sectionNum(b.sectionNum)}
   <h2>${esc(b.heading)}</h2>
   ${b.intro ? `<p>${b.intro}</p>` : ''}
+  <style>${css}</style>
   <ul class="check-list">
     ${items}
   </ul>
+  <div class="cq-add">
+    <div class="cq-add-label">Add your own question</div>
+    <textarea class="cq-ta" placeholder="Type a question you’d like to cover…" rows="2"></textarea>
+    <div class="cq-row">
+      <button type="button" class="cq-btn" disabled>Add question</button>
+      <span class="cq-status"></span>
+    </div>
+  </div>
+  <script>${js}</script>
 </div>`;
 }
 
