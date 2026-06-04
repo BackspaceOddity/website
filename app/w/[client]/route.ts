@@ -62,7 +62,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ client: string
 
   const accessKey = await getWorkspacePassword(client);
   const body = await req.text();
-  const entered = new URLSearchParams(body).get('code') ?? '';
+  // trim: pasting the code from a file/editor often carries a trailing
+  // newline or space, which would silently fail the exact match.
+  const entered = (new URLSearchParams(body).get('code') ?? '').trim();
 
   if (accessKey && entered === accessKey) {
     const res = NextResponse.redirect(new URL(`/w/${client}/`, req.url), 303);
