@@ -71,7 +71,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ client: string
       secure: isSecureReq(req),
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 90, // 90 days
-      path: `/w/${client}/`,
+      // path '/' (not /w/<client>/) so the cookie is also sent on the bare
+      // subdomain root <slug>.backspaceoddity.com, which proxy.ts rewrites to
+      // /w/<slug>. Cookie name is per-client (pw-<slug>) so no cross-unlock.
+      path: '/',
     });
     return res;
   }
