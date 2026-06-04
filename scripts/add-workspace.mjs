@@ -75,6 +75,10 @@ async function main() {
   const accessCode = genAccessCode();
   const row = { slug, client_name: clientName, active: true };
   row['password'] = accessCode; // bracket-set to keep the DB column name out of secret-scanner false-positives
+  // Optional: map the client to their Notion Deal page so submissions sync there (BSO-586).
+  // Usage: ... <slug> "<Name>" --notion=<notion-page-id>
+  const notionFlag = flags.find((f) => f.startsWith('--notion='));
+  if (notionFlag) row['notion_page_id'] = notionFlag.slice('--notion='.length);
   const { error } = await supabase
     .from('workspaces')
     .upsert(row, { onConflict: 'slug' });
