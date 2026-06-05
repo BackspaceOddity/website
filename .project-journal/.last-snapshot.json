@@ -1,6 +1,6 @@
 {
-  "last_session_at": "2026-05-21T23:10:00",
-  "global_claude_md_hash": "a6f43ac72f4023388ce8124cc6f2abad2e759095d2c6b58c70427d3ef4c31153",
+  "last_session_at": "2026-05-30T00:25:47",
+  "global_claude_md_hash": "2547a3ff255ba9e8ee95aaa30029e49ced6547cd62a2de258ceb5a011c562060",
   "global_claude_md_sections": [
     "Architectural fixes over patches — MANDATORY",
     "Architectural-claim provenance — MANDATORY",
@@ -12,6 +12,7 @@
     "Canon-grounding before domain-touching response — MANDATORY",
     "Clarifying Questions — MANDATORY",
     "Closure discipline — MANDATORY (incident 2026-04-30 BSO-187)",
+    "Communication style — outcomes, not engineering log — MANDATORY",
     "Compound Problem Decomposition — MANDATORY (external systems)",
     "Context Capture — MANDATORY",
     "Critical thinking & no-bullshit — MANDATORY",

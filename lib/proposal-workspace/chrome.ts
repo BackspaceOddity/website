@@ -141,10 +141,16 @@ const BSO_TOKEN_MAP = [
   { match: 'p', token: '--fs-body', label: 'BODY' },
 ];
 
+const BSO_FONT_FAMILIES = [
+  { k: '--display', l: 'Display (headings)', d: 'GT Eesti Pro Display' },
+  { k: '--text',    l: 'Text (body)',         d: 'GT Eesti Pro Text' },
+  { k: '--mono',    l: 'Mono',                d: 'ui-monospace' },
+];
+
 export function editModeScript(slug: string): string {
   return buildScript({
     slug,
-    tweaks: { sizes: BSO_SIZES, lineHeights: BSO_LHS, weightStyles: BSO_WSTYLE },
+    tweaks: { sizes: BSO_SIZES, lineHeights: BSO_LHS, weightStyles: BSO_WSTYLE, fontFamilies: BSO_FONT_FAMILIES },
     tokenMap: BSO_TOKEN_MAP,
   });
 }

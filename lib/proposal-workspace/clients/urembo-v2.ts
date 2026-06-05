@@ -277,7 +277,7 @@ export const uremboV2Page: ClientPage = {
       sectionNum: '10 — From our side',
       heading: 'What happens next',
       intro:
-        'This is our read, not a proposal yet. The next step is a short call to pressure-test it together and agree where to actually start.',
+        'This is our read, not a proposal yet. The best next step would be a call to discuss our approach together and agree where to actually start.',
       steps: [
         {
           title: 'You react to this read',
@@ -292,7 +292,6 @@ export const uremboV2Page: ClientPage = {
           desc: 'With the first workflow running on its own, the growth and revenue goals you came in with become a real next conversation — on solid ground.',
         },
       ],
-      link: { href: 'https://backspaceoddity.com/ai-skills/', label: 'The five AI products we scoped' },
     },
 
     {
