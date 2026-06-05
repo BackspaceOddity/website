@@ -81,10 +81,16 @@ ${b.note ? `<p class="note-small">${b.note}</p>` : ''}`;
 }
 
 export function narrative(b: NarrativeBlock): string {
+  const list = b.bullets?.length
+    ? `<${b.bulletStyle === 'number' ? 'ol' : 'ul'} class="ws-list">
+    ${b.bullets.map(x => `<li>${x}</li>`).join('\n    ')}
+  </${b.bulletStyle === 'number' ? 'ol' : 'ul'}>`
+    : '';
   return `<section>
   ${sectionNum(b.sectionNum)}
   <h2>${esc(b.heading)}</h2>
   ${paras(b.body)}
+  ${list}
   ${b.example ? `<div class="statement">${b.example}</div>` : ''}
 </section>`;
 }

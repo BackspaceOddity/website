@@ -1,4 +1,4 @@
-import { buildScript } from '@backspace-oddity/edit-mode/build-script';
+import { buildScript, type EditModeConfig } from '@backspace-oddity/edit-mode/build-script';
 
 /**
  * Throwaway sandbox landing — exists only to exercise the CANONICAL Edit Mode
@@ -10,7 +10,7 @@ import { buildScript } from '@backspace-oddity/edit-mode/build-script';
  */
 export const dynamic = 'force-dynamic';
 
-const TWEAKS = {
+const TWEAKS: NonNullable<EditModeConfig['tweaks']> = {
   sizes: [
     { k: '--fs-h1', l: 'Hero H1', d: 76, min: 40, max: 140 },
     { k: '--fs-h2', l: 'Section H2', d: 40, min: 24, max: 80 },
@@ -21,7 +21,7 @@ const TWEAKS = {
     { k: '--lh-body', l: 'Body LH', d: 155, min: 100, max: 200 },
   ],
   weightStyles: [
-    { l: 'Body', w: '--w-body', s: '--st-body', wd: '400', sd: 'normal' },
+    { l: 'Body', w: '--w-body', s: '--st-body', wd: 400, sd: 'normal' },
   ],
   weightOptions: [
     ['100|normal', 'Ultra Light'], ['200|normal', 'Thin'], ['300|normal', 'Light'],

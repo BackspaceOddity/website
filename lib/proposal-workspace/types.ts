@@ -96,6 +96,10 @@ export interface NarrativeBlock {
   sectionNum?: string;
   heading: string;
   body: Rich[];
+  /** optional structured points rendered as a list after the body */
+  bullets?: Rich[];
+  /** list marker style when bullets are present (default: disc) */
+  bulletStyle?: 'disc' | 'number';
   /** optional pulled-out concrete example */
   example?: Rich;
 }

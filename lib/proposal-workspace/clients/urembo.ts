@@ -24,7 +24,7 @@ export const uremboPage: ClientPage = {
       block: 'docHeader',
       label: 'Initial Assessment · Urembo Hub',
       meta: 'Prepared by Backspace Oddity · for Fatuma Dabassa',
-      version: 'Draft',
+      version: 'Conceptual proposal',
       date: 'June 2026',
     },
 
@@ -52,13 +52,13 @@ export const uremboPage: ClientPage = {
         'You described it plainly on the call: the approvals that gate every new merchant are yours to do, one by one.',
       before: {
         label: 'Today',
-        core: 'Every merchant waits for you.',
+        core: 'Every merchant waits for you',
         body:
           'Sign-up arrives → you open the admin dashboard → check the uploaded documents → verify the business → approve the Paystack sub-account → the merchant gets the email and can finally start. Three to five days, and a real chance they drop off before the approval lands.',
       },
       after: {
         label: 'Where this goes',
-        core: 'Merchants onboard themselves; you handle the exceptions.',
+        core: 'Merchants onboard themselves; you handle the exceptions',
         body:
           'The routine checks run automatically the moment a merchant signs up. Clean applications activate in minutes. Only the ones that genuinely need a human reach you — so your time goes to judgement, not to the queue.',
       },
@@ -73,9 +73,13 @@ export const uremboPage: ClientPage = {
       sectionNum: '03 — Where we’d start',
       heading: 'Our read on the first move',
       body: [
-        'It’s the same way we work on the engagements you saw on the page: take the one workflow that eats the most time and rebuild it with AI built in — so within a few weeks you run it without us. For Urembo, that workflow is merchant onboarding, on the stack you already own.',
-        'You own your stack — GitHub, your own database, your own back office — and your data sits in one place. The automation builds on what you already have, instead of bolting on from outside.',
-        'The first build is the onboarding approval flow: read the submitted documents, run the verification and authenticity checks, set up the Paystack sub-account, and activate the merchant — escalating to you only when something is genuinely unclear. Support tickets follow the same pattern once volume is real.',
+        'We start the same way as on the engagements you saw: take the one workflow that costs you the most time and rebuild it with AI inside — so within a few weeks you run it without us. For Urembo, that workflow is merchant onboarding, on the stack you already own.',
+      ],
+      bullets: [
+        'It builds on what you already have — your GitHub, your database, your back office. We add AI to your own stack, rather than bolting a tool on from outside.',
+        'The first build is the onboarding approval flow: it reads the submitted documents, runs the verification and authenticity checks, sets up the Paystack sub-account, and activates the merchant.',
+        'You stay in the loop only where it matters — anything genuinely unclear comes to you, while the routine applications clear on their own.',
+        'Once support volume is real, the same pattern extends to tickets — one approach, steadily taking more of the operation off your plate.',
       ],
       example:
         'The same engine that clears a merchant in minutes also gives you the audit trail — every approval, every reason, on record.',
@@ -85,7 +89,7 @@ export const uremboPage: ClientPage = {
 
     {
       block: 'processFlow',
-      sectionNum: '04 — What it looks like',
+      sectionNum: '04 — What it might look like',
       heading: 'Your onboarding flow, automated',
       intro: 'A walk-through of the first build, on your actual process. We’d tailor this together.',
       steps: [
@@ -126,20 +130,11 @@ export const uremboPage: ClientPage = {
     { block: 'divider' },
 
     {
-      block: 'whatStayed',
-      sectionNum: '05 — What stayed with us',
-      heading: 'Why this is a good place to build',
-      body: [
-        'Fifteen years in the beauty industry before you built the platform — you’re not solving a problem you read about, you’re solving one you lived. That shows in how specifically you described the gap in the market and the merchants you’re onboarding.',
-      ],
-    },
-
-    {
       block: 'nextSteps',
       sectionNum: '06 — From our side',
       heading: 'What happens next',
       intro:
-        'This is our read, not a proposal yet. The next step is a short call to pressure-test it together and agree where to actually start.',
+        'This is our read, not a proposal yet. The next step is a short call to discuss it together and agree where to actually start.',
       steps: [
         {
           title: 'You react to this read',
@@ -154,7 +149,6 @@ export const uremboPage: ClientPage = {
           desc: 'With the first workflow running on its own, the growth and revenue goals you came in with become a real next conversation — on solid ground.',
         },
       ],
-      link: { href: 'https://backspaceoddity.com/ai-skills/', label: 'The five AI products we scoped' },
     },
 
     {

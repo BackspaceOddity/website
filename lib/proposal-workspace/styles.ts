@@ -158,6 +158,13 @@ export const styles = `
   p + p { margin-top: 12px; }
   a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
   a:hover { text-decoration-color: var(--ink); }
+  .ws-list { margin-top: 18px; padding-left: 0; list-style: none; }
+  .ws-list li { font-family: var(--text); font-weight: var(--w-body); font-style: var(--st-body); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); position: relative; padding-left: 24px; }
+  .ws-list li + li { margin-top: 14px; }
+  .ws-list li::before { content: ''; position: absolute; left: 2px; top: 0.62em; width: 7px; height: 7px; border: 1.5px solid var(--ink); border-radius: 50%; }
+  ol.ws-list { counter-reset: ws; }
+  ol.ws-list li::before { content: counter(ws); counter-increment: ws; border: none; border-radius: 0; left: 0; top: 0; width: auto; height: auto; font-family: var(--mono); font-size: 12px; color: var(--ink-55); }
+  ol.ws-list li { padding-left: 28px; }
 
   .divider { border: none; border-top: 1px solid var(--rule); margin: 48px 0; }
 
@@ -190,7 +197,7 @@ export const styles = `
   .ej-frame { background: var(--ink); padding: 28px 32px; margin: 28px 0 20px; }
   .ej-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--on-dark-muted); display: block; margin-bottom: 12px; }
   .ej-frame p { font-family: var(--display); font-size: var(--fs-ej-frame); line-height: var(--lh-quote); font-weight: var(--w-ej-frame); font-style: var(--st-ej-frame); color: var(--on-dark-primary); }
-  .note-small { font-family: var(--text); font-size: var(--fs-note); color: var(--ink-40); font-style: italic; line-height: 1.6; margin-top: 4px; }
+  .note-small { font-family: var(--text); font-size: var(--fs-note); color: var(--ink); font-style: italic; line-height: 1.6; margin-top: 4px; }
 
   /* ── Two-column ── */
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
