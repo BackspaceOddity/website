@@ -96,7 +96,7 @@ export const styles = `
     --text:    'GT Eesti Pro Text',    system-ui, sans-serif;
     --mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
     --fs-h2:          42px;
-    --fs-body:        22px;
+    --fs-body:        20px;
     --fs-statement:   22px;
     --fs-ba-core:     22px;
     --fs-ej-frame:    26px;
@@ -112,7 +112,7 @@ export const styles = `
     --lh-ba-core: 1.35;
     /* ── Weight + style tokens (adjustable via Tweaks panel) ── */
     --w-h2: 400;          --st-h2: normal;
-    --w-body: 400;        --st-body: normal;
+    --w-body: 300;        --st-body: normal;
     --w-statement: 400;   --st-statement: italic;
     --w-ba-core: 400;     --st-ba-core: italic;
     --w-ej-frame: 400;    --st-ej-frame: italic;
