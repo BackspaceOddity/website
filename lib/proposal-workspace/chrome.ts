@@ -147,10 +147,23 @@ const BSO_FONT_FAMILIES = [
   { k: '--mono',    l: 'Mono',                d: 'ui-monospace' },
 ];
 
+const GT_EESTI_WEIGHTS: Array<[string, string]> = [
+  ['100|normal', 'Ultra Light'], ['200|normal', 'Thin'],    ['300|normal', 'Light'],
+  ['400|normal', 'Regular'],    ['500|normal', 'Medium'],   ['700|normal', 'Bold'],
+  ['800|normal', 'Ultra Bold'],
+  ['100|italic', 'Ultra Light Italic'], ['200|italic', 'Thin Italic'],  ['300|italic', 'Light Italic'],
+  ['400|italic', 'Italic'],             ['500|italic', 'Medium Italic'],['700|italic', 'Bold Italic'],
+  ['800|italic', 'Ultra Bold Italic'],
+];
+
 export function editModeScript(slug: string): string {
   return buildScript({
     slug,
-    tweaks: { sizes: BSO_SIZES, lineHeights: BSO_LHS, weightStyles: BSO_WSTYLE, fontFamilies: BSO_FONT_FAMILIES },
+    tweaks: {
+      sizes: BSO_SIZES, lineHeights: BSO_LHS,
+      weightStyles: BSO_WSTYLE, weightOptions: GT_EESTI_WEIGHTS,
+      fontFamilies: BSO_FONT_FAMILIES,
+    },
     tokenMap: BSO_TOKEN_MAP,
   });
 }
