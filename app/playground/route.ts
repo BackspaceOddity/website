@@ -23,6 +23,14 @@ const TWEAKS = {
   weightStyles: [
     { l: 'Body', w: '--w-body', s: '--st-body', wd: '400', sd: 'normal' },
   ],
+  weightOptions: [
+    ['100|normal', 'Ultra Light'], ['200|normal', 'Thin'], ['300|normal', 'Light'],
+    ['400|normal', 'Regular'], ['500|normal', 'Medium'], ['700|normal', 'Bold'],
+    ['800|normal', 'Ultra Bold'],
+    ['100|italic', 'Ultra Light Italic'], ['200|italic', 'Thin Italic'], ['300|italic', 'Light Italic'],
+    ['400|italic', 'Italic'], ['500|italic', 'Medium Italic'], ['700|italic', 'Bold Italic'],
+    ['800|italic', 'Ultra Bold Italic'],
+  ],
   fontFamilies: [
     { k: '--font-display', l: 'Display (headings)', d: 'GT Eesti Pro Display' },
     { k: '--font-text',    l: 'Text (body)',         d: 'GT Eesti Pro Text' },
