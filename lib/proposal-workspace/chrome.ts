@@ -147,12 +147,16 @@ const BSO_FONT_FAMILIES = [
   { k: '--mono',    l: 'Mono',                d: 'ui-monospace' },
 ];
 
-// Only weights that have a corresponding @font-face in styles.ts (loaded files in /public/fonts/).
-// Adding other weights here without the matching TTF file → browser silently falls back to nearest
-// loaded weight, making the control appear broken.
+// Full GT Eesti Pro weight range — all faces are loaded in styles.ts @font-face declarations.
 const GT_EESTI_WEIGHTS: Array<[string, string]> = [
-  ['400|normal', 'Regular'], ['500|normal', 'Medium'], ['700|normal', 'Bold'],
-  ['400|italic', 'Italic'],
+  ['100|normal', 'Ultra Light'], ['100|italic', 'Ultra Light Italic'],
+  ['200|normal', 'Thin'],        ['200|italic', 'Thin Italic'],
+  ['300|normal', 'Light'],       ['300|italic', 'Light Italic'],
+  ['350|normal', 'Book'],        ['350|italic', 'Book Italic'],
+  ['400|normal', 'Regular'],     ['400|italic', 'Italic'],
+  ['500|normal', 'Medium'],      ['500|italic', 'Medium Italic'],
+  ['700|normal', 'Bold'],        ['700|italic', 'Bold Italic'],
+  ['800|normal', 'Ultra Bold'],  ['800|italic', 'Ultra Bold Italic'],
 ];
 
 export function editModeScript(slug: string): string {

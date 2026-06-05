@@ -47,6 +47,30 @@ export const styles = `
     src: url('/fonts/GTEestiProDisplay-Bold.ttf') format('truetype');
     font-weight: 700; font-style: normal; font-display: swap;
   }
+  /* ── Extended GT Eesti Pro weight range (all faces added 2026-06-05) ── */
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-UltraLight.ttf') format('truetype'); font-weight: 100; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-UltraLightItalic.ttf') format('truetype'); font-weight: 100; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-Thin.ttf') format('truetype'); font-weight: 200; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-ThinItalic.ttf') format('truetype'); font-weight: 200; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-LightItalic.ttf') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-RegularItalic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-MediumItalic.ttf') format('truetype'); font-weight: 500; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-BoldItalic.ttf') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-UltraBold.ttf') format('truetype'); font-weight: 800; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Display'; src: url('/fonts/GTEestiProDisplay-UltraBoldItalic.ttf') format('truetype'); font-weight: 800; font-style: italic; font-display: swap; }
+
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-UltraLight.ttf') format('truetype'); font-weight: 100; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-UltraLightItalic.ttf') format('truetype'); font-weight: 100; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-Thin.ttf') format('truetype'); font-weight: 200; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-ThinItalic.ttf') format('truetype'); font-weight: 200; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-LightItalic.ttf') format('truetype'); font-weight: 300; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-Book.ttf') format('truetype'); font-weight: 350; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-BookItalic.ttf') format('truetype'); font-weight: 350; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-RegularItalic.ttf') format('truetype'); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-MediumItalic.ttf') format('truetype'); font-weight: 500; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'GT Eesti Pro Text'; src: url('/fonts/GTEestiProText-BoldItalic.ttf') format('truetype'); font-weight: 700; font-style: italic; font-display: swap; }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
