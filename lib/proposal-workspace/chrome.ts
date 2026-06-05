@@ -136,6 +136,10 @@ const BSO_TOKEN_MAP = [
   { match: '.section-num', token: '--fs-section-num', label: 'SECTION LABEL' },
   { match: 'h2', token: '--fs-h2', label: 'H2 HEADING' },
   { match: '.ej-frame', token: '--fs-ej-frame', label: 'EMPHASIS' },
+  // Step-list titles (numbered steps: "Payment setup", "Automatic checks", etc.)
+  { match: '.step-title', token: '--fs-list-item', label: 'LIST ITEM' },
+  // Step descriptions + other secondary-size text
+  { match: '.step-desc', token: '--fs-secondary', label: 'SECONDARY' },
   { match: '.ba-col, .comp-card, .criterion', token: '--fs-secondary', label: 'SECONDARY' },
   { match: '.check-list', token: '--fs-small', label: 'SMALL' },
   { match: 'p', token: '--fs-body', label: 'BODY' },
