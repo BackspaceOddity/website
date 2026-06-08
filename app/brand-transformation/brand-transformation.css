@@ -1,0 +1,416 @@
+/* ============================================================
+   Backspace Oddity — Brand Transformation (service page)
+   PIXEL-PERFECT to Figma DS "Web Components" (file LSlHR0QK0d5tNiyYt957dS).
+   Self-contained: does NOT reuse the homepage's older system classes.
+   DS truth captured 2026-06-08 — see web-output/brand-transformation/node-map.json.
+
+   DS tokens:
+     surface dark  #1A1A1A   surface light cream #F5F2E9   ivory #FDFBF4
+     button (pill) #011C00 fill / #FDFBF4 label / radius 100 / pad 20-22·48-56
+     block radius 22   card radius 12   section pad 80v·120h
+     Display = GT Eesti Pro Display   Text = GT Eesti Pro Text
+   ============================================================ */
+
+.bt-page {
+  --ink:    #1A1A1A;
+  --cream:  #F5F2E9;
+  --ivory:  #FDFBF4;
+  --green:  #011C00;
+  --card:   #2E2E2E;
+  /* Brand gradient (Figma DS node 48:6) — replaces flat dark surfaces */
+  --grad: url("/images/brand-gradient.webp") center / cover no-repeat;
+  color: var(--ink);
+}
+
+/* ---------- Section scaffolding ---------- */
+.bt-sec { padding: 120px var(--pad-content); }
+.bt-sec--light { background: var(--color-cream); }
+.bt-block {                       /* rounded full-width brand-gradient surface */
+  position: relative;
+  border-radius: var(--radius-block);
+  background: var(--grad);
+  color: var(--ink);
+  padding: 120px var(--pad-content);
+  overflow: hidden;
+  isolation: isolate;
+}
+.bt-inner { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+/* ---------- DS SectionHeader ---------- */
+.bt-head { display: flex; flex-direction: column; gap: 24px; max-width: 1000px; }
+.bt-eyebrow {
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--ink) 50%, transparent);
+}
+.bt-eyebrow--on-dark { color: color-mix(in oklch, var(--ink) 60%, transparent); }
+.bt-h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(40px, 6vw, 80px);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.bt-h2--on-dark { color: var(--ink); }
+.bt-intro {
+  margin: 0;
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: color-mix(in oklch, var(--ink) 70%, transparent);
+  max-width: 640px;
+  text-wrap: pretty;
+}
+.bt-intro--on-dark { color: color-mix(in oklch, var(--ink) 72%, transparent); }
+.bt-head--gap { margin-bottom: 72px; }
+
+/* ============================================================ NAV ============================================================ */
+.bt-nav {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 40px; padding: 28px 0 24px;
+}
+.bt-nav__logo {
+  display: flex; flex-direction: row; align-items: flex-start; gap: 14px;
+  font-family: var(--font-display); font-weight: 700; font-size: 22px;
+  line-height: 0.9; letter-spacing: -0.02em; color: var(--ink);
+}
+.bt-nav__logo-mark { width: 44px; height: 44px; flex-shrink: 0; }
+.bt-nav__logo-text { display: flex; flex-direction: column; }
+.bt-nav__right { display: flex; gap: 64px; font-family: var(--font-text); font-size: 16px; line-height: 1.4; }
+.bt-nav__label {
+  display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: color-mix(in oklch, var(--ink) 45%, transparent); margin-bottom: 8px;
+}
+.bt-nav__col a:hover { text-decoration: underline; }
+.bt-nav__col { display: flex; flex-direction: column; gap: 6px; }
+.bt-nav__col > * { color: color-mix(in oklch, var(--ink) 75%, transparent); }
+
+/* ============================================================ HERO (DS Hero, dark, left) ============================================================ */
+.bt-hero {
+  position: relative;
+  border-radius: var(--radius-block);
+  background: var(--grad);
+  color: var(--ink);
+  min-height: 82vh;
+  padding: 120px var(--pad-content);
+  display: flex; flex-direction: column; justify-content: center;
+  isolation: isolate;
+}
+.bt-hero__inner { max-width: 1200px; display: flex; flex-direction: column; gap: 40px; }
+.bt-hero__eyebrow {
+  font-family: var(--font-text); font-weight: 400; font-size: 16px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: color-mix(in oklch, var(--ink) 60%, transparent);
+}
+.bt-hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(48px, 8vw, 112px);
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+  max-width: 1100px;
+}
+.bt-hero__sub {
+  margin: 0;
+  font-family: var(--font-text); font-weight: 400;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.12; letter-spacing: -0.01em;
+  color: color-mix(in oklch, var(--ink) 82%, transparent);
+  max-width: 760px; text-wrap: pretty;
+}
+
+/* ---------- DS pill button ---------- */
+.bt-pill {
+  display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+  font-family: var(--font-display); font-weight: 700; font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ivory); background: var(--green);
+  padding: 20px 48px; border-radius: 100px;
+  transition: transform 200ms var(--ease-standard), box-shadow 200ms var(--ease-standard);
+}
+.bt-pill:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+.bt-pill__arrow { transition: transform 200ms var(--ease-standard); }
+.bt-pill:hover .bt-pill__arrow { transform: translateX(4px); }
+
+/* ============================================================ NUMBERED LIST (reasons) — DS NumberedList extended ============================================================ */
+.bt-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid color-mix(in oklch, var(--ink) 15%, transparent); }
+.bt-row {
+  display: grid; grid-template-columns: 56px 1fr; gap: 60px;
+  padding: 40px 0; align-items: start;
+  border-bottom: 1px solid color-mix(in oklch, var(--ink) 12%, transparent);
+}
+.bt-row__num {
+  font-family: var(--font-text); font-weight: 400; font-size: 24px;
+  letter-spacing: 0.02em; padding-top: 8px;
+  color: color-mix(in oklch, var(--ink) 40%, transparent);
+}
+.bt-row__body { display: flex; flex-direction: column; gap: 14px; }
+.bt-row__name {
+  margin: 0; font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(28px, 3vw, 40px); line-height: 1.0; letter-spacing: -0.02em;
+  color: var(--ink); text-wrap: balance;
+}
+.bt-row__text {
+  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 22px;
+  line-height: 1.4; color: color-mix(in oklch, var(--ink) 80%, transparent); text-wrap: pretty;
+  max-width: 880px;
+}
+
+/* ============================================================ LEVERAGES (why a brand) — dark grid ============================================================ */
+.bt-leverages {
+  list-style: none; margin: 0; padding: 64px 0 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px 40px;
+  border-top: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+}
+.bt-leverage { display: flex; flex-direction: column; gap: 14px; }
+.bt-leverage__name {
+  margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 28px;
+  line-height: 1.0; letter-spacing: -0.02em; color: var(--ink);
+}
+.bt-leverage__text {
+  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 20px;
+  line-height: 1.4; color: color-mix(in oklch, var(--ink) 82%, transparent); text-wrap: pretty;
+}
+
+/* ============================================================ EXPERIENCE — DS Card ============================================================ */
+.bt-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.bt-card {
+  position: relative; border-radius: var(--radius-card);
+  background: var(--card); color: var(--ivory);
+  padding: 56px; min-height: 320px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 40px;
+  isolation: isolate;
+}
+.bt-card__transform {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px;
+  font-family: var(--font-display); font-weight: 700; letter-spacing: -0.015em; line-height: 1.05;
+}
+.bt-card__from { font-size: clamp(26px, 2.6vw, 34px); color: color-mix(in oklch, var(--ivory) 50%, transparent); }
+.bt-card__arrow { font-size: clamp(22px, 2vw, 28px); color: color-mix(in oklch, var(--ivory) 65%, transparent); }
+.bt-card__to { font-size: clamp(34px, 3.6vw, 48px); color: var(--ivory); }
+.bt-card__foot { display: flex; flex-direction: column; gap: 20px; }
+.bt-card__desc {
+  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 20px;
+  line-height: 1.12; letter-spacing: -0.005em;
+  color: color-mix(in oklch, var(--ivory) 70%, transparent); max-width: 520px;
+}
+.bt-tag {
+  align-self: flex-start;
+  font-family: var(--font-text); font-weight: 400; font-size: 16px;
+  color: var(--ivory); background: color-mix(in oklch, var(--ivory) 15%, transparent);
+  padding: 8px 16px; border-radius: 100px;
+}
+
+/* ============================================================ HOW — DS How / PrincipleGrid (dark) ============================================================ */
+.bt-how__intro {
+  margin: 28px 0 96px; max-width: 1100px;
+  font-family: var(--font-text); font-weight: 400; font-style: italic; font-size: 28px;
+  line-height: 1.3; color: color-mix(in oklch, var(--ink) 80%, transparent); text-wrap: pretty;
+}
+.bt-principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; }
+.bt-principle { display: flex; flex-direction: column; gap: 20px; }
+.bt-principle__name {
+  margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 32px;
+  line-height: 1.0; letter-spacing: -0.01em; color: var(--ink); text-wrap: balance;
+}
+.bt-principle__text {
+  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 24px;
+  line-height: 1.4; color: color-mix(in oklch, var(--ink) 88%, transparent); text-wrap: pretty;
+}
+
+/* ============================================================ DIAGNOSTIC ============================================================ */
+.bt-diagnostic {
+  max-width: 1200px; margin: 0 auto;
+  border-radius: var(--radius-block);
+  background: var(--color-cream-soft);
+  border: 1px solid color-mix(in oklch, var(--ink) 12%, transparent);
+  padding: 80px var(--pad-content);
+  display: flex; flex-direction: column; gap: 24px;
+}
+.bt-diagnostic__title {
+  margin: 0; font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(32px, 3.4vw, 48px); line-height: 1.0; letter-spacing: -0.02em;
+  color: var(--ink); text-wrap: balance; max-width: 900px;
+}
+.bt-diagnostic__text {
+  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 24px;
+  line-height: 1.4; color: color-mix(in oklch, var(--ink) 80%, transparent);
+  max-width: 880px; text-wrap: pretty;
+}
+
+/* ============================================================ TIMELINE ============================================================ */
+.bt-timeline { border-top: 1px solid color-mix(in oklch, var(--ink) 15%, transparent); }
+.bt-trow {
+  display: grid; grid-template-columns: 1fr 140px 110px; align-items: baseline; gap: 24px;
+  padding: 26px 0; border-bottom: 1px solid color-mix(in oklch, var(--ink) 10%, transparent);
+}
+.bt-trow__name {
+  font-family: var(--font-display); font-weight: 500; font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.05; letter-spacing: -0.02em; color: var(--ink);
+}
+.bt-trow__weeks { font-family: var(--font-text); font-size: 20px; color: color-mix(in oklch, var(--ink) 70%, transparent); }
+.bt-trow__weeks b { font-weight: 500; color: var(--ink); }
+.bt-trow__tag {
+  justify-self: start; font-family: var(--font-text); font-size: 14px;
+  letter-spacing: 0.04em; color: color-mix(in oklch, var(--ink) 55%, transparent);
+  border: 1px solid color-mix(in oklch, var(--ink) 25%, transparent);
+  border-radius: 100px; padding: 2px 12px;
+}
+.bt-total {
+  margin: 32px 0 0; font-family: var(--font-text); font-size: 22px; color: var(--ink);
+}
+.bt-total b { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; }
+
+/* ============================================================ PHASE DETAIL — DS NumberedList rhythm ============================================================ */
+.bt-phases { list-style: none; margin: 0; padding: 0; }
+.bt-phase {
+  display: grid; grid-template-columns: 300px 1fr; gap: 56px; padding: 64px 0;
+  border-top: 1px solid color-mix(in oklch, var(--ink) 15%, transparent);
+}
+.bt-phases > .bt-phase:last-child { border-bottom: 1px solid color-mix(in oklch, var(--ink) 15%, transparent); }
+.bt-phase__aside { display: flex; flex-direction: column; gap: 12px; }
+.bt-phase__kicker {
+  font-family: var(--font-text); font-weight: 400; font-style: italic; font-size: 16px;
+  color: color-mix(in oklch, var(--ink) 55%, transparent);
+}
+.bt-phase__name {
+  margin: 0; font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(28px, 2.8vw, 40px); line-height: 1.0; letter-spacing: -0.02em;
+  color: var(--ink); text-wrap: balance;
+}
+.bt-phase__meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.bt-phase__weeks { font-family: var(--font-text); font-size: 18px; color: color-mix(in oklch, var(--ink) 65%, transparent); }
+.bt-phase__opt {
+  font-family: var(--font-text); font-size: 14px; letter-spacing: 0.04em;
+  color: color-mix(in oklch, var(--ink) 60%, transparent);
+  border: 1px solid color-mix(in oklch, var(--ink) 28%, transparent);
+  border-radius: 100px; padding: 3px 12px;
+}
+.bt-phase__main { display: flex; flex-direction: column; gap: 28px; }
+.bt-phase__summary {
+  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 24px; line-height: 1.4;
+  color: var(--ink); max-width: 760px; text-wrap: pretty;
+}
+.bt-phase__subhead {
+  margin: 8px 0 -8px; font-family: var(--font-display); font-weight: 500; font-size: 22px;
+  letter-spacing: -0.01em; color: var(--ink);
+}
+.bt-modules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.bt-modules li {
+  position: relative; padding-left: 26px;
+  font-family: var(--font-text); font-weight: 400; font-size: 20px; line-height: 1.4;
+  color: color-mix(in oklch, var(--ink) 85%, transparent); text-wrap: pretty;
+}
+.bt-modules li::before {
+  content: ""; position: absolute; left: 2px; top: 12px; width: 7px; height: 7px;
+  border-radius: 50%; background: color-mix(in oklch, var(--ink) 40%, transparent);
+}
+.bt-callout {
+  border-left: 2px solid color-mix(in oklch, var(--ink) 28%, transparent);
+  padding: 4px 0 4px 24px; display: flex; flex-direction: column; gap: 8px;
+}
+.bt-callout__title {
+  font-family: var(--font-display); font-weight: 500; font-size: 20px; letter-spacing: -0.01em; color: var(--ink);
+}
+.bt-callout__text {
+  margin: 0; font-family: var(--font-text); font-size: 19px; line-height: 1.4;
+  color: color-mix(in oklch, var(--ink) 72%, transparent); text-wrap: pretty;
+}
+
+/* ============================================================ FINAL CTA — DS CTA (dark, centered) ============================================================ */
+.bt-final {
+  border-radius: var(--radius-block); background: var(--grad); color: var(--ink);
+  padding: 160px var(--pad-content); text-align: center; isolation: isolate;
+}
+.bt-final__inner { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 40px; }
+.bt-final__h2 {
+  margin: 0; font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(40px, 5.2vw, 80px); line-height: 0.96; letter-spacing: -0.03em;
+  color: var(--ink); text-wrap: balance;
+}
+.bt-final__copy {
+  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 24px; line-height: 1.12;
+  letter-spacing: -0.01em; color: color-mix(in oklch, var(--ink) 78%, transparent);
+  max-width: 760px; text-wrap: pretty;
+}
+.bt-final .bt-pill { align-self: center; }
+.bt-final__email {
+  font-family: var(--font-text); font-size: 20px;
+  color: color-mix(in oklch, var(--ink) 58%, transparent);
+  transition: color 200ms var(--ease-standard);
+}
+.bt-final__email:hover { color: var(--ink); text-decoration: underline; }
+
+/* ============================================================ FOOTER — DS Footer (light) ============================================================ */
+.bt-footer {
+  background: var(--ivory);
+  border-radius: var(--radius-block);
+  padding: 80px var(--pad-content) 64px;
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 60px;
+  color: var(--ink);
+}
+.bt-footer__logo {
+  display: flex; align-items: flex-start; gap: 14px;
+  font-family: var(--font-text); font-weight: 400; font-size: 14px; line-height: 1.4;
+  margin-bottom: 16px;
+}
+.bt-footer__logo-mark { width: 40px; height: 40px; flex-shrink: 0; }
+.bt-footer__copy { font-size: 13px; color: color-mix(in oklch, var(--ink) 40%, transparent); }
+.bt-footer__col { display: flex; flex-direction: column; gap: 6px; }
+.bt-footer__label {
+  font-family: var(--font-text); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: color-mix(in oklch, var(--ink) 40%, transparent); margin-bottom: 8px;
+}
+.bt-footer__col a, .bt-footer__col span:not(.bt-footer__label) {
+  font-family: var(--font-text); font-size: 14px; line-height: 1.7;
+  color: color-mix(in oklch, var(--ink) 75%, transparent);
+}
+.bt-footer__col a:hover { text-decoration: underline; }
+
+/* ============================================================ RESPONSIVE ============================================================ */
+@media (max-width: 1024px) {
+  .bt-leverages { grid-template-columns: repeat(2, 1fr); gap: 44px 40px; }
+  .bt-principles { gap: 44px; }
+}
+@media (max-width: 768px) {
+  :root { --pad-content: 28px; }
+  .bt-sec, .bt-block, .bt-hero, .bt-final { padding-left: 28px; padding-right: 28px; }
+  .bt-sec { padding-top: 88px; padding-bottom: 88px; }
+  .bt-block { padding-top: 88px; padding-bottom: 88px; }
+  .bt-hero { padding-top: 100px; padding-bottom: 100px; min-height: 70vh; }
+  .bt-final { padding-top: 110px; padding-bottom: 110px; }
+  .bt-nav { flex-direction: column; gap: 20px; }
+  .bt-nav__right { flex-direction: column; gap: 16px; }
+  .bt-head--gap { margin-bottom: 48px; }
+  .bt-intro, .bt-how__intro { font-size: 19px; }
+  .bt-how__intro { margin-bottom: 56px; }
+  .bt-row { grid-template-columns: 1fr; gap: 14px; padding: 32px 0; }
+  .bt-row__num { padding-top: 0; }
+  .bt-row__name { font-size: 26px; }
+  .bt-row__text { font-size: 18px; }
+  .bt-leverages { grid-template-columns: 1fr; gap: 36px; padding-top: 44px; }
+  .bt-cards { grid-template-columns: 1fr; }
+  .bt-card { padding: 40px 32px; min-height: 240px; }
+  .bt-principles { grid-template-columns: 1fr; gap: 44px; }
+  .bt-principle__name { font-size: 26px; }
+  .bt-principle__text { font-size: 19px; }
+  .bt-diagnostic { padding: 56px 28px; }
+  .bt-diagnostic__text { font-size: 19px; }
+  .bt-trow { grid-template-columns: 1fr auto; gap: 6px 16px; }
+  .bt-trow__tag { grid-column: 1 / -1; }
+  .bt-phase { grid-template-columns: 1fr; gap: 24px; padding: 48px 0; }
+  .bt-phase__summary { font-size: 20px; }
+  .bt-modules li { font-size: 18px; }
+  .bt-footer { grid-template-columns: 1fr; gap: 40px; }
+}
