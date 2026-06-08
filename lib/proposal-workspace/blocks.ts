@@ -203,12 +203,23 @@ export function nextSteps(b: NextStepsBlock): string {
 </section>`;
 }
 
-export function discussion(b: DiscussionBlock, slug: string): string {
+export function discussion(b: DiscussionBlock, slug: string, saved: string[] = []): string {
   const items = b.questions.map(q => `<li>
       <div class="check-box"></div>
       <div>
         <span class="check-question">${q.q}</span>
         ${q.note ? `<span class="check-note">${q.note}</span>` : ''}
+      </div>
+    </li>`).join('\n    ');
+
+  // Client-added questions, persisted server-side (source of truth) so they
+  // stay ON THE PAGE across devices/sessions and are visible to us too — not
+  // just in the submitter's localStorage. Escaped: this is client-typed text.
+  const savedItems = saved.map(t => `<li class="cq-own">
+      <div class="check-box"></div>
+      <div>
+        <span class="check-question">${esc(t)}</span>
+        <span class="check-note">Added by you</span>
       </div>
     </li>`).join('\n    ');
 
@@ -245,7 +256,12 @@ export function discussion(b: DiscussionBlock, slug: string): string {
     var q=document.createElement('span'); q.className='check-question'; q.textContent=text;
     var note=document.createElement('span'); note.className='check-note'; note.textContent='Added by you';
     wrap.appendChild(q); wrap.appendChild(note); el.appendChild(box); el.appendChild(wrap); return el; }
-  load().forEach(function(t){ list.appendChild(li(t)); });
+  // Server already rendered seed + saved questions. Only add localStorage
+  // items not already shown (dedupe by text) so there are no duplicates on the
+  // submitter's own device.
+  var seen={};
+  Array.prototype.forEach.call(list.querySelectorAll('.check-question'), function(el){ seen[(el.textContent||'').trim()]=1; });
+  load().forEach(function(t){ var k=(t||'').trim(); if(k && !seen[k]){ list.appendChild(li(t)); seen[k]=1; } });
   function update(){ btn.disabled = ta.value.trim().length===0; }
   ta.addEventListener('input',update); update();
   function add(){ var t=ta.value.trim(); if(!t) return;
@@ -267,6 +283,7 @@ export function discussion(b: DiscussionBlock, slug: string): string {
   <style>${css}</style>
   <ul class="check-list">
     ${items}
+    ${savedItems}
   </ul>
   <div class="cq-add">
     <div class="cq-add-label">Add your own question</div>

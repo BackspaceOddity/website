@@ -8,9 +8,10 @@
 import type { Block, ClientPage } from './types';
 import { styles } from './styles';
 import { themeHeadScript, themeToggle, editModeScript } from './chrome';
+import { savedQuestions, type SavedResponses } from './responses';
 import * as B from './blocks';
 
-export function renderBlock(block: Block, slug: string): string {
+export function renderBlock(block: Block, slug: string, responses: SavedResponses = {}): string {
   switch (block.block) {
     case 'docHeader':      return B.docHeader(block);
     case 'divider':        return B.divider(block);
@@ -24,7 +25,7 @@ export function renderBlock(block: Block, slug: string): string {
     case 'phases':         return B.phases(block);
     case 'whatStayed':     return B.whatStayed(block);
     case 'nextSteps':      return B.nextSteps(block);
-    case 'discussion':     return B.discussion(block, slug);
+    case 'discussion':     return B.discussion(block, slug, savedQuestions(responses));
     case 'exerciseMatrix': return B.exerciseMatrix(block, slug);
     case 'exerciseRank':   return B.exerciseRank(block, slug);
     case 'exerciseChips':  return B.exerciseChips(block, slug);
@@ -38,8 +39,11 @@ export function renderBlock(block: Block, slug: string): string {
   }
 }
 
-export function renderPage(page: ClientPage, opts: { editMode: boolean }): string {
-  const body = page.blocks.map((b) => renderBlock(b, page.slug)).join('\n\n');
+export function renderPage(
+  page: ClientPage,
+  opts: { editMode: boolean; responses?: SavedResponses },
+): string {
+  const body = page.blocks.map((b) => renderBlock(b, page.slug, opts.responses ?? {})).join('\n\n');
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

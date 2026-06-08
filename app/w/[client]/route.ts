@@ -17,6 +17,7 @@ import { getClient } from '@/lib/proposal-workspace/clients';
 import { renderPage } from '@/lib/proposal-workspace/render';
 import { token, getCookie, cookieName, loginHtml } from '@/lib/proposal-workspace/chrome';
 import { getWorkspacePassword } from '@/lib/proposal-workspace/auth';
+import { getSavedResponses } from '@/lib/proposal-workspace/responses';
 
 // Edit Mode auto-enables in local dev (NODE_ENV !== 'production'); Vercel
 // preview/prod builds run as 'production' so the panel never ships to a client.
@@ -42,17 +43,21 @@ export async function GET(req: Request, ctx: { params: Promise<{ client: string 
   if (!entry) return notFound();
 
   const accessKey = await getWorkspacePassword(client);
-  const renderHtml = () => new NextResponse(renderPage(entry.page, { editMode: editMode() }), { headers: htmlHeaders });
 
-  if (!accessKey) return renderHtml();
-
-  if (getCookie(req, cookieName(client)) !== token(accessKey, client)) {
+  // Gate first; only fetch the client's saved submissions once we're going to
+  // render the real page (avoids a Supabase round-trip on the login screen).
+  if (accessKey && getCookie(req, cookieName(client)) !== token(accessKey, client)) {
     return new NextResponse(
       loginHtml({ clientName: entry.page.title, subtitle: 'Backspace Oddity', actionPath: `/w/${client}/` }),
       { headers: htmlHeaders },
     );
   }
-  return renderHtml();
+
+  const responses = await getSavedResponses(client);
+  return new NextResponse(
+    renderPage(entry.page, { editMode: editMode(), responses }),
+    { headers: htmlHeaders },
+  );
 }
 
 export async function POST(req: Request, ctx: { params: Promise<{ client: string }> }) {
