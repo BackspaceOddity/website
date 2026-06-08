@@ -170,16 +170,28 @@ export const uremboPage: ClientPage = {
       intro: 'Add your own — this page is yours, and we’ll keep building on it as we go.',
       questions: [
         {
-          q: 'Is the onboarding flow in section 04 how it actually works today?',
-          note: 'Where does a merchant most often get stuck or drop off?',
+          q: 'When an application gets flagged for review, should we automatically email the merchant exactly what’s missing — registration, tax compliance, store number, location, bank details, commission split — and activate them the moment it all clears?',
+          note: 'From your note on the “needs a look” path in section 04.',
         },
         {
-          q: 'Of the approval steps, which take you the most time — documents, verification, or payment setup?',
-          note: 'That tells us where the first automation earns its keep fastest.',
+          q: 'Should the merchant agreement and the onboarding video become part of sign-up itself, instead of a manual email back-and-forth?',
+          note: 'You flagged this as still manual today.',
         },
         {
-          q: 'When you picture this off your plate, what would you do with the time it frees?',
-          note: 'It helps us aim the work at what matters most to you, not just what’s easiest to build.',
+          q: 'Should the jurisdiction-specific policies be a required checkbox at sign-up?',
+          note: 'You mentioned the documents are already prepared per jurisdiction.',
+        },
+        {
+          q: 'Should the system map DHL pickup and drop-off by jurisdiction and calculate each shipment’s cost automatically from the rate cards?',
+          note: 'Building on the DHL partnership and rate cards you already have in place.',
+        },
+        {
+          q: 'Should merchants get automatic order alerts, so nothing slips when they’re not logged into the dashboard?',
+          note: 'From the missed-orders risk you raised.',
+        },
+        {
+          q: 'Of all of these, which one would free you up the most if we built it first?',
+          note: 'So we start where it unblocks you fastest.',
         },
       ],
     },
