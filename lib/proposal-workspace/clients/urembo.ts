@@ -196,6 +196,17 @@ export const uremboPage: ClientPage = {
       ],
     },
 
+    { block: 'divider' },
+
+    {
+      block: 'bookingEmbed',
+      sectionNum: '09 — Book the call',
+      heading: 'Grab a time that works for you',
+      intro:
+        'Pick a slot below and we’ll walk through it together.',
+      calLink: 'team/backspace-oddity/deep-dive',
+    },
+
     {
       block: 'docFooter',
       left: 'Initial Assessment · Not a proposal',

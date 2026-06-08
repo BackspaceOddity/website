@@ -41,6 +41,7 @@ export type Block =
   | NextStepsBlock
   | DiscussionBlock
   | ClientInputBlock
+  | BookingEmbedBlock
   | ExerciseMatrixBlock
   | ExerciseRankBlock
   | ExerciseChipsBlock
@@ -175,6 +176,18 @@ export interface ClientInputBlock {
   intro?: Rich;
   /** shown when the client hasn't submitted anything yet */
   emptyNote?: Rich;
+}
+
+/** Closing CTA: an inline cal.com booking widget so the client books the next
+ *  call without leaving the page. calLink is the cal.com path, e.g.
+ *  'team/backspace-oddity/ai-skills'. */
+export interface BookingEmbedBlock {
+  block: 'bookingEmbed';
+  sectionNum?: string;
+  heading: string;
+  intro?: Rich;
+  /** cal.com link path after cal.com/ — e.g. 'team/backspace-oddity/deep-dive' */
+  calLink: string;
 }
 
 /** One-way workshop, Exercise 1: place pre-filled underserved-job cards on a

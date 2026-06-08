@@ -10,7 +10,7 @@
 import type {
   DocHeaderBlock, DividerBlock, StatementBlock, HeardItBlock, BeforeAfterBlock,
   EmphasisFrameBlock, NarrativeBlock, DemoBlock, ProcessFlowBlock, PhasesBlock,
-  WhatStayedBlock, NextStepsBlock, DiscussionBlock, ClientInputBlock, ExerciseMatrixBlock, ExerciseRankBlock,
+  WhatStayedBlock, NextStepsBlock, DiscussionBlock, ClientInputBlock, BookingEmbedBlock, ExerciseMatrixBlock, ExerciseRankBlock,
   ExerciseChipsBlock, ExerciseSolutionsBlock, DocFooterBlock,
 } from './types';
 
@@ -293,6 +293,29 @@ export function clientInput(b: ClientInputBlock, saved: string[] = []): string {
   <h2>${esc(b.heading)}</h2>
   ${b.intro ? `<p>${b.intro}</p>` : ''}
   ${cards}
+</section>`;
+}
+
+export function bookingEmbed(b: BookingEmbedBlock, slug: string): string {
+  const ns = `${slug}`.replace(/[^a-zA-Z0-9_]/g, '_');
+  const elId = `cal-inline-${ns}`;
+  const css = `
+  .booking-embed { margin-top: 22px; min-height: 620px; width: 100%; overflow: scroll; border: 1px solid var(--rule-strong); border-radius: 10px; }
+  `;
+  // cal-brand follows the page palette: dark-green accent on the light theme,
+  // cream on the dark theme. Mirrors --ink/--paper in styles.ts.
+  const js =
+`(function(C,A,L){let p=function(a,ar){a.q.push(ar);};let d=C.document;C.Cal=C.Cal||function(){let cal=C.Cal;let ar=arguments;if(!cal.loaded){cal.ns={};cal.q=cal.q||[];d.head.appendChild(d.createElement("script")).src=A;cal.loaded=true;}if(ar[0]===L){const api=function(){p(api,arguments);};const namespace=ar[1];api.q=api.q||[];if(typeof namespace==="string"){cal.ns[namespace]=cal.ns[namespace]||api;p(cal.ns[namespace],ar);p(cal,["initNamespace",namespace]);}else p(cal,ar);return;}p(cal,ar);};})(window,"https://app.cal.com/embed/embed.js","init");
+Cal("init","${esc(ns)}",{origin:"https://app.cal.com"});
+Cal.ns["${esc(ns)}"]("inline",{elementOrSelector:"#${esc(elId)}",config:{layout:"month_view",useSlotsViewOnSmallScreen:true},calLink:"${esc(b.calLink)}"});
+Cal.ns["${esc(ns)}"]("ui",{cssVarsPerTheme:{light:{"cal-brand":"#011C00"},dark:{"cal-brand":"#F2F2F0"}},hideEventTypeDetails:false,layout:"month_view"});`;
+  return `<section>
+  <style>${css}</style>
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<p>${b.intro}</p>` : ''}
+  <div class="booking-embed" id="${esc(elId)}"></div>
+  <script>${js}</script>
 </section>`;
 }
 

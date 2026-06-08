@@ -27,6 +27,7 @@ export function renderBlock(block: Block, slug: string, responses: SavedResponse
     case 'nextSteps':      return B.nextSteps(block);
     case 'discussion':     return B.discussion(block, slug);
     case 'clientInput':    return B.clientInput(block, savedQuestions(responses));
+    case 'bookingEmbed':   return B.bookingEmbed(block, slug);
     case 'exerciseMatrix': return B.exerciseMatrix(block, slug);
     case 'exerciseRank':   return B.exerciseRank(block, slug);
     case 'exerciseChips':  return B.exerciseChips(block, slug);
