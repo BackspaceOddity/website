@@ -151,9 +151,21 @@ export const uremboPage: ClientPage = {
       ],
     },
 
+    { block: 'divider' },
+
+    {
+      block: 'clientInput',
+      sectionNum: '07 — What you told us',
+      heading: 'Your notes on this page',
+      intro:
+        'Captured straight from what you added here — so it stays with the work and we build the next call around it.',
+    },
+
+    { block: 'divider' },
+
     {
       block: 'discussion',
-      sectionNum: '07 — To align on',
+      sectionNum: '08 — To align on',
       heading: 'Questions for our next call',
       intro: 'Add your own — this page is yours, and we’ll keep building on it as we go.',
       questions: [

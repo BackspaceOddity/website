@@ -10,7 +10,7 @@
 import type {
   DocHeaderBlock, DividerBlock, StatementBlock, HeardItBlock, BeforeAfterBlock,
   EmphasisFrameBlock, NarrativeBlock, DemoBlock, ProcessFlowBlock, PhasesBlock,
-  WhatStayedBlock, NextStepsBlock, DiscussionBlock, ExerciseMatrixBlock, ExerciseRankBlock,
+  WhatStayedBlock, NextStepsBlock, DiscussionBlock, ClientInputBlock, ExerciseMatrixBlock, ExerciseRankBlock,
   ExerciseChipsBlock, ExerciseSolutionsBlock, DocFooterBlock,
 } from './types';
 
@@ -203,7 +203,7 @@ export function nextSteps(b: NextStepsBlock): string {
 </section>`;
 }
 
-export function discussion(b: DiscussionBlock, slug: string, saved: string[] = []): string {
+export function discussion(b: DiscussionBlock, slug: string): string {
   const items = b.questions.map(q => `<li>
       <div class="check-box"></div>
       <div>
@@ -212,23 +212,12 @@ export function discussion(b: DiscussionBlock, slug: string, saved: string[] = [
       </div>
     </li>`).join('\n    ');
 
-  // Client-added questions, persisted server-side (source of truth) so they
-  // stay ON THE PAGE across devices/sessions and are visible to us too — not
-  // just in the submitter's localStorage. Escaped: this is client-typed text.
-  const savedItems = saved.map(t => `<li class="cq-own">
-      <div class="check-box"></div>
-      <div>
-        <span class="check-question">${esc(t)}</span>
-        <span class="check-note">Added by you</span>
-      </div>
-    </li>`).join('\n    ');
-
-  // v2: client can add their own questions. They persist in localStorage
-  // (so they stay on this device across reloads) and POST to the exercise
-  // endpoint (so Backspace Oddity receives them once Supabase is configured —
-  // BSO-583; until then the server falls back to a gitignored dev JSONL).
-  // Styled with the same --on-dark-* tokens as .check-section so it matches
-  // the inverted panel in either theme.
+  // This block holds OUR seed questions + the "add your own" form. The client's
+  // submitted notes are displayed in the clientInput ("Your notes") section,
+  // which read-backs from Supabase — so submissions live in exactly one place.
+  // On add we save to localStorage (cumulative array for the POST) + POST to the
+  // exercise endpoint; the note then surfaces in the Your-notes section on reload.
+  // Styled with the same --on-dark-* tokens as .check-section.
   const css = `
   .cq-add { margin-top: 26px; border-top: 1px solid var(--on-dark-border); padding-top: 20px; }
   .cq-add-label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--on-dark-muted); margin-bottom: 10px; }
@@ -239,37 +228,23 @@ export function discussion(b: DiscussionBlock, slug: string, saved: string[] = [
   .cq-btn { background: var(--on-dark-primary); color: var(--ink); border: none; border-radius: 7px; padding: 10px 20px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
   .cq-btn:disabled { opacity: .4; cursor: default; }
   .cq-status { font-family: var(--mono); font-size: 11px; color: var(--on-dark-muted); }
-  .check-list li.cq-own .check-box { background: var(--on-dark-primary); border-color: var(--on-dark-primary); }
   `;
 
   const js =
 `(function(){
   var root=document.getElementById('cq-${esc(slug)}'); if(!root) return;
-  var list=root.querySelector('.check-list');
   var ta=root.querySelector('.cq-ta'), btn=root.querySelector('.cq-btn'), st=root.querySelector('.cq-status');
   var KEY='ws:${slug}:questions';
   function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(_){ return []; } }
   function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(_){} }
-  function li(text){ var el=document.createElement('li'); el.className='cq-own';
-    var box=document.createElement('div'); box.className='check-box';
-    var wrap=document.createElement('div');
-    var q=document.createElement('span'); q.className='check-question'; q.textContent=text;
-    var note=document.createElement('span'); note.className='check-note'; note.textContent='Added by you';
-    wrap.appendChild(q); wrap.appendChild(note); el.appendChild(box); el.appendChild(wrap); return el; }
-  // Server already rendered seed + saved questions. Only add localStorage
-  // items not already shown (dedupe by text) so there are no duplicates on the
-  // submitter's own device.
-  var seen={};
-  Array.prototype.forEach.call(list.querySelectorAll('.check-question'), function(el){ seen[(el.textContent||'').trim()]=1; });
-  load().forEach(function(t){ var k=(t||'').trim(); if(k && !seen[k]){ list.appendChild(li(t)); seen[k]=1; } });
   function update(){ btn.disabled = ta.value.trim().length===0; }
   ta.addEventListener('input',update); update();
   function add(){ var t=ta.value.trim(); if(!t) return;
-    list.appendChild(li(t)); var a=load(); a.push(t); save(a); ta.value=''; update();
-    st.textContent='Saved';
+    var a=load(); a.push(t); save(a); ta.value=''; update();
+    st.textContent='Saving…';
     fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'client-questions',payload:{questions:a}})})
       .then(function(r){ return r.json(); })
-      .then(function(j){ st.textContent=j.ok?'✓ Saved — we’ll see this before our call':'Saved on this device'; })
+      .then(function(j){ st.textContent=j.ok?'✓ Saved — it’ll appear in “Your notes” above':'Saved on this device'; })
       .catch(function(){ st.textContent='Saved on this device'; });
   }
   btn.addEventListener('click',add);
@@ -283,7 +258,6 @@ export function discussion(b: DiscussionBlock, slug: string, saved: string[] = [
   <style>${css}</style>
   <ul class="check-list">
     ${items}
-    ${savedItems}
   </ul>
   <div class="cq-add">
     <div class="cq-add-label">Add your own question</div>
@@ -295,6 +269,31 @@ export function discussion(b: DiscussionBlock, slug: string, saved: string[] = [
   </div>
   <script>${js}</script>
 </div>`;
+}
+
+export function clientInput(b: ClientInputBlock, saved: string[] = []): string {
+  const css = `
+  .ci-list { margin-top: 22px; display: flex; flex-direction: column; gap: 16px; }
+  .ci-card { border: 1px solid var(--rule-strong); border-radius: 8px; padding: 18px 20px; background: var(--paper-soft, transparent); }
+  .ci-num { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); margin-bottom: 8px; display: block; }
+  .ci-text { font-family: var(--text); font-weight: var(--w-body); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); white-space: pre-wrap; }
+  .ci-empty { font-family: var(--text); font-size: var(--fs-small); color: var(--ink-55); font-style: italic; margin-top: 18px; }
+  `;
+  const cards = saved.length
+    ? `<div class="ci-list">
+    ${saved.map((t, i) => `<div class="ci-card">
+      <span class="ci-num">From you · ${String(i + 1).padStart(2, '0')}</span>
+      <div class="ci-text">${esc(t)}</div>
+    </div>`).join('\n    ')}
+  </div>`
+    : `<p class="ci-empty">${b.emptyNote ?? 'Nothing added yet — your notes from this page will appear here.'}</p>`;
+  return `<section>
+  <style>${css}</style>
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<p>${b.intro}</p>` : ''}
+  ${cards}
+</section>`;
 }
 
 export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {

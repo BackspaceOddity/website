@@ -40,6 +40,7 @@ export type Block =
   | WhatStayedBlock
   | NextStepsBlock
   | DiscussionBlock
+  | ClientInputBlock
   | ExerciseMatrixBlock
   | ExerciseRankBlock
   | ExerciseChipsBlock
@@ -162,6 +163,18 @@ export interface DiscussionBlock {
   intro?: Rich;
   /** v1: static checklist. v2: form that persists + client adds their own. */
   questions: { q: Rich; note?: Rich }[];
+}
+
+/** Read-back display of what the client submitted on this page (§07 questions),
+ *  rendered server-side as a readable "What you told us" section. Content comes
+ *  from saved responses, not the data file — the block itself holds only framing. */
+export interface ClientInputBlock {
+  block: 'clientInput';
+  sectionNum?: string;
+  heading: string;
+  intro?: Rich;
+  /** shown when the client hasn't submitted anything yet */
+  emptyNote?: Rich;
 }
 
 /** One-way workshop, Exercise 1: place pre-filled underserved-job cards on a
