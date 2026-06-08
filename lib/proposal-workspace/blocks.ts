@@ -260,7 +260,7 @@ export function discussion(b: DiscussionBlock, slug: string): string {
     ${items}
   </ul>
   <div class="cq-add">
-    <div class="cq-add-label">Add your own question</div>
+    <div class="cq-add-label">${esc(b.addLabel ?? 'Add your own question')}</div>
     <textarea class="cq-ta" placeholder="Type a question you’d like to cover…" rows="2"></textarea>
     <div class="cq-row">
       <button type="button" class="cq-btn" disabled>Add question</button>

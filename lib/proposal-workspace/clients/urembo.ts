@@ -169,6 +169,7 @@ export const uremboPage: ClientPage = {
       heading: 'Questions for our next call',
       intro:
         'We’ve turned your notes above into the questions below — the agenda for our call. If anything else comes to mind, add it below; this page stays yours.',
+      addLabel: 'Anything else to add?',
       questions: [
         {
           q: 'When an application gets flagged for review, should we automatically email the merchant exactly what’s missing — registration, tax compliance, store number, location, bank details, commission split — and activate them the moment it all clears?',

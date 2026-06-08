@@ -164,6 +164,10 @@ export interface DiscussionBlock {
   intro?: Rich;
   /** v1: static checklist. v2: form that persists + client adds their own. */
   questions: { q: Rich; note?: Rich }[];
+  /** label above the add-field. Default 'Add your own question'. Set to
+   *  something like 'Anything else to add?' when the questions are already
+   *  the client's own (distilled from their input). */
+  addLabel?: string;
 }
 
 /** Read-back display of what the client submitted on this page (§07 questions),
