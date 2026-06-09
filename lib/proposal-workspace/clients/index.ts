@@ -14,6 +14,7 @@ import type { ClientPage } from '../types';
 import { demoPage } from './_demo';
 import { uremboPage } from './urembo';
 import { uremboV2Page } from './urembo-v2';
+import { jetbrainsPage } from './jetbrains';
 
 export interface ClientEntry {
   page: ClientPage;
@@ -23,6 +24,7 @@ export const clients: Record<string, ClientEntry> = {
   _demo: { page: demoPage },
   urembo: { page: uremboPage },        // BSO-560 — clean sendable fallback
   'urembo-v2': { page: uremboV2Page }, // experimental: infographic redesign + interactive exercises (parallel track)
+  jetbrains: { page: jetbrainsPage },  // Campaign Intelligence workshop Part 1 (discovery) — live session
 };
 
 export function getClient(slug: string): ClientEntry | undefined {
