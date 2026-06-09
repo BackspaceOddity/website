@@ -1,107 +1,106 @@
 /**
- * JetBrains — Campaign Intelligence workshop, Part 1 (discovery).
+ * JetBrains — Campaign Intelligence workshop, Part 1 (discovery). RUSSIAN.
  *
  * Bespoke discovery flow for the live JetBrains marketing-team session.
- * Built from the existing block primitives — NOT the urembo sequence
- * (different engagement). Goal of Part 1: agree, together, which slice of
- * "what did our marketing produce for the money" we solve first, and lock it.
- * Part 2 (separate) = the Campaign Intelligence prototype shown as the result.
+ * Client-facing copy is Russian (JetBrains' marketing team is Russian-speaking;
+ * all project deliverables are RU). English source of record: git history of
+ * this file + Deliverables/workshop-part1-structure.md (v3).
  *
- * Grounded in: 10 BSO meetings (Mar–Jun 2026), the Campaign Intelligence
- * proposal, the client Q&A (2026-06-09), and the 5-campaign data corpus in
- * Client projects/JetBrains/Context/. Structure: Deliverables/workshop-part1-structure.md (v3).
- *
+ * Built from the existing block primitives — NOT the urembo sequence.
  * Method: cascade-hypotheses — Underserved JTBD → Problems → CEP (the moment,
  * 7-W per the Puma operationalization) → Current solutions → converge → lock.
  *
- * STATUS: DRAFT for the live workshop. Ungated locally (no Supabase row / no
- * WS_PW_JETBRAINS) → renders directly at /w/jetbrains for screen-share.
+ * NOTE: exercise-block UI chrome (Save / "X of Y placed" / drag-tray label /
+ * add-your-own) is hardcoded EN in blocks.ts — made translatable via optional
+ * `ui` props (English defaults) so this page renders fully Russian.
+ *
+ * STATUS: DRAFT for the live workshop. Ungated locally → /w/jetbrains.
  */
 
 import type { ClientPage } from '../types';
 
 export const jetbrainsPage: ClientPage = {
   slug: 'jetbrains',
-  title: 'Campaign Intelligence — Working Session',
+  title: 'Campaign Intelligence — рабочая сессия',
   blocks: [
     {
       block: 'docHeader',
-      label: 'Working session · Campaign Intelligence',
+      label: 'Рабочая сессия · Campaign Intelligence',
       meta: 'JetBrains × Backspace Oddity',
-      version: 'Live working session',
-      date: 'June 2026',
+      version: 'Рабочая сессия',
+      date: 'Июнь 2026',
     },
 
     {
       block: 'heardIt',
-      sectionNum: '01 — How we heard it',
-      heading: 'The task, as we understood it',
+      sectionNum: '01 — Как мы это услышали',
+      heading: 'Задача, как мы её поняли',
       statement:
-        'You asked for a tool that shows not just what a campaign cost, but what it returned. Underneath it is a sharper question — and today nothing answers it.',
+        'Вы просили инструмент, который показывает не только сколько кампания стоила, но и что она принесла. Под этим — более острый вопрос, на который сегодня ничего не отвечает.',
       body: [
-        'You run 10–15 creative campaigns a year across 40 products, plus always-on channels — and every one reports in its own shape.',
-        'The sharper question underneath: across all those products and campaign types, <strong>what did our marketing actually produce for the money we spent?</strong> It has no answer today — not because the data is missing, but because it has never been joined.',
-        'This session is about agreeing, together, which slice of that to solve first.',
+        'Вы запускаете 10–15 креативных кампаний в год на 40 продуктов, плюс постоянные каналы — и каждая отчитывается в своём формате.',
+        'Острый вопрос внизу: по всем этим продуктам и типам кампаний — <strong>что наш маркетинг на самом деле произвёл на потраченные деньги?</strong> Сегодня ответа нет — не потому что данных нет, а потому что их никогда не сводили вместе.',
+        'Эта сессия — о том, чтобы вместе договориться, какой кусок этого решать первым.',
       ],
-      pills: ['40 products', '5 campaign types', 'Five currencies', 'One unanswered question'],
+      pills: ['40 продуктов', '5 типов кампаний', 'Пять валют', 'Вопрос без ответа'],
     },
 
     { block: 'divider' },
 
     {
       block: 'beforeAfter',
-      sectionNum: '02 — The core challenge',
-      heading: 'Five currencies, no exchange rate',
+      sectionNum: '02 — Суть задачи',
+      heading: 'Пять валют, и ни одного обменного курса',
       intro:
-        'Across the campaigns you shared, each kind of work is measured in its own unit — and none of them convert.',
+        'В кампаниях, что вы прислали, каждый вид работы измеряется в своих единицах — и они не переводятся одна в другую.',
       before: {
-        label: 'Today',
-        core: 'Every campaign is its own island',
+        label: 'Сегодня',
+        core: 'Каждая кампания — сама по себе',
         body:
-          'Downloads, brand-lift points, impressions, survey sentiment, watch-time — five ways of counting, none converts to another or back to revenue. Each report is sound on its own; none was built to talk to the others.',
+          'Загрузки, пункты узнаваемости, показы, настроения из опросов, время просмотра — пять способов считать, и ни один не переводится в другой или в выручку. Каждый отчёт хорош сам по себе; ни один не создавался, чтобы говорить с остальными.',
       },
       after: {
-        label: 'Where this goes',
-        core: 'One connected picture, queryable',
+        label: 'Куда это ведёт',
+        core: 'Одна связанная картина, к которой можно обратиться',
         body:
-          'Brief, creative, channel, result and revenue connected — so “what did this produce” becomes a question you can actually ask, across products and campaign types.',
+          'Бриф, креатив, канал, результат и выручка связаны — так что «что это принесло» становится вопросом, который реально можно задать, по всем продуктам и типам кампаний.',
       },
       note:
-        'This isn’t a JetBrains failing — it’s what happens when campaign volume grows faster than the system beneath it. It’s an integration problem, and that’s exactly what’s solvable.',
+        'Это не промах JetBrains — так бывает, когда число кампаний растёт быстрее, чем система под ними. Это задача про интеграцию, и именно поэтому она решаемая.',
     },
 
     { block: 'divider' },
 
     {
       block: 'narrative',
-      sectionNum: '03 — How we’ll work today',
-      heading: 'How we’ll think about it together',
+      sectionNum: '03 — Как мы поработаем сегодня',
+      heading: 'Как мы будем думать об этом вместе',
       body: [
-        'We’ll walk five short exercises: the jobs your marketing team is hired for → which ones are underserved → what specifically breaks → the moment the need lands → what you’ve already tried.',
-        'It’s the same method we’d put in your hands for campaigns — today, pointed at your own team’s problem. You rate, you pick; we lock it as where we start.',
+        'Пройдём пять коротких упражнений: работы, на которые нанимают вашу маркетинговую команду → какие из них недообслужены → что именно ломается → момент, когда возникает потребность → что вы уже пробовали.',
+        'Это тот же метод, что мы дали бы вам в руки для кампаний — сегодня направим его на задачу вашей собственной команды. Вы оцениваете, вы выбираете; мы фиксируем это как точку старта.',
       ],
       example:
-        'By the end you’ll have placed and ranked the work yourselves — not us telling you the scope, you choosing it.',
+        'К концу вы сами разместите и проранжируете работу — не мы назначаем объём, а вы его выбираете.',
     },
 
     { block: 'divider' },
 
     {
       block: 'exerciseMatrix',
-      sectionNum: '04 — Over to you',
-      heading: 'Which of these matter most — and run worst?',
+      sectionNum: '04 — Теперь вы',
+      heading: 'Что из этого важнее всего — и работает хуже всего?',
       intro:
-        'We pulled these from our calls and your reports. Drag each onto the grid — how important it is to you against how well it’s handled today. The ones that matter most but still run painfully are where we start. Tap ＋note on any card to tell us why.',
+        'Мы собрали это из наших созвонов и ваших отчётов. Перетащите каждую карточку на поле — насколько это важно против того, насколько хорошо это закрыто сегодня. То, что важнее всего, но идёт болезненно, — точка старта. Нажмите ＋заметку на любой карточке, чтобы пояснить.',
       exerciseId: 'jtbd-matrix',
-      axisX: { label: 'How important to you', low: 'Minor', high: 'Critical' },
-      axisY: { label: 'How well it’s handled today', low: 'Painful', high: 'Handled' },
+      axisX: { label: 'Насколько важно для вас', low: 'Не очень', high: 'Критично' },
+      axisY: { label: 'Насколько хорошо закрыто сегодня', low: 'Болезненно', high: 'Закрыто' },
       jobs: [
-        { id: 'budget', label: 'Decide where the next budget goes' },
-        { id: 'creative', label: 'Tell whether a creative concept worked' },
-        { id: 'value', label: 'Prove marketing’s value to leadership' },
-        { id: 'produced', label: 'Know what a campaign actually produced' },
-        { id: 'compare', label: 'Compare campaigns on one footing' },
-        { id: 'brief', label: 'Brief the next campaign smarter' },
+        { id: 'budget', label: 'Решать, куда направить следующий бюджет' },
+        { id: 'creative', label: 'Понять, сработал ли креатив' },
+        { id: 'value', label: 'Доказать ценность маркетинга руководству' },
+        { id: 'produced', label: 'Знать, что кампания на самом деле принесла' },
+        { id: 'compare', label: 'Сравнивать кампании по одной мерке' },
+        { id: 'brief', label: 'Брифовать следующую кампанию умнее' },
       ],
     },
 
@@ -109,46 +108,46 @@ export const jetbrainsPage: ClientPage = {
 
     {
       block: 'exerciseRank',
-      sectionNum: '05 — Where each one hurts',
-      heading: 'Inside each, what bites hardest?',
+      sectionNum: '05 — Где именно болит',
+      heading: 'Внутри каждой — что ранит сильнее всего?',
       intro:
-        'For the jobs you flagged as underserved, drag the problems so the one that hurts most sits on top. Draft lists — we’ll refine them together.',
+        'Для работ, что вы отметили недообслуженными, перетащите проблемы так, чтобы самая болезненная была сверху. Списки черновые — доработаем вместе.',
       exerciseId: 'problem-rank',
       groups: [
         {
           jobId: 'budget',
-          jobLabel: 'Deciding where the next budget goes',
+          jobLabel: 'Решение, куда направить бюджет',
           problems: [
-            { id: 'budget-reconcile', label: 'The same downloads come back 7,300 / 6,063 / 2,204 — none reconcile' },
-            { id: 'budget-loss', label: '~67% data loss in consent countries' },
-            { id: 'budget-blind', label: '“Reddit off, daily.dev up” rests on numbers we flag unreliable' },
+            { id: 'budget-reconcile', label: 'Одни и те же загрузки приходят как 7 300 / 6 063 / 2 204 — не сходятся' },
+            { id: 'budget-loss', label: '~67% потерь данных в странах с согласием на сбор' },
+            { id: 'budget-blind', label: '«Reddit выключаем, daily.dev усиливаем» опирается на цифры, которые мы сами считаем ненадёжными' },
           ],
         },
         {
           jobId: 'creative',
-          jobLabel: 'Telling whether a concept worked',
+          jobLabel: 'Оценка, сработал ли креатив',
           problems: [
-            { id: 'creative-severed', label: 'Creative is severed from result — no join from concept to download' },
-            { id: 'creative-video', label: 'A 1.2M-view video can’t be tied to any product install' },
-            { id: 'creative-noattr', label: '“No attribution to downloads or usages can be made”' },
+            { id: 'creative-severed', label: 'Креатив оторван от результата — нет связи от идеи до загрузки' },
+            { id: 'creative-video', label: 'Ролик с 1,2 млн просмотров нельзя привязать ни к одной установке продукта' },
+            { id: 'creative-noattr', label: '«Атрибуцию к загрузкам или использованию построить нельзя»' },
           ],
         },
         {
           jobId: 'value',
-          jobLabel: 'Proving marketing’s value',
+          jobLabel: 'Доказательство ценности маркетинга',
           problems: [
-            { id: 'value-currencies', label: 'Five currencies, nothing converts to one number' },
-            { id: 'value-soft', label: '“No significant uplift, but we saw some”' },
-            { id: 'value-b2b', label: 'B2B licenses driven by companies, not the end-users we reach' },
+            { id: 'value-currencies', label: 'Пять валют, ничто не сводится в одно число' },
+            { id: 'value-soft', label: '«Значимого роста нет, но кое-что мы заметили»' },
+            { id: 'value-b2b', label: 'Лицензии B2B тянут компании, а не конечные пользователи, до которых мы дотягиваемся' },
           ],
         },
         {
           jobId: 'produced',
-          jobLabel: 'Knowing what a campaign produced',
+          jobLabel: 'Знание, что кампания принесла',
           problems: [
-            { id: 'produced-nohome', label: 'No single place where the data lands' },
-            { id: 'produced-silo', label: 'Each PMM counts on their own' },
-            { id: 'produced-nocompound', label: 'Retros happen, but learnings don’t compound' },
+            { id: 'produced-nohome', label: 'Нет единого места, куда ложатся данные' },
+            { id: 'produced-silo', label: 'Каждый PMM считает у себя' },
+            { id: 'produced-nocompound', label: 'Ретро проводятся, но выводы не накапливаются' },
           ],
         },
       ],
@@ -158,53 +157,53 @@ export const jetbrainsPage: ClientPage = {
 
     {
       block: 'exerciseChips',
-      sectionNum: '06 — The moment it lands',
-      heading: 'When does the need actually arise?',
+      sectionNum: '06 — Момент, когда возникает потребность',
+      heading: 'Когда потребность реально возникает?',
       intro:
-        'The need shows up at a specific moment — that moment is what turns a background wish into an urgent one. Map it across these questions; pick what fits and add your own.',
+        'Потребность появляется в конкретный момент — и именно момент превращает фоновое желание в срочное. Разложим его по вопросам; выберите подходящее и добавьте своё.',
       exerciseId: 'entry-points',
       questions: [
         {
           id: 'why',
-          q: 'Why',
-          example: 'leadership asks what a year of marketing produced',
-          options: ['Budget planning for next year', 'A campaign just wrapped', 'Leadership asked “what did we get”', 'A channel is underperforming mid-flight'],
+          q: 'Почему',
+          example: 'руководство спрашивает, что год маркетинга произвёл',
+          options: ['Планирование бюджета на год', 'Кампания только что завершилась', 'Руководство спросило «что мы получили»', 'Канал недорабатывает на ходу'],
         },
         {
           id: 'when',
-          q: 'When',
-          example: 'in the run-up to a board review',
-          options: ['Board / budget review', 'Quarter close', 'Post-campaign retro', 'Mid-campaign channel review'],
+          q: 'Когда',
+          example: 'в преддверии совета директоров',
+          options: ['Совет директоров / защита бюджета', 'Закрытие квартала', 'Ретро после кампании', 'Пересмотр каналов на ходу'],
         },
         {
           id: 'where',
-          q: 'Where',
-          example: 'in a leadership review, on the spot',
-          options: ['A leadership review', 'The media-buying team', 'A PMM’s own spreadsheet', 'A cross-product sync'],
+          q: 'Где',
+          example: 'на ревью у руководства, сходу',
+          options: ['Ревью у руководства', 'Команда закупки медиа', 'Своя таблица у PMM', 'Синхронизация по продуктам'],
         },
         {
           id: 'while',
-          q: 'While',
-          example: 'defending the budget under an AI-native mandate',
-          options: ['Defending the marketing budget', 'Deciding next quarter’s channel mix', 'Justifying spend under a hiring freeze', 'Briefing the next campaign'],
+          q: 'На фоне чего',
+          example: 'защищая бюджет под мандатом стать AI-native',
+          options: ['Защита маркетингового бюджета', 'Выбор каналов на следующий квартал', 'Обоснование трат при заморозке найма', 'Бриф следующей кампании'],
         },
         {
           id: 'with-whom',
-          q: 'With whom',
-          example: 'in front of the CFO',
-          options: ['The CFO / board', 'The CEO (AI-native mandate)', 'Other PMMs', 'Just you'],
+          q: 'С кем',
+          example: 'перед финансовым директором',
+          options: ['Финдиректор / совет', 'CEO (мандат стать AI-native)', 'Другие PMM', 'Наедине с собой'],
         },
         {
           id: 'with-what',
-          q: 'With what',
-          example: 'five reports open that don’t agree',
-          options: ['Five reports that don’t reconcile', 'A Looker dashboard', 'A manual sheet pull', 'An agency export'],
+          q: 'С чем',
+          example: 'пять отчётов открыто, и они не сходятся',
+          options: ['Пять несводимых отчётов', 'Дашборд в Looker', 'Ручная выгрузка в таблицу', 'Выгрузка от агентства'],
         },
         {
           id: 'how-feeling',
-          q: 'How feeling',
-          example: 'exposed — the number should exist and doesn’t',
-          options: ['Exposed — can’t prove the return', 'Frustrated — the answer should exist', 'Under pressure — every dollar must count', 'Behind — competitors moving faster'],
+          q: 'С каким настроем',
+          example: 'уязвимо — число должно быть, а его нет',
+          options: ['Уязвимо — нечем доказать отдачу', 'Раздражение — ответ должен существовать', 'Под давлением — каждый рубль на счету', 'Позади — конкуренты двигаются быстрее'],
         },
       ],
     },
@@ -213,16 +212,16 @@ export const jetbrainsPage: ClientPage = {
 
     {
       block: 'exerciseSolutions',
-      sectionNum: '07 — What you do today',
-      heading: 'How do you handle each one now?',
+      sectionNum: '07 — Что вы делаете сегодня',
+      heading: 'Как вы справляетесь с каждой из них сейчас?',
       intro:
-        'For each job, tell us the current workaround — the tool, the manual step, the thing you’ve already tried (per-project retros, dev-panel tests, Looker, the framework work with the previous agency). The pattern shows what’s worth solving — and that the gap isn’t for lack of trying.',
+        'По каждой работе — какой сейчас обходной путь: инструмент, ручной шаг, то, что уже пробовали (ретро по проектам, тесты на панелях разработчиков, Looker, работа над фреймворком с прошлым агентством). Картина покажет, что стоит решать — и что разрыв не от того, что не пытались.',
       exerciseId: 'current-solutions',
       jobs: [
-        { id: 'budget', label: 'Deciding where the next budget goes', placeholder: 'e.g. Looker channel attribution, plus judgement…' },
-        { id: 'creative', label: 'Telling whether a concept worked', placeholder: 'e.g. retros, occasional developer-panel tests…' },
-        { id: 'value', label: 'Proving marketing’s value', placeholder: 'e.g. per-campaign decks, brand-lift panels…' },
-        { id: 'produced', label: 'Knowing what a campaign produced', placeholder: 'e.g. per-project retros, manual sheet pulls…' },
+        { id: 'budget', label: 'Решение, куда направить бюджет', placeholder: 'например, атрибуция по каналам в Looker плюс чутьё…' },
+        { id: 'creative', label: 'Оценка, сработал ли креатив', placeholder: 'например, ретро, изредка тесты на панелях разработчиков…' },
+        { id: 'value', label: 'Доказательство ценности', placeholder: 'например, презентации по кампаниям, панели узнаваемости…' },
+        { id: 'produced', label: 'Знание, что кампания принесла', placeholder: 'например, ретро по проектам, ручные выгрузки в таблицы…' },
       ],
     },
 
@@ -230,42 +229,42 @@ export const jetbrainsPage: ClientPage = {
 
     {
       block: 'emphasisFrame',
-      label: 'The pattern',
+      label: 'Закономерность',
       text:
-        'Four seats described four different problems. Underneath, they’re the same broken chain — <strong>brief → creative → channel → result → revenue</strong>. Fix that one connection and every question above becomes answerable.',
-      note: 'That’s the foundation. Whichever job you rated highest, it traces back to this.',
+        'Четыре роли описали четыре разные проблемы. Под ними — одна и та же порванная цепочка: <strong>бриф → креатив → канал → результат → выручка</strong>. Почините это одно соединение — и каждый вопрос выше станет отвечаемым.',
+      note: 'Это фундамент. Какую бы работу вы ни поставили выше всех — она ведёт сюда.',
     },
 
     { block: 'divider' },
 
     {
       block: 'discussion',
-      sectionNum: '08 — Where we start',
-      heading: 'The slice we lock today',
+      sectionNum: '08 — С чего начинаем',
+      heading: 'Кусок, который фиксируем сегодня',
       intro:
-        'From what you rated and ranked: we pick the one slice we build first, and lock it here. It records to our shared workspace as what this engagement is measured against — holding us to a clear scope, and the work to a chosen one.',
+        'Из того, что вы оценили и проранжировали, выбираем один кусок, который строим первым, и фиксируем его здесь. Он записывается в наше общее пространство как то, по чему меряется эта работа — удерживая нас в чётком объёме, а работу — в выбранном.',
       questions: [
         {
-          q: 'Of the jobs on the matrix, which one do we commit to first?',
-          note: 'The most important × worst-handled is the natural pick — but it’s your call, not ours.',
+          q: 'Из работ на поле — какую берём в работу первой?',
+          note: 'Самая важная и хуже всего закрытая — естественный выбор, но решать вам, а не нам.',
         },
         {
-          q: 'What would “this is working” look like, three months in?',
-          note: 'So the locked slice has a result we both recognise when we get there.',
+          q: 'Как будет выглядеть «это работает» через три месяца?',
+          note: 'Чтобы у зафиксированного куска был результат, который мы оба узнаем, когда дойдём.',
         },
       ],
-      addLabel: 'Anything else to lock in?',
+      addLabel: 'Что ещё зафиксировать?',
     },
 
     {
       block: 'statement',
       text:
-        'Here’s what that one connection looks like, already solved →',
+        'Вот как это одно соединение выглядит уже решённым →',
     },
 
     {
       block: 'docFooter',
-      left: 'Working session · Part 1 of 2',
+      left: 'Рабочая сессия · Часть 1 из 2',
       right: 'backspaceoddity.com',
     },
   ],
