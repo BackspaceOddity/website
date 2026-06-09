@@ -392,19 +392,17 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   .exm-save:disabled { opacity: .4; cursor: default; }
   .exm-status { font-family: var(--mono); font-size: 11px; color: var(--ink-40); }
   ${b.wide ? `
-  /* editorial wide: break out past the 860px column; matrix left + cards right,
-     with the note-panel and Save action spanning the full width BELOW the row. */
-  .exm-section-wide { width: min(1240px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
-  .exm-section-wide h2, .exm-section-wide .exm-intro { max-width: 780px; }
-  .exm-section-wide .exm-wrap { display: grid; grid-template-columns: minmax(580px, 0.64fr) minmax(260px, 0.36fr); column-gap: 56px; row-gap: 22px; align-items: start; }
+  /* editorial wide: heading + intro stay in the normal centered column; only the
+     canvas (.exm-wrap) breaks out past the 860px column. Matrix left + cards
+     right; the note-panel and Save action span the full width BELOW the row. */
+  .exm-section-wide .exm-wrap { width: min(1240px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); display: grid; grid-template-columns: minmax(580px, 0.64fr) minmax(260px, 0.36fr); column-gap: 56px; row-gap: 22px; align-items: start; }
   .exm-section-wide .exm-stage { grid-column: 1; grid-row: 1; width: 100%; max-width: none; }
   .exm-section-wide .exm-matrix { max-width: none; }
   .exm-section-wide .exm-tray { grid-column: 2; grid-row: 1; margin-top: 30px; align-content: flex-start; }
   .exm-section-wide .exm-panel { grid-column: 1 / -1; }
   .exm-section-wide .exm-actions { grid-column: 1 / -1; }
   @media (max-width: 920px) {
-    .exm-section-wide { width: auto; left: 0; transform: none; }
-    .exm-section-wide .exm-wrap { display: block; }
+    .exm-section-wide .exm-wrap { width: auto; left: 0; transform: none; display: block; }
     .exm-section-wide .exm-tray { margin-top: 28px; }
   }
   ` : ''}
