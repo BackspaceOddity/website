@@ -241,6 +241,13 @@ export interface ExerciseMatrixBlock {
   /** pre-filled job cards the client positions */
   jobs: { id: string; label: string }[];
   ui?: ExerciseUI;
+  /** editorial wide layout: break out past the content column + place the card
+   *  tray to the RIGHT of the matrix (landscape). Default false = square,
+   *  tray-below (unchanged for existing clients). */
+  wide?: boolean;
+  /** hide the shaded "Underserved" quadrant + its label. The highlight tells the
+   *  client where the "right" answer is → confirmation bias. Default false. */
+  hideUnderservedZone?: boolean;
 }
 
 /** Exercise 2 — Problems (cascade block 3). For each underserved job, a short

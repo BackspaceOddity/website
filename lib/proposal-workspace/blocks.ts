@@ -391,6 +391,22 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   .exm-save { background: var(--ink); color: var(--paper); border: none; border-radius: 7px; padding: 12px 22px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
   .exm-save:disabled { opacity: .4; cursor: default; }
   .exm-status { font-family: var(--mono); font-size: 11px; color: var(--ink-40); }
+  ${b.wide ? `
+  /* editorial wide: break out past the 860px column; matrix left + cards right,
+     with the note-panel and Save action spanning the full width BELOW the row. */
+  .exm-section-wide { width: min(1160px, calc(100vw - 48px)); position: relative; left: 50%; transform: translateX(-50%); }
+  .exm-section-wide h2, .exm-section-wide .exm-intro { max-width: 780px; }
+  .exm-section-wide .exm-wrap { display: grid; grid-template-columns: minmax(440px, 560px) 1fr; column-gap: 52px; row-gap: 20px; align-items: start; }
+  .exm-section-wide .exm-stage { grid-column: 1; grid-row: 1; width: 100%; max-width: none; }
+  .exm-section-wide .exm-tray { grid-column: 2; grid-row: 1; margin-top: 30px; align-content: flex-start; }
+  .exm-section-wide .exm-panel { grid-column: 1 / -1; }
+  .exm-section-wide .exm-actions { grid-column: 1 / -1; }
+  @media (max-width: 920px) {
+    .exm-section-wide { width: auto; left: 0; transform: none; }
+    .exm-section-wide .exm-wrap { display: block; }
+    .exm-section-wide .exm-tray { margin-top: 28px; }
+  }
+  ` : ''}
   `;
 
   const root = `exm-${esc(b.exerciseId)}`;
@@ -464,7 +480,7 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   status();
 })();`;
 
-  return `<section id="${root}">
+  return `<section id="${root}"${b.wide ? ' class="exm-section-wide"' : ''}>
   ${sectionNum(b.sectionNum)}
   <h2>${esc(b.heading)}</h2>
   ${b.intro ? `<p class="exm-intro">${b.intro}</p>` : ''}
@@ -476,7 +492,7 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
         <div class="exm-ynums">${ynums}</div>
       </div>
       <div class="exm-matrix">
-        <div class="exm-hot"><span>${esc(u.underserved)}</span></div>
+        ${b.hideUnderservedZone ? '' : `<div class="exm-hot"><span>${esc(u.underserved)}</span></div>`}
         <div class="exm-guide exm-guide-v"></div>
         <div class="exm-guide exm-guide-h"></div>
       </div>
