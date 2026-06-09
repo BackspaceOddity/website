@@ -16,6 +16,7 @@ import path from 'node:path';
 import { getClient } from '@/lib/proposal-workspace/clients';
 import { token, getCookie, cookieName } from '@/lib/proposal-workspace/chrome';
 import { getWorkspacePassword } from '@/lib/proposal-workspace/auth';
+import { getSavedResponses, savedQuestions } from '@/lib/proposal-workspace/responses';
 import { supabase } from '@/lib/supabase';
 
 const KNOWN_EXERCISES = new Set([
@@ -25,6 +26,25 @@ const KNOWN_EXERCISES = new Set([
   'entry-points',
   'client-questions',
 ]);
+
+// Read-back endpoint for live polling — lets the §07 "Your notes" block pick up
+// new submissions without a page reload. Returns the latest saved questions.
+export async function GET(req: Request, ctx: { params: Promise<{ client: string }> }) {
+  const { client } = await ctx.params;
+  const entry = getClient(client);
+  if (!entry) return NextResponse.json({ error: 'not found' }, { status: 404 });
+
+  const accessKey = await getWorkspacePassword(client);
+  if (accessKey && getCookie(req, cookieName(client)) !== token(accessKey, client)) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  }
+
+  const responses = await getSavedResponses(client);
+  return NextResponse.json(
+    { questions: savedQuestions(responses) },
+    { headers: { 'cache-control': 'no-store' } },
+  );
+}
 
 export async function POST(req: Request, ctx: { params: Promise<{ client: string }> }) {
   const { client } = await ctx.params;

@@ -276,7 +276,10 @@ export function discussion(b: DiscussionBlock, slug: string): string {
 </div>`;
 }
 
-export function clientInput(b: ClientInputBlock, saved: string[] = []): string {
+export function clientInput(b: ClientInputBlock, slug: string, saved: string[] = []): string {
+  const ns = `${slug}`.replace(/[^a-zA-Z0-9_]/g, '_');
+  const listId = `ci-list-${ns}`;
+  const empty = String(b.emptyNote ?? 'Nothing added yet — your notes from this page will appear here.');
   const css = `
   .ci-list { margin-top: 22px; display: flex; flex-direction: column; gap: 16px; }
   .ci-card { border: 1px solid var(--rule-strong); border-radius: 8px; padding: 18px 20px; background: var(--paper-soft, transparent); }
@@ -284,20 +287,47 @@ export function clientInput(b: ClientInputBlock, saved: string[] = []): string {
   .ci-text { font-family: var(--text); font-weight: var(--w-body); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); white-space: pre-wrap; }
   .ci-empty { font-family: var(--text); font-size: var(--fs-small); color: var(--ink-55); font-style: italic; margin-top: 18px; }
   `;
-  const cards = saved.length
-    ? `<div class="ci-list">
-    ${saved.map((t, i) => `<div class="ci-card">
+  const inner = saved.length
+    ? saved.map((t, i) => `<div class="ci-card">
       <span class="ci-num">From you · ${String(i + 1).padStart(2, '0')}</span>
       <div class="ci-text">${esc(t)}</div>
-    </div>`).join('\n    ')}
-  </div>`
-    : `<p class="ci-empty">${b.emptyNote ?? 'Nothing added yet — your notes from this page will appear here.'}</p>`;
+    </div>`).join('\n    ')
+    : `<p class="ci-empty">${esc(empty)}</p>`;
+  // Live poll: new submissions appear without a page reload (closes the
+  // "added something, see nothing" gap — the cards re-render when the
+  // server-side count changes). Client text set via textContent (safe).
+  const js =
+`(function(){
+  var box=document.getElementById('${listId}'); if(!box) return;
+  function pad(n){return n<10?'0'+n:''+n;}
+  function render(arr){
+    box.innerHTML='';
+    if(!arr.length){ var p=document.createElement('p'); p.className='ci-empty'; p.textContent=${JSON.stringify(empty)}; box.appendChild(p); return; }
+    arr.forEach(function(t,i){
+      var c=document.createElement('div'); c.className='ci-card';
+      var n=document.createElement('span'); n.className='ci-num'; n.textContent='From you \\u00b7 '+pad(i+1);
+      var x=document.createElement('div'); x.className='ci-text'; x.textContent=t;
+      c.appendChild(n); c.appendChild(x); box.appendChild(c);
+    });
+  }
+  var current=${saved.length};
+  function poll(){
+    fetch('/w/${slug}/exercise/',{headers:{accept:'application/json'}})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){ if(j&&j.questions&&j.questions.length!==current){ current=j.questions.length; render(j.questions); } })
+      .catch(function(){});
+  }
+  setInterval(poll, 12000);
+})();`;
   return `<section>
   <style>${css}</style>
   ${sectionNum(b.sectionNum)}
   <h2>${esc(b.heading)}</h2>
   ${b.intro ? `<p>${b.intro}</p>` : ''}
-  ${cards}
+  <div class="ci-list" id="${listId}">
+    ${inner}
+  </div>
+  <script>${js}</script>
 </section>`;
 }
 
