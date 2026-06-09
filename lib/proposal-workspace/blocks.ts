@@ -394,10 +394,11 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   ${b.wide ? `
   /* editorial wide: break out past the 860px column; matrix left + cards right,
      with the note-panel and Save action spanning the full width BELOW the row. */
-  .exm-section-wide { width: min(1160px, calc(100vw - 48px)); position: relative; left: 50%; transform: translateX(-50%); }
+  .exm-section-wide { width: min(1240px, calc(100vw - 40px)); position: relative; left: 50%; transform: translateX(-50%); }
   .exm-section-wide h2, .exm-section-wide .exm-intro { max-width: 780px; }
-  .exm-section-wide .exm-wrap { display: grid; grid-template-columns: minmax(440px, 560px) 1fr; column-gap: 52px; row-gap: 20px; align-items: start; }
+  .exm-section-wide .exm-wrap { display: grid; grid-template-columns: minmax(580px, 0.64fr) minmax(260px, 0.36fr); column-gap: 56px; row-gap: 22px; align-items: start; }
   .exm-section-wide .exm-stage { grid-column: 1; grid-row: 1; width: 100%; max-width: none; }
+  .exm-section-wide .exm-matrix { max-width: none; }
   .exm-section-wide .exm-tray { grid-column: 2; grid-row: 1; margin-top: 30px; align-content: flex-start; }
   .exm-section-wide .exm-panel { grid-column: 1 / -1; }
   .exm-section-wide .exm-actions { grid-column: 1 / -1; }
