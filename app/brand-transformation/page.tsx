@@ -56,20 +56,38 @@ export default function BrandTransformationPage() {
       <header className="bt-hero" id="top" data-screen-label="01 Hero">
         <div className="bt-hero__inner">
           <span className="bt-hero__eyebrow">Brand transformation &amp; rebranding</span>
-          <h1 className="bt-hero__title">We turn brand into a growth lever that compounds</h1>
-          <p className="bt-hero__sub">
-            Brand stops being decoration — it becomes the assembly point of your company: who
-            you&apos;re for, how you&apos;re different, and why you. Built end-to-end, strategy to
-            launch, AI-native — and kept as a living system, not a project that ends.
-          </p>
+          <h1 className="bt-hero__title">Turning brand into a growth lever that compounds</h1>
+          <div className="bt-hero__how">
+            <div className="bt-hero__princ">
+              <h3>Strategy ↔ execution, end-to-end</h3>
+              <p>
+                You get strategy, brand, content, website, and launch as one continuous process —
+                not five contractors to coordinate.
+              </p>
+            </div>
+            <div className="bt-hero__princ">
+              <h3>Brand is a means, not the goal</h3>
+              <p>
+                Your brand becomes a tool for a durable business strategy, not an end in itself —
+                you walk away with results, not a rebrand for its own sake.
+              </p>
+            </div>
+            <div className="bt-hero__princ">
+              <h3>AI-native</h3>
+              <p>
+                You inherit a working system, not a folder of files: a Figma ↔ code design system,
+                your Messaging House in Notion, plus our agents and assets you keep using.
+              </p>
+            </div>
+          </div>
           <Pill href={CAL} label="Book a call" />
         </div>
       </header>
 
       {/* ============ WHEN YOU NEED A REBRAND ============ */}
-      <section className="bt-sec bt-sec--light" id="when" data-screen-label="02 When you need a rebrand">
+      <section className="bt-sec bt-sec--light bt-sec--compact" id="when" data-screen-label="02 When you need a rebrand">
         <div className="bt-inner">
-          <header className="bt-head bt-head--gap">
+          <header className="bt-head bt-head--compact">
             <span className="bt-eyebrow">When a rebrand earns its place</span>
             <h2 className="bt-h2">When you need this</h2>
             <p className="bt-intro">
@@ -78,52 +96,42 @@ export default function BrandTransformationPage() {
             </p>
           </header>
 
-          <ol className="bt-list">
-            <li className="bt-row">
-              <div className="bt-row__num">01</div>
-              <div className="bt-row__body">
-                <h3 className="bt-row__name">Moving up-market</h3>
-                <p className="bt-row__text">
-                  SMB → Enterprise — signal the market that you&apos;re no longer a startup.
-                </p>
-              </div>
-            </li>
-            <li className="bt-row">
-              <div className="bt-row__num">02</div>
-              <div className="bt-row__body">
-                <h3 className="bt-row__name">A market full of lookalikes</h3>
-                <p className="bt-row__text">
-                  Competitors say and look the same — you need to explain how you&apos;re different.
-                </p>
-              </div>
-            </li>
-            <li className="bt-row">
-              <div className="bt-row__num">03</div>
-              <div className="bt-row__body">
-                <h3 className="bt-row__name">Raising investment</h3>
-                <p className="bt-row__text">Package the company so investors want in.</p>
-              </div>
-            </li>
-            <li className="bt-row">
-              <div className="bt-row__num">04</div>
-              <div className="bt-row__body">
-                <h3 className="bt-row__name">Category shift</h3>
-                <p className="bt-row__text">
-                  M&amp;A, a new business model, a shifted product-market fit, or launching a product
-                  in a new category.
-                </p>
-              </div>
-            </li>
-            <li className="bt-row">
-              <div className="bt-row__num">05</div>
-              <div className="bt-row__body">
-                <h3 className="bt-row__name">Entering new markets</h3>
-                <p className="bt-row__text">
-                  New countries and audiences — the brand has to speak their language.
-                </p>
-              </div>
-            </li>
-          </ol>
+          <div className="bt-eps">
+            <div className="bt-ep">
+              <span className="bt-ep__num">01</span>
+              <h3 className="bt-ep__name">Moving up-market</h3>
+              <p className="bt-ep__text">
+                SMB → Enterprise — signal the market that you&apos;re no longer a startup.
+              </p>
+            </div>
+            <div className="bt-ep">
+              <span className="bt-ep__num">02</span>
+              <h3 className="bt-ep__name">A market full of lookalikes</h3>
+              <p className="bt-ep__text">
+                Competitors say and look the same — you need to explain how you&apos;re different.
+              </p>
+            </div>
+            <div className="bt-ep">
+              <span className="bt-ep__num">03</span>
+              <h3 className="bt-ep__name">Raising investment</h3>
+              <p className="bt-ep__text">Package the company so investors want in.</p>
+            </div>
+            <div className="bt-ep">
+              <span className="bt-ep__num">04</span>
+              <h3 className="bt-ep__name">Category shift</h3>
+              <p className="bt-ep__text">
+                M&amp;A, a new business model, a shifted product-market fit, or launching a product
+                in a new category.
+              </p>
+            </div>
+            <div className="bt-ep">
+              <span className="bt-ep__num">05</span>
+              <h3 className="bt-ep__name">Entering new markets</h3>
+              <p className="bt-ep__text">
+                New countries and audiences — the brand has to speak their language.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -168,77 +176,27 @@ export default function BrandTransformationPage() {
             <span className="bt-eyebrow">Our experience</span>
             <h2 className="bt-h2">Brands we&apos;ve transformed</h2>
           </header>
-          <div className="bt-cards">
-            <article className="bt-card">
-              <div className="bt-card__transform">
-                <span className="bt-card__from">RealtimeBoard</span>
-                <span className="bt-card__arrow" aria-hidden="true">→</span>
-                <span className="bt-card__to">Miro</span>
-              </div>
-              <div className="bt-card__foot">
-                <p className="bt-card__desc">
-                  Full rebrand and brand architecture — followed by a path to a $17.5B valuation.
-                </p>
-                <span className="bt-tag">Rebrand</span>
-              </div>
-            </article>
-            <article className="bt-card">
-              <div className="bt-card__transform">
-                <span className="bt-card__from">Stape</span>
-                <span className="bt-card__arrow" aria-hidden="true">→</span>
-                <span className="bt-card__to">Kleos</span>
-              </div>
-              <div className="bt-card__foot">
-                <p className="bt-card__desc">Renaming, positioning, and a new brand identity.</p>
-                <span className="bt-tag">Renaming</span>
-              </div>
-            </article>
-            <article className="bt-card">
-              <div className="bt-card__transform">
-                <span className="bt-card__to">Sidekick</span>
-              </div>
-              <div className="bt-card__foot">
-                <p className="bt-card__desc">Sidekick browser — acquired by Perplexity.</p>
-                <span className="bt-tag">Acquired</span>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ HOW WE WORK ============ */}
-      <section className="bt-block" id="how" data-screen-label="05 How we work">
-        <div className="bt-inner">
-          <header className="bt-head">
-            <span className="bt-eyebrow bt-eyebrow--on-dark">How we work</span>
-            <h2 className="bt-h2 bt-h2--on-dark">One continuous process — and a system you keep</h2>
-          </header>
-          <p className="bt-how__intro">
-            You get it built end-to-end — strategy to launch, AI-native — and keep it as a living
-            system, not a project that ends.
-          </p>
-          <div className="bt-principles">
-            <div className="bt-principle">
-              <h3 className="bt-principle__name">Strategy ↔ execution, end-to-end</h3>
-              <p className="bt-principle__text">
-                You get strategy, brand, content, website, and launch as one continuous process —
-                not five contractors to coordinate.
-              </p>
-            </div>
-            <div className="bt-principle">
-              <h3 className="bt-principle__name">Brand is a means, not the goal</h3>
-              <p className="bt-principle__text">
-                Your brand becomes a tool for a durable business strategy, not an end in itself —
-                you walk away with results, not a rebrand for its own sake.
-              </p>
-            </div>
-            <div className="bt-principle">
-              <h3 className="bt-principle__name">AI-native</h3>
-              <p className="bt-principle__text">
-                You inherit a working system, not a folder of files: a Figma ↔ code design system,
-                your Messaging House in Notion, plus our agents and assets you keep using.
-              </p>
-            </div>
+          <div className="bt-projects">
+            <a className="bt-proj" href="https://miro.com/" target="_blank" rel="noopener noreferrer">
+              <img className="bt-proj__img" src="/images/projects/miro.webp" alt="RealtimeBoard → Miro rebrand" />
+              <span className="bt-proj__shade" aria-hidden="true"></span>
+              <h3 className="bt-proj__title">RealtimeBoard → Miro</h3>
+            </a>
+            <a className="bt-proj" href="https://kleos.io/" target="_blank" rel="noopener noreferrer">
+              <img className="bt-proj__img" src="/images/projects/kleos.webp" alt="Stape → Kleos rebrand" />
+              <span className="bt-proj__shade" aria-hidden="true"></span>
+              <h3 className="bt-proj__title">Stape → Kleos</h3>
+            </a>
+            <a
+              className="bt-proj"
+              href="https://www.theinformation.com/briefings/perplexity-buys-browser-startup-sidekick"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img className="bt-proj__img" src="/images/projects/sidekick.webp" alt="Sidekick browser, acquired by Perplexity" />
+              <span className="bt-proj__shade" aria-hidden="true"></span>
+              <h3 className="bt-proj__title">Sidekick (acq. Perplexity)</h3>
+            </a>
           </div>
         </div>
       </section>
