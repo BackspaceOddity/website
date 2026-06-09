@@ -227,6 +227,10 @@ export interface ExerciseUI {
   addSticker?: string;
   /** placeholder shown in an empty new sticker. Default "Your own job…". */
   newStickerPlaceholder?: string;
+  /** add-problem button label (rank, when editable). Default "＋ Add problem". */
+  addProblem?: string;
+  /** placeholder shown in an empty new problem row. Default "Your problem…". */
+  newProblemPlaceholder?: string;
 }
 
 /** One-way workshop, Exercise 1: place pre-filled underserved-job cards on a
@@ -270,6 +274,9 @@ export interface ExerciseRankBlock {
   exerciseId: string;
   groups: { jobId: string; jobLabel: string; problems: { id: string; label: string }[] }[];
   ui?: ExerciseUI;
+  /** allow the client to edit problem text (double-click) and add their own
+   *  problems (＋ button) per group. Default false. */
+  editable?: boolean;
 }
 
 /** Exercise 3 — Category Entry Points (cascade block 4). The Sharp & Romaniuk

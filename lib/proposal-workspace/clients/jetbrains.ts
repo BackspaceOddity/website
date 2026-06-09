@@ -47,6 +47,8 @@ const ru: ExerciseUI = {
   valFormat: 'ВАЖН {imp} · ЗАКР {sat}',
   addSticker: '＋ Добавить стикер',
   newStickerPlaceholder: 'Своя работа…',
+  addProblem: '＋ Добавить проблему',
+  newProblemPlaceholder: 'Своя проблема…',
 };
 
 export const jetbrainsPage: ClientPage = {
@@ -148,6 +150,7 @@ export const jetbrainsPage: ClientPage = {
         'Для работ, что вы отметили недообслуженными, перетащите проблемы так, чтобы самая болезненная была сверху. Списки черновые — доработаем вместе.',
       exerciseId: 'problem-rank',
       ui: ru,
+      editable: true,
       groups: [
         {
           jobId: 'budget',

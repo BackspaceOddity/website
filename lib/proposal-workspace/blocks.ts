@@ -558,6 +558,7 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
   const u = {
     saving: 'saving…', saved: '✓ Saved — thank you', saveFail: 'Save failed',
     saveFailNet: 'Save failed — check connection', saveRanking: 'Save ranking',
+    addProblem: '＋ Add problem', newProblemPlaceholder: 'Your problem…',
     ...(b.ui || {}),
   };
   const fallbackJobs = b.groups.slice(0, 3).map(g => g.jobId);
@@ -566,6 +567,7 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
       <ol class="exr-list" data-job="${esc(g.jobId)}">
         ${g.problems.slice(0, 5).map(p => `<li class="exr-row" data-id="${esc(p.id)}"><span class="exr-rank"></span><span class="exr-label">${esc(p.label)}</span><span class="exr-handle" aria-hidden="true">⠿</span></li>`).join('\n        ')}
       </ol>
+      ${b.editable ? `<button type="button" class="exr-add">${esc(u.addProblem)}</button>` : ''}
     </div>`).join('\n    ');
   const css = `
   .exr { margin-top: 18px; max-width: 580px; }
@@ -578,6 +580,11 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
   .exr-rank { font-family: var(--mono); font-size: 12px; color: var(--ink-40); min-width: 16px; text-align: right; }
   .exr-label { font-family: var(--text); font-size: var(--fs-small); color: var(--ink); flex: 1; }
   .exr-handle { color: var(--ink-25); font-size: 13px; letter-spacing: -2px; }
+  .exr-label[contenteditable="true"] { outline: none; cursor: text; user-select: text; -webkit-user-select: text; }
+  .exr-row.editing { cursor: default; user-select: text; -webkit-user-select: text; box-shadow: 0 0 0 2px var(--ink); }
+  .exr-label:empty::before { content: attr(data-ph); color: var(--ink-40); font-style: italic; }
+  .exr-add { margin-top: 6px; background: transparent; border: 1px dashed var(--rule-strong); border-radius: 6px; padding: 8px 12px; font-family: var(--text); font-size: var(--fs-small); color: var(--ink-55); cursor: pointer; transition: border-color .12s, color .12s; }
+  .exr-add:hover { border-color: var(--ink); color: var(--ink); }
   .exr-actions { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
   .exr-save { background: var(--ink); color: var(--paper); border: none; border-radius: 7px; padding: 12px 22px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
   .exr-save:disabled { opacity: .4; cursor: default; }
@@ -587,10 +594,11 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
   var root=document.getElementById('${root}'); if(!root) return;
   var saveBtn=root.querySelector('.exr-save'), statusEl=root.querySelector('.exr-status');
   var drag=null, dragList=null;
+  var EDIT=${b.editable ? 'true' : 'false'}, PH=${JSON.stringify(u.newProblemPlaceholder)};
   function rowsIn(l){ return Array.prototype.slice.call(l.querySelectorAll('.exr-row')); }
   function lists(){ return Array.prototype.slice.call(root.querySelectorAll('.exr-list')); }
   function renum(l){ rowsIn(l).forEach(function(r,i){ r.querySelector('.exr-rank').textContent=(i+1); }); }
-  function down(e){ var r=e.target.closest('.exr-row'); if(!r) return; e.preventDefault(); drag=r; dragList=r.closest('.exr-list'); r.classList.add('dragging'); try{ r.setPointerCapture(e.pointerId); }catch(_){} }
+  function down(e){ var r=e.target.closest('.exr-row'); if(!r) return; if(r.classList.contains('editing')) return; e.preventDefault(); drag=r; dragList=r.closest('.exr-list'); r.classList.add('dragging'); try{ r.setPointerCapture(e.pointerId); }catch(_){} }
   function move(e){ if(!drag||!dragList) return;
     var after=null, rs=rowsIn(dragList);
     for(var i=0;i<rs.length;i++){ if(rs[i]===drag) continue; var bb=rs[i].getBoundingClientRect(); if(e.clientY < bb.top + bb.height/2){ after=rs[i]; break; } }
@@ -604,12 +612,31 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
   function applyTop(){ var keep=topJobs(); Array.prototype.slice.call(root.querySelectorAll('.exr-group')).forEach(function(g){ var l=g.querySelector('.exr-list'); g.style.display = (l && keep.indexOf(l.getAttribute('data-job'))>=0) ? '' : 'none'; }); }
   saveBtn.addEventListener('click',function(){
     saveBtn.disabled=true; statusEl.textContent=${JSON.stringify(u.saving)};
-    var rankings=lists().filter(function(l){ return l.closest('.exr-group').style.display!=='none'; }).map(function(l){ return {job:l.getAttribute('data-job'), order:rowsIn(l).map(function(r,i){ return {id:r.getAttribute('data-id'), rank:i+1}; })}; });
+    var rankings=lists().filter(function(l){ return l.closest('.exr-group').style.display!=='none'; }).map(function(l){ return {job:l.getAttribute('data-job'), order:rowsIn(l).map(function(r,i){ return {id:r.getAttribute('data-id'), label:(r.querySelector('.exr-label').textContent||'').trim(), rank:i+1}; })}; });
     fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{rankings:rankings}})})
       .then(function(r){ return r.json(); })
       .then(function(j){ statusEl.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.saveFail)}; saveBtn.disabled=!j.ok; })
       .catch(function(){ statusEl.textContent=${JSON.stringify(u.saveFailNet)}; saveBtn.disabled=false; });
   });
+  function enterEditR(row){ if(!EDIT) return; var lbl=row.querySelector('.exr-label'); if(!lbl) return;
+    row.classList.add('editing'); lbl.setAttribute('contenteditable','true'); lbl.focus();
+    try{ var rg=document.createRange(); rg.selectNodeContents(lbl); var s=window.getSelection(); s.removeAllRanges(); s.addRange(rg); }catch(_){}
+  }
+  function exitEditR(row){ var lbl=row.querySelector('.exr-label'); if(!lbl) return;
+    lbl.removeAttribute('contenteditable'); row.classList.remove('editing');
+    lbl.textContent=(lbl.textContent||'').replace(/\\s+/g,' ').trim(); saveBtn.disabled=false;
+  }
+  if(EDIT){
+    root.addEventListener('dblclick',function(e){ var r=e.target.closest('.exr-row'); if(r) enterEditR(r); });
+    root.addEventListener('keydown',function(e){ if(e.target.classList&&e.target.classList.contains('exr-label')&&e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
+    root.addEventListener('blur',function(e){ if(e.target.classList&&e.target.classList.contains('exr-label')){ var r=e.target.closest('.exr-row'); if(r) exitEditR(r); } }, true);
+    root.addEventListener('click',function(e){ var ab=e.target.closest('.exr-add'); if(!ab) return;
+      var list=ab.closest('.exr-group').querySelector('.exr-list');
+      var li=document.createElement('li'); li.className='exr-row'; li.setAttribute('data-id','custom-'+Date.now());
+      li.innerHTML='<span class="exr-rank"></span><span class="exr-label" data-ph="'+PH+'"></span><span class="exr-handle" aria-hidden="true">⠿</span>';
+      list.appendChild(li); renum(list); saveBtn.disabled=false; enterEditR(li);
+    });
+  }
   lists().forEach(renum); applyTop();
   window.addEventListener('ws:jtbd-changed', applyTop);
 })();`;
