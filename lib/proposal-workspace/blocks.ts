@@ -204,6 +204,11 @@ export function nextSteps(b: NextStepsBlock): string {
 }
 
 export function discussion(b: DiscussionBlock, slug: string): string {
+  const u = {
+    questionPlaceholder: 'Type a question you’d like to cover…', addQuestion: 'Add question',
+    saved: '✓ Saved — it’ll appear in “Your notes” above', savedLocal: 'Saved on this device',
+    ...(b.ui || {}),
+  };
   const items = b.questions.map(q => `<li>
       <div class="check-box"></div>
       <div>
@@ -244,8 +249,8 @@ export function discussion(b: DiscussionBlock, slug: string): string {
     st.textContent='Saving…';
     fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'client-questions',payload:{questions:a}})})
       .then(function(r){ return r.json(); })
-      .then(function(j){ st.textContent=j.ok?'✓ Saved — it’ll appear in “Your notes” above':'Saved on this device'; })
-      .catch(function(){ st.textContent='Saved on this device'; });
+      .then(function(j){ st.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.savedLocal)}; })
+      .catch(function(){ st.textContent=${JSON.stringify(u.savedLocal)}; });
   }
   btn.addEventListener('click',add);
   ta.addEventListener('keydown',function(e){ if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){ e.preventDefault(); add(); } });
@@ -261,9 +266,9 @@ export function discussion(b: DiscussionBlock, slug: string): string {
   </ul>
   <div class="cq-add">
     <div class="cq-add-label">${esc(b.addLabel ?? 'Add your own question')}</div>
-    <textarea class="cq-ta" placeholder="Type a question you’d like to cover…" rows="2"></textarea>
+    <textarea class="cq-ta" placeholder="${esc(u.questionPlaceholder)}" rows="2"></textarea>
     <div class="cq-row">
-      <button type="button" class="cq-btn" disabled>Add question</button>
+      <button type="button" class="cq-btn" disabled>${esc(u.addQuestion)}</button>
       <span class="cq-status"></span>
     </div>
   </div>
@@ -322,10 +327,19 @@ Cal.ns["${esc(ns)}"]("ui",{cssVarsPerTheme:{light:{"cal-brand":"#011C00"},dark:{
 export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   const ax = b.axisX ?? { label: 'How well it’s handled today', low: 'Badly served', high: 'Well served' };
   const ay = b.axisY ?? { label: 'How important to you', low: 'Minor', high: 'Critical' };
+  const u = {
+    note: '＋ note', placed: '{n} of {t} placed', underserved: 'Underserved',
+    dragHint: 'Drag each onto the grid — left/right = importance, up/down = how well it’s handled today',
+    notePlaceholder: 'Optional: why did you place it there?', whyRating: 'Why that rating — ',
+    record: '● Record', stop: '■ Stop', voiceSaved: 'voice note saved',
+    saving: 'saving…', saved: '✓ Saved — thank you', saveFail: 'Save failed',
+    saveFailNet: 'Save failed — check connection', save: 'Save',
+    ...(b.ui || {}),
+  };
   const xnums = Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('');
   const ynums = Array.from({ length: 10 }, (_, i) => `<span>${10 - i}</span>`).join('');
   const cards = b.jobs.map(j =>
-    `<div class="exm-card" data-id="${esc(j.id)}" data-label="${esc(j.label)}"><span class="exm-card-label">${esc(j.label)}</span><div class="exm-card-foot"><span class="exm-val" aria-hidden="true"></span><button class="exm-note-btn" type="button" title="Add a note" aria-label="Add a note">＋ note</button></div></div>`
+    `<div class="exm-card" data-id="${esc(j.id)}" data-label="${esc(j.label)}"><span class="exm-card-label">${esc(j.label)}</span><div class="exm-card-foot"><span class="exm-val" aria-hidden="true"></span><button class="exm-note-btn" type="button" title="${esc(u.note)}" aria-label="${esc(u.note)}">${esc(u.note)}</button></div></div>`
   ).join('\n      ');
 
   const css = `
@@ -400,7 +414,7 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   function record(card,c){ var id=card.getAttribute('data-id'); P[id]=P[id]||{label:card.getAttribute('data-label')};
     P[id].importance=c.imp; P[id].satisfaction=c.sat; setVal(card,c.imp,c.sat); }
   function place(card){ record(card,coords(card)); status(); }
-  function status(){ var n=Object.keys(P).length, t=${b.jobs.length}; statusEl.textContent=n+' of '+t+' placed'; saveBtn.disabled=n===0; persist(); }
+  function status(){ var n=Object.keys(P).length, t=${b.jobs.length}; statusEl.textContent=${JSON.stringify(u.placed)}.replace('{n}',n).replace('{t}',t); saveBtn.disabled=n===0; persist(); }
   function persist(){ try{ localStorage.setItem('ws:${slug}:jtbd', JSON.stringify(Object.keys(P).map(function(id){ return {id:id,label:P[id].label,importance:P[id].importance,satisfaction:P[id].satisfaction}; }))); window.dispatchEvent(new CustomEvent('ws:jtbd-changed')); }catch(_){} }
   function down(e){ var card=e.target.closest('.exm-card'); if(!card) return;
     if(e.target.closest('.exm-note-btn')){ openNote(card); return; }
@@ -417,8 +431,8 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   function up(){ if(!drag) return; if(drag.classList.contains('placed')){ place(drag); }
     guideV.classList.remove('on'); guideH.classList.remove('on'); drag.style.cursor='grab'; drag=null; }
   function openNote(card){ active=card.getAttribute('data-id'); P[active]=P[active]||{label:card.getAttribute('data-label')};
-    panelH.textContent='Why that rating — '+card.getAttribute('data-label'); ta.value=P[active].comment||'';
-    micNote.textContent=P[active].audio?'voice note saved':''; panel.classList.add('open'); ta.focus();
+    panelH.textContent=${JSON.stringify(u.whyRating)}+card.getAttribute('data-label'); ta.value=P[active].comment||'';
+    micNote.textContent=P[active].audio?${JSON.stringify(u.voiceSaved)}:''; panel.classList.add('open'); ta.focus();
     panel.scrollIntoView({behavior:'smooth',block:'nearest'}); }
   ta && ta.addEventListener('input',function(){ if(active){ P[active].comment=ta.value; mark(active); } });
   function mark(id){ var c=matrix.querySelector('.exm-card[data-id="'+id+'"]'); if(c){ var has=(P[id].comment&&P[id].comment.trim())||P[id].audio; c.classList.toggle('has-note',!!has); } }
@@ -431,21 +445,21 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
     if(mr_&&mr_.state==='recording'){ mr_.stop(); return; }
     if(!navigator.mediaDevices||!window.MediaRecorder){ micNote.textContent='voice not supported here'; return; }
     navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
-      chunks=[]; mr_=new MediaRecorder(s); mic.classList.add('rec'); mic.textContent='■ Stop';
+      chunks=[]; mr_=new MediaRecorder(s); mic.classList.add('rec'); mic.textContent=${JSON.stringify(u.stop)};
       mr_.ondataavailable=function(ev){ chunks.push(ev.data); };
-      mr_.onstop=function(){ s.getTracks().forEach(function(t){t.stop();}); mic.classList.remove('rec'); mic.textContent='● Record';
+      mr_.onstop=function(){ s.getTracks().forEach(function(t){t.stop();}); mic.classList.remove('rec'); mic.textContent=${JSON.stringify(u.record)};
         var blob=new Blob(chunks,{type:'audio/webm'}); var fr=new FileReader();
-        fr.onload=function(){ if(active){ P[active].audio=fr.result; micNote.textContent='voice note saved'; mark(active); } }; fr.readAsDataURL(blob); };
+        fr.onload=function(){ if(active){ P[active].audio=fr.result; micNote.textContent=${JSON.stringify(u.voiceSaved)}; mark(active); } }; fr.readAsDataURL(blob); };
       mr_.start();
     }).catch(function(){ micNote.textContent='mic blocked'; });
   });
   saveBtn.addEventListener('click',function(){
-    saveBtn.disabled=true; statusEl.textContent='saving…';
+    saveBtn.disabled=true; statusEl.textContent=${JSON.stringify(u.saving)};
     var items=Object.keys(P).map(function(id){ return {id:id,label:P[id].label,importance:P[id].importance,satisfaction:P[id].satisfaction,comment:P[id].comment||'',hasAudio:!!P[id].audio,audio:P[id].audio||null}; });
     fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{placements:items}})})
       .then(function(r){ return r.json(); })
-      .then(function(j){ statusEl.textContent=j.ok?'✓ Saved — thank you':'Save failed'; saveBtn.disabled=!j.ok; })
-      .catch(function(){ statusEl.textContent='Save failed — check connection'; saveBtn.disabled=false; });
+      .then(function(j){ statusEl.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.saveFail)}; saveBtn.disabled=!j.ok; })
+      .catch(function(){ statusEl.textContent=${JSON.stringify(u.saveFailNet)}; saveBtn.disabled=false; });
   });
   status();
 })();`;
@@ -462,7 +476,7 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
         <div class="exm-ynums">${ynums}</div>
       </div>
       <div class="exm-matrix">
-        <div class="exm-hot"><span>Underserved</span></div>
+        <div class="exm-hot"><span>${esc(u.underserved)}</span></div>
         <div class="exm-guide exm-guide-v"></div>
         <div class="exm-guide exm-guide-h"></div>
       </div>
@@ -472,19 +486,19 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
       </div>
     </div>
     <div class="exm-tray">
-      <div class="exm-tray-label">Drag each onto the grid — left/right = importance, up/down = how well it’s handled today</div>
+      <div class="exm-tray-label">${esc(u.dragHint)}</div>
       ${cards}
     </div>
     <div class="exm-panel">
       <div class="exm-panel-h"></div>
-      <textarea class="exm-ta" placeholder="Optional: why did you place it there?"></textarea>
+      <textarea class="exm-ta" placeholder="${esc(u.notePlaceholder)}"></textarea>
       <div class="exm-panel-row">
-        <button type="button" class="exm-mic">● Record</button>
+        <button type="button" class="exm-mic">${esc(u.record)}</button>
         <span class="exm-mic-note"></span>
       </div>
     </div>
     <div class="exm-actions">
-      <button type="button" class="exm-save" disabled>Save</button>
+      <button type="button" class="exm-save" disabled>${esc(u.save)}</button>
       <span class="exm-status"></span>
     </div>
   </div>
@@ -494,6 +508,12 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
 
 export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
   const root = `exr-${esc(b.exerciseId)}`;
+  const u = {
+    saving: 'saving…', saved: '✓ Saved — thank you', saveFail: 'Save failed',
+    saveFailNet: 'Save failed — check connection', saveRanking: 'Save ranking',
+    ...(b.ui || {}),
+  };
+  const fallbackJobs = b.groups.slice(0, 3).map(g => g.jobId);
   const groups = b.groups.map(g => `<div class="exr-group">
       <div class="exr-job">${esc(g.jobLabel)}</div>
       <ol class="exr-list" data-job="${esc(g.jobId)}">
@@ -533,15 +553,15 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
   function up(){ if(!drag) return; drag.classList.remove('dragging'); drag=null; dragList=null; saveBtn.disabled=false; }
   root.addEventListener('pointerdown',down); document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
   // Phase A: show only the client's top-3 underserved jobs from Ex1 (fallback to a default triad).
-  function topJobs(){ try{ var d=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]'); if(d.length){ d.sort(function(a,b){ return (b.importance+(11-b.satisfaction))-(a.importance+(11-a.satisfaction)); }); return d.slice(0,3).map(function(x){ return x.id; }); } }catch(_){} return ['approve','verify','paystack']; }
+  function topJobs(){ try{ var d=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]'); if(d.length){ d.sort(function(a,b){ return (b.importance+(11-b.satisfaction))-(a.importance+(11-a.satisfaction)); }); return d.slice(0,3).map(function(x){ return x.id; }); } }catch(_){} return ${JSON.stringify(fallbackJobs)}; }
   function applyTop(){ var keep=topJobs(); Array.prototype.slice.call(root.querySelectorAll('.exr-group')).forEach(function(g){ var l=g.querySelector('.exr-list'); g.style.display = (l && keep.indexOf(l.getAttribute('data-job'))>=0) ? '' : 'none'; }); }
   saveBtn.addEventListener('click',function(){
-    saveBtn.disabled=true; statusEl.textContent='saving…';
+    saveBtn.disabled=true; statusEl.textContent=${JSON.stringify(u.saving)};
     var rankings=lists().filter(function(l){ return l.closest('.exr-group').style.display!=='none'; }).map(function(l){ return {job:l.getAttribute('data-job'), order:rowsIn(l).map(function(r,i){ return {id:r.getAttribute('data-id'), rank:i+1}; })}; });
     fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{rankings:rankings}})})
       .then(function(r){ return r.json(); })
-      .then(function(j){ statusEl.textContent=j.ok?'✓ Saved — thank you':'Save failed'; saveBtn.disabled=!j.ok; })
-      .catch(function(){ statusEl.textContent='Save failed — check connection'; saveBtn.disabled=false; });
+      .then(function(j){ statusEl.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.saveFail)}; saveBtn.disabled=!j.ok; })
+      .catch(function(){ statusEl.textContent=${JSON.stringify(u.saveFailNet)}; saveBtn.disabled=false; });
   });
   lists().forEach(renum); applyTop();
   window.addEventListener('ws:jtbd-changed', applyTop);
@@ -555,7 +575,7 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
     ${groups}
   </div>
   <div class="exr-actions">
-    <button class="exr-save" type="button">Save ranking</button>
+    <button class="exr-save" type="button">${esc(u.saveRanking)}</button>
     <span class="exr-status"></span>
   </div>
   <script>${js}</script>
@@ -564,12 +584,18 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
 
 export function exerciseChips(b: ExerciseChipsBlock, slug: string): string {
   const root = `exc-${esc(b.exerciseId)}`;
+  const u = {
+    egPrefix: ' — e.g. ', addPlaceholder: 'Add your own…', addBtn: 'Add',
+    saving: 'saving…', saved: '✓ Saved — thank you', saveFail: 'Save failed',
+    saveFailNet: 'Save failed — check connection', save: 'Save',
+    ...(b.ui || {}),
+  };
   const qs = b.questions.map(q => `<div class="exc-q" data-q="${esc(q.id)}">
-      <div class="exc-q-h">${esc(q.q)}${q.example ? `<span class="exc-q-ex"> — e.g. ${esc(q.example)}</span>` : ''}</div>
+      <div class="exc-q-h">${esc(q.q)}${q.example ? `<span class="exc-q-ex">${esc(u.egPrefix)}${esc(q.example)}</span>` : ''}</div>
       <div class="exc-chips">
         ${q.options.map(o => `<button type="button" class="exc-chip">${esc(o)}</button>`).join('\n        ')}
       </div>
-      <div class="exc-add"><input class="exc-inp" type="text" placeholder="Add your own…" /><button class="exc-add-btn" type="button">Add</button></div>
+      <div class="exc-add"><input class="exc-inp" type="text" placeholder="${esc(u.addPlaceholder)}" /><button class="exc-add-btn" type="button">${esc(u.addBtn)}</button></div>
     </div>`).join('\n    ');
   const css = `
   .exc { margin-top: 18px; max-width: 620px; }
@@ -598,14 +624,14 @@ export function exerciseChips(b: ExerciseChipsBlock, slug: string): string {
   });
   root.addEventListener('keydown',function(e){ if(e.key==='Enter' && e.target.classList.contains('exc-inp')){ e.preventDefault(); e.target.parentNode.querySelector('.exc-add-btn').click(); } });
   saveBtn.addEventListener('click',function(){
-    saveBtn.disabled=true; statusEl.textContent='saving…';
+    saveBtn.disabled=true; statusEl.textContent=${JSON.stringify(u.saving)};
     var cep=Array.prototype.slice.call(root.querySelectorAll('.exc-q')).map(function(q){
       return { q:q.getAttribute('data-q'), picks:Array.prototype.slice.call(q.querySelectorAll('.exc-chip.on')).map(function(c){ return c.textContent; }) };
     });
     fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{cep:cep}})})
       .then(function(r){ return r.json(); })
-      .then(function(j){ statusEl.textContent=j.ok?'✓ Saved — thank you':'Save failed'; saveBtn.disabled=!j.ok; })
-      .catch(function(){ statusEl.textContent='Save failed — check connection'; saveBtn.disabled=false; });
+      .then(function(j){ statusEl.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.saveFail)}; saveBtn.disabled=!j.ok; })
+      .catch(function(){ statusEl.textContent=${JSON.stringify(u.saveFailNet)}; saveBtn.disabled=false; });
   });
 })();`;
   return `<section id="${root}">
@@ -616,7 +642,7 @@ export function exerciseChips(b: ExerciseChipsBlock, slug: string): string {
   <div class="exc">
     ${qs}
     <div class="exc-actions">
-      <button class="exc-save" type="button">Save</button>
+      <button class="exc-save" type="button">${esc(u.save)}</button>
       <span class="exc-status"></span>
     </div>
   </div>
@@ -626,10 +652,17 @@ export function exerciseChips(b: ExerciseChipsBlock, slug: string): string {
 
 export function exerciseSolutions(b: ExerciseSolutionsBlock, slug: string): string {
   const root = `exs-${esc(b.exerciseId)}`;
+  const u = {
+    saving: 'saving…', saved: '✓ Saved — thank you', saveFail: 'Save failed',
+    saveFailNet: 'Save failed — check connection', save: 'Save',
+    notePlaceholder: 'What do you do about this today?',
+    ...(b.ui || {}),
+  };
+  const fallbackJobs = b.jobs.slice(0, 3).map(j => j.id);
   const rows = b.jobs.map(j =>
     `<div class="exs-row" data-id="${esc(j.id)}">
       <div class="exs-label">${esc(j.label)}</div>
-      <textarea class="exs-ta" rows="2" placeholder="${esc(j.placeholder || 'What do you do about this today?')}"></textarea>
+      <textarea class="exs-ta" rows="2" placeholder="${esc(j.placeholder || u.notePlaceholder)}"></textarea>
     </div>`
   ).join('\n      ');
   const css = `
@@ -648,16 +681,16 @@ export function exerciseSolutions(b: ExerciseSolutionsBlock, slug: string): stri
   var saveBtn=root.querySelector('.exs-save'), statusEl=root.querySelector('.exs-status');
   root.addEventListener('input',function(e){ if(e.target.classList.contains('exs-ta')) saveBtn.disabled=false; });
   // Phase A: show only the client's top-3 underserved jobs from Ex1 (fallback triad).
-  function topJobs(){ try{ var d=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]'); if(d.length){ d.sort(function(a,b){ return (b.importance+(11-b.satisfaction))-(a.importance+(11-a.satisfaction)); }); return d.slice(0,3).map(function(x){ return x.id; }); } }catch(_){} return ['approve','verify','paystack']; }
+  function topJobs(){ try{ var d=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]'); if(d.length){ d.sort(function(a,b){ return (b.importance+(11-b.satisfaction))-(a.importance+(11-a.satisfaction)); }); return d.slice(0,3).map(function(x){ return x.id; }); } }catch(_){} return ${JSON.stringify(fallbackJobs)}; }
   function applyTop(){ var keep=topJobs(); Array.prototype.slice.call(root.querySelectorAll('.exs-row')).forEach(function(r){ r.style.display = keep.indexOf(r.getAttribute('data-id'))>=0 ? '' : 'none'; }); }
   applyTop(); window.addEventListener('ws:jtbd-changed', applyTop);
   saveBtn.addEventListener('click',function(){
-    saveBtn.disabled=true; statusEl.textContent='saving…';
+    saveBtn.disabled=true; statusEl.textContent=${JSON.stringify(u.saving)};
     var ans=Array.prototype.slice.call(root.querySelectorAll('.exs-row')).filter(function(r){ return r.style.display!=='none'; }).map(function(r){ return {id:r.getAttribute('data-id'), text:(r.querySelector('.exs-ta').value||'').trim()}; });
     fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(b.exerciseId)}',payload:{solutions:ans}})})
       .then(function(r){ return r.json(); })
-      .then(function(j){ statusEl.textContent=j.ok?'✓ Saved — thank you':'Save failed'; saveBtn.disabled=!j.ok; })
-      .catch(function(){ statusEl.textContent='Save failed — check connection'; saveBtn.disabled=false; });
+      .then(function(j){ statusEl.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.saveFail)}; saveBtn.disabled=!j.ok; })
+      .catch(function(){ statusEl.textContent=${JSON.stringify(u.saveFailNet)}; saveBtn.disabled=false; });
   });
 })();`;
   return `<section id="${root}">
@@ -668,7 +701,7 @@ export function exerciseSolutions(b: ExerciseSolutionsBlock, slug: string): stri
   <div class="exs">
       ${rows}
     <div class="exs-actions">
-      <button class="exs-save" type="button">Save</button>
+      <button class="exs-save" type="button">${esc(u.save)}</button>
       <span class="exs-status"></span>
     </div>
   </div>

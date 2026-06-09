@@ -168,6 +168,7 @@ export interface DiscussionBlock {
    *  something like 'Anything else to add?' when the questions are already
    *  the client's own (distilled from their input). */
   addLabel?: string;
+  ui?: ExerciseUI;
 }
 
 /** Read-back display of what the client submitted on this page (§07 questions),
@@ -194,6 +195,34 @@ export interface BookingEmbedBlock {
   calLink: string;
 }
 
+/** Optional UI-chrome labels for the interactive exercise + discussion blocks.
+ *  Every field defaults to its English string in blocks.ts when omitted — so
+ *  existing clients are unaffected. A non-English client (e.g. jetbrains) passes
+ *  a translated subset. `placed` is a template with {n}/{t} placeholders. */
+export interface ExerciseUI {
+  save?: string;
+  saving?: string;
+  saved?: string;
+  saveFail?: string;
+  saveFailNet?: string;
+  note?: string;
+  placed?: string;        // "{n} of {t} placed"
+  underserved?: string;
+  dragHint?: string;
+  notePlaceholder?: string;
+  whyRating?: string;     // note-panel header prefix, before the card label
+  record?: string;
+  stop?: string;
+  voiceSaved?: string;
+  saveRanking?: string;
+  egPrefix?: string;      // chips: "— e.g. " before an example
+  addPlaceholder?: string;
+  addBtn?: string;
+  questionPlaceholder?: string;
+  addQuestion?: string;
+  savedLocal?: string;
+}
+
 /** One-way workshop, Exercise 1: place pre-filled underserved-job cards on a
  *  2-axis matrix (importance × satisfaction). Each placed card takes an
  *  optional comment (typed; voice best-effort). Save persists to the
@@ -211,6 +240,7 @@ export interface ExerciseMatrixBlock {
   axisY?: { label: string; low: string; high: string };
   /** pre-filled job cards the client positions */
   jobs: { id: string; label: string }[];
+  ui?: ExerciseUI;
 }
 
 /** Exercise 2 — Problems (cascade block 3). For each underserved job, a short
@@ -223,6 +253,7 @@ export interface ExerciseRankBlock {
   intro?: Rich;
   exerciseId: string;
   groups: { jobId: string; jobLabel: string; problems: { id: string; label: string }[] }[];
+  ui?: ExerciseUI;
 }
 
 /** Exercise 3 — Category Entry Points (cascade block 4). The Sharp & Romaniuk
@@ -235,6 +266,7 @@ export interface ExerciseChipsBlock {
   intro?: Rich;
   exerciseId: string;
   questions: { id: string; q: string; example?: string; options: string[] }[];
+  ui?: ExerciseUI;
 }
 
 /** Exercise 4 — Current solutions / competition (cascade block 5). For each job,
@@ -246,6 +278,7 @@ export interface ExerciseSolutionsBlock {
   intro?: Rich;
   exerciseId: string;
   jobs: { id: string; label: string; placeholder?: string }[];
+  ui?: ExerciseUI;
 }
 
 export interface DocFooterBlock {

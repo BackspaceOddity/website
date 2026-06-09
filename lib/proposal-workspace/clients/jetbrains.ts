@@ -17,7 +17,34 @@
  * STATUS: DRAFT for the live workshop. Ungated locally → /w/jetbrains.
  */
 
-import type { ClientPage } from '../types';
+import type { ClientPage, ExerciseUI } from '../types';
+
+/** Russian UI-chrome labels for the interactive blocks (buttons, status,
+ *  drag hint, the Underserved zone). One object spread into every exercise +
+ *  discussion block; each block reads only the keys it needs. */
+const ru: ExerciseUI = {
+  save: 'Сохранить',
+  saving: 'сохраняю…',
+  saved: '✓ Сохранено — спасибо',
+  saveFail: 'Не удалось сохранить',
+  saveFailNet: 'Не удалось сохранить — проверьте соединение',
+  note: '＋ заметка',
+  placed: 'размещено {n} из {t}',
+  underserved: 'Недообслужено',
+  dragHint: 'Перетащите каждую карточку на поле — влево/вправо = важность, вверх/вниз = насколько хорошо закрыто сегодня',
+  notePlaceholder: 'По желанию: почему вы поместили её сюда?',
+  whyRating: 'Почему такая оценка — ',
+  record: '● Запись',
+  stop: '■ Стоп',
+  voiceSaved: 'голосовая заметка сохранена',
+  saveRanking: 'Сохранить порядок',
+  egPrefix: ' — напр. ',
+  addPlaceholder: 'Добавить своё…',
+  addBtn: 'Добавить',
+  questionPlaceholder: 'Впишите вопрос, который хотите обсудить…',
+  addQuestion: 'Добавить вопрос',
+  savedLocal: 'Сохранено на этом устройстве',
+};
 
 export const jetbrainsPage: ClientPage = {
   slug: 'jetbrains',
@@ -92,6 +119,7 @@ export const jetbrainsPage: ClientPage = {
       intro:
         'Мы собрали это из наших созвонов и ваших отчётов. Перетащите каждую карточку на поле — насколько это важно против того, насколько хорошо это закрыто сегодня. То, что важнее всего, но идёт болезненно, — точка старта. Нажмите ＋заметку на любой карточке, чтобы пояснить.',
       exerciseId: 'jtbd-matrix',
+      ui: ru,
       axisX: { label: 'Насколько важно для вас', low: 'Не очень', high: 'Критично' },
       axisY: { label: 'Насколько хорошо закрыто сегодня', low: 'Болезненно', high: 'Закрыто' },
       jobs: [
@@ -113,6 +141,7 @@ export const jetbrainsPage: ClientPage = {
       intro:
         'Для работ, что вы отметили недообслуженными, перетащите проблемы так, чтобы самая болезненная была сверху. Списки черновые — доработаем вместе.',
       exerciseId: 'problem-rank',
+      ui: ru,
       groups: [
         {
           jobId: 'budget',
@@ -162,6 +191,7 @@ export const jetbrainsPage: ClientPage = {
       intro:
         'Потребность появляется в конкретный момент — и именно момент превращает фоновое желание в срочное. Разложим его по вопросам; выберите подходящее и добавьте своё.',
       exerciseId: 'entry-points',
+      ui: ru,
       questions: [
         {
           id: 'why',
@@ -217,6 +247,7 @@ export const jetbrainsPage: ClientPage = {
       intro:
         'По каждой работе — какой сейчас обходной путь: инструмент, ручной шаг, то, что уже пробовали (ретро по проектам, тесты на панелях разработчиков, Looker, работа над фреймворком с прошлым агентством). Картина покажет, что стоит решать — и что разрыв не от того, что не пытались.',
       exerciseId: 'current-solutions',
+      ui: ru,
       jobs: [
         { id: 'budget', label: 'Решение, куда направить бюджет', placeholder: 'например, атрибуция по каналам в Looker плюс чутьё…' },
         { id: 'creative', label: 'Оценка, сработал ли креатив', placeholder: 'например, ретро, изредка тесты на панелях разработчиков…' },
@@ -254,6 +285,7 @@ export const jetbrainsPage: ClientPage = {
         },
       ],
       addLabel: 'Что ещё зафиксировать?',
+      ui: ru,
     },
 
     {
