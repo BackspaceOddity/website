@@ -56,11 +56,11 @@ export default function BrandTransformationPage() {
       <header className="bt-hero" id="top" data-screen-label="01 Hero">
         <div className="bt-hero__inner">
           <span className="bt-hero__eyebrow">Brand transformation &amp; rebranding</span>
-          <h1 className="bt-hero__title">We turn a company into a brand that sells</h1>
+          <h1 className="bt-hero__title">We turn brand into a growth lever that compounds</h1>
           <p className="bt-hero__sub">
-            From strategy and positioning to identity, website, and launch — one continuous
-            process, not five contractors. The method is evidence-based: every decision rests on the
-            language of your real customers.
+            Brand stops being decoration — it becomes the assembly point of your company: who
+            you&apos;re for, how you&apos;re different, and why you. Built end-to-end, strategy to
+            launch, AI-native — and kept as a living system, not a project that ends.
           </p>
           <Pill href={CAL} label="Book a call" />
         </div>
@@ -132,8 +132,10 @@ export default function BrandTransformationPage() {
         <div className="bt-inner">
           <header className="bt-head">
             <span className="bt-eyebrow bt-eyebrow--on-dark">Why a brand matters</span>
-            <h2 className="bt-h2 bt-h2--on-dark">A brand is a competitive moat that compounds</h2>
-            <p className="bt-intro bt-intro--on-dark">It pulls four levers at once.</p>
+            <h2 className="bt-h2 bt-h2--on-dark">A brand is a competitive moat</h2>
+            <p className="bt-intro bt-intro--on-dark">
+              The one advantage competitors can&apos;t copy — it drives four growth levers.
+            </p>
           </header>
 
           <ol className="bt-leverages">
@@ -169,7 +171,7 @@ export default function BrandTransformationPage() {
           <div className="bt-cards">
             <article className="bt-card">
               <div className="bt-card__transform">
-                <span className="bt-card__from">RealTimeBoard</span>
+                <span className="bt-card__from">RealtimeBoard</span>
                 <span className="bt-card__arrow" aria-hidden="true">→</span>
                 <span className="bt-card__to">Miro</span>
               </div>
@@ -191,6 +193,15 @@ export default function BrandTransformationPage() {
                 <span className="bt-tag">Renaming</span>
               </div>
             </article>
+            <article className="bt-card">
+              <div className="bt-card__transform">
+                <span className="bt-card__to">Sidekick</span>
+              </div>
+              <div className="bt-card__foot">
+                <p className="bt-card__desc">Sidekick browser — acquired by Perplexity.</p>
+                <span className="bt-tag">Acquired</span>
+              </div>
+            </article>
           </div>
         </div>
       </section>
@@ -200,32 +211,32 @@ export default function BrandTransformationPage() {
         <div className="bt-inner">
           <header className="bt-head">
             <span className="bt-eyebrow bt-eyebrow--on-dark">How we work</span>
-            <h2 className="bt-h2 bt-h2--on-dark">A brand is a means, not the goal</h2>
+            <h2 className="bt-h2 bt-h2--on-dark">One continuous process — and a system you keep</h2>
           </header>
           <p className="bt-how__intro">
-            For us, branding is a tool for a durable business strategy — we run it end-to-end and
-            hand you a working system, not a folder of files.
+            You get it built end-to-end — strategy to launch, AI-native — and keep it as a living
+            system, not a project that ends.
           </p>
           <div className="bt-principles">
             <div className="bt-principle">
               <h3 className="bt-principle__name">Strategy ↔ execution, end-to-end</h3>
               <p className="bt-principle__text">
-                Strategy, brand, content, website, and launch — one continuous process, not five
-                contractors handing files between each other.
+                You get strategy, brand, content, website, and launch as one continuous process —
+                not five contractors to coordinate.
               </p>
             </div>
             <div className="bt-principle">
               <h3 className="bt-principle__name">Brand is a means, not the goal</h3>
               <p className="bt-principle__text">
-                For us, branding is a tool for a durable business strategy, not an end in itself.
-                Most agencies rebrand for the sake of rebranding — we do it for the result.
+                Your brand becomes a tool for a durable business strategy, not an end in itself —
+                you walk away with results, not a rebrand for its own sake.
               </p>
             </div>
             <div className="bt-principle">
               <h3 className="bt-principle__name">AI-native</h3>
               <p className="bt-principle__text">
-                We run the project on our own AI ops and hand it over: a Figma ↔ code design system,
-                your Messaging House in Notion, our agents and assets. You inherit a working system.
+                You inherit a working system, not a folder of files: a Figma ↔ code design system,
+                your Messaging House in Notion, plus our agents and assets you keep using.
               </p>
             </div>
           </div>
@@ -294,6 +305,9 @@ export default function BrandTransformationPage() {
             </div>
           </div>
           <p className="bt-total">Total: <b>≈ 16–18 weeks.</b></p>
+          <p className="bt-total-note">
+            Each phase ends in a client sign-off; further changes require a scope extension.
+          </p>
         </div>
       </section>
 
@@ -345,6 +359,7 @@ export default function BrandTransformationPage() {
                   <li>Values, mission &amp; vision workshop.</li>
                   <li>Audiences workshop: key segments via JTBD.</li>
                   <li>Brand personality workshop: character, attributes, tone.</li>
+                  <li>Brand platform — the 9-box artifact: vision · mission · values · key audiences · meaningful difference · positioning · brand promise · reasons to believe · brand personality.</li>
                   <li>ICP profiles from interviews or call analysis: JTBD, triggers, barriers, buying journey.</li>
                   <li>Positioning — the project&apos;s key fork: territories → choosing a direction → Positioning Canvas + PMF narrative.</li>
                   <li>Messaging foundation: Category Entry Points per segment.</li>
@@ -367,6 +382,7 @@ export default function BrandTransformationPage() {
                   <li>Tone of Voice: voice character, principles, the &ldquo;volume knob&rdquo; of tone.</li>
                   <li>Brand identity: logo, typography, palette, graphics.</li>
                   <li>Design system — tokens + components — and brand guidelines.</li>
+                  <li>Design system in detail: core components (buttons, nav, forms, cards, grids), spacing &amp; layout rules, tokens (color, shadow, radii, typography, states), interaction patterns (hover, focus, transitions), light + optional dark mode, documented in Figma.</li>
                 </ul>
                 <div className="bt-phase__subhead">2.2 Naming / renaming · +2 weeks · optional</div>
                 <ul className="bt-modules">
@@ -391,6 +407,9 @@ export default function BrandTransformationPage() {
                   <li>Tactical layer per channel: which channels, for which moment.</li>
                   <li>Content for every surface: website, email, ads, social, support, hiring — depending on the product.</li>
                   <li>Website: prototype → design → build, on the platform that fits your needs.</li>
+                  <li>Page templates: homepage, use-case templates, acquisition LPs, company info pages, blog index + article — plus reusable components (hero, features, pricing, CTAs, forms, FAQ).</li>
+                  <li>Build: project setup (nav, footer, global styles), assembly, responsive behaviors, animations, CMS for blog, final QA.</li>
+                  <li>Asset production for dev: finalized &amp; documented Figma files, logo &amp; identity package, exported web assets (SVGs, optimized images), component &amp; template docs.</li>
                   <li>Sales enablement: decks, scripts, objection handling.</li>
                   <li>Marketing &amp; brand assets: social kit, ad creatives, templates.</li>
                 </ul>
@@ -425,7 +444,7 @@ export default function BrandTransformationPage() {
                 <div className="bt-callout">
                   <span className="bt-callout__title">⚙️ Technical migration — on your side</span>
                   <p className="bt-callout__text">
-                    Domains, SSO, redirects, and rebranding the product itself are handled by your
+                    Domains, SSO, redirects, and the product rebrand itself are handled by your
                     engineering team. We coordinate the launch and dependencies.
                   </p>
                 </div>
@@ -465,10 +484,10 @@ export default function BrandTransformationPage() {
       {/* ============ FINAL CTA ============ */}
       <section className="bt-final" id="contact" data-screen-label="09 Final CTA">
         <div className="bt-final__inner">
-          <h2 className="bt-final__h2">A strong brand pulls the company together — and carries it to market</h2>
+          <h2 className="bt-final__h2">A quantum leap for your business</h2>
           <p className="bt-final__copy">
-            We run this end-to-end, from the first interview to a launched brand — and leave you a
-            living system your team keeps working with on its own, not a folder of files.
+            Built end-to-end, strategy to launch — and kept as a living system your team keeps
+            working with on its own, not a project that ends.
           </p>
           <Pill href={CAL} label="Book a call" />
           <a className="bt-final__email" href={MAIL}>yegor@backspaceoddity.com</a>

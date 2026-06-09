@@ -1,27 +1,13 @@
-# Brand Transformation — service structure (EN) · v2
+# Brand Transformation — service structure (EN)
 
 > Source: Notion "🪄 Brand Transformation" (https://app.notion.com/p/379402511cda81f7aae5c55f90056e1a)
 > Category: Methodology · Status: Work in progress
-> Summary: English version of the rebrand service structure: 6 phases, weeks per phase, core + optional modules. Basis for the service page on the website.
-> Fetched: 2026-06-09 (v2 — content reworked; v1 archived in brand-transformation-v1.md)
+> Summary: English version of the rebranding service structure: 6 phases, weeks per phase, core + optional modules. Basis for the service page on the website.
+> Fetched: 2026-06-08
 
 ---
 
-> **We turn brand into a growth lever that compounds.** For you, brand stops being decoration — it becomes the assembly point of your company: it answers who you're for, how you're different, and why you, and it lifts your acquisition, retention, and referral. Invest in these levers and you get a growth flywheel: a system that grows itself. You get it built end-to-end — strategy to launch, AI-native — and keep it as a living system, not a project that ends.
-
-## How we work
-- **Strategy ↔ execution, end-to-end.** You get strategy, brand, content, website, and launch as one continuous process — not five contractors to coordinate.
-- **Brand is a means, not the goal.** Your brand becomes a tool for a durable business strategy, not an end in itself — you walk away with results, not a rebrand for its own sake.
-- **AI-native.** You inherit a working system, not a folder of files: a Figma ↔ code design system, your Messaging House in Notion, plus our agents and assets you keep using.
-
-## Why a brand matters
-A brand is a competitive moat — the one advantage competitors can't copy. It drives four growth levers:
-— **Acquisition.** With equal offers, people pick the brand they know — cheaper to acquire.
-— **Retention.** People return to a brand they love and stay longer.
-— **Monetization.** People pay more for a strong brand.
-— **Referral.** A loved brand gets recommended.
-
----
+> We turn a company into a brand that sells — from strategy and positioning to identity, website, and launch. The method is evidence-based: every decision rests on the language of real customers. We work modularly — after a short diagnostic we assemble a proposal for your specific task, from a positioning refresh to a full rebrand with renaming.
 
 **When you need a rebrand**
 — **Moving up-market.** SMB → Enterprise — signal the market that you're no longer a startup.
@@ -30,10 +16,23 @@ A brand is a competitive moat — the one advantage competitors can't copy. It d
 — **Category shift.** M&A, a new business model, a shifted product-market fit, or launching a product in a new category.
 — **Entering new markets.** New countries and audiences — the brand has to speak their language.
 
+---
+
+**Why a brand matters**
+A brand is a competitive moat that compounds. Leverages:
+— **Acquisition.** With equal offers, people pick the brand they know — cheaper to acquire.
+— **Retention.** People return to a brand they love and stay longer.
+— **Monetization.** People pay more for a strong brand.
+— **Referral.** A loved brand gets recommended.
+
 ## Our experience
-**RealtimeBoard → Miro**
+**RealTimeBoard → Miro**
 **Stape → Kleos**
-**Sidekick browser** (acq. by Perplexity)
+
+## How we work
+- **Strategy ↔ execution, end-to-end.** Strategy, brand, content, website, and launch — one continuous process, not five contractors.
+- **Brand is a means, not the goal.** For us, branding is a tool for a durable business strategy, not an end in itself. Most agencies rebrand for the sake of rebranding — we do it for the result.
+- **AI-native.** We run the project on our own AI ops and hand it over to you: a Figma ↔ code design system, your Messaging House living in Notion, our agents and assets. You inherit a working system, not a folder of files.
 
 ## How the proposal is built
 > 🎯 **Mini-diagnostic → a proposal tailored to you**
@@ -52,7 +51,6 @@ A brand is a competitive moat — the one advantage competitors can't copy. It d
 | 5. Stabilization & handover | 2 | optional |
 
 **Total:** ≈ 16–18 weeks.
-Each phase ends in a client sign-off; further changes require a scope extension.
 
 ---
 
@@ -73,7 +71,6 @@ We understand the business, market, and customers — and formulate positioning 
 - Values, mission & vision workshop
 - Audiences workshop: key segments via JTBD
 - Brand personality workshop: character, attributes, tone
-- Brand platform (the 9-box artifact): vision · mission · values · key audiences · meaningful difference · positioning · brand promise · reasons to believe · brand personality
 - ICP profiles from interviews (current and potential customers, incl. paid) or call analysis: JTBD, triggers, barriers, buying journey
 - Positioning (the project's key fork): territories → choosing a direction → Positioning Canvas + PMF narrative
 - Messaging foundation: Category Entry Points per segment
@@ -88,7 +85,6 @@ We turn strategy into a brand — verbal and visual.
 - Tone of Voice: voice character, principles, the "volume knob" of tone
 - Brand identity: logo, typography, palette, graphics
 - Design system (tokens + components) + brand guidelines
-- Design system in detail: core components (buttons, nav, forms, cards, grids), spacing & layout rules, tokens (color, shadow, radii, typography, states), interaction patterns (hover, focus, transitions), light + optional dark mode, documented in Figma
 
 ### 2.2. Naming / renaming · +2 weeks · optional
 If the name can't carry the new strategy.
@@ -103,9 +99,6 @@ We build all the brand's carriers.
 - Tactical layer per channel: which channels and for which moment
 - Content for every surface: website, email, ads, social, support, hiring, and others — depending on the product
 - Website: prototype → design → build (platform chosen for the client's needs)
-- Page templates: homepage, use-case templates, acquisition LPs, company info pages, blog index + article — plus reusable components (hero, features, pricing, CTAs, forms, FAQ)
-- Build: project setup (nav, footer, global styles), assembly, responsive behaviors, animations, CMS for blog, final QA
-- Asset production for dev: finalized & documented Figma files, logo & identity package, exported web assets (SVGs, optimized images), component & template docs
 - Sales enablement: decks, scripts, objection handling
 - Marketing & brand assets: social kit, ad creatives, templates
 
@@ -119,7 +112,7 @@ Needed for any launch of a new brand — not only when renaming; the rollout hap
 - Rollout across hundreds of touchpoints — every asset, channel, integration, and account. The most underestimated part of a rebrand: reaching launch isn't enough — you have to run it through a huge todo-list and hit the date exactly
 
 > ⚙️ **Technical migration — on the client's side**
-> Domains, SSO, redirects, and the product rebrand itself are handled by the client's engineering team. We coordinate the launch and dependencies.
+> Domains, SSO, redirects, and rebranding the product itself are handled by the client's engineering team. We coordinate the launch and dependencies.
 
 ---
 
@@ -136,4 +129,4 @@ We lock in the result and hand the brand over to the client's team.
 
 ---
 
-**A quantum leap for your business.**
+A strong brand pulls the company together around a clear strategy — and carries it to market. We run this end-to-end, from the first interview to a launched brand, and we leave you not a folder of files but a living system your team keeps working with on its own.
