@@ -221,6 +221,12 @@ export interface ExerciseUI {
   questionPlaceholder?: string;
   addQuestion?: string;
   savedLocal?: string;
+  /** placed-card readout template, with {imp}/{sat} placeholders. Default "IMP {imp} · SAT {sat}". */
+  valFormat?: string;
+  /** add-sticker button label (matrix, when editable). Default "＋ Add sticker". */
+  addSticker?: string;
+  /** placeholder shown in an empty new sticker. Default "Your own job…". */
+  newStickerPlaceholder?: string;
 }
 
 /** One-way workshop, Exercise 1: place pre-filled underserved-job cards on a
@@ -248,6 +254,9 @@ export interface ExerciseMatrixBlock {
   /** hide the shaded "Underserved" quadrant + its label. The highlight tells the
    *  client where the "right" answer is → confirmation bias. Default false. */
   hideUnderservedZone?: boolean;
+  /** allow the client to edit seeded sticker text (double-click) and add their own
+   *  stickers (＋ button) — for when the seeded jobs don't fit. Default false. */
+  editable?: boolean;
 }
 
 /** Exercise 2 — Problems (cascade block 3). For each underserved job, a short

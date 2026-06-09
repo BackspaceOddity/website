@@ -44,6 +44,9 @@ const ru: ExerciseUI = {
   questionPlaceholder: 'Впишите вопрос, который хотите обсудить…',
   addQuestion: 'Добавить вопрос',
   savedLocal: 'Сохранено на этом устройстве',
+  valFormat: 'ВАЖН {imp} · ЗАКР {sat}',
+  addSticker: '＋ Добавить стикер',
+  newStickerPlaceholder: 'Своя работа…',
 };
 
 export const jetbrainsPage: ClientPage = {
@@ -122,6 +125,7 @@ export const jetbrainsPage: ClientPage = {
       ui: ru,
       wide: true,
       hideUnderservedZone: true,
+      editable: true,
       axisX: { label: 'Насколько важно для вас', low: 'Не очень', high: 'Критично' },
       axisY: { label: 'Насколько хорошо закрыто сегодня', low: 'Болезненно', high: 'Закрыто' },
       jobs: [
