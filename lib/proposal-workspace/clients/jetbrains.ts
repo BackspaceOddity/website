@@ -87,31 +87,29 @@ export const jetbrainsPage: ClientPage = {
     },
 
     {
-      block: 'discussion',
-      heading: 'Повестка',
-      intro:
-        'Желаемый результат: выйти с согласованным приоритетом — одна работа, конкретный следующий шаг.',
-      questions: [
-        {
-          q: 'Какие работы маркетинговой команды наиболее недообслужены?',
-          note: 'Упражнение: расставить работы на матрице важность × насколько закрыто',
-        },
-        {
-          q: 'Когда фоновая потребность превращается в срочную?',
-          note: 'Упражнение: описать конкретный момент для каждой работы',
-        },
-        {
-          q: 'Где болит конкретнее всего внутри каждой работы?',
-          note: 'Упражнение: проранжировать проблемы по болезненности',
-        },
-        {
-          q: 'Что уже пробовали — и почему это не закрывает задачу полностью?',
-          note: 'Упражнение: зафиксировать обходные пути по каждой работе',
-        },
-        { q: '<strong>Решение:</strong> Какую работу берём в работу первой?' },
-        { q: '<strong>Решение:</strong> Как выглядит «это работает» через три месяца?' },
-      ],
-      ui: ru,
+      block: 'demo',
+      heading: '',
+      html: `<style>
+.agnd{background:var(--surface);border:1px solid var(--rule-strong);padding:32px 40px;border-radius:10px;color:var(--ink)}
+.agnd-ttl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-40);margin-bottom:8px}
+.agnd-goal{font-family:var(--text);font-size:15px;color:var(--ink-55);margin:0 0 24px;line-height:1.5}
+.agnd-item{display:flex;gap:16px;padding:13px 0;border-top:1px solid var(--rule)}
+.agnd-n{font-family:var(--mono);font-size:11px;color:var(--ink-40);min-width:18px;padding-top:3px}
+.agnd-q{font-family:var(--text);font-size:16px;font-weight:500;line-height:1.4}
+.agnd-note{font-family:var(--text);font-size:13px;color:var(--ink-55);margin-top:3px}
+.agnd-item.dec .agnd-n{color:var(--ink)}
+.agnd-item.dec .agnd-q::before{content:'Решение · ';font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-55)}
+</style>
+<div class="agnd">
+  <div class="agnd-ttl">Повестка</div>
+  <p class="agnd-goal">Желаемый результат: выйти с согласованным приоритетом — одна работа, конкретный следующий шаг.</p>
+  <div class="agnd-item"><span class="agnd-n">1</span><div><div class="agnd-q">Какие работы маркетинговой команды наиболее недообслужены?</div><div class="agnd-note">Упражнение: расставить работы на матрице важность × насколько закрыто</div></div></div>
+  <div class="agnd-item"><span class="agnd-n">2</span><div><div class="agnd-q">Когда фоновая потребность превращается в срочную?</div><div class="agnd-note">Упражнение: описать конкретный момент для каждой работы</div></div></div>
+  <div class="agnd-item"><span class="agnd-n">3</span><div><div class="agnd-q">Где болит конкретнее всего внутри каждой работы?</div><div class="agnd-note">Упражнение: проранжировать проблемы по болезненности</div></div></div>
+  <div class="agnd-item"><span class="agnd-n">4</span><div><div class="agnd-q">Что уже пробовали — и почему это не закрывает задачу полностью?</div><div class="agnd-note">Упражнение: зафиксировать обходные пути по каждой работе</div></div></div>
+  <div class="agnd-item dec"><span class="agnd-n">5</span><div><div class="agnd-q">Какую работу берём в работу первой?</div></div></div>
+  <div class="agnd-item dec"><span class="agnd-n">6</span><div><div class="agnd-q">Как выглядит «это работает» через три месяца?</div></div></div>
+</div>`,
     },
 
     { block: 'divider' },
@@ -127,7 +125,6 @@ export const jetbrainsPage: ClientPage = {
         'Ключевой вопрос по этим продуктам и кампаниям — <strong>что наш маркетинг на самом деле произвёл на потраченные деньги?</strong> Сегодня ответа нет — не потому что данных нет, а потому что их никогда не сводили вместе.',
         'Эта сессия — о том, чтобы вместе договориться, какой кусок этого решать первым.',
       ],
-      pills: ['40 продуктов', '5 типов кампаний', 'Пять валют', 'Вопрос без ответа'],
     },
 
     { block: 'divider' },

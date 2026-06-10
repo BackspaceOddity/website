@@ -10,7 +10,7 @@
  */
 
 import crypto from 'crypto';
-import { buildScript } from '@backspace-oddity/edit-mode/build-script';
+import { buildScript } from '@/lib/vendor/edit-mode/build-script';
 
 const BSO_LOGO_SVG = `<svg width="268" height="268" viewBox="0 0 268 268" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M267.18 133.339C267.18 157.332 260.58 176.783 256.42 176.783C252.26 176.783 252.116 157.332 252.116 133.339C252.116 109.345 252.26 89.8948 256.42 89.8948C260.58 89.8948 267.18 109.345 267.18 133.339Z" fill="#F2F2F0"/>

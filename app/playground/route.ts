@@ -1,4 +1,4 @@
-import { buildScript, type EditModeConfig } from '@backspace-oddity/edit-mode/build-script';
+import { buildScript, type EditModeConfig } from '@/lib/vendor/edit-mode/build-script';
 
 /**
  * Throwaway sandbox landing — exists only to exercise the CANONICAL Edit Mode
