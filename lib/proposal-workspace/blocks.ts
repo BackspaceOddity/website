@@ -614,6 +614,24 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   function place(card){ record(card,coords(card)); status(); }
   function status(){ var n=Object.keys(P).length, t=root.querySelectorAll('.exm-card').length; statusEl.textContent=${JSON.stringify(u.placed)}.replace('{n}',n).replace('{t}',t); saveBtn.disabled=n===0; persist(); }
   function persist(){ try{ localStorage.setItem('ws:${slug}:jtbd', JSON.stringify(Object.keys(P).map(function(id){ return {id:id,label:P[id].label,importance:P[id].importance,satisfaction:P[id].satisfaction}; }))); window.dispatchEvent(new CustomEvent('ws:jtbd-changed')); }catch(_){} }
+  function restore(){ try{
+    var saved=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]');
+    if(!saved.length) return;
+    var mr=matrix.getBoundingClientRect(); if(mr.width===0) return;
+    saved.forEach(function(item){
+      var card=tray.querySelector('.exm-card[data-id="'+item.id+'"]');
+      if(!card||card.classList.contains('placed')) return;
+      var sx=(item.importance-1)/9, sy=1-(item.satisfaction-1)/9;
+      card.classList.add('placed'); matrix.appendChild(card);
+      var cw=card.offsetWidth||136, ch=card.offsetHeight||60;
+      card.style.left=Math.max(0,sx*mr.width-cw/2)+'px';
+      card.style.top=Math.max(0,sy*mr.height-ch/2)+'px';
+      P[item.id]=P[item.id]||{label:item.label||card.getAttribute('data-label')};
+      P[item.id].importance=item.importance; P[item.id].satisfaction=item.satisfaction;
+      setVal(card,item.importance,item.satisfaction);
+    });
+    status();
+  }catch(_){} }
   function down(e){ var card=e.target.closest('.exm-card'); if(!card) return;
     if(card.classList.contains('editing')) return;
     if(e.target.closest('.exm-note-btn')){ openNote(card); return; }
@@ -682,7 +700,7 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
       card.appendChild(foot); tray.insertBefore(card, addBtn); status(); enterEdit(card);
     });
   }
-  status();
+  status(); requestAnimationFrame(restore);
 })();`;
 
   return `<section id="${root}"${b.wide ? ' class="exm-section-wide"' : ''}>
