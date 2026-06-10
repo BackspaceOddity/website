@@ -99,17 +99,81 @@ export const jetbrainsPage: ClientPage = {
 .agnd-note{font-family:var(--text);font-size:13px;color:var(--ink-55);margin-top:3px}
 .agnd-item.dec .agnd-n{color:var(--ink)}
 .agnd-item.dec .agnd-q::before{content:'Решение · ';font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-55)}
+.agnd-q[contenteditable="true"],.agnd-note[contenteditable="true"]{outline:1px dashed var(--rule-strong);outline-offset:3px;border-radius:3px}
+.agnd-hint{font-family:var(--mono);font-size:10px;color:var(--ink-40);margin-top:16px}
+.agnd-addrow{display:flex;gap:10px;margin-top:14px}
+.agnd-inp{flex:1;border:1px solid var(--rule-strong);border-radius:6px;padding:9px 12px;font-family:var(--text);font-size:14px;background:var(--surface);color:var(--ink);outline:none}
+.agnd-btn{background:transparent;border:1px solid var(--rule-strong);border-radius:6px;padding:9px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);cursor:pointer}
+.agnd-foot{display:flex;align-items:center;gap:14px;margin-top:18px}
+.agnd-save{background:var(--ink);color:var(--paper);border:none;border-radius:7px;padding:11px 20px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.agnd-save:disabled{opacity:.4;cursor:default}
+.agnd-status{font-family:var(--mono);font-size:11px;color:var(--ink-40)}
 </style>
-<div class="agnd">
+<div class="agnd" id="agnd">
   <div class="agnd-ttl">Повестка</div>
   <p class="agnd-goal">Желаемый результат: выйти с согласованным приоритетом — одна работа, конкретный следующий шаг.</p>
-  <div class="agnd-item"><span class="agnd-n">1</span><div><div class="agnd-q">Какие работы маркетинговой команды наиболее недообслужены?</div><div class="agnd-note">Упражнение: расставить работы на матрице важность × насколько закрыто</div></div></div>
-  <div class="agnd-item"><span class="agnd-n">2</span><div><div class="agnd-q">Когда фоновая потребность превращается в срочную?</div><div class="agnd-note">Упражнение: описать конкретный момент для каждой работы</div></div></div>
-  <div class="agnd-item"><span class="agnd-n">3</span><div><div class="agnd-q">Где болит конкретнее всего внутри каждой работы?</div><div class="agnd-note">Упражнение: проранжировать проблемы по болезненности</div></div></div>
-  <div class="agnd-item"><span class="agnd-n">4</span><div><div class="agnd-q">Что уже пробовали — и почему это не закрывает задачу полностью?</div><div class="agnd-note">Упражнение: зафиксировать обходные пути по каждой работе</div></div></div>
-  <div class="agnd-item dec"><span class="agnd-n">5</span><div><div class="agnd-q">Какую работу берём в работу первой?</div></div></div>
-  <div class="agnd-item dec"><span class="agnd-n">6</span><div><div class="agnd-q">Как выглядит «это работает» через три месяца?</div></div></div>
-</div>`,
+  <div id="agnd-list"></div>
+  <div class="agnd-addrow"><input class="agnd-inp" id="agnd-inp" placeholder="Добавить пункт повестки…"><button class="agnd-btn" id="agnd-add">Добавить</button></div>
+  <div class="agnd-hint">Двойной клик по пункту — отредактировать текст</div>
+  <div class="agnd-foot"><button class="agnd-save" id="agnd-save" disabled>Сохранить повестку</button><span class="agnd-status" id="agnd-status"></span></div>
+</div>
+<script>
+(function(){
+  var DEFAULT=[
+    {q:'Какие работы маркетинговой команды наиболее недообслужены?',note:'Упражнение: расставить работы на матрице важность × насколько закрыто',dec:false},
+    {q:'Когда фоновая потребность превращается в срочную?',note:'Упражнение: описать конкретный момент для каждой работы',dec:false},
+    {q:'Где болит конкретнее всего внутри каждой работы?',note:'Упражнение: проранжировать проблемы по болезненности',dec:false},
+    {q:'Что уже пробовали — и почему это не закрывает задачу полностью?',note:'Упражнение: зафиксировать обходные пути по каждой работе',dec:false},
+    {q:'Какую работу берём в работу первой?',note:'',dec:true},
+    {q:'Как выглядит «это работает» через три месяца?',note:'',dec:true}
+  ];
+  var KEY='ws:jetbrains:agenda';
+  var list=document.getElementById('agnd-list'),inp=document.getElementById('agnd-inp'),
+      addBtn=document.getElementById('agnd-add'),saveBtn=document.getElementById('agnd-save'),
+      statusEl=document.getElementById('agnd-status');
+  var items=DEFAULT;
+  try{ var s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&s.length) items=s; }catch(_){}
+  function render(){
+    list.innerHTML='';
+    items.forEach(function(it,i){
+      var row=document.createElement('div'); row.className='agnd-item'+(it.dec?' dec':''); row.setAttribute('data-i',i);
+      var n=document.createElement('span'); n.className='agnd-n'; n.textContent=String(i+1);
+      var body=document.createElement('div');
+      var q=document.createElement('div'); q.className='agnd-q'; q.textContent=it.q;
+      body.appendChild(q);
+      if(it.note){ var nt=document.createElement('div'); nt.className='agnd-note'; nt.textContent=it.note; body.appendChild(nt); }
+      row.appendChild(n); row.appendChild(body); list.appendChild(row);
+    });
+  }
+  function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(items)); }catch(_){} saveBtn.disabled=false; }
+  render();
+  list.addEventListener('dblclick',function(e){
+    var el=e.target.closest('.agnd-q,.agnd-note'); if(!el) return;
+    el.contentEditable='true'; el.focus();
+    var r=document.createRange(); r.selectNodeContents(el); r.collapse(false);
+    var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  });
+  list.addEventListener('blur',function(e){
+    var el=e.target; if(!el.isContentEditable) return;
+    el.contentEditable='false';
+    var i=+el.closest('.agnd-item').getAttribute('data-i');
+    if(el.classList.contains('agnd-q')) items[i].q=el.textContent.trim();
+    else items[i].note=el.textContent.trim();
+    persist();
+  },true);
+  list.addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target.isContentEditable){ e.preventDefault(); e.target.blur(); } });
+  function addItem(){ var v=inp.value.trim(); if(!v) return; items.push({q:v,note:'',dec:false}); inp.value=''; render(); persist(); }
+  addBtn.addEventListener('click',addItem);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter') addItem(); });
+  saveBtn.addEventListener('click',function(){
+    saveBtn.disabled=true; statusEl.textContent='сохраняю…';
+    fetch('/w/jetbrains/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'agenda',payload:{items:items}})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ statusEl.textContent=j.ok?'✓ Сохранено':'Не удалось сохранить'; saveBtn.disabled=!!j.ok; })
+      .catch(function(){ statusEl.textContent='Не удалось сохранить — проверьте соединение'; saveBtn.disabled=false; });
+  });
+})();
+</script>`,
     },
 
     { block: 'divider' },
