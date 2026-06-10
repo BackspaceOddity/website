@@ -222,6 +222,49 @@ export const jetbrainsPage: ClientPage = {
         'Это не промах JetBrains — так бывает, когда число кампаний растёт быстрее, чем система под ними. Это задача про интеграцию, и именно поэтому она решаемая.',
     },
 
+    {
+      block: 'discussion',
+      sectionNum: '02а — Метрики',
+      heading: 'Какие метрики утверждаем точкой отсчёта?',
+      intro:
+        'Набросали стартовый список — сгруппирован по трём уровням. Снимите галочки с того, что не актуально, добавьте своё. Итог фиксируем как baseline для всей последующей работы.',
+      questions: [
+        {
+          q: '<span style="display:block;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem">АУДИТОРНЫЕ</span>MAU по продукту — уникальные активные пользователи в месяц',
+        },
+        { q: 'Охват по сегменту: разработчики / студенты / команды' },
+        { q: 'Brand recall в целевых сегментах (опросы, brand lift)' },
+        { q: 'Время вовлечения с контентом — engagement rate по формату' },
+        {
+          q: '<span style="display:block;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem;margin-top:.5rem">МАРКЕТИНГОВЫЕ</span>CPL / CPA — стоимость лида и действия по каналу и типу кампании',
+        },
+        { q: 'CTR по формату (видео, баннер, editorial, спонсорство)' },
+        {
+          q: 'Trial downloads с атрибуцией к кампании',
+          note: 'Требует сквозной UTM-разметки и сведения данных из магазинов',
+        },
+        { q: 'Share of voice в DevEx / Developer Tools пространстве' },
+        {
+          q: '<span style="display:block;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem;margin-top:.5rem">БИЗНЕСОВЫЕ (ДЕНЕЖНЫЕ)</span>Revenue attributed — выручка, прямо связанная с кампанией',
+          note: 'Ключевой вопрос сессии — именно здесь сегодня нет ответа',
+        },
+        { q: 'Trial → Paid конверсия в разбивке по источнику привлечения' },
+        { q: 'LTV когорт, привлечённых через маркетинговые кампании' },
+        { q: 'Marketing ROI = attributed revenue / marketing spend по продукту' },
+      ],
+      addLabel: 'Добавить свою метрику',
+      ui: {
+        save: 'Зафиксировать',
+        saving: 'Сохраняем…',
+        saved: '✓ Зафиксировано',
+        saveFail: 'Ошибка сохранения',
+        saveFailNet: 'Ошибка соединения',
+        addQuestion: 'Добавить',
+        questionPlaceholder: 'Ваша метрика…',
+        savedLocal: '✓ Сохранено локально',
+      },
+    },
+
     { block: 'divider' },
 
     {

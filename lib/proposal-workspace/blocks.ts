@@ -768,7 +768,7 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
 `(function(){
   var root=document.getElementById('${root}'); if(!root) return;
   var saveBtn=root.querySelector('.exr-save'), statusEl=root.querySelector('.exr-status');
-  var drag=null, dragList=null, dragGhost=null, dragPH=null, dragOffY=0;
+  var drag=null, dragList=null, dragGhost=null, dragPH=null, dragOffY=0, dragOrigStyle='';
   var EDIT=${b.editable ? 'true' : 'false'}, PH=${JSON.stringify(u.newProblemPlaceholder)};
   function rowsIn(l){ return Array.prototype.slice.call(l.querySelectorAll('.exr-row:not(.exr-ph)')); }
   function lists(){ return Array.prototype.slice.call(root.querySelectorAll('.exr-list')); }
@@ -778,7 +778,8 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
     var rect=r.getBoundingClientRect(); dragOffY=e.clientY-rect.top;
     dragPH=document.createElement('li'); dragPH.className='exr-ph'; dragPH.style.cssText='height:'+rect.height+'px;box-sizing:border-box;border:2px dashed var(--rule-strong);border-radius:6px;opacity:.5;';
     r.parentNode.insertBefore(dragPH,r);
-    r.classList.add('dragging'); r.style.cssText+='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;z-index:9999;pointer-events:none;margin:0;';
+    dragOrigStyle=r.style.cssText;
+    r.classList.add('dragging'); r.style.cssText=dragOrigStyle+'position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;z-index:9999;pointer-events:none;margin:0;';
     try{ r.setPointerCapture(e.pointerId); }catch(_){} }
   function move(e){ if(!drag||!dragList||!dragPH) return;
     drag.style.top=(e.clientY-dragOffY)+'px';
@@ -787,7 +788,7 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
     if(after){ dragList.insertBefore(dragPH,after); } else { dragList.appendChild(dragPH); }
   }
   function up(){ if(!drag||!dragPH) return;
-    drag.style.cssText=drag.style.cssText.replace(/position:[^;]+;left:[^;]+;top:[^;]+;width:[^;]+;z-index:[^;]+;pointer-events:[^;]+;margin:[^;]+;/,'');
+    drag.style.cssText=dragOrigStyle; dragOrigStyle='';
     dragList.insertBefore(drag,dragPH); dragPH.remove(); dragPH=null;
     drag.classList.remove('dragging'); renum(dragList); drag=null; dragList=null; saveBtn.disabled=false; }
   root.addEventListener('pointerdown',down); document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
