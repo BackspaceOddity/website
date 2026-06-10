@@ -42,16 +42,68 @@ export function statement(b: StatementBlock): string {
   return `<div class="statement">${b.text}</div>`;
 }
 
-export function heardIt(b: HeardItBlock): string {
+export function heardIt(b: HeardItBlock, slug?: string): string {
   const pills = b.pills?.length
     ? `<div class="pill-group">${b.pills.map(p => `<span class="pill">${esc(p)}</span>`).join('')}</div>`
     : '';
-  return `<section>
+  if (!b.confirm || !slug) {
+    return `<section>
   ${sectionNum(b.sectionNum)}
   <h2>${esc(b.heading)}</h2>
   ${b.statement ? `<div class="statement">${b.statement}</div>` : ''}
   ${paras(b.body)}
   ${pills}
+</section>`;
+  }
+  const c = b.confirm;
+  const root = `hic-${esc(c.exerciseId)}`;
+  const confirmLabel = c.confirmLabel || 'Confirm';
+  const altLabel = c.altLabel || 'Different version';
+  const editHint = c.editHint || 'Double-click any paragraph to edit, then Confirm.';
+  const savedMsg = c.savedMsg || '✓ Locked';
+  const css = `
+  #${root} .hic-ed[contenteditable="true"]{outline:1px dashed var(--rule-strong);outline-offset:4px;border-radius:3px}
+  #${root} .hic-actions{display:flex;align-items:center;gap:12px;margin-top:22px}
+  #${root} .hic-confirm{background:var(--ink);color:var(--paper);border:none;border-radius:7px;padding:11px 20px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  #${root} .hic-confirm:disabled{opacity:.4;cursor:default}
+  #${root} .hic-alt{background:transparent;border:1px solid var(--rule-strong);border-radius:7px;padding:11px 20px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);cursor:pointer}
+  #${root} .hic-status{font-family:var(--mono);font-size:11px;color:var(--ink-40)}
+  #${root} .hic-hint{font-family:var(--mono);font-size:10px;color:var(--ink-40);margin-top:10px;display:none}
+  #${root}.hic-editing .hic-hint{display:block}`;
+  const js =
+`(function(){
+  var root=document.getElementById('${root}'); if(!root) return;
+  var confirmBtn=root.querySelector('.hic-confirm'), altBtn=root.querySelector('.hic-alt'), statusEl=root.querySelector('.hic-status');
+  function eds(){ return Array.prototype.slice.call(root.querySelectorAll('.hic-ed')); }
+  root.addEventListener('dblclick',function(e){ var el=e.target.closest('.hic-ed'); if(!el) return; el.contentEditable='true'; el.focus(); });
+  root.addEventListener('blur',function(e){ if(e.target.isContentEditable){ e.target.contentEditable='false'; } },true);
+  altBtn.addEventListener('click',function(){
+    root.classList.add('hic-editing');
+    var first=eds()[0]; if(first){ first.contentEditable='true'; first.focus(); }
+  });
+  confirmBtn.addEventListener('click',function(){
+    confirmBtn.disabled=true; statusEl.textContent='…';
+    var st=root.querySelector('.statement'); var body=eds().filter(function(el){ return !el.classList.contains('statement'); }).map(function(el){ return el.textContent.trim(); });
+    fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'${esc(c.exerciseId)}',payload:{confirmed:true,statement:st?st.textContent.trim():'',body:body}})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ statusEl.textContent=j.ok?${JSON.stringify(savedMsg)}:'!'; confirmBtn.disabled=!!j.ok; })
+      .catch(function(){ statusEl.textContent='!'; confirmBtn.disabled=false; });
+  });
+})();`;
+  return `<section id="${root}">
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  <style>${css}</style>
+  ${b.statement ? `<div class="statement hic-ed">${b.statement}</div>` : ''}
+  ${b.body.map(p => `<p class="hic-ed">${p}</p>`).join('\n  ')}
+  ${pills}
+  <div class="hic-hint">${esc(editHint)}</div>
+  <div class="hic-actions">
+    <button class="hic-confirm">${esc(confirmLabel)}</button>
+    <button class="hic-alt">${esc(altLabel)}</button>
+    <span class="hic-status"></span>
+  </div>
+  <script>${js}</script>
 </section>`;
 }
 

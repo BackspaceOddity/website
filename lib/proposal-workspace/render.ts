@@ -16,7 +16,7 @@ export function renderBlock(block: Block, slug: string, responses: SavedResponse
     case 'docHeader':      return B.docHeader(block);
     case 'divider':        return B.divider(block);
     case 'statement':      return B.statement(block);
-    case 'heardIt':        return B.heardIt(block);
+    case 'heardIt':        return B.heardIt(block, slug);
     case 'beforeAfter':    return B.beforeAfter(block);
     case 'emphasisFrame':  return B.emphasisFrame(block);
     case 'narrative':      return B.narrative(block);

@@ -74,6 +74,16 @@ export interface HeardItBlock {
   /** body paragraphs (rich) */
   body: Rich[];
   pills?: string[];
+  /** live-call confirmation widget: Confirm / Different-version buttons +
+   *  dblclick inline editing of statement and body. Saves to the exercise
+   *  endpoint under `exerciseId`. Off by default — existing clients unchanged. */
+  confirm?: {
+    exerciseId: string;
+    confirmLabel?: string;
+    altLabel?: string;
+    editHint?: string;
+    savedMsg?: string;
+  };
 }
 
 export interface BeforeAfterBlock {
