@@ -716,19 +716,28 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
 `(function(){
   var root=document.getElementById('${root}'); if(!root) return;
   var saveBtn=root.querySelector('.exr-save'), statusEl=root.querySelector('.exr-status');
-  var drag=null, dragList=null;
+  var drag=null, dragList=null, dragGhost=null, dragPH=null, dragOffY=0;
   var EDIT=${b.editable ? 'true' : 'false'}, PH=${JSON.stringify(u.newProblemPlaceholder)};
-  function rowsIn(l){ return Array.prototype.slice.call(l.querySelectorAll('.exr-row')); }
+  function rowsIn(l){ return Array.prototype.slice.call(l.querySelectorAll('.exr-row:not(.exr-ph)')); }
   function lists(){ return Array.prototype.slice.call(root.querySelectorAll('.exr-list')); }
   function renum(l){ rowsIn(l).forEach(function(r,i){ r.querySelector('.exr-rank').textContent=(i+1); }); }
-  function down(e){ var r=e.target.closest('.exr-row'); if(!r) return; if(r.classList.contains('editing')) return; e.preventDefault(); drag=r; dragList=r.closest('.exr-list'); r.classList.add('dragging'); try{ r.setPointerCapture(e.pointerId); }catch(_){} }
-  function move(e){ if(!drag||!dragList) return;
+  function down(e){ var r=e.target.closest('.exr-row'); if(!r) return; if(r.classList.contains('editing')) return; e.preventDefault();
+    drag=r; dragList=r.closest('.exr-list');
+    var rect=r.getBoundingClientRect(); dragOffY=e.clientY-rect.top;
+    dragPH=document.createElement('li'); dragPH.className='exr-ph'; dragPH.style.cssText='height:'+rect.height+'px;box-sizing:border-box;border:2px dashed var(--rule-strong);border-radius:6px;opacity:.5;';
+    r.parentNode.insertBefore(dragPH,r);
+    r.classList.add('dragging'); r.style.cssText+='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;z-index:9999;pointer-events:none;margin:0;';
+    try{ r.setPointerCapture(e.pointerId); }catch(_){} }
+  function move(e){ if(!drag||!dragList||!dragPH) return;
+    drag.style.top=(e.clientY-dragOffY)+'px';
     var after=null, rs=rowsIn(dragList);
-    for(var i=0;i<rs.length;i++){ if(rs[i]===drag) continue; var bb=rs[i].getBoundingClientRect(); if(e.clientY < bb.top + bb.height/2){ after=rs[i]; break; } }
-    if(after){ dragList.insertBefore(drag, after); } else { dragList.appendChild(drag); }
-    renum(dragList);
+    for(var i=0;i<rs.length;i++){ if(rs[i]===drag) continue; var bb=rs[i].getBoundingClientRect(); if(e.clientY<bb.top+bb.height/2){ after=rs[i]; break; } }
+    if(after){ dragList.insertBefore(dragPH,after); } else { dragList.appendChild(dragPH); }
   }
-  function up(){ if(!drag) return; drag.classList.remove('dragging'); drag=null; dragList=null; saveBtn.disabled=false; }
+  function up(){ if(!drag||!dragPH) return;
+    drag.style.cssText=drag.style.cssText.replace(/position:[^;]+;left:[^;]+;top:[^;]+;width:[^;]+;z-index:[^;]+;pointer-events:[^;]+;margin:[^;]+;/,'');
+    dragList.insertBefore(drag,dragPH); dragPH.remove(); dragPH=null;
+    drag.classList.remove('dragging'); renum(dragList); drag=null; dragList=null; saveBtn.disabled=false; }
   root.addEventListener('pointerdown',down); document.addEventListener('pointermove',move); document.addEventListener('pointerup',up);
   // Phase A: show only the client's top-3 underserved jobs from Ex1 (fallback to a default triad).
   function topJobs(){ try{ var d=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]'); if(d.length){ d.sort(function(a,b){ return (b.importance+(11-b.satisfaction))-(a.importance+(11-a.satisfaction)); }); return d.slice(0,3).map(function(x){ return x.id; }); } }catch(_){} return ${JSON.stringify(fallbackJobs)}; }
