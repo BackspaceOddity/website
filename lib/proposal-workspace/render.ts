@@ -8,7 +8,7 @@
 import type { Block, ClientPage } from './types';
 import { styles } from './styles';
 import { themeHeadScript, themeToggle, editModeScript } from './chrome';
-import { savedQuestions, savedDiscussionLock, type SavedResponses } from './responses';
+import { savedQuestions, savedDiscussionLock, savedMatrixPlacements, type SavedResponses } from './responses';
 import * as B from './blocks';
 
 export function renderBlock(block: Block, slug: string, responses: SavedResponses = {}): string {
@@ -28,7 +28,7 @@ export function renderBlock(block: Block, slug: string, responses: SavedResponse
     case 'discussion':     return B.discussion(block, slug, savedDiscussionLock(responses) ?? undefined);
     case 'clientInput':    return B.clientInput(block, slug, savedQuestions(responses));
     case 'bookingEmbed':   return B.bookingEmbed(block, slug);
-    case 'exerciseMatrix': return B.exerciseMatrix(block, slug);
+    case 'exerciseMatrix': return B.exerciseMatrix(block, slug, savedMatrixPlacements(responses, block.exerciseId));
     case 'exerciseRank':   return B.exerciseRank(block, slug);
     case 'exerciseChips':  return B.exerciseChips(block, slug);
     case 'exerciseSolutions': return B.exerciseSolutions(block, slug);

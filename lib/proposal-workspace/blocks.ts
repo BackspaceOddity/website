@@ -499,7 +499,7 @@ Cal.ns["${esc(ns)}"]("ui",{cssVarsPerTheme:{light:{"cal-brand":"#011C00"},dark:{
 </section>`;
 }
 
-export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
+export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string, serverSeed: { id: string; importance: number; satisfaction: number; label?: string }[] = []): string {
   const ax = b.axisX ?? { label: 'How well it’s handled today', low: 'Badly served', high: 'Well served' };
   const ay = b.axisY ?? { label: 'How important to you', low: 'Minor', high: 'Critical' };
   const u = {
@@ -614,8 +614,10 @@ export function exerciseMatrix(b: ExerciseMatrixBlock, slug: string): string {
   function place(card){ record(card,coords(card)); status(); }
   function status(){ var n=Object.keys(P).length, t=root.querySelectorAll('.exm-card').length; statusEl.textContent=${JSON.stringify(u.placed)}.replace('{n}',n).replace('{t}',t); saveBtn.disabled=n===0; persist(); }
   function persist(){ try{ localStorage.setItem('ws:${slug}:jtbd', JSON.stringify(Object.keys(P).map(function(id){ return {id:id,label:P[id].label,importance:P[id].importance,satisfaction:P[id].satisfaction}; }))); window.dispatchEvent(new CustomEvent('ws:jtbd-changed')); }catch(_){} }
+  var __seed__=${JSON.stringify(serverSeed)};
   function restore(){ try{
-    var saved=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]');
+    var local=JSON.parse(localStorage.getItem('ws:${slug}:jtbd')||'[]');
+    var saved=local.length?local:__seed__;
     if(!saved.length) return;
     var mr=matrix.getBoundingClientRect(); if(mr.width===0) return;
     saved.forEach(function(item){

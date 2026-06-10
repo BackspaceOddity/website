@@ -49,6 +49,24 @@ export async function getSavedResponses(slug: string): Promise<SavedResponses> {
   }
 }
 
+export type MatrixPlacement = { id: string; importance: number; satisfaction: number; label?: string };
+
+/** Extract matrix placements from saved responses, safely. */
+export function savedMatrixPlacements(r: SavedResponses, exerciseId: string): MatrixPlacement[] {
+  const p = r[exerciseId] as { placements?: unknown } | undefined;
+  if (p && Array.isArray(p.placements)) {
+    return p.placements.filter(
+      (x): x is MatrixPlacement =>
+        x !== null &&
+        typeof x === 'object' &&
+        typeof (x as MatrixPlacement).id === 'string' &&
+        typeof (x as MatrixPlacement).importance === 'number' &&
+        typeof (x as MatrixPlacement).satisfaction === 'number',
+    );
+  }
+  return [];
+}
+
 /** Extract the client's added questions (§07) from saved responses, safely. */
 export function savedQuestions(r: SavedResponses): string[] {
   const p = r['client-questions'] as { questions?: unknown } | undefined;
