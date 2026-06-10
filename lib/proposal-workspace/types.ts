@@ -288,7 +288,7 @@ export interface ExerciseChipsBlock {
   heading: string;
   intro?: Rich;
   exerciseId: string;
-  questions: { id: string; q: string; example?: string; options: string[] }[];
+  questions: { id: string; q: string; example?: string; options: string[]; singleSelect?: boolean }[];
   ui?: ExerciseUI;
 }
 

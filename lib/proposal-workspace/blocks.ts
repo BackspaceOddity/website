@@ -698,8 +698,8 @@ export function exerciseRank(b: ExerciseRankBlock, slug: string): string {
   .exr-group { margin-bottom: 26px; }
   .exr-job { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-55); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
   .exr-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-  .exr-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: var(--surface); border: 1px solid var(--rule); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
-  .exr-row.dragging { opacity: .9; box-shadow: 0 8px 20px rgba(1,28,0,.18); cursor: grabbing; }
+  .exr-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: var(--surface); border: 1px solid var(--rule); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: box-shadow .15s ease, transform .1s ease, opacity .1s ease; }
+  .exr-row.dragging { opacity: .88; box-shadow: 0 10px 24px rgba(1,28,0,.22); cursor: grabbing; transform: scale(1.015); }
   .exr-rank { font-family: var(--mono); font-size: 12px; color: var(--ink-40); min-width: 16px; text-align: right; }
   .exr-label { font-family: var(--text); font-size: var(--fs-small); color: var(--ink); flex: 1; }
   .exr-handle { color: var(--ink-25); font-size: 13px; letter-spacing: -2px; }
@@ -787,7 +787,7 @@ export function exerciseChips(b: ExerciseChipsBlock, slug: string): string {
     saveFailNet: 'Save failed — check connection', save: 'Save',
     ...(b.ui || {}),
   };
-  const qs = b.questions.map(q => `<div class="exc-q" data-q="${esc(q.id)}">
+  const qs = b.questions.map(q => `<div class="exc-q" data-q="${esc(q.id)}"${q.singleSelect ? ' data-single="1"' : ''}>
       <div class="exc-q-h">${esc(q.q)}${q.example ? `<span class="exc-q-ex">${esc(u.egPrefix)}${esc(q.example)}</span>` : ''}</div>
       <div class="exc-chips">
         ${q.options.map(o => `<button type="button" class="exc-chip">${esc(o)}</button>`).join('\n        ')}
@@ -816,7 +816,7 @@ export function exerciseChips(b: ExerciseChipsBlock, slug: string): string {
   var saveBtn=root.querySelector('.exc-save'), statusEl=root.querySelector('.exc-status');
   function touch(){ saveBtn.disabled=false; }
   root.addEventListener('click',function(e){
-    var c=e.target.closest('.exc-chip'); if(c){ c.classList.toggle('on'); touch(); return; }
+    var c=e.target.closest('.exc-chip'); if(c){ var cq=c.closest('.exc-q'); if(cq && cq.getAttribute('data-single')){ Array.prototype.slice.call(cq.querySelectorAll('.exc-chip')).forEach(function(ch){ ch.classList.remove('on'); }); c.classList.add('on'); } else { c.classList.toggle('on'); } touch(); return; }
     var add=e.target.closest('.exc-add-btn'); if(add){ var box=add.closest('.exc-add'); var inp=box.querySelector('.exc-inp'); var v=(inp.value||'').trim(); if(v){ var chips=add.closest('.exc-q').querySelector('.exc-chips'); var nb=document.createElement('button'); nb.type='button'; nb.className='exc-chip on'; nb.textContent=v; chips.appendChild(nb); inp.value=''; touch(); } }
   });
   root.addEventListener('keydown',function(e){ if(e.key==='Enter' && e.target.classList.contains('exc-inp')){ e.preventDefault(); e.target.parentNode.querySelector('.exc-add-btn').click(); } });
