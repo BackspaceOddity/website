@@ -107,6 +107,7 @@ export const themeToggle = `<button class="theme-toggle" onclick="toggleTheme()"
  *  block->token map; the panel itself is identical across every project. */
 const BSO_SIZES = [
   { k: '--fs-h2', l: 'H2 heading', d: 42, min: 24, max: 64 },
+  { k: '--fs-mhdr-title', l: 'Dark header title', d: 42, min: 24, max: 64 },
   { k: '--fs-body', l: 'Body', d: 22, min: 14, max: 32 },
   { k: '--fs-statement', l: 'Pull quote', d: 22, min: 14, max: 40 },
   { k: '--fs-ba-core', l: 'Before/After', d: 22, min: 14, max: 36 },

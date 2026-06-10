@@ -69,7 +69,7 @@ export const jetbrainsPage: ClientPage = {
       html: `<style>
 .mhdr{background:var(--ink);color:var(--paper);padding:36px 40px;border-radius:10px}
 .mhdr-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.4;margin-bottom:18px}
-.mhdr-title{font-family:var(--display);font-size:clamp(26px,3.5vw,42px);font-weight:700;letter-spacing:-1px;line-height:1.15;margin:0 0 32px}
+.mhdr-title{font-family:var(--display);font-size:var(--fs-mhdr-title,clamp(26px,3.5vw,42px));font-weight:700;letter-spacing:-1px;line-height:1.15;margin:0 0 32px}
 .mhdr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:20px 40px}
 .mhdr-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.4;margin-bottom:5px}
 .mhdr-val{font-family:var(--text);font-size:15px;font-weight:500}
