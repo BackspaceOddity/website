@@ -13,6 +13,7 @@ import type {
   WhatStayedBlock, NextStepsBlock, DiscussionBlock, ClientInputBlock, BookingEmbedBlock, ExerciseMatrixBlock, ExerciseRankBlock,
   ExerciseChipsBlock, ExerciseSolutionsBlock, DocFooterBlock,
 } from './types';
+import type { LockAnswer } from './responses';
 
 /** Escape plain-text fields. Rich fields (documented in types.ts) are inserted raw. */
 export function esc(s: string): string {
@@ -203,12 +204,17 @@ export function nextSteps(b: NextStepsBlock): string {
 </section>`;
 }
 
-export function discussion(b: DiscussionBlock, slug: string): string {
+export function discussion(b: DiscussionBlock, slug: string, savedLock?: LockAnswer[]): string {
   const u = {
-    questionPlaceholder: 'Type a question you’d like to cover…', addQuestion: 'Add question',
-    saved: '✓ Saved — it’ll appear in “Your notes” above', savedLocal: 'Saved on this device',
+    questionPlaceholder: "Type a question you’d like to cover…", addQuestion: 'Add question',
+    saved: "✓ Saved — it’ll appear in “Your notes” above", savedLocal: 'Saved on this device',
+    lockBtnLabel: 'Зафиксировать',
+    lockedBadge: 'Зафиксировано',
+    locking: 'Фиксируем…',
+    lockFail: 'Ошибка — попробуйте ещё раз',
     ...(b.ui || {}),
   };
+
   const items = b.questions.map(q => `<li>
       <div class="check-box"></div>
       <div>
@@ -217,12 +223,6 @@ export function discussion(b: DiscussionBlock, slug: string): string {
       </div>
     </li>`).join('\n    ');
 
-  // This block holds OUR seed questions + the "add your own" form. The client's
-  // submitted notes are displayed in the clientInput ("Your notes") section,
-  // which read-backs from Supabase — so submissions live in exactly one place.
-  // On add we save to localStorage (cumulative array for the POST) + POST to the
-  // exercise endpoint; the note then surfaces in the Your-notes section on reload.
-  // Styled with the same --on-dark-* tokens as .check-section.
   const css = `
   .cq-add { margin-top: 26px; border-top: 1px solid var(--on-dark-border); padding-top: 20px; }
   .cq-add-label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--on-dark-muted); margin-bottom: 10px; }
@@ -233,9 +233,100 @@ export function discussion(b: DiscussionBlock, slug: string): string {
   .cq-btn { background: var(--on-dark-primary); color: var(--ink); border: none; border-radius: 7px; padding: 10px 20px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
   .cq-btn:disabled { opacity: .4; cursor: default; }
   .cq-status { font-family: var(--mono); font-size: 11px; color: var(--on-dark-muted); }
+  .dl-form { margin-top: 26px; border-top: 1px solid var(--on-dark-border); padding-top: 22px; }
+  .dl-form-label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--on-dark-muted); margin-bottom: 18px; }
+  .dl-q-row { margin-bottom: 18px; }
+  .dl-q-label { font-family: var(--text); font-size: var(--fs-small); line-height: 1.45; color: var(--on-dark-primary); margin-bottom: 8px; }
+  .dl-ta { display: block; width: 100%; box-sizing: border-box; background: transparent; border: 1px solid var(--on-dark-border); border-radius: 6px; padding: 10px 12px; font-family: var(--text); font-size: var(--fs-small); line-height: 1.5; color: var(--on-dark-primary); resize: vertical; min-height: 52px; outline: none; }
+  .dl-ta::placeholder { color: var(--on-dark-muted); }
+  .dl-ta:focus { border-color: var(--on-dark-primary); }
+  .dl-footer { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+  .dl-btn { background: var(--on-dark-primary); color: var(--ink); border: none; border-radius: 7px; padding: 10px 22px; font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .dl-btn:disabled { opacity: .4; cursor: default; }
+  .dl-st { font-family: var(--mono); font-size: 11px; color: var(--on-dark-muted); }
+  .dl-locked { margin-top: 26px; border-top: 1px solid var(--on-dark-border); padding-top: 22px; }
+  .dl-lock-badge { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent, #4ade80); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .dl-lock-badge::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent, #4ade80); }
+  .dl-answer-card { border: 1px solid var(--on-dark-border); border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; }
+  .dl-aq { font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--on-dark-muted); margin-bottom: 8px; }
+  .dl-aa { font-family: var(--text); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--on-dark-primary); white-space: pre-wrap; }
   `;
 
-  const js =
+  if (savedLock && savedLock.length > 0) {
+    const lockedCards = savedLock.map(({ q, a }) =>
+      `<div class="dl-answer-card"><div class="dl-aq">${esc(q)}</div><div class="dl-aa">${esc(a)}</div></div>`,
+    ).join('');
+    return `<div class="check-section">
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<p>${b.intro}</p>` : ''}
+  <style>${css}</style>
+  <ul class="check-list">
+    ${items}
+  </ul>
+  <div class="dl-locked">
+    <div class="dl-lock-badge">${esc(u.lockedBadge)}</div>
+    ${lockedCards}
+  </div>
+</div>`;
+  }
+
+  const lockFormId = `dlf-${esc(slug)}`;
+  const lockResultId = `dll-${esc(slug)}`;
+  const qTexts = JSON.stringify(b.questions.map(q => String(q.q)));
+
+  const lockForm = `<div class="dl-form" id="${lockFormId}">
+    <div class="dl-form-label">Записать решение</div>
+    ${b.questions.map((q, i) => `<div class="dl-q-row">
+      <div class="dl-q-label">${q.q}</div>
+      <textarea class="dl-ta" data-idx="${i}" placeholder="Ваш ответ…" rows="2"></textarea>
+    </div>`).join('\n    ')}
+    <div class="dl-footer">
+      <button type="button" class="dl-btn">${esc(u.lockBtnLabel)}</button>
+      <span class="dl-st"></span>
+    </div>
+  </div>
+  <div class="dl-locked" id="${lockResultId}" style="display:none"></div>`;
+
+  const lockJs =
+`(function(){
+  var form=document.getElementById(${JSON.stringify(lockFormId)});
+  var res=document.getElementById(${JSON.stringify(lockResultId)});
+  if(!form||!res) return;
+  var btn=form.querySelector('.dl-btn'), st=form.querySelector('.dl-st');
+  var qs=${qTexts};
+  function collect(){
+    return Array.from(form.querySelectorAll('.dl-ta')).map(function(el,i){
+      return {q:qs[i]||'', a:el.value.trim()};
+    });
+  }
+  function renderLocked(answers){
+    var badge=document.createElement('div'); badge.className='dl-lock-badge';
+    badge.textContent=${JSON.stringify(u.lockedBadge)}; res.appendChild(badge);
+    answers.forEach(function(a){
+      var card=document.createElement('div'); card.className='dl-answer-card';
+      var qEl=document.createElement('div'); qEl.className='dl-aq'; qEl.textContent=a.q;
+      var aEl=document.createElement('div'); aEl.className='dl-aa'; aEl.textContent=a.a;
+      card.appendChild(qEl); card.appendChild(aEl); res.appendChild(card);
+    });
+    form.style.display='none'; res.style.display='';
+  }
+  btn.addEventListener('click',function(){
+    var answers=collect();
+    if(answers.every(function(a){return a.a.length===0;})) return;
+    btn.disabled=true; st.textContent=${JSON.stringify(u.locking)};
+    fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({exercise:'discussion-lock',payload:{answers:answers}})})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(j.ok){ renderLocked(answers); }
+        else{ st.textContent=${JSON.stringify(u.lockFail)}; btn.disabled=false; }
+      })
+      .catch(function(){ st.textContent=${JSON.stringify(u.lockFail)}; btn.disabled=false; });
+  });
+})();`;
+
+  const cqJs =
 `(function(){
   var root=document.getElementById('cq-${esc(slug)}'); if(!root) return;
   var ta=root.querySelector('.cq-ta'), btn=root.querySelector('.cq-btn'), st=root.querySelector('.cq-status');
@@ -264,6 +355,7 @@ export function discussion(b: DiscussionBlock, slug: string): string {
   <ul class="check-list">
     ${items}
   </ul>
+  ${lockForm}
   <div class="cq-add">
     <div class="cq-add-label">${esc(b.addLabel ?? 'Add your own question')}</div>
     <textarea class="cq-ta" placeholder="${esc(u.questionPlaceholder)}" rows="2"></textarea>
@@ -272,7 +364,8 @@ export function discussion(b: DiscussionBlock, slug: string): string {
       <span class="cq-status"></span>
     </div>
   </div>
-  <script>${js}</script>
+  <script>${lockJs}</script>
+  <script>${cqJs}</script>
 </div>`;
 }
 

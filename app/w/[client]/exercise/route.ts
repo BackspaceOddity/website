@@ -25,6 +25,7 @@ const KNOWN_EXERCISES = new Set([
   'current-solutions',
   'entry-points',
   'client-questions',
+  'discussion-lock',
 ]);
 
 // Read-back endpoint for live polling — lets the §07 "Your notes" block pick up

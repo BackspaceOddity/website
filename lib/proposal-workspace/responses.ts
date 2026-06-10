@@ -57,3 +57,21 @@ export function savedQuestions(r: SavedResponses): string[] {
   }
   return [];
 }
+
+export type LockAnswer = { q: string; a: string };
+
+/** Extract the discussion-lock answers (§08) from saved responses, safely. */
+export function savedDiscussionLock(r: SavedResponses): LockAnswer[] | null {
+  const p = r['discussion-lock'] as { answers?: unknown } | undefined;
+  if (p && Array.isArray(p.answers) && p.answers.length > 0) {
+    const answers = p.answers.filter(
+      (x): x is LockAnswer =>
+        x !== null &&
+        typeof x === 'object' &&
+        typeof (x as LockAnswer).q === 'string' &&
+        typeof (x as LockAnswer).a === 'string',
+    );
+    if (answers.length > 0) return answers;
+  }
+  return null;
+}
