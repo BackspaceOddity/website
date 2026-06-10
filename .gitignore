@@ -42,3 +42,7 @@ _edit-inbox.json
 # One-way workshop dev fallback storage
 .workspace-data/
 .supabase-setup.env
+
+# ToV lint pipeline scratch files (local, written by tov-coach pipeline)
+_tov-requests.json
+_tov-results.json
