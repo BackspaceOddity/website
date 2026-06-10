@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: "/",
+        has: [{ type: "host", value: "jetbrains.backspaceoddity.com" }],
+        destination: "/w/jetbrains/",
+      },
+      {
         source: "/ai-skills/",
         destination: "https://ai-skills-landing-wheat.vercel.app/",
       },
