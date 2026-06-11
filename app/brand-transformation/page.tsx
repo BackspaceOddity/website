@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { LeadForm } from "./LeadForm";
 import "./brand-transformation.css";
 
 export const metadata: Metadata = {
@@ -252,14 +253,17 @@ export default function BrandTransformationPage() {
 
       {/* ============ HOW THE PROPOSAL IS BUILT ============ */}
       <section className="bt-sec bt-sec--light" id="proposal" data-screen-label="06 The proposal">
-        <div className="bt-diagnostic">
-          <span className="bt-eyebrow">How the proposal is built</span>
-          <h2 className="bt-diagnostic__title">Mini-diagnostic → a proposal tailored to you</h2>
-          <p className="bt-diagnostic__text">
-            We start with a short diagnostic: goal, brand state, market, timeline. Based on it we
-            lock the scope — which phases and modules are included — and assemble the final proposal
-            for your specific task.
-          </p>
+        <div className="bt-inner">
+          <header className="bt-head bt-head--gap">
+            <span className="bt-eyebrow">Diagnostic</span>
+            <h2 className="bt-h2">Run your business through our frame — get a quick diagnostic</h2>
+            <p className="bt-intro">
+              A few quick answers and we send back a short diagnostic: the job you&apos;re really
+              hired for, who you actually compete with, your biggest opening, and an under-used
+              angle. A surface cut of one frame — the full picture is the real work. Takes a minute.
+            </p>
+          </header>
+          <LeadForm />
         </div>
       </section>
 
