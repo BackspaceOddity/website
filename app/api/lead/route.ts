@@ -11,18 +11,6 @@
  */
 import { NextResponse } from "next/server";
 
-// TEMP diagnostic — reports whether the Slack webhook env var is visible at
-// runtime, without leaking the secret. Remove once Slack delivery is confirmed.
-export async function GET() {
-  const v = process.env.SLACK_LEAD_WEBHOOK_URL;
-  return NextResponse.json({
-    configured: typeof v === "string" && v.trim().length > 0,
-    len: typeof v === "string" ? v.length : 0,
-    trimmedLen: typeof v === "string" ? v.trim().length : 0,
-    startsOk: typeof v === "string" ? v.startsWith("https://hooks.slack.com/") : false,
-  });
-}
-
 const FIT_LABELS: Record<string, string> = {
   "1": "Barely — it's wide open",
   "2": "Poorly",
