@@ -306,6 +306,21 @@ body:has(.bt-page) { background: #F2F2F0; }
   color: color-mix(in oklch, var(--ink) 45%, transparent);
 }
 
+/* ============================================================ LANGUAGE SWITCH ============================================================ */
+.bt-lang {
+  display: inline-flex; align-self: flex-start; height: fit-content;
+  border: 1.5px solid color-mix(in oklch, var(--ink) 16%, transparent);
+  border-radius: 999px; padding: 2px; gap: 2px; background: transparent;
+}
+.bt-lang__btn {
+  font-family: var(--font-text); font-size: 13px; letter-spacing: 0.04em;
+  line-height: 1; padding: 6px 12px; border: 0; border-radius: 999px;
+  background: transparent; color: color-mix(in oklch, var(--ink) 55%, transparent);
+  cursor: pointer; transition: background 160ms var(--ease-standard), color 160ms var(--ease-standard);
+}
+.bt-lang__btn:hover { color: var(--ink); }
+.bt-lang__btn.is-active { background: var(--ink); color: var(--cream); }
+
 /* ============================================================ TIMELINE ============================================================ */
 .bt-timeline { border-top: 1px solid color-mix(in oklch, var(--ink) 18%, transparent); }
 .bt-trow {

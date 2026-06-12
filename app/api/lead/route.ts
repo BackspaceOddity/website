@@ -23,6 +23,44 @@ function field(label: string, value: string) {
   return { type: "mrkdwn", text: `*${label}*\n${value || "—"}` };
 }
 
+async function sendConfirmationEmail(to: string, name: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log("[lead] RESEND_API_KEY unset — skipping confirmation email");
+    return;
+  }
+  const from = process.env.LEAD_EMAIL_FROM || "Backspace Oddity <onboarding@resend.dev>";
+  const firstName = name.split(/\s+/)[0] || "there";
+
+  const html = `
+  <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#F2F2F0;padding:32px 0;">
+    <div style="max-width:520px;margin:0 auto;background:#FAFAF8;border-radius:14px;padding:36px 32px;color:#011C00;">
+      <p style="font-size:17px;line-height:1.5;margin:0 0 18px;">Hi ${firstName},</p>
+      <p style="font-size:17px;line-height:1.5;margin:0 0 18px;">
+        Thanks — we&rsquo;ve got your details. We&rsquo;re putting together your mini brand diagnostic now.
+      </p>
+      <p style="font-size:17px;line-height:1.5;margin:0 0 18px;">
+        It&rsquo;ll land in your inbox within a few hours.
+      </p>
+      <p style="font-size:17px;line-height:1.5;margin:24px 0 0;">— Backspace Oddity</p>
+    </div>
+  </div>`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      from,
+      to,
+      subject: "We've got your details — your diagnostic is on the way",
+      html,
+    }),
+  });
+  if (!res.ok) {
+    console.error("[lead] resend failed", res.status, await res.text().catch(() => ""));
+  }
+}
+
 export async function POST(req: Request) {
   let body: Record<string, unknown>;
   try {
@@ -42,6 +80,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "company and email are required" }, { status: 400 });
   }
 
+  const name = String(body.name || "").trim();
   const sell = String(body.sell || "").trim();
   const customer = String(body.customer || "").trim();
   const instead = String(body.instead || "").trim();
@@ -61,15 +100,19 @@ export async function POST(req: Request) {
         },
         {
           type: "section",
-          fields: [field("Company / website", company), field("Work email", email)],
+          fields: [field("Name", name), field("Work email", email)],
         },
         {
           type: "section",
-          fields: [field("What they sell", sell), field("Key customer", customer)],
+          fields: [field("Company / website", company), field("What they sell", sell)],
         },
         {
           type: "section",
-          fields: [field("Used instead", instead), field("Market solves it", fitLabel)],
+          fields: [field("Key customer", customer), field("Used instead", instead)],
+        },
+        {
+          type: "section",
+          fields: [field("Market solves it", fitLabel)],
         },
         {
           type: "section",
@@ -93,6 +136,11 @@ export async function POST(req: Request) {
   } else {
     console.log("[lead]", JSON.stringify({ ...body, at: new Date().toISOString() }));
   }
+
+  // Confirmation email to the lead — best-effort, never blocks the response.
+  await sendConfirmationEmail(email, name).catch((err) =>
+    console.error("[lead] confirmation email error", err),
+  );
 
   return NextResponse.json({ ok: true });
 }
