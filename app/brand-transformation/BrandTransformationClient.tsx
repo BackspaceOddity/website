@@ -109,23 +109,15 @@ export function BrandTransformationClient() {
         </div>
       </header>
 
-      {/* ============ WHEN YOU NEED A REBRAND ============ */}
-      <section className="bt-sec bt-sec--light bt-sec--compact" id="when" data-screen-label="02 When you need a rebrand">
+      {/* ============ DIAGNOSTIC (lead magnet — first interactive thing) ============ */}
+      <section className="bt-sec bt-sec--light" id="proposal" data-screen-label="02 Brand diagnostic">
         <div className="bt-inner">
-          <header className="bt-head bt-head--compact">
-            <span className="bt-eyebrow">{c.when.eyebrow}</span>
-            <h2 className="bt-h2">{c.when.h2}</h2>
-            <p className="bt-intro">{c.when.intro}</p>
+          <header className="bt-head bt-head--gap">
+            <span className="bt-eyebrow">{c.diagnostic.eyebrow}</span>
+            <h2 className="bt-h2">{c.diagnostic.h2}</h2>
+            <p className="bt-intro">{c.diagnostic.intro}</p>
           </header>
-          <div className="bt-eps">
-            {c.when.entries.map((e) => (
-              <div className="bt-ep" key={e.num}>
-                <span className="bt-ep__num">{e.num}</span>
-                <h3 className="bt-ep__name">{e.name}</h3>
-                <p className="bt-ep__text">{e.text}</p>
-              </div>
-            ))}
-          </div>
+          <LeadForm lang={lang} />
         </div>
       </section>
 
@@ -149,8 +141,28 @@ export function BrandTransformationClient() {
         </div>
       </section>
 
+      {/* ============ WHEN YOU NEED A REBRAND ============ */}
+      <section className="bt-sec bt-sec--light bt-sec--compact" id="when" data-screen-label="04 When you need a rebrand">
+        <div className="bt-inner">
+          <header className="bt-head bt-head--compact">
+            <span className="bt-eyebrow">{c.when.eyebrow}</span>
+            <h2 className="bt-h2">{c.when.h2}</h2>
+            <p className="bt-intro">{c.when.intro}</p>
+          </header>
+          <div className="bt-eps">
+            {c.when.entries.map((e) => (
+              <div className="bt-ep" key={e.num}>
+                <span className="bt-ep__num">{e.num}</span>
+                <h3 className="bt-ep__name">{e.name}</h3>
+                <p className="bt-ep__text">{e.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ============ OUR EXPERIENCE ============ */}
-      <section className="bt-sec bt-sec--light" id="experience" data-screen-label="04 Our experience">
+      <section className="bt-sec bt-sec--light" id="experience" data-screen-label="05 Our experience">
         <div className="bt-inner">
           <header className="bt-head bt-head--gap">
             <span className="bt-eyebrow">{c.experience.eyebrow}</span>
@@ -172,20 +184,8 @@ export function BrandTransformationClient() {
         </div>
       </section>
 
-      {/* ============ DIAGNOSTIC ============ */}
-      <section className="bt-sec bt-sec--light" id="proposal" data-screen-label="06 The proposal">
-        <div className="bt-inner">
-          <header className="bt-head bt-head--gap">
-            <span className="bt-eyebrow">{c.diagnostic.eyebrow}</span>
-            <h2 className="bt-h2">{c.diagnostic.h2}</h2>
-            <p className="bt-intro">{c.diagnostic.intro}</p>
-          </header>
-          <LeadForm lang={lang} />
-        </div>
-      </section>
-
       {/* ============ PHASES & TIMELINE ============ */}
-      <section className="bt-sec bt-sec--light" id="timeline" data-screen-label="07 Phases & timeline">
+      <section className="bt-sec bt-sec--light" id="timeline" data-screen-label="06 Phases & timeline">
         <div className="bt-inner">
           <header className="bt-head bt-head--gap">
             <span className="bt-eyebrow">{c.timeline.eyebrow}</span>
@@ -207,7 +207,7 @@ export function BrandTransformationClient() {
       </section>
 
       {/* ============ PHASE DETAIL ============ */}
-      <section className="bt-sec bt-sec--light" id="phases" data-screen-label="08 Phase detail">
+      <section className="bt-sec bt-sec--light" id="phases" data-screen-label="07 Phase detail">
         <div className="bt-inner">
           <ol className="bt-phases">
             {c.phases.map((ph) => (
@@ -245,7 +245,7 @@ export function BrandTransformationClient() {
       </section>
 
       {/* ============ FINAL CTA ============ */}
-      <section className="bt-final" id="contact" data-screen-label="09 Final CTA">
+      <section className="bt-final" id="contact" data-screen-label="08 Final CTA">
         <div className="bt-final__inner">
           <h2 className="bt-final__h2">{c.final.h2}</h2>
           <p className="bt-final__copy">{c.final.copy}</p>
@@ -255,7 +255,7 @@ export function BrandTransformationClient() {
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer className="bt-footer" data-screen-label="10 Footer">
+      <footer className="bt-footer" data-screen-label="07 Footer">
         <div>
           <div className="bt-footer__logo">
             <img className="bt-footer__logo-mark" src="/images/Logo Mark.svg" alt="" aria-hidden="true" />

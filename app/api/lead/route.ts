@@ -32,19 +32,13 @@ async function sendConfirmationEmail(to: string, name: string) {
   const from = process.env.LEAD_EMAIL_FROM || "Backspace Oddity <onboarding@resend.dev>";
   const firstName = name.split(/\s+/)[0] || "there";
 
-  const html = `
-  <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#F2F2F0;padding:32px 0;">
-    <div style="max-width:520px;margin:0 auto;background:#FAFAF8;border-radius:14px;padding:36px 32px;color:#011C00;">
-      <p style="font-size:17px;line-height:1.5;margin:0 0 18px;">Hi ${firstName},</p>
-      <p style="font-size:17px;line-height:1.5;margin:0 0 18px;">
-        Thanks — we&rsquo;ve got your details. We&rsquo;re putting together your mini brand diagnostic now.
-      </p>
-      <p style="font-size:17px;line-height:1.5;margin:0 0 18px;">
-        It&rsquo;ll land in your inbox within a few hours.
-      </p>
-      <p style="font-size:17px;line-height:1.5;margin:24px 0 0;">— Backspace Oddity</p>
-    </div>
-  </div>`;
+  const text = `Hi ${firstName},
+
+Thanks — we've got your details. We're putting together your mini brand diagnostic now.
+
+It'll land in your inbox within a few hours.
+
+— Backspace Oddity`;
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -53,7 +47,7 @@ async function sendConfirmationEmail(to: string, name: string) {
       from,
       to,
       subject: "We've got your details — your diagnostic is on the way",
-      html,
+      text,
     }),
   });
   if (!res.ok) {

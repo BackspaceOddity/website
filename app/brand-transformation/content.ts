@@ -41,7 +41,7 @@ export const content: Record<Lang, Content> = {
     nav: { contact: "Contact", office: ["Vijzelstraat 68-78", "1017 ES Amsterdam"], book: "Book a call" },
     hero: {
       eyebrow: "Brand transformation & rebrand",
-      title: "Turning brand into a growth lever that compounds",
+      title: "Did you know your brand might be your most under-used growth lever?",
       principles: [
         { title: "Strategy ↔ execution, end-to-end", text: "You get strategy, brand, content, website, and launch as one continuous process — not five contractors to coordinate." },
         { title: "Brand is a means, not the goal", text: "Your brand becomes a tool for a durable business strategy, not an end in itself — you walk away with results, not a rebrand for its own sake." },
@@ -83,9 +83,9 @@ export const content: Record<Lang, Content> = {
       ],
     },
     diagnostic: {
-      eyebrow: "Diagnostic",
-      h2: "Run your business through our frame — get a quick diagnostic",
-      intro: "A few quick answers and we send back a short diagnostic: the job you're really hired for, who you actually compete with, your biggest opening, and an under-used angle. A surface cut of one frame — the full picture is the real work. Takes a minute.",
+      eyebrow: "Free brand diagnostic",
+      h2: "Want to find out how much of your brand's potential you're using?",
+      intro: "Answer a few questions and we'll send you a short brand diagnostic — the job you're really hired for, who you actually compete with, your biggest opening, and an under-used angle. By email, takes a minute.",
     },
     timeline: {
       eyebrow: "Phases & timeline",
@@ -201,8 +201,8 @@ export const content: Record<Lang, Content> = {
     footer: {
       thisPage: "This page",
       links: [
-        { label: "When you need it", href: "#when" },
-        { label: "Phases & timeline", href: "#timeline" },
+        { label: "Brand diagnostic", href: "#proposal" },
+        { label: "Why a brand matters", href: "#why" },
         { label: "Contact", href: "#contact" },
       ],
       reach: "Reach us",
@@ -214,7 +214,7 @@ export const content: Record<Lang, Content> = {
     nav: { contact: "Контакт", office: ["Vijzelstraat 68-78", "1017 ES Amsterdam"], book: "Записаться на звонок" },
     hero: {
       eyebrow: "Бренд-трансформация и ребрендинг",
-      title: "Превращаем бренд в рычаг роста",
+      title: "А знаете ли вы, что бренд — возможно, ваш самый недоиспользованный рычаг роста?",
       principles: [
         { title: "Связка стратегии и исполнения, end-to-end", text: "Вы получаете стратегию, бренд, контент, сайт и запуск как один сквозной процесс — а не пять подрядчиков, которых надо координировать." },
         { title: "Бренд — средство, а не цель", text: "Ваш бренд становится инструментом устойчивой бизнес-стратегии, а не самоцелью — вы уходите с результатом, а не с ребрендом ради ребренда." },
@@ -256,9 +256,9 @@ export const content: Record<Lang, Content> = {
       ],
     },
     diagnostic: {
-      eyebrow: "Диагностика",
-      h2: "Прогоните бизнес через нашу рамку — получите короткую диагностику",
-      intro: "Несколько коротких ответов — и мы пришлём короткую диагностику: за какую работу вас на самом деле нанимают, с кем вы реально конкурируете, ваш самый большой разрыв возможности и недоиспользованный угол. Поверхностный срез одной рамки — полная картина это уже работа проекта. Займёт минуту.",
+      eyebrow: "Бесплатная бренд-диагностика",
+      h2: "Хотите узнать, насколько вы используете потенциал своего бренда?",
+      intro: "Ответьте на несколько вопросов — и мы пришлём короткую бренд-диагностику: за какую работу вас на самом деле нанимают, с кем вы реально конкурируете, ваш самый большой разрыв возможности и недоиспользованный угол. На почту, за минуту.",
     },
     timeline: {
       eyebrow: "Этапы и сроки",
@@ -374,8 +374,8 @@ export const content: Record<Lang, Content> = {
     footer: {
       thisPage: "Эта страница",
       links: [
-        { label: "Когда это нужно", href: "#when" },
-        { label: "Этапы и сроки", href: "#timeline" },
+        { label: "Бренд-диагностика", href: "#proposal" },
+        { label: "Зачем нужен бренд", href: "#why" },
         { label: "Контакт", href: "#contact" },
       ],
       reach: "Связаться",
