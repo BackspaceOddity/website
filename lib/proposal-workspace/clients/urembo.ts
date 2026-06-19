@@ -1,30 +1,32 @@
 /**
- * Urembo Hub — initial assessment (BSO-560).
+ * Urembo Hub — proposal (BSO-560).
  *
- * First real instantiation of the interactive proposal workspace.
+ * Interactive proposal workspace. Evolved from the initial assessment into a
+ * full proposal: the original read (§01–05) is unchanged; §06–11 add the
+ * commercial shape — a two-stage engagement (discovery sprint → onboarding build).
+ *
  * Grounded in: call transcript 2026-05-21 (Notion 367402511cda80a4b5def87aede6531d)
  * + Yegor's follow-up email thread (Gmail 19e419c17f2b815e).
+ * Commercial sections mirror the Notion proposal 384402511cda8110b44de90387b3c193.
  *
- * Wedge = onboarding/support automation (approach A, Yegor-approved 2026-05-30).
- * The $400K / $3M figures are Fatuma's stated ambitions from the match form;
- * she could not substantiate them on the call ("the number is on the form").
- * So they appear here as DESTINATION, never quoted as current fact.
+ * Wedge = onboarding automation (approach A, Yegor-approved 2026-05-30).
+ * Sprint price: €14,000 excl. VAT for 2 weeks (Anna, 2026-06-19). Build priced
+ * after the sprint.
  *
- * STATUS: DRAFT — must pass tov-lint + Yegor review before WS_PW_UREMBO is set
- * and the page goes live. Not for client eyes yet.
+ * STATUS: must pass tov-lint + Yegor review before deploy.
  */
 
 import type { ClientPage } from '../types';
 
 export const uremboPage: ClientPage = {
   slug: 'urembo',
-  title: 'Urembo Hub — Initial Assessment',
+  title: 'Urembo Hub — Proposal',
   blocks: [
     {
       block: 'docHeader',
-      label: 'Initial Assessment · Urembo Hub',
+      label: 'Proposal · Urembo Hub',
       meta: 'Prepared by Backspace Oddity · for Fatuma Dabassa',
-      version: 'Draft',
+      version: 'Proposal',
       date: 'June 2026',
     },
 
@@ -134,24 +136,150 @@ export const uremboPage: ClientPage = {
       ],
     },
 
+    { block: 'divider' },
+
+    {
+      block: 'narrative',
+      sectionNum: '06 — How we’d work',
+      heading: 'Two steps, not one leap',
+      body: [
+        'We’d rather not hand over one big number built on guesswork. Two things make an up-front quote for the whole build unreliable today: its hardest part — the judgement behind each approval — isn’t written down anywhere yet, and the spend should match an early stage.',
+        'So we start small and earn the rest. A short discovery sprint turns the onboarding process into a concrete, buildable spec — and a firm price for the build. With that in front of both of us, we build.',
+      ],
+      example:
+        'If the sprint shows the build isn’t worth it yet, we’ll say so — and the cost will have been small and fixed, not a quarter’s budget.',
+    },
+
+    {
+      block: 'phases',
+      phases: [
+        {
+          tag: 'Stage 1 · 2 weeks · €14,000 excl. VAT',
+          title: 'Discovery sprint',
+          body:
+            'Map the onboarding flow, capture the approval criteria, and confirm the technical ground. You leave with a written spec and a firm price for the build.',
+          emphasis: true,
+        },
+        {
+          tag: 'Stage 2 · scoped after the sprint',
+          title: 'The onboarding build',
+          body:
+            'We build the approval automation on the stack you already own and hand it over — running on its own within a few weeks.',
+        },
+      ],
+    },
+
+    { block: 'divider' },
+
     {
       block: 'nextSteps',
-      sectionNum: '06 — From our side',
-      heading: 'What happens next',
-      intro:
-        'This is our read, not a proposal yet. The next step is a short call to pressure-test it together and agree where to actually start.',
+      sectionNum: '07 — Stage one: the discovery sprint',
+      heading: 'What the two weeks cover',
+      intro: 'A focused piece of work to map onboarding as it runs today and pin down what the automation has to do.',
       steps: [
         {
-          title: 'You react to this read',
-          desc: 'Tell us where it’s right and where it’s off — especially the onboarding flow in section 04. You know the edge cases we don’t.',
+          title: 'We map the real flow with you',
+          desc: 'Every approval step, every edge case, the points where a merchant actually drops off.',
         },
         {
-          title: 'We scope the first build',
-          desc: 'Together we turn the onboarding automation into a concrete first project — what’s in, what it touches, what “done” looks like.',
+          title: 'We pull the criteria out of your head',
+          desc: 'What makes an application authentic, what you check by eye, where you hesitate. This is the part only you can answer, and it’s the heart of the build.',
         },
         {
-          title: 'Turn the pilot into a system',
-          desc: 'With the first workflow running on its own, the growth and revenue goals you came in with become a real next conversation — on solid ground.',
+          title: 'We confirm the technical ground',
+          desc: 'Access to your codebase, database, and the Paystack API, and where the automation will run on your stack.',
+        },
+        {
+          title: 'We agree the escalation line',
+          desc: 'Which applications activate on their own, and which always wait for you.',
+        },
+      ],
+    },
+
+    {
+      block: 'emphasisFrame',
+      label: 'What you get',
+      text:
+        'A written onboarding spec — the decision logic in plain terms — a technical integration plan, and a firm fixed price and timeline for the build.',
+    },
+
+    { block: 'divider' },
+
+    {
+      block: 'narrative',
+      sectionNum: '08 — Stage two: what the build covers',
+      heading: 'In scope, and what waits',
+      body: [
+        '<strong>In this build.</strong> The onboarding approval flow, end to end: the submitted documents are read and validated, the business details verified, the Paystack sub-account created and confirmed, and the merchant activated. Clean applications go through in minutes; anything unclear routes to you with the reason attached. Every decision is logged.',
+        '<strong>Done means.</strong> Clean merchants onboard without you touching them, the exceptions reach you with a reason, every decision is on record — and within a few weeks you run it without us.',
+      ],
+      example:
+        '<strong>Not in this build.</strong> Support-ticket automation, lead generation and the revenue goals, and any change to the merchant-facing sign-up — each a later step, on solid ground once the first one runs. We build on the platform you own, not a rebuild of it.',
+    },
+
+    { block: 'divider' },
+
+    {
+      block: 'processFlow',
+      sectionNum: '09 — Timeline',
+      heading: 'How the work runs',
+      intro: 'From the first session to a flow you run on your own.',
+      steps: [
+        {
+          title: 'Kickoff',
+          desc: 'We agree the sprint scope and get access to the codebase, database, and Paystack.',
+        },
+        {
+          title: 'Discovery sprint',
+          desc: 'A couple of working sessions to capture the approval criteria, plus the technical mapping. Two weeks.',
+        },
+        {
+          title: 'The build',
+          desc: 'We build the approval automation on your stack — scoped and priced from the sprint.',
+        },
+        {
+          title: 'Test on real applications',
+          desc: 'We run it against live sign-ups; you watch it clear merchants and catch the edge cases.',
+        },
+        {
+          title: 'Handoff',
+          desc: 'The flow runs on its own. You hold the audit trail and the controls.',
+        },
+      ],
+    },
+
+    { block: 'divider' },
+
+    {
+      block: 'narrative',
+      sectionNum: '10 — Investment',
+      heading: 'What it costs',
+      body: [
+        '<strong>Discovery sprint — €14,000 excl. VAT.</strong> Two weeks of work: the onboarding spec, the technical integration plan, and a firm price for the build.',
+        '<strong>The onboarding build — priced at the end of the sprint.</strong> The larger number is set only once the spec is firm and we both know exactly what it covers.',
+      ],
+      example:
+        'Staged on purpose: a small first commitment you can carry now, the bigger one priced only when it’s real.',
+    },
+
+    { block: 'divider' },
+
+    {
+      block: 'nextSteps',
+      sectionNum: '11 — What we need from you',
+      heading: 'To get going',
+      steps: [
+        {
+          title: 'Access',
+          desc: 'To the codebase, database, and the Paystack API.',
+        },
+        {
+          title: 'A few working sessions',
+          desc: 'Two or three sessions to get the approval criteria out of your head.',
+        },
+        {
+          title: 'One point of contact',
+          desc: 'On your side, for the technical hand-offs.',
         },
       ],
       link: { href: 'https://backspaceoddity.com/ai-skills/', label: 'The five AI products we scoped' },
@@ -159,28 +287,28 @@ export const uremboPage: ClientPage = {
 
     {
       block: 'discussion',
-      sectionNum: '07 — To align on',
-      heading: 'Questions for our next call',
+      sectionNum: '12 — To align on',
+      heading: 'Questions for our call',
       intro: 'Add your own — this page is yours, and we’ll keep building on it as we go.',
       questions: [
         {
-          q: 'Is the onboarding flow in section 04 how it actually works today?',
-          note: 'Where does a merchant most often get stuck or drop off?',
+          q: 'Does starting with the two-week discovery sprint feel like the right first step?',
+          note: 'If the shape or the timing gives you any pause, that’s the thing to talk through first.',
         },
         {
-          q: 'Of the approval steps, which take you the most time — documents, verification, or payment setup?',
-          note: 'That tells us where the first automation earns its keep fastest.',
+          q: 'When you approve a merchant today, what’s the first thing you check to know they’re genuine?',
+          note: 'This is the judgement the sprint is built to capture — a few minutes on it now gives us a running start.',
         },
         {
-          q: 'When you picture this off your plate, what would you do with the time it frees?',
-          note: 'It helps us aim the work at what matters most to you, not just what’s easiest to build.',
+          q: 'Looking at what’s in and out of the build in section 08, is there anything you’d move?',
+          note: 'Better to draw that line together now than after we’ve scoped it.',
         },
       ],
     },
 
     {
       block: 'docFooter',
-      left: 'Initial Assessment · Not a proposal',
+      left: 'Proposal · Urembo Hub',
       right: 'backspaceoddity.com',
     },
   ],

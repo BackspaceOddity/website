@@ -153,7 +153,7 @@ export function phases(b: PhasesBlock): string {
       <div class="phx-body">${p.body}</div>
     </div>`).join('\n    ');
   const css = `
-  .phx { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 24px; }
+  .phx { display: grid; grid-template-columns: repeat(${b.phases.length}, 1fr); gap: 2px; margin-top: 24px; }
   .phx-col { padding: 20px; background: var(--surface); }
   .phx-col.phx-now { background: var(--ink); }
   .phx-tag { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-40); margin-bottom: 10px; }
