@@ -41,7 +41,8 @@ export function proxy(request: NextRequest) {
   const isEntry = path === '/' || path === '/proposal' || path === '/proposal/';
   if (isEntry) {
     const url = request.nextUrl.clone();
-    url.pathname = `/w/${slug}/`;
+    // 8FIGURES uses the standalone /8figures route, not the /w block workspace.
+    url.pathname = slug === '8figures' ? '/8figures' : `/w/${slug}/`;
     return NextResponse.rewrite(url);
   }
 
