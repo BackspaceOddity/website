@@ -66,6 +66,10 @@ class BuilderApp extends React.Component {
   }
   componentDidMount(){
     try{ const raw = localStorage.getItem('bso_ds_styles'); if(raw){ this.dsStyles = JSON.parse(raw); } }catch(e){}
+    // Restore an existing session — skip the login screen if already signed in.
+    fetch('/api/builder/me').then(r=>r.json()).then(d=>{
+      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}); }
+    }).catch(()=>{});
   }
   componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
@@ -349,7 +353,20 @@ class BuilderApp extends React.Component {
   seg(opts, value, onChange, extra){ const h=React.createElement; return h('div',{style:Object.assign({display:'inline-flex', border:'1px solid var(--rule2)', borderRadius:7, overflow:'hidden', background:'var(--surface)'}, extra||{})}, opts.map(o=>{ const v=typeof o==='object'?o.v:o; const lab=typeof o==='object'?o.l:o; const on=v===value; return h('button',{key:String(v), onClick:()=>onChange(v), style:{padding:'6px 11px', border:'none', background:on?'var(--ink)':'transparent', color:on?'var(--paper)':'var(--muted)', cursor:'pointer', fontSize:'12px', fontWeight:on?600:500, fontFamily:'inherit', letterSpacing:'0', whiteSpace:'nowrap'}}, lab); })); }
 
   // ---------- login ----------
-  doLogin(){ if(this.state.loginBusy) return; if(!/.+@.+\..+/.test(this.state.loginEmail)){ this.setState({loginErr:'Enter a valid work email.'}); return; } this.setState({loginBusy:true, loginErr:''}); clearTimeout(this._li); this._li=setTimeout(()=>this.setState({loginBusy:false, screen:'dashboard'}), 950); }
+  doLogin(){
+    if(this.state.loginBusy) return;
+    const email=this.state.loginEmail, mode=this.state.loginMode;
+    if(!/.+@.+\..+/.test(email)){ this.setState({loginErr:'Enter a valid work email.'}); return; }
+    if(mode==='password' && !this.state.loginPw){ this.setState({loginErr:'Enter your password.'}); return; }
+    this.setState({loginBusy:true, loginErr:''});
+    fetch('/api/builder/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email, password:this.state.loginPw, mode})})
+      .then(async r=>{ const j=await r.json().catch(()=>({}));
+        if(r.ok && j.magic){ this.setState({loginBusy:false, loginErr:''}); this.toast('Magic link sent — check your email.'); }
+        else if(r.ok){ this.setState({loginBusy:false, loginPw:'', screen:'dashboard'}); }
+        else { this.setState({loginBusy:false, loginErr: j.error || 'Sign-in failed.'}); }
+      })
+      .catch(()=>this.setState({loginBusy:false, loginErr:'Network error — try again.'}));
+  }
   renderLogin(){
     const h=React.createElement; const SCH="'ABC Schengen','Inter',system-ui,sans-serif"; const GTD="'GT Eesti Pro Display','Inter',system-ui,sans-serif";
     const logo = h('svg',{viewBox:'0 0 80 80', width:30, height:30, fill:'currentColor', style:{display:'block'}},
