@@ -1,11 +1,11 @@
 // @ts-nocheck
 'use client';
 /* eslint-disable */
-/* Ported from the Claude Design export "Landing Builder.dc.html" (BSO-658).
-   Runtime decoupled to React 19; block library rewired to our real
-   lib/proposal-workspace blocks (see ./realBlocks). Design choices untouched. */
+/* Ported verbatim from the Claude Design export "Landing Builder.dc.html" (BSO-658).
+   Faithful import: only the Claude Design runtime coupling was swapped for React 19
+   (base class, mount, window.claude.complete → /api/builder/generate, asset URLs).
+   Design choices (ABC Schengen / Inter / JetBrains Mono / GT Eesti, palette, layout) untouched. */
 import React from 'react';
-import { CATALOG, CATALOG_BY_TYPE, renderPageHtml } from './realBlocks';
 
 class BuilderApp extends React.Component {
   constructor(props){
@@ -23,7 +23,14 @@ class BuilderApp extends React.Component {
       projectgrid:['label','heading','statement','body'], footer:['label','heading','body'],
       custom:['label','heading','body'],
     };
-    this.TEMPLATES = CATALOG.map(c => ({type:c.type, name:c.name, desc:c.desc}));
+    this.TEMPLATES = [
+      {type:'hero',        name:'Hero well',     desc:'Dark forest well · grain gradient · big statement'},
+      {type:'statement',   name:'Statement',     desc:'Large editorial statement on cream'},
+      {type:'twocol',      name:'Two-column copy',desc:'Lede + two body columns'},
+      {type:'casestudy',   name:'Case study',    desc:'Image well + title + metric'},
+      {type:'projectgrid', name:'Project grid',  desc:'Grid of project tiles'},
+      {type:'footer',      name:'Footer',        desc:'Contact · office · lockup'},
+    ];
     this.PAGES = [
       {id:'p1', tab:'bso', name:'Homepage — 2024 relaunch', img:'warm', owner:'Lieke', edited:'2 hours ago', status:'Published', recipe:['hero','statement','twocol','projectgrid','footer']},
       {id:'p2', tab:'bso', name:'Brand transformation', img:'magenta-green', owner:'Marnix', edited:'Yesterday', status:'Draft', recipe:['hero','statement','casestudy','footer']},
@@ -115,7 +122,7 @@ class BuilderApp extends React.Component {
   replaceBtn(target){ const h=React.createElement; if(!(this.state.editMode && !this.state.locked && !this.state.previewVersionId)) return null; const t=this.state.imgTarget; const armed=t && t.blockId===target.blockId && t.tileIndex===target.tileIndex && t.kind===target.kind; return h('button',{onClick:e=>{ e.stopPropagation(); this.armReplace(target); }, 'data-tip':'Replace from library', style:{position:'absolute', bottom:8, right:8, zIndex:7, padding:'5px 11px', borderRadius:7, border:'1px solid rgba(255,255,255,.55)', background:armed?'#F2F2F0':'rgba(1,28,0,.74)', color:armed?'#011C00':'#F2F2F0', cursor:'pointer', fontSize:'11px', fontWeight:600, fontFamily:"'Inter',system-ui,sans-serif"}}, armed?'Choose an image \u2192':'Replace image'); }
   toast(msg){ this.setState({toast:msg}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}), 3200); }
   roleName(r){ return ({label:'Label',heading:'Heading',statement:'Statement',body:'Body',list:'List'})[r]||r; }
-  typeName(t){ return (CATALOG_BY_TYPE[t] && CATALOG_BY_TYPE[t].name) || t; }
+  typeName(t){ return ({hero:'Hero well',statement:'Statement',twocol:'Two-column',casestudy:'Case study',projectgrid:'Project grid',footer:'Footer',custom:'Custom block'})[t]||t; }
   hashStr(s){ let h=2166136261; s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return Math.abs(h); }
   arnd(p,key,a,b){ return a + (this.hashStr(p.id+'#'+key) % (b-a+1)); }
   fmtDur(s){ const m=Math.floor(s/60), r=s%60; return m>0? m+'m '+r+'s' : r+'s'; }
@@ -196,11 +203,7 @@ class BuilderApp extends React.Component {
     return this.clone(m[type] || m.custom);
   }
   makeBlock(type, extra){
-    const ALIAS = {hero:'heardIt', twocol:'beforeAfter', casestudy:'demo', projectgrid:'phases', footer:'docFooter', custom:'narrative'};
-    const t = ALIAS[type] || type;
-    const entry = CATALOG_BY_TYPE[t] || CATALOG_BY_TYPE['statement'];
-    const real = entry.make();
-    return Object.assign({id:this.nid(), type: real.block}, real, extra||{});
+    return Object.assign({id:this.nid(), type, bg: type==='hero'?'forest':'paper', pad:'M', props:this.defaults(type), overrides:{}}, extra||{});
   }
   buildPage(recipe){ return (recipe||[]).map(t=> this.makeBlock(t)); }
 
@@ -284,7 +287,7 @@ class BuilderApp extends React.Component {
   }
   addAskToCanvas(){
     const r=this.state.askResult; if(!r) return;
-    const b=this.makeBlock('narrative'); if(r.heading) b.heading=r.heading; b.body=[r.body||r.heading||''].filter(Boolean);
+    const b=this.makeBlock('custom'); b.bg=r.bg; b.props={label:r.label, heading:r.heading, body:r.body};
     this.setState(s=>({blocks:[...s.blocks, b], selectedId:b.id, askState:'idle', askResult:null, askPrompt:''}));
     this.toast('Block added to canvas');
   }
@@ -557,24 +560,16 @@ class BuilderApp extends React.Component {
   }
 
   // ---------- canvas ----------
-  outlineBtn(dis){ return {width:24, height:24, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', borderRadius:5, cursor:dis?'default':'pointer', opacity:dis?0.35:1, fontSize:'11px', fontFamily:"'IBM Plex Mono',monospace", flex:'0 0 auto', padding:0}; }
   renderCanvas(){
-    const h=React.createElement;
-    const pver=this.state.previewVersionId && this.state.versions.find(v=>v.id===this.state.previewVersionId);
-    const blocks = pver && pver.blocks ? pver.blocks : this.state.blocks;
-    const n=blocks.length; const sel=this.state.selectedId;
-    const outline = h('div',{className:'bso-scroll', style:{flex:'0 0 236px', borderRight:'1px solid var(--rule)', background:'var(--surface)', overflowY:'auto', padding:'14px 12px'}},
-      h('div',{style:this.mono({marginBottom:12})}, 'Page outline'),
-      n===0 ? h('div',{style:{fontSize:'12.5px', color:'var(--muted)', lineHeight:1.5}}, 'Empty page. Add sections from the library.') :
-      blocks.map((b,i)=> h('div',{key:b.id, onClick:()=>this.selectBlock(b.id), style:{display:'flex', alignItems:'center', gap:7, padding:'8px 9px', marginBottom:6, borderRadius:8, border:'1px solid '+(sel===b.id?'var(--ink)':'var(--rule2)'), background:sel===b.id?'var(--paper)':'transparent', cursor:'pointer'}},
-        h('span',{style:Object.assign(this.mono({fontSize:'9px', letterSpacing:0, textTransform:'none'}),{flex:'0 0 16px', color:'var(--faint)'})}, String(i+1).padStart(2,'0')),
-        h('span',{style:{flex:1, minWidth:0, fontSize:'12.5px', fontWeight:500, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}, this.typeName(b.type)),
-        h('button',{onClick:e=>{e.stopPropagation(); this.moveBlock(b.id,-1);}, disabled:i===0, style:this.outlineBtn(i===0)}, '\u2191'),
-        h('button',{onClick:e=>{e.stopPropagation(); this.moveBlock(b.id,1);}, disabled:i===n-1, style:this.outlineBtn(i===n-1)}, '\u2193'),
-        h('button',{onClick:e=>{e.stopPropagation(); this.deleteBlock(b.id);}, style:this.outlineBtn(false)}, '\u00d7'))));
-    const frame = h('div',{className:'bso-scroll', style:{flex:1, minWidth:0, overflow:'auto', height:'100%', background:'var(--soft)', padding:'20px'}},
-      h('iframe',{title:'Page preview', srcDoc:renderPageHtml(blocks), style:{width:'100%', height:'100%', minHeight:'100%', border:'1px solid var(--rule)', borderRadius:12, background:'#F2F2F0', display:'block'}}));
-    return h('div',{style:{flex:1, minWidth:0, height:'100%', display:'flex'}}, outline, frame);
+    const h=React.createElement; const pver=this.state.previewVersionId && this.state.versions.find(v=>v.id===this.state.previewVersionId);
+    const blocks = pver && pver.blocks ? pver.blocks : this.state.blocks; const edit=this.state.editMode && !this.state.locked && !pver;
+    return h('div',{className:'bso-scroll', ref:this.onCanvasRef, onClick:()=>{ if(edit) this.setState({selectedId:null, selectedRole:null}); },
+      style:{flex:1, minWidth:0, overflowY:'auto', height:'100%', background:'var(--soft)', padding:'34px 0 120px'}},
+      h('div',{style:{width:1160, margin:'0 auto', zoom:this.state.canvasZoom, background:'#F2F2F0', color:'#011C00', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)', minHeight:300}},
+        blocks.length===0 ? this.emptyCanvas() :
+        h('div',null,
+          edit && this.dropzone(0),
+          blocks.map((b,i)=> h(React.Fragment,{key:b.id}, this.renderBlock(b,i), edit && this.dropzone(i+1))))));
   }
   emptyCanvas(){
     const h=React.createElement;

@@ -7,7 +7,15 @@ export const metadata = {
 };
 
 // Ported Claude Design prototype (BSO-658). Client-only builder shell.
-export default function BuilderPage() {
+export default async function BuilderPage() {
+  // Canonical Edit Mode — dev only. Dynamic import inside the dev branch so the
+  // production build never resolves the dev tool (per the EditModeShell prod-decouple fix).
+  let editPanel = '';
+  if (process.env.NODE_ENV !== 'production') {
+    const { buildScriptInner } = await import('@backspace-oddity/edit-mode/build-script');
+    editPanel = buildScriptInner({ slug: 'landing-builder', inboxBase: 'http://localhost:8014' });
+  }
+
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,6 +25,7 @@ export default function BuilderPage() {
         rel="stylesheet"
       />
       <BuilderApp />
+      {editPanel && <script dangerouslySetInnerHTML={{ __html: editPanel }} />}
     </>
   );
 }

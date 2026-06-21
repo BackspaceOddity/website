@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   EditModeProvider,
   EditToolbar,
@@ -21,6 +22,10 @@ import {
  * next Claude session for context on what needs to be changed.
  */
 export function EditModeShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  // /builder runs the canonical @backspace-oddity/edit-mode panel injected by its own
+  // route (BSO-658). Suppress the legacy global picker there to avoid a double panel.
+  if (pathname?.startsWith('/builder')) return <>{children}</>;
   return (
     <EditModeProvider>
       {children}
