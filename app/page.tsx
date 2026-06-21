@@ -1,4 +1,10 @@
-import { EditableText } from "@/lib/edit-mode/index.js";
+import type { ReactNode } from "react";
+
+// V1 edit-mode removed (BSO-658): EditableText is now a plain inline passthrough,
+// so the homepage renders without the legacy EditModeProvider.
+function EditableText({ children }: { id?: string; children?: ReactNode }) {
+  return <>{children}</>;
+}
 
 export default function HomePage() {
   return (
