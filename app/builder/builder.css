@@ -1,0 +1,33 @@
+
+    @font-face{font-family:'GT Eesti Pro Display';src:url('/fonts/GTEestiProDisplay-Light.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Display';src:url('/fonts/GTEestiProDisplay-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Display';src:url('/fonts/GTEestiProDisplay-Medium.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Display';src:url('/fonts/GTEestiProDisplay-Bold.ttf') format('truetype');font-weight:600 700;font-style:normal;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Display';src:url('/fonts/GTEestiProDisplay-UltraBold.ttf') format('truetype');font-weight:800;font-style:normal;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Text';src:url('/fonts/GTEestiProText-Light.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Text';src:url('/fonts/GTEestiProText-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Text';src:url('/fonts/GTEestiProText-RegularItalic.ttf') format('truetype');font-weight:400;font-style:italic;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Text';src:url('/fonts/GTEestiProText-Medium.ttf') format('truetype');font-weight:500 600;font-style:normal;font-display:swap;}
+    @font-face{font-family:'GT Eesti Pro Text';src:url('/fonts/GTEestiProText-Bold.ttf') format('truetype');font-weight:700 800;font-style:normal;font-display:swap;}
+    @font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengen-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;}
+    @font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengen-Medium.otf') format('opentype');font-weight:500 600;font-style:normal;font-display:swap;}
+    @font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengen-Bold.otf') format('opentype');font-weight:700 800;font-style:normal;font-display:swap;}
+    @font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0400-052F,U+1C80-1C88,U+2DE0-2DFF,U+A640-A69F;}
+    @font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Medium.otf') format('opentype');font-weight:500 600;font-style:normal;font-display:swap;unicode-range:U+0400-052F,U+1C80-1C88,U+2DE0-2DFF,U+A640-A69F;}
+    @font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Bold.otf') format('opentype');font-weight:700 800;font-style:normal;font-display:swap;unicode-range:U+0400-052F,U+1C80-1C88,U+2DE0-2DFF,U+A640-A69F;}
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;height:100%;}
+    body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;background:#0d1209;}
+    [data-theme="light"]{--ink:#011C00;--paper:#F2F2F0;--soft:#E8E8E6;--surface:#FAFAF8;--rule:rgba(1,28,0,.12);--rule2:rgba(1,28,0,.22);--muted:rgba(1,28,0,.55);--faint:rgba(1,28,0,.40);--shadow:0 1px 2px rgba(1,28,0,.06),0 8px 30px rgba(1,28,0,.08);}
+    [data-theme="dark"]{--ink:#e8e2d6;--paper:#0d1209;--soft:#111810;--surface:#172014;--rule:rgba(232,226,214,.13);--rule2:rgba(232,226,214,.24);--muted:rgba(232,226,214,.55);--faint:rgba(232,226,214,.40);--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 30px rgba(0,0,0,.4);}
+    ::selection{background:rgba(1,28,0,.14);}
+    @keyframes bsofade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+    @keyframes bsoblink{0%,100%{opacity:.25;}50%{opacity:1;}}
+    @keyframes bsospin{to{transform:rotate(360deg);}}
+    [contenteditable]:focus{outline:none;}
+    [data-tip]{position:relative;}
+    [data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#011C00;color:#F2F2F0;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border-radius:5px;white-space:nowrap;pointer-events:none;z-index:50;box-shadow:0 4px 14px rgba(1,28,0,.22);}
+    .bso-scroll::-webkit-scrollbar{width:11px;height:11px;}
+    .bso-scroll::-webkit-scrollbar-thumb{background:var(--rule2);border-radius:999px;border:3px solid transparent;background-clip:padding-box;}
+    .bso-scroll::-webkit-scrollbar-track{background:transparent;}
+  
