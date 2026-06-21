@@ -10,6 +10,7 @@
 'use client';
 
 import Script from 'next/script';
+import { LeadForm } from '../../brand-transformation/LeadForm';
 
 const MAIL = 'mailto:yegor@backspaceoddity.com';
 
@@ -229,5 +230,73 @@ export function BtFooter({ thisPage = 'This page', links, reach = 'Reach us', ci
       <div className="bt-footer__col"><span className="bt-footer__label">{thisPage}</span>{links.map((l) => <a href={l.href} key={l.href}>{l.label}</a>)}</div>
       <div className="bt-footer__col"><span className="bt-footer__label">{reach}</span><a href={MAIL}>yegor@backspaceoddity.com</a><button type="button" className="bt-cta-link" {...CAL_TRIGGER}>{book}</button><span>{city}</span></div>
     </footer>
+  );
+}
+
+/* ---------- Leverages — "Why a brand matters" (dark) ---------- */
+type Leverage = { metric: string; name: string; text: string };
+export function BtLeverages({ eyebrow, h2, intro, items }: { eyebrow: string; h2: string; intro: string; items: Leverage[] }) {
+  return (
+    <section className="bt-block" id="why" data-screen-label="Why a brand matters">
+      <div className="bt-inner">
+        <header className="bt-head">
+          <span className="bt-eyebrow bt-eyebrow--on-dark">{eyebrow}</span>
+          <h2 className="bt-h2 bt-h2--on-dark">{h2}</h2>
+          <p className="bt-intro bt-intro--on-dark">{intro}</p>
+        </header>
+        <ol className="bt-leverages">
+          {items.map((it) => (
+            <li className="bt-leverage" key={it.name}>
+              <span className="bt-leverage__metric">{it.metric}</span>
+              <h3 className="bt-leverage__name">{it.name}</h3>
+              <p className="bt-leverage__text">{it.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Timeline — phase rows + total ---------- */
+type TRow = { name: string; weeksNum: string; weeksUnit: string; tag?: string };
+export function BtTimeline({ eyebrow, h2, intro, rows, totalNum, totalNote }: { eyebrow: string; h2: string; intro: string; rows: TRow[]; totalNum: string; totalNote?: string }) {
+  return (
+    <section className="bt-sec bt-sec--light" id="timeline" data-screen-label="Phases & timeline">
+      <div className="bt-inner">
+        <header className="bt-head bt-head--gap">
+          <span className="bt-eyebrow">{eyebrow}</span>
+          <h2 className="bt-h2">{h2}</h2>
+          <p className="bt-intro">{intro}</p>
+        </header>
+        <div className="bt-timeline">
+          {rows.map((r, i) => (
+            <div className="bt-trow" key={i}>
+              <span className="bt-trow__name">{r.name}</span>
+              <span className="bt-trow__weeks"><b>{r.weeksNum}</b> {r.weeksUnit}</span>
+              {r.tag ? <span className="bt-trow__tag">{r.tag}</span> : <span></span>}
+            </div>
+          ))}
+        </div>
+        <p className="bt-total">Total: <b>{totalNum}</b></p>
+        {totalNote ? <p className="bt-total-note">{totalNote}</p> : null}
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Brand Diagnostic — section header + the lead form ---------- */
+export function BtDiagnostic({ eyebrow, h2, intro }: { eyebrow: string; h2: string; intro: string }) {
+  return (
+    <section className="bt-sec bt-sec--light" id="proposal" data-screen-label="The proposal">
+      <div className="bt-inner">
+        <header className="bt-head bt-head--gap">
+          <span className="bt-eyebrow">{eyebrow}</span>
+          <h2 className="bt-h2">{h2}</h2>
+          <p className="bt-intro">{intro}</p>
+        </header>
+        <LeadForm />
+      </div>
+    </section>
   );
 }
