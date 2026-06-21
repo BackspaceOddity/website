@@ -50,7 +50,7 @@ class BuilderApp extends React.Component {
       {id:'blank',    name:'Blank',          desc:'Start from an empty canvas', recipe:[], img:'warm'},
     ];
     this.state = {
-      screen:'login', theme:'light', loginEmail:'lieke@backspaceoddity.com', loginPw:'', loginBusy:false, loginErr:'', loginMode:'password',
+      screen:'login', theme:'light', loginEmail:'', loginPw:'', loginBusy:false, loginErr:'', loginMode:'password',
       dashTab:'bso', dashView:'rows', dashPageIdx:0,
       editorLayout:'lr', tweaksStyle:'stacked',
       newPageOpen:false, newPageStep:1, newPageArche:null, newPageName:'',
@@ -390,7 +390,7 @@ class BuilderApp extends React.Component {
         h('div',{style:{width:'100%', maxWidth:360}},
           h('div',{style:{fontFamily:SCH, fontWeight:700, fontSize:'27px', letterSpacing:'-0.02em', marginBottom:8}}, 'Sign in'),
           h('div',{style:{fontSize:'14px', color:'var(--muted)', marginBottom:28, lineHeight:1.45}}, 'Use your Backspace Oddity workspace account.'),
-          field('Work email', h('input',{type:'email', value:this.state.loginEmail, onChange:e=>this.setState({loginEmail:e.target.value, loginErr:''}), onKeyDown:onKey, autoFocus:true, style:inputStyle})),
+          field('Work email', h('input',{type:'email', value:this.state.loginEmail, placeholder:'you@backspaceoddity.com', onChange:e=>this.setState({loginEmail:e.target.value, loginErr:''}), onKeyDown:onKey, autoFocus:true, style:inputStyle})),
           this.state.loginMode==='password' && field('Password', h('input',{type:'password', value:this.state.loginPw, placeholder:'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022', onChange:e=>this.setState({loginPw:e.target.value, loginErr:''}), onKeyDown:onKey, style:inputStyle})),
           this.state.loginErr && h('div',{style:{fontSize:'12.5px', color:'#C0392B', marginTop:-6, marginBottom:14}}, this.state.loginErr),
           h('button',{onClick:()=>this.doLogin(), disabled:this.state.loginBusy, style:{width:'100%', padding:'13px', borderRadius:9, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:this.state.loginBusy?'default':'pointer', fontSize:'14.5px', fontWeight:600, fontFamily:'inherit', opacity:this.state.loginBusy?0.7:1}}, this.state.loginBusy?'Signing in\u2026':'Sign in'),
