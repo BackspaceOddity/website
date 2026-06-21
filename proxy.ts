@@ -34,6 +34,18 @@ export function proxy(request: NextRequest) {
 
   if (!slug) return NextResponse.next();
 
+  // kern.backspaceoddity.com → the Landing Builder app (the SaaS surface), not a
+  // /w/ client page. Bare host serves /builder; everything else (the builder's
+  // own routes + assets) passes through to the same app on this host.
+  if (slug === 'kern') {
+    if (request.nextUrl.pathname === '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/builder';
+      return NextResponse.rewrite(url);
+    }
+    return NextResponse.next();
+  }
+
   const path = request.nextUrl.pathname;
 
   // Vanity entry points → the client page. Everything else (assets, the /w/
