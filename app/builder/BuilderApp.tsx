@@ -1,5 +1,5 @@
-'use client';
 // @ts-nocheck
+'use client';
 /* eslint-disable */
 /* Ported verbatim from the Claude Design export "Landing Builder.dc.html" (BSO-658).
    Faithful import: only the Claude Design runtime coupling was swapped for React 19
