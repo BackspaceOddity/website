@@ -67,7 +67,7 @@ class BuilderApp extends React.Component {
   componentDidMount(){
     try{ const raw = localStorage.getItem('bso_ds_styles'); if(raw){ this.dsStyles = JSON.parse(raw); } }catch(e){}
     // Restore an existing session — skip the login screen if already signed in.
-    fetch('/api/builder/me').then(r=>r.json()).then(d=>{
+    fetch('/api/builder/me/').then(r=>r.json()).then(d=>{
       if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}); }
     }).catch(()=>{});
   }
@@ -359,7 +359,7 @@ class BuilderApp extends React.Component {
     if(!/.+@.+\..+/.test(email)){ this.setState({loginErr:'Enter a valid work email.'}); return; }
     if(mode==='password' && !this.state.loginPw){ this.setState({loginErr:'Enter your password.'}); return; }
     this.setState({loginBusy:true, loginErr:''});
-    fetch('/api/builder/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email, password:this.state.loginPw, mode})})
+    fetch('/api/builder/login/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email, password:this.state.loginPw, mode})})
       .then(async r=>{ const j=await r.json().catch(()=>({}));
         if(r.ok && j.magic){ this.setState({loginBusy:false, loginErr:''}); this.toast('Magic link sent — check your email.'); }
         else if(r.ok){ this.setState({loginBusy:false, loginPw:'', screen:'dashboard'}); }
