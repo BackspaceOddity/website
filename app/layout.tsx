@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import { EditModeShell } from "@/components/EditModeShell";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://backspaceoddity.com"),
@@ -34,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <EditModeShell>{children}</EditModeShell>
+        {children}
         <Script
           src="https://app.rybbit.io/api/script.js"
           data-site-id="41dafd61e53c"

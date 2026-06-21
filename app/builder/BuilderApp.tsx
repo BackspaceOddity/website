@@ -55,7 +55,7 @@ class BuilderApp extends React.Component {
       editorLayout:'lr', tweaksStyle:'stacked',
       newPageOpen:false, newPageStep:1, newPageArche:null, newPageName:'',
       pageTitle:'', pageTab:'bso', blocks:[], styles:this.clone(this.DEFAULT_STYLES),
-      selectedId:null, selectedRole:null, editMode:true, libraryOpen:true, tweaksOpen:true, libW:288, tweaksW:312,
+      selectedId:null, selectedRole:null, editMode:true, libraryOpen:true, tweaksOpen:true, libW:188, tweaksW:248, dsRole:'heading',
       askPrompt:'', askState:'idle', askResult:null, customTemplates:[], libTab:'sections', draggingAsset:null, assets:[{id:'a1',name:'Magenta · green',val:'magenta-green'},{id:'a2',name:'Terracotta',val:'terracotta'},{id:'a3',name:'Emerald',val:'emerald'},{id:'a4',name:'Warm',val:'warm'}],
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
@@ -69,7 +69,7 @@ class BuilderApp extends React.Component {
   }
   componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
-  startResize(e, which){ e.preventDefault(); const startX=e.clientX; const key=which==='lib'?'libW':'tweaksW'; const startW=this.state[key]; const lr=this.state.editorLayout==='lr'; const dir=(which==='lib')?(lr?1:-1):(lr?-1:1); const move=ev=>{ let w=startW+dir*(ev.clientX-startX); w=Math.max(224,Math.min(480,w)); this.setState({[key]:w}); }; const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); document.body.style.cursor=''; document.body.style.userSelect=''; }; window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); document.body.style.cursor='col-resize'; document.body.style.userSelect='none'; }
+  startResize(e, which){ e.preventDefault(); const startX=e.clientX; const key=which==='lib'?'libW':'tweaksW'; const startW=this.state[key]; const lr=this.state.editorLayout==='lr'; const dir=(which==='lib')?(lr?1:-1):(lr?-1:1); const move=ev=>{ let w=startW+dir*(ev.clientX-startX); w=Math.max(168,Math.min(480,w)); this.setState({[key]:w}); }; const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); document.body.style.cursor=''; document.body.style.userSelect=''; }; window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); document.body.style.cursor='col-resize'; document.body.style.userSelect='none'; }
   onCanvasRef = (el)=>{ this._canvasEl=el; if(el){ this.measureCanvas(); if(!this._ro){ this._ro=new ResizeObserver(()=>this.measureCanvas()); } this._ro.disconnect(); this._ro.observe(el); } };
   measureCanvas(){ if(!this._canvasEl) return; const w=this._canvasEl.clientWidth; const z=Math.max(0.22, Math.min(1, (w-64)/1160)); if(Math.abs(z-(this.state.canvasZoom||1))>0.004){ this.setState({canvasZoom:z}); } }
   clone(o){ return JSON.parse(JSON.stringify(o)); }
@@ -202,6 +202,18 @@ class BuilderApp extends React.Component {
     };
     return this.clone(m[type] || m.custom);
   }
+  placeholders(type){
+    const m = {
+      hero:{label:'Eyebrow', heading:'Your headline goes here', cta:'Call to action', img:'magenta-green'},
+      statement:{label:'Section label', heading:'A short, bold statement goes here.', body:'Supporting copy placeholder — replace with your own.'},
+      twocol:{label:'Section label', lede:'Lede sentence placeholder.', colA:'First column body placeholder.', colB:'Second column body placeholder.'},
+      casestudy:{label:'Section label', title:'Case study title', lede:'One-line summary placeholder.', metricValue:'00×', metricLabel:'metric label', img:'emerald'},
+      projectgrid:{label:'Section label', heading:'Section heading', tiles:[{title:'Item one', lede:'Subtitle', img:'terracotta'},{title:'Item two', lede:'Subtitle', img:'warm'},{title:'Item three', lede:'Subtitle', img:'emerald'}]},
+      footer:{label:'Section label', heading:'Closing line goes here.', contact:'email@example.com', office:'Address placeholder', nav:'Link · Link · Link'},
+      custom:{label:'New block', heading:'Headline placeholder', body:'Body placeholder.'},
+    };
+    return this.clone(m[type] || m.custom);
+  }
   makeBlock(type, extra){
     return Object.assign({id:this.nid(), type, bg: type==='hero'?'forest':'paper', pad:'M', props:this.defaults(type), overrides:{}}, extra||{});
   }
@@ -245,7 +257,7 @@ class BuilderApp extends React.Component {
   insertAt(index, block){ this.setState(s=>{ const arr=[...s.blocks]; arr.splice(index,0,block); return {blocks:arr, selectedId:block.id, selectedRole:null, dropAt:null, draggingType:null, dragIndex:null}; }); }
   onDrop(index){
     const {draggingType, dragIndex} = this.state;
-    if(draggingType){ const tpl=this.state.customTemplates.find(t=>t.type===draggingType+'__custom'); this.insertAt(index, draggingType.startsWith('custom:') ? this.customInstance(draggingType) : this.makeBlock(draggingType)); return; }
+    if(draggingType){ const blank=draggingType.startsWith('blank:'); const realType=blank?draggingType.slice(6):draggingType; this.insertAt(index, draggingType.startsWith('custom:') ? this.customInstance(draggingType) : (blank?this.makeBlock(realType,{props:this.placeholders(realType), bg:'paper'}):this.makeBlock(realType))); return; }
     if(dragIndex!=null){ this.setState(s=>{ const arr=[...s.blocks]; const [m]=arr.splice(dragIndex,1); let to=index; if(dragIndex<index) to=index-1; arr.splice(to,0,m); return {blocks:arr, dragIndex:null, dropAt:null}; }); }
   }
   customInstance(key){ const t=this.state.customTemplates.find(x=>x.key===key); if(!t) return this.makeBlock('custom'); const b=this.makeBlock('custom'); b.props=this.clone(t.props); b.bg=t.bg||'paper'; return b; }
@@ -258,6 +270,7 @@ class BuilderApp extends React.Component {
     this.setState(s=>({blocks:s.blocks.map(b=>{ if(b.id!==selectedId) return b; const cur=Object.assign({}, s.styles[selectedRole], (b.overrides&&b.overrides[selectedRole])||{}); cur[prop]=val; return {...b, overrides:{...b.overrides,[selectedRole]:cur}}; })}));
   }
   resetOverride(){ const {selectedId, selectedRole}=this.state; this.setState(s=>({blocks:s.blocks.map(b=>{ if(b.id!==selectedId) return b; const o={...b.overrides}; delete o[selectedRole]; return {...b, overrides:o}; })})); }
+  setDSProp(role, prop, val){ this.setState(s=>{ const styles=Object.assign({}, s.styles, {[role]:Object.assign({}, s.styles[role], {[prop]:val})}); this.dsStyles=this.clone(styles); try{ localStorage.setItem('bso_ds_styles', JSON.stringify(styles)); }catch(e){} return {styles}; }); }
   updateStyle(scope){
     const {selectedId, selectedRole, blocks} = this.state;
     const inst = blocks.find(b=>b.id===selectedId); if(!inst) return;
@@ -375,7 +388,7 @@ class BuilderApp extends React.Component {
     const logo = h('svg',{viewBox:'0 0 80 80', width:22, height:22, fill:'currentColor', style:{display:'block'}},
       h('ellipse',{cx:14.718,cy:40,rx:14.718,ry:30.732}), h('ellipse',{cx:33.283,cy:40,rx:10.31,ry:38.537}),
       h('ellipse',{cx:47.615,cy:40,rx:3.544,ry:40}), h('ellipse',{cx:59.5,cy:40,rx:5,ry:32}), h('ellipse',{cx:72,cy:40,rx:3.3,ry:18}));
-    return h('div',{style:{height:56, flex:'0 0 56px', borderBottom:'1px solid var(--rule)', background:'var(--surface)', display:'flex', alignItems:'center', padding:'0 16px', gap:14, zIndex:30}},
+    return h('div',{className:'bso-topbar', style:{height:56, flex:'0 0 56px', borderBottom:'1px solid var(--rule)', background:'var(--surface)', display:'flex', alignItems:'center', padding:'0 16px', gap:7, zIndex:30}},
       h('div',{style:{display:'flex', alignItems:'center', gap:10, color:'var(--ink)'}}, logo,
         h('div',{style:{lineHeight:1}},
           h('div',{style:{fontWeight:700, fontSize:'14px', letterSpacing:'-0.01em'}}, 'Backspace Oddity'),
@@ -398,7 +411,7 @@ class BuilderApp extends React.Component {
       screen==='dashboard' && h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:''}), style:Object.assign(this.topBtn(false),{background:'var(--ink)', color:'var(--paper)', borderColor:'var(--ink)', fontWeight:600})}, '+ New page'),
     );
   }
-  topBtn(active){ return {padding:'7px 12px', border:'1px solid var(--rule2)', borderRadius:7, background:active?'var(--ink)':'var(--surface)', color:active?'var(--paper)':'var(--ink)', cursor:'pointer', fontSize:'12.5px', fontWeight:500, fontFamily:'inherit', whiteSpace:'nowrap'}; }
+  topBtn(active){ return {height:26, flex:'0 0 auto', padding:'0 10px', display:'inline-flex', alignItems:'center', border:'1px solid '+(active?'var(--ink)':'var(--rule)'), borderRadius:6, background:active?'var(--ink)':'transparent', color:active?'var(--paper)':'var(--muted)', cursor:'pointer', fontSize:'11px', fontWeight:500, fontFamily:"'JetBrains Mono',monospace", letterSpacing:'.02em', whiteSpace:'nowrap', transition:'border-color .12s, color .12s, background .12s'}; }
 
   // ---------- dashboard ----------
   renderDashboard(){
@@ -456,16 +469,23 @@ class BuilderApp extends React.Component {
     const lib = this.renderLibrary();
     const tweaks = this.renderTweaks();
     const canvas = this.renderCanvas();
-    const lh = libraryOpen && this.resizeBar('lib');
-    const th = tweaksOpen && this.resizeBar('tweaks');
     const cols = editorLayout==='lr'
-      ? [libraryOpen&&lib, lh, canvas, th, tweaksOpen&&tweaks]
-      : [tweaksOpen&&tweaks, th, canvas, lh, libraryOpen&&lib];
+      ? [libraryOpen&&lib, canvas, tweaksOpen&&tweaks]
+      : [tweaksOpen&&tweaks, canvas, libraryOpen&&lib];
     return h('div',{style:{height:'100%', display:'flex', minHeight:0, position:'relative'}},
       this.state.locked && this.renderLockBanner(),
       this.state.previewVersionId && this.renderPreviewBanner(),
       cols.filter(Boolean).map((c,i)=>h(React.Fragment,{key:i}, c)),
+      this.renderTplHover(),
       this.state.versionsOpen && this.renderVersions());
+  }
+  renderTplHover(){
+    const h=React.createElement; const ht=this.state.hoverTpl; if(!ht) return null;
+    const top=Math.max(64, Math.min(ht.top, (typeof window!=='undefined'?window.innerHeight:900)-220));
+    return h('div',{style:{position:'fixed', top, left:ht.left, zIndex:60, width:248, background:'var(--surface)', border:'1px solid var(--rule)', borderRadius:12, boxShadow:'var(--shadow)', padding:12, pointerEvents:'none', animation:'bsofade .12s both'}},
+      this.miniPreview(ht.type, ht.bg, '100%', 132),
+      h('div',{style:{fontSize:'13px', fontWeight:600, marginTop:9, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, ht.name),
+      ht.desc && h('div',{style:{fontSize:'11.5px', color:'var(--muted)', marginTop:3, lineHeight:1.4}}, ht.desc));
   }
   renderLockBanner(){
     const h=React.createElement;
@@ -476,6 +496,13 @@ class BuilderApp extends React.Component {
       h('button',{onClick:()=>this.setState({locked:false}), style:{padding:'5px 12px', borderRadius:7, border:'none', background:'var(--paper)', color:'var(--ink)', cursor:'pointer', fontSize:'12.5px', fontWeight:600, fontFamily:'inherit'}}, 'Request access'));
   }
 
+  libTabIcon(kind, on){
+    const h=React.createElement; const c=on?'var(--paper)':'var(--muted)';
+    const svg=kids=>h('svg',{width:15,height:15,viewBox:'0 0 16 16',fill:'none',stroke:c,strokeWidth:1.4,strokeLinecap:'round',strokeLinejoin:'round'},kids);
+    if(kind==='sections') return svg([h('rect',{key:1,x:2.5,y:2.5,width:11,height:11,rx:1.6}),h('line',{key:2,x1:5,y1:6,x2:11,y2:6}),h('line',{key:3,x1:5,y1:8.3,x2:11,y2:8.3}),h('line',{key:4,x1:5,y1:10.6,x2:9,y2:10.6})]);
+    if(kind==='layouts') return svg([h('rect',{key:1,x:2.5,y:2.5,width:11,height:11,rx:1.6,strokeDasharray:'2.3 1.8'}),h('line',{key:2,x1:5,y1:6.4,x2:11,y2:6.4,strokeDasharray:'2 1.7'}),h('line',{key:3,x1:5,y1:9.4,x2:9,y2:9.4,strokeDasharray:'2 1.7'})]);
+    return svg([h('rect',{key:1,x:2.5,y:3,width:11,height:10,rx:1.6}),h('circle',{key:2,cx:6,cy:6.4,r:1.1}),h('path',{key:3,d:'M3.4 12 L6.8 8.6 L9.3 11 L11 9.4 L12.6 11'})]);
+  }
   // ---------- library panel ----------
   renderLibrary(){
     const h=React.createElement; const side=this.state.editorLayout==='lr'?'right':'left';
@@ -485,51 +512,56 @@ class BuilderApp extends React.Component {
         h('div',{style:{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12}},
           h('div',{style:this.mono()}, 'Library'),
           h('button',{onClick:()=>this.setState({libraryOpen:false}), style:{background:'none',border:'none',cursor:'pointer',color:'var(--faint)',fontSize:'16px',padding:0}}, '\u00d7')),
-        h('div',{style:{display:'flex', gap:6}}, ['sections','assets'].map(k=>h('button',{key:k, onClick:()=>this.setState({libTab:k}), style:{flex:1, padding:'7px', borderRadius:7, border:'1px solid var(--rule2)', background:this.state.libTab===k?'var(--ink)':'var(--surface)', color:this.state.libTab===k?'var(--paper)':'var(--muted)', cursor:'pointer', fontSize:'12px', fontWeight:this.state.libTab===k?600:500, fontFamily:'inherit'}}, k==='sections'?'Sections':'Brand assets')))),
-      this.state.libTab==='assets' ? this.renderAssets() : h('div',{style:{padding:'14px 16px'}},
-        h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Drag a template onto the canvas, or ask Claude for a new one.'),
-        this.TEMPLATES.map(t=> this.libCard(t.type, t.name, t.desc, false)),
-        this.state.customTemplates.length>0 && h('div',{style:this.mono({margin:'18px 2px 10px'})}, 'Locked by you'),
-        this.state.customTemplates.map(t=> this.libCard(t.key, t.name, t.props.heading, true, t.bg)),
-        this.renderAsk()));
+        h('div',{style:{display:'flex', gap:5}}, [['sections','Sections'],['layouts','Layouts'],['assets','Assets']].map(p=>{ const k=p[0]; const on=this.state.libTab===k; return h('button',{key:k, 'data-tip':p[1], title:p[1], onClick:()=>this.setState({libTab:k}), style:{flex:1, minWidth:0, height:30, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid '+(on?'var(--ink)':'var(--rule)'), background:on?'var(--ink)':'transparent', cursor:'pointer', transition:'border-color .12s, background .12s'}}, this.libTabIcon(k,on)); }))),
+      this.state.libTab==='assets' ? this.renderAssets()
+      : this.state.libTab==='layouts' ? h('div',{style:{padding:'14px 16px'}},
+          h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Structure only, placeholder text — for designing freely. Drag onto the canvas.'),
+          this.TEMPLATES.map(t=> this.libCard(t.type, t.name, t.desc, false, null, true)),
+          this.renderAsk())
+      : h('div',{style:{padding:'14px 16px'}},
+          h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Ready-made, with our copy. Drag onto the canvas or ask Claude.'),
+          this.TEMPLATES.map(t=> this.libCard(t.type, t.name, t.desc, false)),
+          this.state.customTemplates.length>0 && h('div',{style:this.mono({margin:'18px 2px 10px'})}, 'Locked by you'),
+          this.state.customTemplates.map(t=> this.libCard(t.key, t.name, t.props.heading, true, t.bg)),
+          this.renderAsk()));
   }
   renderAssets(){
     const h=React.createElement; const inst=this.state.blocks.find(b=>b.id===this.state.selectedId);
     const canApply = inst && (inst.type==='hero'||inst.type==='casestudy');
     return h('div',{style:{padding:'14px 16px'}},
       h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, canApply? 'Click to apply to the selected '+this.typeName(inst.type)+', or drag onto any image area.' : 'Drag an image onto any image area on the canvas \u2014 hero, case study or a project tile.'),
-      h('div',{style:{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, alignItems:'start'}},
+      h('div',{style:{display:'flex', flexDirection:'column', gap:10, alignItems:'center'}},
         this.state.assets.map(a=> h('div',{key:a.id, draggable:true,
           onDragStart:e=>{ this.setState({draggingAsset:a.val}); e.dataTransfer.effectAllowed='copy'; },
           onDragEnd:()=>this.setState({draggingAsset:null}),
           onClick:()=>{ if(this.applyAssetToTarget(a.val)) return; if(canApply){ this.setBlockImg(inst.id, a.val); this.toast('Image applied to '+this.typeName(inst.type)); } else { this.toast('Select a hero or case-study block, or drag onto an image'); } },
-          style:{position:'relative', display:'flex', flexDirection:'column', cursor:'grab', borderRadius:9, overflow:'hidden', border:'1px solid var(--rule2)', background:'var(--paper)'}},
+          style:{position:'relative', width:152, maxWidth:'100%', display:'flex', flexDirection:'column', cursor:'grab', borderRadius:9, overflow:'hidden', border:'1px solid var(--rule2)', background:'var(--paper)'}},
           h('button',{onClick:e=>{e.stopPropagation(); this.deleteAsset(a.id);}, style:{position:'absolute', top:6, right:6, zIndex:3, width:20, height:20, borderRadius:99, border:'none', background:'rgba(1,28,0,.66)', color:'#F2F2F0', cursor:'pointer', fontSize:'12px', lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', padding:0}}, '×'),
-          h('div',{style:{height:62, flex:'0 0 auto', background:'#011C00', backgroundImage:'url('+this.imgUrl(a.val)+')', backgroundSize:'cover', backgroundPosition:'center'}}),
+          h('div',{style:{height:90, flex:'0 0 auto', background:'#011C00', backgroundImage:'url('+this.imgUrl(a.val)+')', backgroundSize:'cover', backgroundPosition:'center'}}),
           h('div',{style:{flex:'0 0 auto', padding:'6px 8px', fontSize:'10.5px', color:'var(--muted)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}, a.name))),
-        h('label',{style:{cursor:'pointer', borderRadius:9, border:'1px dashed var(--rule2)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:89, color:'var(--muted)', fontSize:'11.5px', textAlign:'center', gap:3, padding:8}},
+        h('label',{style:{cursor:'pointer', width:152, maxWidth:'100%', borderRadius:9, border:'1px dashed var(--rule2)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:110, color:'var(--muted)', fontSize:'11.5px', textAlign:'center', gap:3, padding:8}},
           h('span',{style:{fontSize:'18px', lineHeight:1}}, '+'),
           h('span',null, 'Upload image'),
           h('input',{type:'file', accept:'image/*', style:{display:'none'}, onChange:e=>this.uploadAsset(e)}))));
   }
-  libCard(typeKey, name, desc, custom, bg){
+  libCard(typeKey, name, desc, custom, bg, blank){
     const h=React.createElement; const isCustom=String(typeKey).startsWith('custom:');
-    return h('div',{key:typeKey, draggable:true,
-        onDragStart:e=>{ this.setState({draggingType:typeKey}); e.dataTransfer.effectAllowed='copy'; },
+    const mk=()=> isCustom?this.customInstance(typeKey):(blank?this.makeBlock(typeKey,{props:this.placeholders(typeKey), bg:'paper'}):this.makeBlock(typeKey));
+    return h('div',{key:(blank?'blank-':'')+typeKey, draggable:true, title:desc,
+        onDragStart:e=>{ this.setState({draggingType:(blank?'blank:':'')+typeKey}); e.dataTransfer.effectAllowed='copy'; },
         onDragEnd:()=>this.setState({draggingType:null, dropAt:null}),
-        onClick:()=>{ this.insertAt(this.state.blocks.length, isCustom?this.customInstance(typeKey):this.makeBlock(typeKey)); this.toast(name+' added'); },
-        style:{border:'1px solid var(--rule2)', borderRadius:10, padding:'12px 13px', marginBottom:10, cursor:'grab', background:'var(--paper)', transition:'border-color .15s, transform .1s'},
-        onMouseEnter:e=>e.currentTarget.style.borderColor='var(--ink)', onMouseLeave:e=>e.currentTarget.style.borderColor='var(--rule2)'},
-      h('div',{style:{display:'flex', alignItems:'center', gap:10}},
-        this.miniPreview(isCustom?'custom':typeKey, bg),
-        h('div',{style:{minWidth:0, flex:1}},
-          h('div',{style:{fontSize:'13.5px', fontWeight:600, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name),
-          h('div',{style:{fontSize:'11.5px', color:'var(--muted)', marginTop:2, lineHeight:1.35, overflow:'hidden', textOverflow:'ellipsis', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical'}}, desc))),
+        onClick:()=>{ this.insertAt(this.state.blocks.length, mk()); this.toast(name+' added'); },
+        style:{border:'1px '+(blank?'dashed':'solid')+' var(--rule2)', borderRadius:7, padding:4, width:152, maxWidth:'100%', margin:'0 auto 8px', cursor:'grab', background:blank?'transparent':'var(--paper)', transition:'border-color .15s, transform .1s'},
+        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{type:isCustom?'custom':typeKey, name, desc, bg, top:r.top, left:r.right+12}}); },
+        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); }},
+      h('div',{style:{display:'flex', flexDirection:'column', gap:5}},
+        this.miniPreview(isCustom?'custom':typeKey, bg, '100%', 90),
+        h('div',{style:{fontSize:'11px', fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', textAlign:'center', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name)),
     );
   }
-  miniPreview(type, bg){
+  miniPreview(type, bg, w, hh){
     const h=React.createElement; const forest=type==='hero'||bg==='forest';
-    const base={width:44, height:34, borderRadius:6, flex:'0 0 auto', padding:5, display:'flex', flexDirection:'column', gap:3, justifyContent:'center', overflow:'hidden', border:'1px solid var(--rule2)'};
+    const base={width:w||44, height:hh||34, borderRadius:6, flex:'0 0 auto', padding:w?'10px 12px':5, display:'flex', flexDirection:'column', gap:w?5:3, justifyContent:'center', overflow:'hidden', border:'1px solid var(--rule2)'};
     const bar=(w,c)=>h('div',{style:{height:3, width:w, borderRadius:2, background:c}});
     if(forest) return h('div',{style:Object.assign({},base,{background:'#011C00', backgroundImage:type==='hero'?'url('+this.grad('magenta-green')+')':'none', backgroundSize:'cover'})}, bar('70%','rgba(253,251,244,.9)'), bar('45%','rgba(253,251,244,.5)'));
     if(type==='twocol') return h('div',{style:Object.assign({},base,{flexDirection:'row', gap:4, alignItems:'stretch', background:'var(--paper)'})}, h('div',{style:{flex:1, display:'flex', flexDirection:'column', gap:3, justifyContent:'center'}}, bar('80%','var(--rule2)'), bar('60%','var(--rule)')), h('div',{style:{flex:1, display:'flex', flexDirection:'column', gap:3, justifyContent:'center'}}, bar('80%','var(--rule2)'), bar('60%','var(--rule)')));
@@ -690,13 +722,24 @@ class BuilderApp extends React.Component {
   }
   tweaksEmpty(){
     const h=React.createElement;
-    return h('div',{style:{padding:'40px 22px', textAlign:'center', color:'var(--muted)'}},
-      h('div',{style:{width:40, height:40, borderRadius:9, border:'1px dashed var(--rule2)', margin:'0 auto 16px', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'IBM Plex Mono',monospace", fontSize:'18px', color:'var(--faint)'}}, '\u25A1'),
-      h('div',{style:{fontSize:'14px', fontWeight:600, color:'var(--ink)', marginBottom:6, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, 'Select a section'),
-      h('div',{style:{fontSize:'12.5px', lineHeight:1.5}}, 'Click any block on the canvas to reveal its controls. Click a piece of text to edit its type style.'),
-      h('div',{style:{marginTop:22, paddingTop:20, borderTop:'1px solid var(--rule)', textAlign:'left'}},
-        h('div',{style:this.mono({marginBottom:12})}, 'Design system styles'),
-        ['heading','statement','body','label'].map(r=>{ const s=this.state.styles[r]; return h('div',{key:r, style:{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 0', borderBottom:'1px solid var(--rule)'}}, h('span',{style:{fontSize:'13px', fontWeight:500, color:'var(--ink)'}}, this.roleName(r)), h('span',{style:this.mono({textTransform:'none', letterSpacing:0})}, s.size+'/'+s.lh+' · '+s.weight)); })));
+    return h('div',{style:{padding:'0 0 8px', color:'var(--muted)'}},
+      h('div',{style:{padding:'14px 18px 2px'}},
+        h('div',{style:{fontSize:'12px', lineHeight:1.5, color:'var(--muted)'}}, 'Edit the Backspace Oddity type styles below \u2014 applies across the page. Click a section on the canvas to override one instance.')),
+      h('div',{style:{marginTop:18, paddingTop:8, borderTop:'1px solid var(--rule)', textAlign:'left'}},
+        h('div',{style:this.mono({margin:'0 18px 6px'})}, 'Type styles — live DS'),
+        ['heading','statement','body','label','list'].map(r=>{
+          const s=this.state.styles[r]; const open=this.state.dsRole===r;
+          return h('div',{key:r, style:{borderBottom:'1px solid var(--rule)'}},
+            h('button',{onClick:()=>this.setState({dsRole:open?null:r}), style:{width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center', padding:'11px 18px', background:'none', border:'none', cursor:'pointer', textAlign:'left'}},
+              h('span',{style:{display:'flex', alignItems:'center', gap:8}}, h('span',{style:{color:'var(--faint)', fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', width:8, display:'inline-block'}}, open?'-':'+'), h('span',{style:{fontSize:'13px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, this.roleName(r))),
+              h('span',{style:this.mono({textTransform:'none', letterSpacing:0, fontSize:'10.5px'})}, s.size+'/'+s.lh+' '+s.weight)),
+            open && h('div',{style:{padding:'2px 18px 12px'}},
+              this.row('Family', this.seg([{v:'display',l:'Display'},{v:'text',l:'Text'},{v:'mono',l:'Mono'}], s.family, v=>this.setDSProp(r,'family',v))),
+              this.row('Size', this.sliderCtl(s.size, 11, 96, 1, v=>this.setDSProp(r,'size',v), s.size+'px')),
+              this.row('Line height', this.sliderCtl(s.lh, 0.85, 1.8, 0.05, v=>this.setDSProp(r,'lh',Math.round(v*100)/100), s.lh.toFixed(2))),
+              this.row('Weight', this.seg([{v:400,l:'400'},{v:500,l:'500'},{v:600,l:'600'},{v:700,l:'700'},{v:800,l:'800'}], s.weight, v=>this.setDSProp(r,'weight',v))),
+              this.row('Uppercase', this.seg([{v:false,l:'Off'},{v:true,l:'On'}], !!s.upper, v=>this.setDSProp(r,'upper',v)))));
+        })));
   }
   tweaksBody(inst, role){
     const h=React.createElement; const compact=this.state.tweaksStyle==='compact';
