@@ -53,7 +53,7 @@ class BuilderApp extends React.Component {
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'',
-      realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null,
+      realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{},
     };
     this.uid = 0;
     this.fileInput = null;
@@ -617,32 +617,38 @@ class BuilderApp extends React.Component {
           this.renderAsk()));
   }
   // ---------- real-page sections: type -> variations ----------
+  toggleLibType(t){ this.setState(s=>{ const e=Object.assign({}, s.libExpanded); if(e[t]) delete e[t]; else e[t]=true; return {libExpanded:e}; }); }
+  // Keynote-style outline: a delicate disclosure triangle per multi-variation
+  // type; variations expand inline, indented to the right — all on one screen.
+  typeTile(sec, props, name, multiCount, onClick){
+    const h=React.createElement;
+    return h('div',{ onClick,
+        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:sec.type, props, name, top:r.top, left:r.right+12}}); },
+        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
+        style:{flex:1, minWidth:0, border:'1px solid var(--rule2)', borderRadius:9, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
+      h('div',{style:{position:'relative'}},
+        this.thumbFill(sec.type, props, 72, 0.145),
+        multiCount && h('div',{style:{position:'absolute', top:6, right:6, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'9px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 5px', lineHeight:1.4}}, multiCount)),
+      h('div',{style:{padding:'8px 11px 9px', fontSize:'12px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name));
+  }
   renderBtSections(){
-    const h=React.createElement; const openType=this.state.libOpen;
-    // Level 2 — variations of the opened type (name under each preview).
-    if(openType){
-      const sec=BT_SECTIONS.find(s=>s.type===openType);
-      if(!sec) return h('div',{style:{padding:'12px 14px'}});
-      return h('div',{style:{padding:'12px 14px'}},
-        h('button',{onClick:()=>this.setState({libOpen:null}), style:{display:'inline-flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color:'var(--muted)', fontSize:'11.5px', fontFamily:'inherit', padding:0, marginBottom:11}}, '← All sections'),
-        h('div',{style:{fontSize:'13px', fontWeight:700, marginBottom:11, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, sec.name),
-        h('div',{style:{display:'flex', flexDirection:'column', gap:9}}, sec.variations.map(v=> this.btVarCard(sec.type, v))));
-    }
-    // Level 1 — type tiles in a 2-up grid, name under the thumbnail.
+    const h=React.createElement; const exp=this.state.libExpanded||{};
     return h('div',{style:{padding:'12px 14px'}},
-      h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Real sections from this page’s design system. Pick a type, then a variation — hover to preview.'),
+      h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Real sections from this page’s design system. Open the ▸ to see variations — hover to preview.'),
       h('div',{style:{display:'flex', flexDirection:'column', gap:10}},
         BT_SECTIONS.map(sec=>{
-          const first=sec.variations[0]; const multi=sec.variations.length>1;
-          return h('div',{key:sec.type,
-            onClick:()=> multi?this.setState({libOpen:sec.type}):this.insertBtVariation(sec.type, first),
-            onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:sec.type, props:first.props, name:sec.name+(multi?' · '+sec.variations.length+' variations':''), top:r.top, left:r.right+12}}); },
-            onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
-            style:{border:'1px solid var(--rule2)', borderRadius:9, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
-            h('div',{style:{position:'relative'}},
-              this.thumbFill(sec.type, first.props, 72, 0.145),
-              multi && h('div',{style:{position:'absolute', top:6, right:6, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'9px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 5px', lineHeight:1.4}}, sec.variations.length)),
-            h('div',{style:{padding:'8px 11px 9px', fontSize:'12px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, sec.name));
+          const first=sec.variations[0]; const multi=sec.variations.length>1; const open=!!exp[sec.type];
+          return h('div',{key:sec.type},
+            h('div',{style:{display:'flex', alignItems:'flex-start', gap:5}},
+              multi ? h('button',{onClick:e=>{e.stopPropagation(); this.toggleLibType(sec.type);}, 'data-tip':open?'Collapse':'Show variations',
+                  style:{flex:'0 0 auto', width:16, height:34, display:'inline-flex', alignItems:'center', justifyContent:'center', background:'none', border:'none', cursor:'pointer', color:'var(--muted)', padding:0}},
+                  h('span',{style:{display:'inline-block', transform:open?'rotate(90deg)':'none', transition:'transform .14s', fontSize:'10px'}}, '▶'))
+                : h('span',{style:{flex:'0 0 auto', width:16}}),
+              this.typeTile(sec, first.props, sec.name+(multi?' · '+sec.variations.length+' variations':''), multi?sec.variations.length:null, multi?(()=>this.toggleLibType(sec.type)):(()=>this.insertBtVariation(sec.type, first))) ),
+            open && h('div',{style:{marginLeft:23, marginTop:8, paddingLeft:11, borderLeft:'2px solid var(--rule)', display:'flex', flexDirection:'column', gap:8}},
+              sec.variations.map((v,i)=> h('div',{key:v.id, style:{display:'flex', alignItems:'center', gap:8}},
+                h('span',{style:{flex:'0 0 auto', width:11, textAlign:'right', fontSize:'10px', color:'var(--faint)', fontFamily:"'JetBrains Mono',monospace"}}, i+1),
+                h('div',{style:{flex:1, minWidth:0}}, this.btVarCard(sec.type, v))))));
         })));
   }
   // Width-filling scaled thumbnail of a real section (for the type tile).
