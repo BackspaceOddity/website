@@ -697,9 +697,12 @@ class BuilderApp extends React.Component {
           h('button',{onClick:()=>this.setState({libraryOpen:false}), style:{background:'none',border:'none',cursor:'pointer',color:'var(--faint)',fontSize:'16px',padding:0}}, '\u00d7')),
         h('div',{style:{display:'flex', gap:5}}, [['sections','Sections'],['layouts','Layouts'],['assets','Assets']].map(p=>{ const k=p[0]; const on=this.state.libTab===k; return h('button',{key:k, 'data-tip':p[1], title:p[1], onClick:()=>this.setState({libTab:k}), style:{flex:1, minWidth:0, height:30, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid '+(on?'var(--ink)':'var(--rule)'), background:on?'var(--ink)':'transparent', cursor:'pointer', transition:'border-color .12s, background .12s'}}, this.libTabIcon(k,on)); }))),
       this.state.libTab==='assets' ? this.renderAssets()
-      : this.state.libTab==='layouts' ? h('div',{style:{padding:'14px 16px'}},
+      : this.state.libTab==='layouts' ? h('div',{style:{padding:'12px 14px'}},
           h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Structure only, placeholder text — for designing freely. Drag onto the canvas.'),
-          this.TEMPLATES.map(t=> this.libCard(t.type, t.name, t.desc, false, null, true)),
+          h('div',{style:{display:'flex', flexDirection:'column', gap:10}},
+            this.TEMPLATES.map(t=> h('div',{key:t.type, style:{display:'flex', alignItems:'flex-start', gap:5}},
+              h('span',{style:{flex:'0 0 auto', width:16}}),
+              this.layoutTile(t.type, t.name, t.desc)))),
           this.renderAsk())
       : this.state.realPage ? this.renderBtSections()
       : h('div',{style:{padding:'14px 16px'}},
@@ -713,16 +716,51 @@ class BuilderApp extends React.Component {
   toggleLibType(t){ this.setState(s=>{ const e=Object.assign({}, s.libExpanded); if(e[t]) delete e[t]; else e[t]=true; return {libExpanded:e}; }); }
   // Keynote-style outline: a delicate disclosure triangle per multi-variation
   // type; variations expand inline, indented to the right — all on one screen.
-  typeTile(sec, props, name, multiCount, onClick){
+  // Shared wide-tile shell — used by BOTH the Sections tab (typeTile) and the
+  // Layouts tab (layoutTile) so the two can't drift. `thumb` is the rendered
+  // preview element on top; `extra` carries hover/drag handlers + cursor.
+  tileShell(thumb, name, multiCount, onClick, extra){
     const h=React.createElement;
-    return h('div',{ onClick,
-        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:sec.type, props, name, top:r.top, left:r.right+12}}); },
-        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
-        style:{flex:1, minWidth:0, border:'1px solid var(--rule2)', borderRadius:9, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
+    return h('div', Object.assign({ onClick,
+        style:{flex:1, minWidth:0, border:'1px solid var(--rule2)', borderRadius:9, overflow:'hidden', cursor:(extra&&extra.cursor)||'pointer', background:'var(--surface)', transition:'border-color .12s'}}, extra&&extra.props),
       h('div',{style:{position:'relative'}},
-        this.thumbFill(sec.type, props, 80, 0.185),
+        thumb,
         multiCount && h('div',{style:{position:'absolute', top:6, right:6, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'9px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 5px', lineHeight:1.4}}, multiCount)),
       h('div',{style:{padding:'8px 11px 9px', fontSize:'12px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name));
+  }
+  typeTile(sec, props, name, multiCount, onClick){
+    return this.tileShell(this.thumbFill(sec.type, props, 80, 0.185), name, multiCount, onClick, {
+      props:{
+        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:sec.type, props, name, top:r.top, left:r.right+12}}); },
+        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
+      }});
+  }
+  // Layouts tab: same wide-tile shell, but the thumbnail is a real render of a
+  // synthetic structural block, and the tile is draggable onto the canvas.
+  layoutTile(typeKey, name, desc){
+    const h=React.createElement;
+    return this.tileShell(this.synthThumb(typeKey, 80, 0.1), name, null, ()=>{ this.insertAt(this.state.blocks.length, this.makeBlock(typeKey,{props:this.placeholders(typeKey), bg:'paper'})); this.toast(name+' added'); }, {
+      cursor:'grab',
+      props:{
+        draggable:true, title:desc,
+        onDragStart:e=>{ this.setState({draggingType:'blank:'+typeKey}); e.dataTransfer.effectAllowed='copy'; },
+        onDragEnd:()=>this.setState({draggingType:null, dropAt:null}),
+        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{type:typeKey, name, desc, bg:'paper', top:r.top, left:r.right+12}}); },
+        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
+      }});
+  }
+  // Width-filling scaled thumbnail of a synthetic structural block (placeholder
+  // copy) — the Layouts-tab counterpart to thumbFill. Renders the same canvas
+  // body (blockInner) used on the real canvas, statically (pointer-events off).
+  synthThumb(type, hh, zoom){
+    const h=React.createElement;
+    const inst={id:'__thumb-'+type, type, bg:type==='hero'?'forest':'paper', pad:'M', props:this.placeholders(type), overrides:{}};
+    const forest=inst.bg==='forest'; const fg=forest?'#FDFBF4':'#011C00';
+    const bg=forest?'#011C00':'transparent';
+    return h('div',{style:{width:'100%', height:hh, overflow:'hidden', background:forest?'#011C00':'#F2F2F0'}},
+      h('div',{style:{width:1100, zoom:zoom||0.069, pointerEvents:'none', background:bg, color:fg, backgroundImage:(forest&&type==='hero')?'url('+this.imgUrl(inst.props.img||'magenta-green')+')':'none', backgroundSize:'cover', backgroundPosition:'center'}},
+        forest && type==='hero' && h('div',{style:{position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.55))', pointerEvents:'none'}}),
+        h('div',{style:{position:'relative', zIndex:2, padding:this.blockPad(inst)}}, this.blockInner(inst, fg))));
   }
   renderBtSections(){
     const h=React.createElement; const exp=this.state.libExpanded||{};
