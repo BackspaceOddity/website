@@ -269,6 +269,8 @@ class BuilderApp extends React.Component {
   // ---------- persistence ----------
   // Mark the page changed and schedule a debounced save (real pages only).
   markDirty(){ if(!this.state.realPage) return; this.setState({saveState:'dirty'}); if(this._saveT) clearTimeout(this._saveT); this._saveT=setTimeout(()=>this.savePage(), 1400); }
+  // Flip the Save button to "unsaved" on the first touch of editing (before the blur/commit).
+  markDirtyLabel(){ if(this.state.realPage && this.state.saveState!=='saving' && this.state.saveState!=='dirty') this.setState({saveState:'dirty'}); }
   savePage(){
     const id=this.state.realPage; if(!id) return; if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; }
     this.setState({saveState:'saving'});
@@ -277,7 +279,7 @@ class BuilderApp extends React.Component {
       .then(r=>r.json()).then(d=>{ if(d&&d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); } else { this.setState({saveState:'error'}); this.toast('Save failed'); } })
       .catch(()=>{ this.setState({saveState:'error'}); this.toast('Save failed'); });
   }
-  saveLabel(){ const s=this.state.saveState; return s==='saving'?'Saving…':s==='dirty'?'Save now':s==='error'?'Retry save':s==='loading'?'Loading…':'Saved ✓'; }
+  saveLabel(){ const s=this.state.saveState; return s==='saving'?'Saving…':s==='dirty'?'Save changes':s==='error'?'Retry save':s==='loading'?'Loading…':'Saved ✓'; }
   createFromTemplate(){
     const a = this.state.newPageArche; if(!a) return;
     this.clearPageCss();
@@ -809,7 +811,7 @@ class BuilderApp extends React.Component {
     const line= dark?'rgba(253,251,244,.30)':'rgba(1,28,0,.12)';
     const tagBg= dark?'rgba(253,251,244,.16)':'rgba(1,28,0,.07)'; const tagFg= dark?'rgba(253,251,244,.78)':'rgba(1,28,0,.5)';
     const props=Object.assign({key:'c'}, inst.props);
-    if(edit) props.e={on:true, set:(k,v)=>this.setBtText(inst.id,k,v)};
+    if(edit) props.e={on:true, set:(k,v)=>this.setBtText(inst.id,k,v), touch:()=>this.markDirtyLabel()};
     return h('div',{style:{position:'relative'},
         onClickCapture: edit? (ev=>{ const t=ev.target; const a=t&&t.closest&&t.closest('a,button'); if(a) ev.preventDefault(); }) : undefined},
       h(Comp, props),

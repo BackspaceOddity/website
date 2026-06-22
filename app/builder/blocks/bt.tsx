@@ -26,7 +26,7 @@ export const CAL_TRIGGER = {
 } as const;
 
 /* edit context threaded into every block */
-type E = { on: boolean; set: (k: string, v: string) => void } | undefined;
+type E = { on: boolean; set: (k: string, v: string) => void; touch?: () => void } | undefined;
 
 /* one inline-editable text field — static unless an edit context is active */
 function Ed({ e, k, v, as = 'span', className }: { e?: E; k: string; v?: string; as?: any; className?: string }) {
@@ -39,6 +39,7 @@ function Ed({ e, k, v, as = 'span', className }: { e?: E; k: string; v?: string;
       suppressContentEditableWarning
       spellCheck={false}
       data-edit-k={k}
+      onInput={() => { if (e.touch) e.touch(); }}
       onBlur={(ev: any) => { const t = ev.currentTarget.innerText; if (t !== v) e.set(k, t); }}
       style={{ outline: 'none', cursor: 'text' }}
     >
