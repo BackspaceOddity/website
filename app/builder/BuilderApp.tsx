@@ -32,16 +32,8 @@ class BuilderApp extends React.Component {
       {type:'footer',      name:'Footer',        desc:'Contact · office · lockup'},
     ];
     this.PAGES = [
-      {id:'p1', tab:'bso', name:'Homepage — 2024 relaunch', img:'warm', owner:'Lieke', edited:'2 hours ago', status:'Published', recipe:['hero','statement','twocol','projectgrid','footer']},
-      {id:'p2', tab:'bso', name:'Brand transformation', img:'magenta-green', owner:'Marnix', edited:'Yesterday', status:'Draft', recipe:['hero','statement','casestudy','footer']},
-      {id:'p3', tab:'bso', name:'AI Skills — campaign', img:'emerald', owner:'Sanne', edited:'3 days ago', status:'Published', recipe:['hero','twocol','projectgrid','footer']},
-      {id:'p4', tab:'bso', name:'8FIGURES — case study', img:'terracotta', owner:'Tom', edited:'5 days ago', status:'Draft', recipe:['hero','casestudy','statement','footer']},
-      {id:'p5', tab:'bso', name:'Careers — join the band', img:'warm', owner:'Lieke', edited:'1 week ago', status:'Draft', recipe:['hero','statement','footer']},
-      {id:'p6', tab:'bso', name:'Pricing & engagement', img:'magenta-green', owner:'Marnix', edited:'2 weeks ago', status:'Published', recipe:['hero','twocol','footer']},
-      {id:'c1', tab:'community', name:'Sprint 07 — recap', img:'emerald', owner:'Sanne', edited:'4 hours ago', status:'Published', recipe:['hero','statement','projectgrid','footer']},
-      {id:'c2', tab:'community', name:'Maker week — signups', img:'terracotta', owner:'Tom', edited:'2 days ago', status:'Draft', recipe:['hero','twocol','footer']},
-      {id:'c3', tab:'community', name:'Community manifesto', img:'warm', owner:'Lieke', edited:'6 days ago', status:'Published', recipe:['hero','statement','footer']},
-      {id:'c4', tab:'community', name:'Sprint 06 — recap', img:'magenta-green', owner:'Marnix', edited:'3 weeks ago', status:'Archived', recipe:['hero','projectgrid','footer']},
+      {id:'p8fig', tab:'bso', name:'8FIGURES — Brand Sprint', img:'magenta-green', owner:'Yegor', edited:'just now', status:'Draft', route:'/builder/p8fig'},
+      {id:'pbt', tab:'bso', name:'Brand transformation', img:'terracotta', owner:'Anna', edited:'just now', status:'Draft', route:'/builder/pbt'},
     ];
     this.ARCHETYPES = [
       {id:'landing',  name:'Landing page',   desc:'Hero · statement · proof · footer', recipe:['hero','statement','twocol','projectgrid','footer'], img:'magenta-green'},
@@ -54,7 +46,7 @@ class BuilderApp extends React.Component {
       dashTab:'bso', dashView:'rows', dashPageIdx:0,
       editorLayout:'lr', tweaksStyle:'stacked',
       newPageOpen:false, newPageStep:1, newPageArche:null, newPageName:'',
-      pageTitle:'', pageTab:'bso', blocks:[], styles:this.clone(this.DEFAULT_STYLES),
+      pageTitle:'', pageTab:'bso', blocks:[], styles:this.clone(this.DEFAULT_STYLES), pages:this.PAGES.slice(),
       selectedId:null, selectedRole:null, editMode:true, libraryOpen:true, tweaksOpen:true, libW:188, tweaksW:248, dsRole:'heading',
       askPrompt:'', askState:'idle', askResult:null, customTemplates:[], libTab:'sections', draggingAsset:null, assets:[{id:'a1',name:'Magenta · green',val:'magenta-green'},{id:'a2',name:'Terracotta',val:'terracotta'},{id:'a3',name:'Emerald',val:'emerald'},{id:'a4',name:'Warm',val:'warm'}],
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
@@ -224,7 +216,10 @@ class BuilderApp extends React.Component {
   buildPage(recipe){ return (recipe||[]).map(t=> this.makeBlock(t)); }
 
   // ---------- navigation ----------
+  deletePage(id){ this.setState(s=>({pages:(s.pages||[]).filter(p=>p.id!==id)})); this.toast('Page deleted'); }
+  archivePage(id){ this.setState(s=>({pages:(s.pages||[]).map(p=>p.id===id?{...p, archived:true}:p)})); this.toast('Page archived'); }
   openPage(p){
+    if(p && p.route){ window.location.href = p.route; return; }
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
     const cur=this.buildPage(p.recipe);
     const v2=this.clone(cur); const hv2=v2.find(b=>b.type==='hero'); if(hv2){ hv2.props.heading='Uncover hidden growth levers.'; hv2.props.label='Backspace Oddity'; hv2.props.cta='Get in touch'; hv2.props.img='terracotta'; }
@@ -433,7 +428,7 @@ class BuilderApp extends React.Component {
   // ---------- dashboard ----------
   renderDashboard(){
     const h=React.createElement; const {dashTab, dashView, dashPageIdx} = this.state;
-    const all = this.PAGES.filter(p=>p.tab===dashTab);
+    const all = (this.state.pages||[]).filter(p=>p.tab===dashTab && !p.archived);
     const per = dashView==='rows'?6:8; const pages=Math.ceil(all.length/per)||1; const slice=all.slice(dashPageIdx*per,(dashPageIdx+1)*per);
     return h('div',{className:'bso-scroll', style:{height:'100%', overflowY:'auto', background:'var(--paper)'}},
       h('div',{style:{maxWidth:1080, margin:'0 auto', padding:'40px 32px 64px'}},
@@ -457,16 +452,16 @@ class BuilderApp extends React.Component {
   renderRows(slice){
     const h=React.createElement;
     return h('div',{style:{border:'1px solid var(--rule)', borderRadius:12, overflow:'hidden', background:'var(--surface)'}},
-      h('div',{style:{display:'grid', gridTemplateColumns:'1fr 104px 96px 84px 196px', gap:16, padding:'11px 18px', borderBottom:'1px solid var(--rule)', background:'var(--soft)'}},
+      h('div',{style:{display:'grid', gridTemplateColumns:'1fr 104px 96px 84px 300px', gap:16, padding:'11px 18px', borderBottom:'1px solid var(--rule)', background:'var(--soft)'}},
         ['Page','Owner','Edited','Status',''].map((c,i)=> h('div',{key:i, style:this.mono({fontSize:'10px'})}, c))),
-      slice.map((p,idx)=> h('div',{key:p.id, onClick:()=>this.openPage(p), style:{display:'grid', gridTemplateColumns:'1fr 104px 96px 84px 196px', gap:16, padding:'14px 18px', alignItems:'center', borderBottom:idx<slice.length-1?'1px solid var(--rule)':'none', cursor:'pointer'}, onMouseEnter:e=>e.currentTarget.style.background='var(--soft)', onMouseLeave:e=>e.currentTarget.style.background='transparent'},
+      slice.map((p,idx)=> h('div',{key:p.id, onClick:()=>this.openPage(p), style:{display:'grid', gridTemplateColumns:'1fr 104px 96px 84px 300px', gap:16, padding:'14px 18px', alignItems:'center', borderBottom:idx<slice.length-1?'1px solid var(--rule)':'none', cursor:'pointer'}, onMouseEnter:e=>e.currentTarget.style.background='var(--soft)', onMouseLeave:e=>e.currentTarget.style.background='transparent'},
         h('div',{style:{display:'flex', alignItems:'center', gap:14, minWidth:0}}, this.thumb(p.img, 52, 36),
           h('div',{style:{minWidth:0}}, h('div',{style:{fontSize:'15px', fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, p.name),
             h('div',{style:this.mono({fontSize:'10px', marginTop:3, textTransform:'none', letterSpacing:0})}, '/'+p.id))),
         h('div',{style:{fontSize:'14px', color:'var(--muted)'}}, p.owner),
         h('div',{style:{fontSize:'14px', color:'var(--muted)'}}, p.edited),
         h('div',null, this.pill(p.status,'')),
-        h('div',{style:{display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7}}, h('button',{onClick:e=>{e.stopPropagation(); this.openAnalytics(p);}, 'data-tip':'View analytics', style:{padding:'5px 10px', borderRadius:6, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer', fontSize:'11.5px', fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Analytics'), h('button',{onClick:e=>{e.stopPropagation(); this.openDeploy(p);}, style:{padding:'5px 10px', borderRadius:6, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Deploy')))));
+        h('div',{style:{display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7}}, h('button',{onClick:e=>{e.stopPropagation(); this.archivePage(p.id);}, style:{padding:'5px 9px', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'var(--muted)', cursor:'pointer', fontSize:'11.5px', fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Archive'), h('button',{onClick:e=>{e.stopPropagation(); if(typeof window!=='undefined' && window.confirm('Delete this page?')) this.deletePage(p.id);}, style:{padding:'5px 9px', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'#C0392B', cursor:'pointer', fontSize:'11.5px', fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Delete'), h('button',{onClick:e=>{e.stopPropagation(); this.openAnalytics(p);}, 'data-tip':'View analytics', style:{padding:'5px 10px', borderRadius:6, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer', fontSize:'11.5px', fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Analytics'), h('button',{onClick:e=>{e.stopPropagation(); this.openDeploy(p);}, style:{padding:'5px 10px', borderRadius:6, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Deploy')))));
   }
   renderGallery(slice){
     const h=React.createElement;
