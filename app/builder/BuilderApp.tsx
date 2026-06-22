@@ -1027,7 +1027,7 @@ class BuilderApp extends React.Component {
           if(fields.fontFamily && seeds.fontFamily===undefined) seeds.fontFamily=cs.fontFamily;
         }
       }
-      const te=Object.assign({}, s.tweakExpanded); te[role]=true;
+      const te={[role]:true}; // single-expand: opening a role collapses any other open role
       return {selectedRole:role, selectedId:null, tweakExpanded:te, roleDefaults:Object.assign({}, s.roleDefaults, {[role]:seeds})};
     });
     // scroll the newly-expanded role into view (panel is a separate scroll container)
