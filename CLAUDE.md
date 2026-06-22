@@ -42,6 +42,16 @@ In addition to `~/.claude/tov.md`:
 
 4. **Pushback re-read.** If the user pushes back on copy ("не то", "generic", "не прочитал", "защищаешь"), the `pre-pushback-reread.py` hook will force canonical re-read before next draft. Do NOT respond with a new draft before completing the re-read sequence.
 
+## Landing/proposal pages — one repo, branch-per-page (2026-06-21)
+
+A landing/proposal page is NOT its own git repo. The unit of work is a **branch in this repo**. Full rationale + handoff memo: `[[interactive-proposal-page-canon]]` → "Repo & branch model".
+
+- **One site = one repo, many routes** — correct, not the mega-repo anti-pattern (that was unrelated projects with no boundaries). A separate repo per page is an anti-pattern: it duplicates the design system + deploy config.
+- **Client proposals → `/w/<slug>`** — author as `lib/proposal-workspace/clients/<slug>.ts` (via `new-proposal.mjs`), not a bespoke `app/<name>/` route. `app/<name>/` is only for marketing landings (not per-client) and needs an explicit reason. (Debt: `app/8figures/` is a client proposal built pre-rule — migrate to `/w/8figures` separately.)
+- **Each page = own branch** → Vercel auto-preview URL per branch = the shareable, independently-deployable entity.
+- **Collaborator handoff** = branch preview URL + the one file they edit + "edit → PR → merge". Set the access code BEFORE sharing any preview URL (ungated push = published draft, per [[vercel-preview-deploy-exposes-ungated-page]]).
+- **Going live = merge to `production`** (subdomain via wildcard `proxy.ts`), never the apex, never an autonomous push to `main`/`production` (global CLAUDE.md "Push-to-main = Production Publish").
+
 ## Cross-project discipline (per global CLAUDE.md)
 
 - Every `LEARNINGS.md` entry tagged `[LOCAL]` or `[CROSS-PROJECT]`.
