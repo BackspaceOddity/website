@@ -142,3 +142,53 @@ export const BT_PAGES = {
   p8fig: { css: 'p8fig', blocks: P8FIG },
   pbt: { css: 'pbt', blocks: PBT },
 };
+
+/* ---------- Library: section types -> nested variations ----------
+ * Two-level library for real pages: high-level section TYPE, and inside each a
+ * set of variations (different counts / layouts) carrying real content. Props
+ * are reused from the assembled pages above; the builder clones on insert.
+ */
+const find = (arr: any[], type: string) => (arr.find((x) => x.type === type) || {}).props;
+
+export const BT_SECTIONS = [
+  { type: 'bt:hero', name: 'Hero', variations: [
+    { id: 'hero-sub', name: 'With subtitle', props: find(P8FIG, 'bt:hero') },
+    { id: 'hero-princ', name: 'With 3 principles', props: find(PBT, 'bt:hero') },
+  ] },
+  { type: 'bt:eps', name: 'Numbered cards', variations: [
+    { id: 'eps-3', name: '3 cards', props: find(P8FIG, 'bt:eps') },
+    { id: 'eps-5', name: '5 cards', props: find(PBT, 'bt:eps') },
+  ] },
+  { type: 'bt:projects', name: 'Projects', variations: [
+    { id: 'proj-3', name: '3 projects', props: find(PBT, 'bt:projects') },
+    { id: 'proj-6', name: '6 projects', props: { ...find(PBT, 'bt:projects'), projects: [...PBT_PROJECTS, ...PBT_PROJECTS] } },
+  ] },
+  { type: 'bt:phases', name: 'Phases', variations: [
+    { id: 'phases-sprint', name: 'Sprint (5 phases)', props: find(P8FIG, 'bt:phases') },
+    { id: 'phases-full', name: 'Full (6 phases)', props: find(PBT, 'bt:phases') },
+  ] },
+  { type: 'bt:challenge', name: 'Challenge', variations: [
+    { id: 'chal', name: 'You see / We see', props: find(P8FIG, 'bt:challenge') },
+  ] },
+  { type: 'bt:leverages', name: 'Leverages', variations: [
+    { id: 'lev-4', name: '4 levers (dark)', props: find(PBT, 'bt:leverages') },
+  ] },
+  { type: 'bt:timeline', name: 'Timeline', variations: [
+    { id: 'tl', name: 'Phase rows + total', props: find(PBT, 'bt:timeline') },
+  ] },
+  { type: 'bt:invest', name: 'Investment', variations: [
+    { id: 'inv', name: 'Price + terms', props: find(P8FIG, 'bt:invest') },
+  ] },
+  { type: 'bt:diagnostic', name: 'Diagnostic', variations: [
+    { id: 'diag', name: 'Lead form', props: find(PBT, 'bt:diagnostic') },
+  ] },
+  { type: 'bt:final', name: 'Final CTA', variations: [
+    { id: 'final', name: 'Closing CTA', props: find(P8FIG, 'bt:final') },
+  ] },
+  { type: 'bt:nav', name: 'Nav', variations: [
+    { id: 'nav', name: 'Logo + contact', props: find(P8FIG, 'bt:nav') },
+  ] },
+  { type: 'bt:footer', name: 'Footer', variations: [
+    { id: 'footer', name: 'Links + reach', props: find(P8FIG, 'bt:footer') },
+  ] },
+];

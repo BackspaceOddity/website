@@ -6,7 +6,7 @@
    (base class, mount, window.claude.complete → /api/builder/generate, asset URLs).
    Design choices (ABC Schengen / Inter / JetBrains Mono / GT Eesti, palette, layout) untouched. */
 import React from 'react';
-import { BT_COMPONENTS, BT_PAGES, BT_TYPE_NAMES } from './blocks/realpages';
+import { BT_COMPONENTS, BT_PAGES, BT_TYPE_NAMES, BT_SECTIONS } from './blocks/realpages';
 
 class BuilderApp extends React.Component {
   constructor(props){
@@ -517,7 +517,14 @@ class BuilderApp extends React.Component {
   }
   renderTplHover(){
     const h=React.createElement; const ht=this.state.hoverTpl; if(!ht) return null;
-    const top=Math.max(64, Math.min(ht.top, (typeof window!=='undefined'?window.innerHeight:900)-220));
+    const vh=(typeof window!=='undefined'?window.innerHeight:900);
+    if(ht.real){
+      const top=Math.max(64, Math.min(ht.top, vh-340));
+      return h('div',{style:{position:'fixed', top, left:ht.left, zIndex:60, width:340, background:'var(--surface)', border:'1px solid var(--rule)', borderRadius:12, boxShadow:'var(--shadow)', overflow:'hidden', pointerEvents:'none', animation:'bsofade .12s both'}},
+        this.realPreview(ht.btType, ht.props, 0.30, 300),
+        h('div',{style:{padding:'9px 12px', fontSize:'13px', fontWeight:600, borderTop:'1px solid var(--rule)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, ht.name));
+    }
+    const top=Math.max(64, Math.min(ht.top, vh-220));
     return h('div',{style:{position:'fixed', top, left:ht.left, zIndex:60, width:248, background:'var(--surface)', border:'1px solid var(--rule)', borderRadius:12, boxShadow:'var(--shadow)', padding:12, pointerEvents:'none', animation:'bsofade .12s both'}},
       this.miniPreview(ht.type, ht.bg, '100%', 132),
       h('div',{style:{fontSize:'13px', fontWeight:600, marginTop:9, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, ht.name),
@@ -561,12 +568,50 @@ class BuilderApp extends React.Component {
           h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Structure only, placeholder text — for designing freely. Drag onto the canvas.'),
           this.TEMPLATES.map(t=> this.libCard(t.type, t.name, t.desc, false, null, true)),
           this.renderAsk())
+      : this.state.realPage ? this.renderBtSections()
       : h('div',{style:{padding:'14px 16px'}},
           h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Ready-made, with our copy. Drag onto the canvas or ask Claude.'),
           this.TEMPLATES.map(t=> this.libCard(t.type, t.name, t.desc, false)),
           this.state.customTemplates.length>0 && h('div',{style:this.mono({margin:'18px 2px 10px'})}, 'Locked by you'),
           this.state.customTemplates.map(t=> this.libCard(t.key, t.name, t.props.heading, true, t.bg)),
           this.renderAsk()));
+  }
+  // ---------- real-page sections: type -> variations ----------
+  renderBtSections(){
+    const h=React.createElement;
+    return h('div',{style:{padding:'12px 14px'}},
+      h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Real sections from this page’s design system. Open a type, pick a variation — hover to see its content.'),
+      BT_SECTIONS.map(sec=>{
+        const open=this.state.libOpen===sec.type;
+        return h('div',{key:sec.type, style:{marginBottom:6, border:'1px solid var(--rule)', borderRadius:8, overflow:'hidden', background:'var(--paper)'}},
+          h('button',{onClick:()=>this.setState(s=>({libOpen:s.libOpen===sec.type?null:sec.type})),
+            style:{width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 11px', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit'}},
+            h('span',{style:{fontSize:'12.5px', fontWeight:600, color:'var(--ink)'}}, sec.name),
+            h('span',{style:{display:'flex', alignItems:'center', gap:8}},
+              h('span',{style:this.mono({fontSize:'9px'})}, sec.variations.length>1?sec.variations.length+' variations':'1 variation'),
+              h('span',{style:{fontSize:'9px', color:'var(--muted)', display:'inline-block', transform:open?'rotate(90deg)':'none', transition:'transform .12s'}}, '▶'))),
+          open && h('div',{style:{padding:'0 9px 10px', display:'flex', flexDirection:'column', gap:9}},
+            sec.variations.map(v=> this.btVarCard(sec.type, v))));
+      }));
+  }
+  btVarCard(type, v){
+    const h=React.createElement;
+    return h('div',{key:v.id, onClick:()=>this.insertBtVariation(type, v),
+      onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:type, props:v.props, name:v.name, top:r.top, left:r.right+12}}); },
+      onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
+      style:{border:'1px solid var(--rule2)', borderRadius:7, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
+      this.realPreview(type, v.props, 0.12, 84),
+      h('div',{style:{padding:'6px 9px', fontSize:'11px', fontWeight:600, color:'var(--ink)'}}, v.name));
+  }
+  // Scaled, real render of a bt section (exact content) for previews.
+  realPreview(type, props, scale, maxH){
+    const h=React.createElement; const Comp=BT_COMPONENTS[type]; if(!Comp) return null;
+    return h('div',{style:{width:'100%', height:maxH, overflow:'hidden', background:'#F2F2F0'}},
+      h('div',{className:'page bt-page', style:{width:1100, zoom:scale, pointerEvents:'none'}}, h(Comp, props)));
+  }
+  insertBtVariation(type, v){
+    const b={id:this.nid('bt'), type, props:this.clone(v.props), real:true};
+    this.insertAt(this.state.blocks.length, b); this.toast(v.name+' added');
   }
   renderAssets(){
     const h=React.createElement; const inst=this.state.blocks.find(b=>b.id===this.state.selectedId);
