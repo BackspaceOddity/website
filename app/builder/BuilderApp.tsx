@@ -9,6 +9,15 @@ import React from 'react';
 import { BT_COMPONENTS, BT_PAGES, BT_TYPE_NAMES, BT_SECTIONS } from './blocks/realpages';
 import { btVarStyle, ROLE_VARS } from './btVars';
 
+// Default proposal design-system for a NEW page (BSO-658). The two real pages
+// (p8fig / pbt) ship their own stylesheet; a blank page needs one too so any
+// real `bt:` section the user assembles renders styled. `pbt` is the fuller
+// brand-transformation system (superset of section types) — the canonical
+// proposal DS. The two stylesheets share `bt-` class names and define :root
+// vars + `body:has(.bt-page)`, so they CANNOT both be loaded at once — a new
+// page picks ONE (pbt) and every section renders in that DS's visual language.
+const DEFAULT_PAGE_DS = 'pbt';
+
 // Human labels + representative on-canvas selector per bt design-system role.
 // The selector seeds the panel's "current value" via getComputedStyle.
 const BT_ROLE_META = {
@@ -75,7 +84,7 @@ class BuilderApp extends React.Component {
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
       libPicked:null, insertIndex:null, gapHover:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'',
-      realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{}, tweakExpanded:{},
+      realPage:null, pageDs:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{}, tweakExpanded:{},
       btStyles:{}, roleDefaults:{},
       claudeEdit:null, claudeEditPick:null, claudeEditHover:null,
     };
@@ -335,11 +344,16 @@ class BuilderApp extends React.Component {
     link.href='/builder-css/'+cssId+'.css';
   }
   clearPageCss(){ if(typeof document==='undefined') return; const l=document.getElementById('bso-page-css'); if(l) l.parentNode.removeChild(l); }
+  // The design-system whose stylesheet is active for the open page: a real page
+  // keys off its row id (= realPage); any other page uses pageDs (set to the
+  // default proposal DS on create). Drives the canvas `bt-page` wrapper + the
+  // Library Sections tab so real `bt:` sections render styled on ANY page.
+  activeDs(){ const rp=this.state.realPage; return (rp && BT_PAGES[rp]) ? BT_PAGES[rp].css : (this.state.pageDs||null); }
   openPage(p){
     if(p && p.real && BT_PAGES[p.real]){
       const def=BT_PAGES[p.real]; this.injectPageCss(def.css);
       const cur=this.clone(def.blocks);
-      this.setState({screen:'editor', realPage:p.real, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
+      this.setState({screen:'editor', realPage:p.real, pageDs:null, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
         styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES),
         btStyles:{}, roleDefaults:{},
         selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
@@ -355,12 +369,14 @@ class BuilderApp extends React.Component {
       }).catch(()=>this.setState({saveState:'saved'}));
       return;
     }
-    this.clearPageCss();
+    // Non-real page: still load a proposal DS stylesheet so any real `bt:` section
+    // the user assembles from the Sections tab renders styled (BSO-658).
+    this.injectPageCss(DEFAULT_PAGE_DS);
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
     const cur=this.buildPage(p.recipe);
     const v2=this.clone(cur); const hv2=v2.find(b=>b.type==='hero'); if(hv2){ hv2.props.heading='Uncover hidden growth levers.'; hv2.props.label='Backspace Oddity'; hv2.props.cta='Get in touch'; hv2.props.img='terracotta'; }
     const v1=this.clone(cur).filter(b=>b.type==='hero'||b.type==='footer'); const hv1=v1.find(b=>b.type==='hero'); if(hv1){ hv1.props.heading='A new home for Backspace Oddity.'; hv1.props.img='emerald'; }
-    this.setState({screen:'editor', realPage:null, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur, styles,
+    this.setState({screen:'editor', realPage:null, pageDs:DEFAULT_PAGE_DS, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur, styles,
       selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
       versions:[
         {id:'v3', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(cur)},
@@ -368,7 +384,7 @@ class BuilderApp extends React.Component {
         {id:'v1', label:'Initial layout', when:'Earlier', author:p.owner, blocks:v1},
       ]});
   }
-  backToDash(){ if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
+  backToDash(){ if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, pageDs:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
   // ---------- persistence ----------
   // Mark the page changed and schedule a debounced save (real pages only).
   markDirty(){ if(!this.state.realPage) return; this.setState({saveState:'dirty'}); if(this._saveT) clearTimeout(this._saveT); this._saveT=setTimeout(()=>this.savePage(), 1400); }
@@ -385,9 +401,11 @@ class BuilderApp extends React.Component {
   saveLabel(){ const s=this.state.saveState; return s==='saving'?'Saving…':s==='dirty'?'Save changes':s==='error'?'Retry save':s==='loading'?'Loading…':'Saved ✓'; }
   createFromTemplate(){
     const a = this.state.newPageArche; if(!a) return;
-    this.clearPageCss();
+    // Load a proposal DS stylesheet on the new page so real `bt:` sections from the
+    // Library Sections tab render styled when assembled here (BSO-658).
+    this.injectPageCss(DEFAULT_PAGE_DS);
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
-    this.setState({screen:'editor', realPage:null, newPageOpen:false, pageTitle:this.state.newPageName||'Untitled page', pageTab:this.state.dashTab,
+    this.setState({screen:'editor', realPage:null, pageDs:DEFAULT_PAGE_DS, newPageOpen:false, pageTitle:this.state.newPageName||'Untitled page', pageTab:this.state.dashTab,
       blocks:this.buildPage(a.recipe), styles, selectedId:null, selectedRole:null, editMode:true, locked:false,
       versions:[{id:'v1', label:'Created from '+a.name, when:'Just now', author:'You', current:true}]});
   }
@@ -783,13 +801,7 @@ class BuilderApp extends React.Component {
               h('span',{style:{flex:'0 0 auto', width:16}}),
               this.layoutTile(t.type, t.name, t.desc)))),
           this.renderAsk())
-      : this.state.realPage ? this.renderBtSections()
-      : h('div',{style:{padding:'14px 16px'}},
-          h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Ready-made, with our copy. Drag onto the canvas or ask Claude.'),
-          this.TEMPLATES.map(t=> this.libCard(t.type, t.name, t.desc, false)),
-          this.state.customTemplates.length>0 && h('div',{style:this.mono({margin:'18px 2px 10px'})}, 'Locked by you'),
-          this.state.customTemplates.map(t=> this.libCard(t.key, t.name, t.props.heading, true, t.bg)),
-          this.renderAsk()));
+      : this.renderBtSections());
   }
   // ---------- real-page sections: type -> variations ----------
   toggleLibType(t){ this.setState(s=>{ const e=Object.assign({}, s.libExpanded); if(e[t]) delete e[t]; else e[t]=true; return {libExpanded:e}; }); }
@@ -1005,13 +1017,16 @@ class BuilderApp extends React.Component {
   renderCanvas(){
     const h=React.createElement; const pver=this.state.previewVersionId && this.state.versions.find(v=>v.id===this.state.previewVersionId);
     const blocks = pver && pver.blocks ? pver.blocks : this.state.blocks; const edit=this.state.editMode && !this.state.locked && !pver;
+    // A page is in DS mode (bt-page wrapper + DS-role click handling) whenever a
+    // proposal stylesheet is loaded — a real page OR a new page with a default DS.
+    const ds=!!this.activeDs();
     return h('div',{className:'bso-scroll', ref:this.onCanvasRef, onClick:(ev)=>{ if(!edit) return; if(this.state.claudeEditPick) return; /* pick mode owns clicks */ const t=ev.target; if(t&&t.closest&&t.closest('[data-role]')) return; /* keep role just picked from a bt text click */ this.setState({selectedId:null, selectedRole:null}); },
       style:{flex:1, minWidth:0, overflowY:'auto', height:'100%', background:'var(--soft)', padding:'34px 0 120px'}},
       h('div',{style:{width:1160, margin:'0 auto', zoom:this.state.canvasZoom, background:'#F2F2F0', color:'#011C00', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)', minHeight:300}},
         blocks.length===0 ? this.emptyCanvas() :
-        h('div',{className:this.state.realPage?'page bt-page':undefined,
-            style:this.state.realPage?btVarStyle(this.state.btStyles):undefined,
-            onClickCapture:(this.state.realPage&&edit)? (ev=>{ if(this.state.claudeEditPick) return; /* pick mode owns clicks */ const t=ev.target; const r=t&&t.closest&&t.closest('[data-role]'); if(r&&r.dataset&&r.dataset.role) this.selectBtRole(r.dataset.role); }) : undefined},
+        h('div',{className:ds?'page bt-page':undefined,
+            style:ds?btVarStyle(this.state.btStyles):undefined,
+            onClickCapture:(ds&&edit)? (ev=>{ if(this.state.claudeEditPick) return; /* pick mode owns clicks */ const t=ev.target; const r=t&&t.closest&&t.closest('[data-role]'); if(r&&r.dataset&&r.dataset.role) this.selectBtRole(r.dataset.role); }) : undefined},
           [ edit && h(React.Fragment,{key:'dz0'}, this.dropzone(0)) ].concat(
             blocks.map((b,i)=> h(React.Fragment,{key:b.id}, this.renderBlock(b,i), edit && this.dropzone(i+1)))))));
   }
@@ -1044,13 +1059,17 @@ class BuilderApp extends React.Component {
           // Solid drop indicator while dragging a tile over this gap.
           ? h('div',{style:{height:3, background:'#011C00', width:'100%', borderRadius:99, position:'relative'}},
               h('div',{style:{position:'absolute', left:-1, top:-3.5, width:10, height:10, borderRadius:99, background:'#011C00'}}))
-          // Otherwise: dotted line + "+ Insert section" pill (armed = highlighted).
+          // Otherwise: dashed line + "+ Insert section" pill (armed = highlighted).
+          // The pill sits on a solid surface-colored "notch" (zIndex 1) that masks the
+          // dashed line AND any block-frame border crossing this gap, so the pill reads
+          // crisp and centered instead of colliding messily with the outlines behind it.
           : h(React.Fragment, null,
-              h('div',{style:{position:'absolute', left:0, right:0, top:'50%', borderTop:'1.5px dashed '+(armed?'#011C00':'var(--rule)')}}),
-              h('button',{onClick:e=>{ e.stopPropagation(); this.armGap(index); },
-                style:{position:'relative', zIndex:1, display:'inline-flex', alignItems:'center', gap:8, background:armed?'var(--ink)':'var(--surface)', color:armed?'#F2F2F0':'var(--ink)', border:'1px solid '+(armed?'var(--ink)':'var(--rule)'), borderRadius:99, padding:'8px 18px', fontSize:'14px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 9px rgba(0,0,0,.13)'}},
-                h('span',{style:{display:'inline-flex', alignItems:'center', justifyContent:'center', width:17, height:17, borderRadius:99, border:'1.5px solid '+(armed?'#F2F2F0':'var(--ink)'), fontSize:'13px', lineHeight:1}}, '+'),
-                'Insert section'))));
+              h('div',{style:{position:'absolute', left:0, right:0, top:'50%', borderTop:'1.5px dashed '+(armed?'#011C00':'var(--rule)'), zIndex:0}}),
+              h('div',{style:{position:'relative', zIndex:1, display:'inline-flex', alignItems:'center', justifyContent:'center', padding:'4px 8px', background:'var(--surface)', borderRadius:99}},
+                h('button',{onClick:e=>{ e.stopPropagation(); this.armGap(index); },
+                  style:{position:'relative', display:'inline-flex', alignItems:'center', gap:8, background:armed?'var(--ink)':'var(--surface)', color:armed?'#F2F2F0':'var(--ink)', border:'1px solid '+(armed?'var(--ink)':'var(--rule)'), borderRadius:99, padding:'8px 18px', fontSize:'14px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 9px rgba(0,0,0,.13)'}},
+                  h('span',{style:{display:'inline-flex', alignItems:'center', justifyContent:'center', width:17, height:17, borderRadius:99, border:'1.5px solid '+(armed?'#F2F2F0':'var(--ink)'), fontSize:'13px', lineHeight:1}}, '+'),
+                  'Insert section')))));
   }
 
   // ---------- one block ----------
