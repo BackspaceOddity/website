@@ -677,7 +677,18 @@ class BuilderApp extends React.Component {
       style:Object.assign({}, this.textStyle(role, inst, color), {outline:'none', cursor:can?'text':'default', borderRadius:3, boxShadow:(sel&&can)?'0 0 0 2px '+(color==='#FDFBF4'?'rgba(253,251,244,.6)':'rgba(1,28,0,.4)'):'none', transition:'box-shadow .12s'}, extra||{})}, inst.props[key]);
   }
   blockPad(inst){ const m={S:'40px 56px', M:'72px 64px', L:'104px 72px'}; return m[inst.pad]||m.M; }
-  // Real-page section: render the actual bt- component, wrapped in editor chrome.
+  // Set a (possibly nested, dot-pathed) text field on a bt block's props.
+  setBtText(id, path, value){
+    this.setState(s=>({blocks:s.blocks.map(b=>{
+      if(b.id!==id) return b;
+      const props=this.clone(b.props); const keys=path.split('.'); let o=props;
+      for(let i=0;i<keys.length-1;i++){ o=o[keys[i]]; if(o==null) return b; }
+      o[keys[keys.length-1]]=value; return {...b, props};
+    })}));
+  }
+  // Real-page section: render the actual bt- component, with inline text editing
+  // and a light selection chrome. The outline never intercepts clicks (text stays
+  // editable); the section tag is the selection handle; links don't navigate in edit.
   renderBtBlock(inst, index){
     const h=React.createElement; const Comp=BT_COMPONENTS[inst.type]; if(!Comp) return null;
     const edit=this.state.editMode && !this.state.locked && !this.state.previewVersionId;
@@ -685,11 +696,13 @@ class BuilderApp extends React.Component {
     const dark=({'bt:hero':1,'bt:leverages':1,'bt:final':1})[inst.type];
     const line= dark?'rgba(253,251,244,.30)':'rgba(1,28,0,.12)';
     const tagBg= dark?'rgba(253,251,244,.16)':'rgba(1,28,0,.07)'; const tagFg= dark?'rgba(253,251,244,.78)':'rgba(1,28,0,.5)';
-    return h('div',{style:{position:'relative'}},
-      h(Comp, Object.assign({key:'c'}, inst.props)),
-      edit && h('div',{key:'o', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);},
-        style:{position:'absolute', inset:0, zIndex:6, cursor:'pointer', boxShadow:'inset 0 0 0 '+(sel?'2px #011C00':'1px '+line)}}),
-      edit && h('div',{key:'t', style:{position:'absolute', top:0, left:0, zIndex:7, padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:tagBg, color:tagFg, borderBottomRightRadius:7, pointerEvents:'none'}}, this.typeName(inst.type)),
+    const props=Object.assign({key:'c'}, inst.props);
+    if(edit) props.e={on:true, set:(k,v)=>this.setBtText(inst.id,k,v)};
+    return h('div',{style:{position:'relative'},
+        onClickCapture: edit? (ev=>{ const t=ev.target; const a=t&&t.closest&&t.closest('a,button'); if(a) ev.preventDefault(); }) : undefined},
+      h(Comp, props),
+      edit && h('div',{key:'o', style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', boxShadow:'inset 0 0 0 '+(sel?'2px #011C00':'1px '+line)}}),
+      edit && h('div',{key:'t', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);}, 'data-tip':'Select section', style:{position:'absolute', top:0, left:0, zIndex:8, cursor:'pointer', padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:tagBg, color:tagFg, borderBottomRightRadius:7}}, this.typeName(inst.type)),
       edit && sel && h('div',{key:'tb'}, this.blockToolbar(inst, index)));
   }
   renderBlock(inst, index){
