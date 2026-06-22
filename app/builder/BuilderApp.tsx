@@ -99,13 +99,46 @@ class BuilderApp extends React.Component {
     try{ const q=new URLSearchParams(window.location.search); const scr=q.get('screen'); if(scr==='deploy'||scr==='analytics'){ const pid=q.get('page'); const pg=this.PAGES.find(p=>p.id===pid)||{id:pid||'cur', name:decodeURIComponent(q.get('name')||'Page'), status:'Draft'}; const from=q.get('from')||'dashboard'; pend={scr,pg,from}; } }catch(e){}
     // Restore an existing session — skip the login screen if already signed in.
     fetch('/api/builder/me/').then(r=>r.json()).then(d=>{
-      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}, ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,pend.from); else this.openAnalytics(pend.pg,pend.from); } }); this.loadSavedTemplates(); }
+      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}, ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,pend.from); else this.openAnalytics(pend.pg,pend.from); } }); this.loadSavedTemplates(); this.loadPages(); }
     }).catch(()=>{});
   }
   // Load the shared saved-template library (BSO-658). Best-effort — failure leaves an empty Saved tab.
   loadSavedTemplates(){
     fetch('/api/builder/templates/').then(r=>r.json()).then(d=>{
       if(d && Array.isArray(d.templates)) this.setState({savedTemplates:d.templates});
+    }).catch(()=>{});
+  }
+  // Pretty "edited" label from an ISO timestamp.
+  agoLabel(iso){
+    if(!iso) return 'just now';
+    const t=new Date(iso).getTime(); if(isNaN(t)) return 'just now';
+    const s=Math.max(0, Math.floor((Date.now()-t)/1000));
+    if(s<60) return 'just now'; const m=Math.floor(s/60); if(m<60) return m+'m ago';
+    const hh=Math.floor(m/60); if(hh<24) return hh+'h ago'; const dd=Math.floor(hh/24); return dd+'d ago';
+  }
+  // DB-backed dashboard list (BSO-658). The two built-in real pages (p8fig/pbt) carry
+  // rich metadata in this.PAGES (img/owner); DB-only pages get sane defaults. Merge on
+  // id so real pages keep their styling and any saved page (incl. ones created from a
+  // template) shows up and survives reload. Best-effort: a fetch failure leaves the
+  // hardcoded PAGES so the dashboard is never empty.
+  loadPages(){
+    fetch('/api/builder/pages/').then(r=>r.json()).then(d=>{
+      if(!d || !Array.isArray(d.pages)) return;
+      const meta={}; this.PAGES.forEach(p=>{ meta[p.id]=p; });
+      const imgs=['magenta-green','terracotta','emerald','warm'];
+      const merged=d.pages.filter(row=>!row.archived).map(row=>{
+        const base=meta[row.id];
+        if(base) return {...base, name:row.title||base.name, tab:row.tab||base.tab, edited:this.agoLabel(row.updated_at)};
+        return {
+          id:row.id, tab:row.tab||'bso', name:row.title||'Untitled page',
+          img:imgs[this.hashStr(row.id)%imgs.length],
+          owner:(row.updated_by||'').split('@')[0]||'You', edited:this.agoLabel(row.updated_at),
+          status:'Draft', real:row.real_page||row.id,
+        };
+      });
+      // Keep any built-in real page that has no DB row yet (defensive — both ship rows).
+      this.PAGES.forEach(p=>{ if(!merged.some(m=>m.id===p.id)) merged.push(p); });
+      this.setState({pages:merged});
     }).catch(()=>{});
   }
   // Open the deploy / analytics screen in a fresh browser tab (action, not a panel toggle).
@@ -333,8 +366,12 @@ class BuilderApp extends React.Component {
   buildPage(recipe){ return (recipe||[]).map(t=> this.makeBlock(t)); }
 
   // ---------- navigation ----------
-  deletePage(id){ this.setState(s=>({pages:(s.pages||[]).filter(p=>p.id!==id)})); this.toast('Page deleted'); }
-  archivePage(id){ this.setState(s=>({pages:(s.pages||[]).map(p=>p.id===id?{...p, archived:true}:p)})); this.toast('Page archived'); }
+  // Delete/archive persist to the DB so the change survives reload now that the
+  // dashboard list is DB-backed (BSO-658). Optimistic local update first, then API.
+  deletePage(id){ this.setState(s=>({pages:(s.pages||[]).filter(p=>p.id!==id)})); this.toast('Page deleted');
+    fetch('/api/builder/pages/?id='+encodeURIComponent(id), {method:'DELETE'}).catch(()=>{}); }
+  archivePage(id){ this.setState(s=>({pages:(s.pages||[]).map(p=>p.id===id?{...p, archived:true}:p)})); this.toast('Page archived');
+    fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({archived:true})}).catch(()=>{}); }
   // Inject the active real page's stylesheet (8Figures + brand-transformation ship
   // different CSS under shared bt- class names, so only one loads at a time).
   injectPageCss(cssId){
@@ -369,6 +406,27 @@ class BuilderApp extends React.Component {
       }).catch(()=>this.setState({saveState:'saved'}));
       return;
     }
+    // DB-backed page that is NOT a built-in real page (e.g. created from a template).
+    // Key persistence off its own id: set realPage=id so markDirty/savePage target it,
+    // and load its saved blocks/styles from the DB so a reload restores content (BSO-658).
+    if(p && p.id && !BT_PAGES[p.id]){
+      this.injectPageCss(DEFAULT_PAGE_DS);
+      this.setState({screen:'editor', realPage:p.id, pageDs:DEFAULT_PAGE_DS, pageTitle:p.name, pageTab:p.tab||'bso', currentPage:p,
+        blocks:[], styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES), btStyles:{}, roleDefaults:{},
+        selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
+        saveState:'loading',
+        versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:[]}]});
+      fetch('/api/builder/pages/'+encodeURIComponent(p.id)+'/').then(r=>r.json()).then(d=>{
+        if(this.state.realPage!==p.id) return; // navigated away
+        if(d && d.saved && d.page){
+          const savedStyles=d.page.styles?this.clone(d.page.styles):this.state.styles;
+          const savedBlocks=Array.isArray(d.page.blocks)?this.clone(d.page.blocks):[];
+          this.setState({blocks:savedBlocks, styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, pageTitle:d.page.title||p.name, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null,
+            versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(savedBlocks)}]});
+        } else { this.setState({saveState:'saved'}); }
+      }).catch(()=>this.setState({saveState:'saved'}));
+      return;
+    }
     // Non-real page: still load a proposal DS stylesheet so any real `bt:` section
     // the user assembles from the Sections tab renders styled (BSO-658).
     this.injectPageCss(DEFAULT_PAGE_DS);
@@ -399,22 +457,45 @@ class BuilderApp extends React.Component {
       .catch(()=>{ this.setState({saveState:'error'}); this.toast('Save failed'); });
   }
   saveLabel(){ const s=this.state.saveState; return s==='saving'?'Saving…':s==='dirty'?'Save changes':s==='error'?'Retry save':s==='loading'?'Loading…':'Saved ✓'; }
+  // Fresh, collision-free page id (never p8fig/pbt). Used to CREATE a DB row at
+  // creation time so the page persists, lists, and survives reload (BSO-658).
+  newPageId(){
+    const rnd = (typeof crypto!=='undefined' && crypto.randomUUID) ? crypto.randomUUID().slice(0,8) : Math.random().toString(36).slice(2,10);
+    return 'page-'+rnd;
+  }
   createFromTemplate(){
     const a = this.state.newPageArche; if(!a) return;
     // Load a proposal DS stylesheet on the new page so real `bt:` sections from the
     // Library Sections tab render styled when assembled here (BSO-658).
     this.injectPageCss(DEFAULT_PAGE_DS);
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
-    this.setState({screen:'editor', realPage:null, pageDs:DEFAULT_PAGE_DS, newPageOpen:false, pageTitle:this.state.newPageName||'Untitled page', pageTab:this.state.dashTab,
-      blocks:this.buildPage(a.recipe), styles, selectedId:null, selectedRole:null, editMode:true, locked:false,
-      versions:[{id:'v1', label:'Created from '+a.name, when:'Just now', author:'You', current:true}]});
+    const id = this.newPageId();
+    const title = (this.state.newPageName && this.state.newPageName.trim()) || 'Untitled page';
+    const tab = this.state.dashTab || 'bso';
+    const blocks = this.buildPage(a.recipe);
+    // Treat the new page as a DB-backed real page: realPage=id wires markDirty/savePage
+    // to it so every subsequent edit auto-saves to this row.
+    this.setState({screen:'editor', realPage:id, pageDs:DEFAULT_PAGE_DS, newPageOpen:false, newPageName:'', newPageArche:null,
+      pageTitle:title, pageTab:tab, currentPage:{id, name:title, tab, real:id, status:'Draft'},
+      blocks, styles, btStyles:(styles&&styles.bt)?this.clone(styles.bt):{}, roleDefaults:{},
+      selectedId:null, selectedRole:null, editMode:true, locked:false, saveState:'saving', previewVersionId:null, imgTarget:null,
+      versions:[{id:'v1', label:'Created from '+a.name, when:'Just now', author:'You', current:true, blocks:this.clone(blocks)}]});
+    // Persist the initial row NOW (create-on-create), not only on first edit.
+    fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({title, tab, blocks, styles, realPage:id})})
+      .then(r=>r.json()).then(d=>{
+        if(this.state.realPage!==id) return;
+        if(d && d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); this.loadPages(); }
+        else { this.setState({saveState:'error'}); this.toast('Could not create page'); }
+      })
+      .catch(()=>{ if(this.state.realPage===id){ this.setState({saveState:'error'}); this.toast('Could not create page'); } });
   }
 
   // ---------- block ops ----------
   selectBlock(id){ this.setState({selectedId:id, selectedRole:null}); }
   selectText(id, role){ this.setState({selectedId:id, selectedRole:role}); }
-  commitText(id, key, text){ this.setState(s=>({blocks:s.blocks.map(b=> b.id===id ? {...b, props:{...b.props,[key]:text}} : b)})); }
-  commitTile(id, idx, key, text){ this.setState(s=>({blocks:s.blocks.map(b=>{ if(b.id!==id) return b; const tiles=b.props.tiles.map((t,i)=> i===idx?{...t,[key]:text}:t); return {...b, props:{...b.props, tiles}}; })})); }
+  commitText(id, key, text){ this.setState(s=>({blocks:s.blocks.map(b=> b.id===id ? {...b, props:{...b.props,[key]:text}} : b)})); this.markDirty(); }
+  commitTile(id, idx, key, text){ this.setState(s=>({blocks:s.blocks.map(b=>{ if(b.id!==id) return b; const tiles=b.props.tiles.map((t,i)=> i===idx?{...t,[key]:text}:t); return {...b, props:{...b.props, tiles}}; })})); this.markDirty(); }
   moveBlock(id, dir){
     this.setState(s=>{ const arr=[...s.blocks]; const i=arr.findIndex(b=>b.id===id); const j=i+dir; if(j<0||j>=arr.length) return {}; const t=arr[i]; arr[i]=arr[j]; arr[j]=t; return {blocks:arr}; });
     this.markDirty();

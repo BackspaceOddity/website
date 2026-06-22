@@ -49,3 +49,19 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true, updated_at: row.updated_at, updated_by: email });
 }
+
+// PATCH — partial update (currently used to archive a page) without rewriting blocks.
+export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const email = await getEmail();
+  if (!email) return NextResponse.json({ authed: false }, { status: 401 });
+  if (!supabase) return NextResponse.json({ ok: false, error: 'no-db' }, { status: 503 });
+  const { id } = await ctx.params;
+  let body: any = {};
+  try { body = await req.json(); } catch {}
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString(), updated_by: email };
+  if (typeof body.archived === 'boolean') patch.archived = body.archived;
+  if (typeof body.title === 'string') patch.title = body.title;
+  const { error } = await supabase.from('builder_pages').update(patch).eq('id', id);
+  if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
