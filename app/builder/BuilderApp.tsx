@@ -18,6 +18,25 @@ import { btVarStyle, ROLE_VARS } from './btVars';
 // page picks ONE (pbt) and every section renders in that DS's visual language.
 const DEFAULT_PAGE_DS = 'pbt';
 
+// ---------- Design-system registry (BSO-658 Phase 1) ----------
+// A page belongs to ONE design system, chosen at creation and persisted on the
+// `ds` column of builder_pages (default 'bso'). 8Figures + Brand Transformation
+// are the SAME system ('bso' = Backspace Oddity DS) shown as different per-page
+// instances — NOT separate systems. Urembo Hub is a genuinely different DS,
+// registered here as a placeholder until its sections + CSS are ported (Phase 2).
+//   id      — registry/DB identifier stored on `ds`
+//   name    — human label for the chooser + Tweaks header
+//   cssKey  — stylesheet served at /builder-css/<cssKey>.css (null = none yet)
+//   sections— Library "Sections" tab source for pages on this DS
+// Adding a 3rd system = one entry here.
+const DESIGN_SYSTEMS = [
+  { id: 'bso',    name: 'Backspace Oddity', cssKey: 'pbt', sections: BT_SECTIONS },
+  { id: 'urembo', name: 'Urembo Hub',       cssKey: null,  sections: [] },
+];
+const DEFAULT_DS_ID = 'bso';
+// Resolve a DS id -> registry entry (fallback to the default 'bso' system).
+function getDs(id){ return DESIGN_SYSTEMS.find(d => d.id === id) || DESIGN_SYSTEMS.find(d => d.id === DEFAULT_DS_ID); }
+
 // Human labels + representative on-canvas selector per bt design-system role.
 // The selector seeds the panel's "current value" via getComputedStyle.
 const BT_ROLE_META = {
@@ -76,7 +95,7 @@ class BuilderApp extends React.Component {
       screen:'login', theme:'light', loginEmail:'', loginPw:'', loginBusy:false, loginErr:'', loginMode:'password',
       dashTab:'bso', dashView:'rows', dashPageIdx:0,
       editorLayout:'lr', tweaksStyle:'stacked',
-      newPageOpen:false, newPageStep:1, newPageArche:null, newPageName:'',
+      newPageOpen:false, newPageStep:1, newPageArche:null, newPageName:'', newPageDsId:DEFAULT_DS_ID,
       pageTitle:'', pageTab:'bso', blocks:[], styles:this.clone(this.DEFAULT_STYLES), pages:this.PAGES.slice(),
       selectedId:null, selectedRole:null, editMode:true, libraryOpen:true, tweaksOpen:true, libW:248, tweaksW:248, dsRole:'heading',
       askPrompt:'', askState:'idle', askResult:null, customTemplates:[], savedTemplates:[], libTab:'sections', draggingAsset:null, assets:[{id:'a1',name:'Magenta · green',val:'magenta-green'},{id:'a2',name:'Terracotta',val:'terracotta'},{id:'a3',name:'Emerald',val:'emerald'},{id:'a4',name:'Warm',val:'warm'}],
@@ -84,7 +103,7 @@ class BuilderApp extends React.Component {
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
       libPicked:null, insertIndex:null, gapHover:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'',
-      realPage:null, pageDs:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{}, tweakExpanded:{},
+      realPage:null, pageDs:null, pageDsId:DEFAULT_DS_ID, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{}, tweakExpanded:{},
       btStyles:{}, roleDefaults:{},
       claudeEdit:null, claudeEditPick:null, claudeEditHover:null,
     };
@@ -128,12 +147,12 @@ class BuilderApp extends React.Component {
       const imgs=['magenta-green','terracotta','emerald','warm'];
       const merged=d.pages.filter(row=>!row.archived).map(row=>{
         const base=meta[row.id];
-        if(base) return {...base, name:row.title||base.name, tab:row.tab||base.tab, edited:this.agoLabel(row.updated_at)};
+        if(base) return {...base, name:row.title||base.name, tab:row.tab||base.tab, ds:row.ds||'bso', edited:this.agoLabel(row.updated_at)};
         return {
           id:row.id, tab:row.tab||'bso', name:row.title||'Untitled page',
           img:imgs[this.hashStr(row.id)%imgs.length],
           owner:(row.updated_by||'').split('@')[0]||'You', edited:this.agoLabel(row.updated_at),
-          status:'Draft', real:row.real_page||row.id,
+          status:'Draft', real:row.real_page||row.id, ds:row.ds||'bso',
         };
       });
       // Keep any built-in real page that has no DB row yet (defensive — both ship rows).
@@ -376,6 +395,9 @@ class BuilderApp extends React.Component {
   // different CSS under shared bt- class names, so only one loads at a time).
   injectPageCss(cssId){
     if(typeof document==='undefined') return;
+    // A DS with no stylesheet yet (cssKey:null, e.g. Urembo placeholder) injects
+    // nothing — remove any prior link so we fall back to the neutral builder base.
+    if(!cssId){ this.clearPageCss(); return; }
     let link=document.getElementById('bso-page-css');
     if(!link){ link=document.createElement('link'); link.id='bso-page-css'; link.rel='stylesheet'; document.head.appendChild(link); }
     link.href='/builder-css/'+cssId+'.css';
@@ -385,12 +407,19 @@ class BuilderApp extends React.Component {
   // keys off its row id (= realPage); any other page uses pageDs (set to the
   // default proposal DS on create). Drives the canvas `bt-page` wrapper + the
   // Library Sections tab so real `bt:` sections render styled on ANY page.
-  activeDs(){ const rp=this.state.realPage; return (rp && BT_PAGES[rp]) ? BT_PAGES[rp].css : (this.state.pageDs||null); }
+  // The registry id of the design system the OPEN page belongs to. Built-in real
+  // pages (p8fig/pbt) are both instances of the Backspace Oddity DS → 'bso'.
+  // Every other page carries its chosen `ds` id in state.pageDsId.
+  activeDsId(){ const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return 'bso'; return this.state.pageDsId||DEFAULT_DS_ID; }
+  // The cssKey (stylesheet id) active for the open page. A built-in real page keys
+  // off its own per-instance stylesheet (p8fig/pbt); any other page resolves its
+  // DS's cssKey from the registry (may be null → no stylesheet, e.g. Urembo).
+  activeDs(){ const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return BT_PAGES[rp].css; return getDs(this.activeDsId()).cssKey; }
   openPage(p){
     if(p && p.real && BT_PAGES[p.real]){
       const def=BT_PAGES[p.real]; this.injectPageCss(def.css);
       const cur=this.clone(def.blocks);
-      this.setState({screen:'editor', realPage:p.real, pageDs:null, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
+      this.setState({screen:'editor', realPage:p.real, pageDs:null, pageDsId:'bso', pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
         styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES),
         btStyles:{}, roleDefaults:{},
         selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
@@ -410,8 +439,10 @@ class BuilderApp extends React.Component {
     // Key persistence off its own id: set realPage=id so markDirty/savePage target it,
     // and load its saved blocks/styles from the DB so a reload restores content (BSO-658).
     if(p && p.id && !BT_PAGES[p.id]){
-      this.injectPageCss(DEFAULT_PAGE_DS);
-      this.setState({screen:'editor', realPage:p.id, pageDs:DEFAULT_PAGE_DS, pageTitle:p.name, pageTab:p.tab||'bso', currentPage:p,
+      // Resolve the page's DS from the list row's ds (if present) -> registry cssKey.
+      const dsId0=p.ds||DEFAULT_DS_ID; const css0=getDs(dsId0).cssKey;
+      this.injectPageCss(css0);
+      this.setState({screen:'editor', realPage:p.id, pageDs:css0, pageDsId:dsId0, pageTitle:p.name, pageTab:p.tab||'bso', currentPage:p,
         blocks:[], styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES), btStyles:{}, roleDefaults:{},
         selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
         saveState:'loading',
@@ -421,7 +452,9 @@ class BuilderApp extends React.Component {
         if(d && d.saved && d.page){
           const savedStyles=d.page.styles?this.clone(d.page.styles):this.state.styles;
           const savedBlocks=Array.isArray(d.page.blocks)?this.clone(d.page.blocks):[];
-          this.setState({blocks:savedBlocks, styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, pageTitle:d.page.title||p.name, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null,
+          // The DB row is the source of truth for the page's DS — re-inject its CSS.
+          const dsId=d.page.ds||dsId0; const cssId=getDs(dsId).cssKey; this.injectPageCss(cssId);
+          this.setState({blocks:savedBlocks, styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, pageTitle:d.page.title||p.name, pageDs:cssId, pageDsId:dsId, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null,
             versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(savedBlocks)}]});
         } else { this.setState({saveState:'saved'}); }
       }).catch(()=>this.setState({saveState:'saved'}));
@@ -452,7 +485,7 @@ class BuilderApp extends React.Component {
     const id=this.state.realPage; if(!id) return; if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; }
     this.setState({saveState:'saving'});
     fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({title:this.state.pageTitle, tab:this.state.pageTab, blocks:this.state.blocks, styles:this.state.styles, realPage:id})})
+      body:JSON.stringify({title:this.state.pageTitle, tab:this.state.pageTab, blocks:this.state.blocks, styles:this.state.styles, realPage:id, ds:this.activeDsId()})})
       .then(r=>r.json()).then(d=>{ if(d&&d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); } else { this.setState({saveState:'error'}); this.toast('Save failed'); } })
       .catch(()=>{ this.setState({saveState:'error'}); this.toast('Save failed'); });
   }
@@ -465,9 +498,11 @@ class BuilderApp extends React.Component {
   }
   createFromTemplate(){
     const a = this.state.newPageArche; if(!a) return;
-    // Load a proposal DS stylesheet on the new page so real `bt:` sections from the
-    // Library Sections tab render styled when assembled here (BSO-658).
-    this.injectPageCss(DEFAULT_PAGE_DS);
+    // Bind the new page to the chosen design system (registry id -> cssKey). A DS
+    // with no stylesheet yet (Urembo) injects nothing; its sections come later.
+    const dsId = this.state.newPageDsId || DEFAULT_DS_ID;
+    const cssId = getDs(dsId).cssKey;
+    this.injectPageCss(cssId);
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
     const id = this.newPageId();
     const title = (this.state.newPageName && this.state.newPageName.trim()) || 'Untitled page';
@@ -475,14 +510,14 @@ class BuilderApp extends React.Component {
     const blocks = this.buildPage(a.recipe);
     // Treat the new page as a DB-backed real page: realPage=id wires markDirty/savePage
     // to it so every subsequent edit auto-saves to this row.
-    this.setState({screen:'editor', realPage:id, pageDs:DEFAULT_PAGE_DS, newPageOpen:false, newPageName:'', newPageArche:null,
-      pageTitle:title, pageTab:tab, currentPage:{id, name:title, tab, real:id, status:'Draft'},
+    this.setState({screen:'editor', realPage:id, pageDs:cssId, pageDsId:dsId, newPageOpen:false, newPageName:'', newPageArche:null, newPageDsId:DEFAULT_DS_ID,
+      pageTitle:title, pageTab:tab, currentPage:{id, name:title, tab, real:id, status:'Draft', ds:dsId},
       blocks, styles, btStyles:(styles&&styles.bt)?this.clone(styles.bt):{}, roleDefaults:{},
       selectedId:null, selectedRole:null, editMode:true, locked:false, saveState:'saving', previewVersionId:null, imgTarget:null,
       versions:[{id:'v1', label:'Created from '+a.name, when:'Just now', author:'You', current:true, blocks:this.clone(blocks)}]});
     // Persist the initial row NOW (create-on-create), not only on first edit.
     fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({title, tab, blocks, styles, realPage:id})})
+      body:JSON.stringify({title, tab, blocks, styles, realPage:id, ds:dsId})})
       .then(r=>r.json()).then(d=>{
         if(this.state.realPage!==id) return;
         if(d && d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); this.loadPages(); }
@@ -747,7 +782,7 @@ class BuilderApp extends React.Component {
       screen==='editor' && h('button',{onClick:()=>this.setState({locked:!this.state.locked}), style:this.topBtn(false)}, this.state.locked?'Take over':'Simulate lock'),
       h('button',{onClick:()=>this.setState({variationsOpen:true}), style:this.topBtn(false)}, 'Variations'),
       h('button',{onClick:()=>this.setState({theme:this.state.theme==='light'?'dark':'light'}), style:this.topBtn(false), title:'Toggle builder theme'}, this.state.theme==='light'?'Dark':'Light'),
-      screen==='dashboard' && h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:''}), style:Object.assign(this.topBtn(false),{background:'var(--ink)', color:'var(--paper)', borderColor:'var(--ink)', fontWeight:600})}, '+ New page'),
+      screen==='dashboard' && h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:'', newPageDsId:DEFAULT_DS_ID}), style:Object.assign(this.topBtn(false),{background:'var(--ink)', color:'var(--paper)', borderColor:'var(--ink)', fontWeight:600})}, '+ New page'),
     );
   }
   topBtn(active){ return {height:26, flex:'0 0 auto', padding:'0 10px', display:'inline-flex', alignItems:'center', border:'1px solid '+(active?'var(--ink)':'var(--rule)'), borderRadius:6, background:active?'var(--ink)':'transparent', color:active?'var(--paper)':'var(--muted)', cursor:'pointer', fontSize:'11px', fontWeight:500, fontFamily:"'JetBrains Mono',monospace", letterSpacing:'.02em', whiteSpace:'nowrap', transition:'border-color .12s, color .12s, background .12s'}; }
@@ -768,7 +803,7 @@ class BuilderApp extends React.Component {
             h('div',{style:{fontSize:'15px', color:'var(--muted)', marginTop:8}}, all.length+' pages · '+(dashTab==='bso'?'Backspace Oddity':'Community Sprints'))),
           h('div',{style:{display:'flex', gap:10, alignItems:'center'}},
             this.seg([{v:'rows',l:'Rows'},{v:'gallery',l:'Grid'}], dashView, v=>this.setState({dashView:v})),
-            h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:''}), style:{padding:'9px 16px', border:'1px solid var(--ink)', borderRadius:8, background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, 'New page from template'))),
+            h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:'', newPageDsId:DEFAULT_DS_ID}), style:{padding:'9px 16px', border:'1px solid var(--ink)', borderRadius:8, background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, 'New page from template'))),
         // tabs
         h('div',{style:{display:'flex', gap:24, borderBottom:'1px solid var(--rule)', marginBottom:24}},
           [['bso','BSO'],['community','Community Sprints']].map(([k,l])=> h('button',{key:k, onClick:()=>this.setState({dashTab:k, dashPageIdx:0}), style:{padding:'0 0 12px', background:'none', border:'none', borderBottom:'2px solid '+(dashTab===k?'var(--ink)':'transparent'), marginBottom:-1, cursor:'pointer', fontSize:'15px', fontWeight:dashTab===k?600:500, color:dashTab===k?'var(--ink)':'var(--muted)', fontFamily:'inherit'}}, l))),
@@ -975,10 +1010,18 @@ class BuilderApp extends React.Component {
   }
   renderBtSections(){
     const h=React.createElement; const exp=this.state.libExpanded||{};
+    // Sections are bound to the OPEN page's design system (registry). A DS with no
+    // sections yet (Urembo placeholder) shows an empty-state pointing at Layouts.
+    const ds=getDs(this.activeDsId()); const sections=ds.sections||[];
+    if(!sections.length){
+      return h('div',{style:{padding:'14px 16px'}},
+        h('div',{style:{fontSize:'13px', fontWeight:600, color:'var(--ink)', marginBottom:8, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, ds.name+' sections are being ported'),
+        h('div',{style:{fontSize:'12px', color:'var(--muted)', lineHeight:1.5}}, 'This design system has no real sections yet — use the Layouts tab for structural placeholders for now.'));
+    }
     return h('div',{style:{padding:'12px 14px'}},
       h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Real sections from this page’s design system. Open the ▸ to see variations — hover to preview.'),
       h('div',{style:{display:'flex', flexDirection:'column', gap:10}},
-        BT_SECTIONS.map(sec=>{
+        sections.map(sec=>{
           const first=sec.variations[0]; const multi=sec.variations.length>1; const open=!!exp[sec.type];
           return h('div',{key:sec.type},
             h('div',{style:{display:'flex', alignItems:'flex-start', gap:5}},
@@ -1508,7 +1551,7 @@ class BuilderApp extends React.Component {
         h('div',{style:{display:'flex', justifyContent:'space-between', alignItems:'center'}},
           h('div',{style:this.mono()}, 'Tweaks'),
           h('button',{onClick:()=>this.setState({tweaksOpen:false}), title:'Collapse', style:{background:'none',border:'none',cursor:'pointer',color:'var(--faint)',fontSize:'16px',padding:0,lineHeight:1}}, '\u00d7')),
-        h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:9}}, inst? (role? 'Editing '+this.roleName(role)+' style' : 'Section selected') : 'Bound to Backspace Oddity DS')),
+        h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:9}}, inst? (role? 'Editing '+this.roleName(role)+' style' : 'Section selected') : ('Bound to '+getDs(this.activeDsId()).name+' DS'))),
       !inst ? this.tweaksEmpty() : this.tweaksBody(inst, role));
   }
   // bt type-style editor body \u2014 inline accordion: each role row toggles its
@@ -1646,7 +1689,7 @@ class BuilderApp extends React.Component {
 
   // ---------- new page modal ----------
   renderNewPage(){
-    const h=React.createElement; const {newPageArche, newPageName}=this.state;
+    const h=React.createElement; const {newPageArche, newPageName, newPageDsId}=this.state;
     return h('div',{onClick:()=>this.setState({newPageOpen:false}), style:{position:'absolute', inset:0, zIndex:60, background:'rgba(1,28,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', padding:24, animation:'bsofade .2s both'}},
       h('div',{onClick:e=>e.stopPropagation(), style:{width:720, maxWidth:'100%', maxHeight:'90%', overflow:'auto', background:'var(--surface)', borderRadius:16, border:'1px solid var(--rule)', boxShadow:'var(--shadow)'}},
         h('div',{style:{padding:'22px 26px 18px', borderBottom:'1px solid var(--rule)'}},
@@ -1657,6 +1700,13 @@ class BuilderApp extends React.Component {
             this.ARCHETYPES.map(a=>{ const on=newPageArche&&newPageArche.id===a.id; return h('div',{key:a.id, onClick:()=>this.setState({newPageArche:a}), style:{border:'1px solid '+(on?'var(--ink)':'var(--rule2)'), borderRadius:12, overflow:'hidden', cursor:'pointer', background:'var(--paper)', boxShadow:on?'0 0 0 2px var(--ink)':'none', transition:'box-shadow .15s'}},
               h('div',{style:{height:96, background:'#011C00', backgroundImage:a.id==='blank'?'none':'url('+this.grad(a.img)+')', backgroundSize:'cover', backgroundPosition:'center', display:'flex', alignItems:'center', justifyContent:'center'}}, a.id==='blank'&&h('span',{style:this.mono({color:'rgba(253,251,244,.5)'})}, 'Blank')),
               h('div',{style:{padding:'13px 15px'}}, h('div',{style:{fontSize:'15px', fontWeight:600, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, a.name), h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:4}}, a.desc))); })),
+          h('div',{style:{marginTop:22}},
+            h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:7}}, 'Design system'),
+            h('div',{style:{display:'flex', gap:10, flexWrap:'wrap'}},
+              DESIGN_SYSTEMS.map(d=>{ const on=newPageDsId===d.id; const empty=!d.sections.length; return h('button',{key:d.id, 'data-ds':d.id, onClick:()=>this.setState({newPageDsId:d.id}),
+                style:{flex:'1 1 180px', textAlign:'left', padding:'12px 14px', borderRadius:10, border:'1px solid '+(on?'var(--ink)':'var(--rule2)'), background:on?'var(--ink)':'var(--paper)', color:on?'var(--paper)':'var(--ink)', cursor:'pointer', boxShadow:on?'0 0 0 1px var(--ink)':'none', fontFamily:'inherit', transition:'border-color .12s, background .12s'}},
+                h('div',{style:{fontSize:'14px', fontWeight:600, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, d.name),
+                h('div',{style:{fontSize:'11.5px', marginTop:3, color:on?'rgba(242,242,240,.75)':'var(--muted)'}}, empty? 'sections coming soon' : d.sections.length+' section types')); }))),
           h('div',{style:{marginTop:22}},
             h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:7}}, 'Page name'),
             h('input',{value:newPageName, onChange:e=>this.setState({newPageName:e.target.value}), placeholder:'e.g. Q3 partnership proposal', style:{width:'100%', padding:'11px 13px', borderRadius:9, border:'1px solid var(--rule2)', background:'var(--paper)', color:'var(--ink)', fontSize:'15px', fontFamily:'inherit'}}))),

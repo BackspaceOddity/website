@@ -41,6 +41,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     blocks: body.blocks ?? [],
     styles: body.styles ?? null,
     real_page: body.realPage ?? null,
+    ds: body.ds ?? 'bso',
     archived: !!body.archived,
     updated_at: new Date().toISOString(),
     updated_by: email,
