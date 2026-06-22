@@ -70,7 +70,7 @@ function LoginGate({ err = false }: { err?: boolean }) {
       <div className="ef-gate__right">
         <p className="ef-gate__title">8FIGURES</p>
         <p className="ef-gate__sub">Backspace Oddity</p>
-        <form method="POST" action="/8figures/login">
+        <form method="POST" action="/8figures/login/">
           <input type="password" name="code" placeholder="Enter password" autoFocus autoComplete="current-password" />
           <button type="submit">Enter →</button>
           {err ? <p className="ef-gate__err">Incorrect password.</p> : null}
