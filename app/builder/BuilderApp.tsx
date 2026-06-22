@@ -73,6 +73,7 @@ class BuilderApp extends React.Component {
       askPrompt:'', askState:'idle', askResult:null, customTemplates:[], savedTemplates:[], libTab:'sections', draggingAsset:null, assets:[{id:'a1',name:'Magenta · green',val:'magenta-green'},{id:'a2',name:'Terracotta',val:'terracotta'},{id:'a3',name:'Emerald',val:'emerald'},{id:'a4',name:'Warm',val:'warm'}],
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
+      libPicked:null, insertIndex:null, gapHover:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'',
       realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{}, tweakExpanded:{},
       btStyles:{}, roleDefaults:{},
@@ -81,6 +82,7 @@ class BuilderApp extends React.Component {
     this.fileInput = null;
   }
   componentDidMount(){
+    this._bindEsc();
     try{ const raw = localStorage.getItem('bso_ds_styles'); if(raw){ this.dsStyles = JSON.parse(raw); } }catch(e){}
     // Deploy / Analytics open in their own tab via ?screen=…&page=… — parse it here.
     let pend=null;
@@ -106,7 +108,9 @@ class BuilderApp extends React.Component {
     if(!rp){ this.toast('Save this page before publishing.'); return; }
     this.openInTab('deploy', {id:rp, name:this.state.pageTitle||'Page', status:'Draft'}, 'editor');
   }
-  componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } }
+  componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } if(this._onKey){ window.removeEventListener('keydown', this._onKey); } }
+  // Esc clears an armed gap / picked tile (BSO-658).
+  _bindEsc(){ if(this._onKey) return; this._onKey=(e)=>{ if(e.key==='Escape') this.clearArm(); }; if(typeof window!=='undefined') window.addEventListener('keydown', this._onKey); }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
   startResize(e, which){ e.preventDefault(); const startX=e.clientX; const key=which==='lib'?'libW':'tweaksW'; const startW=this.state[key]; const lr=this.state.editorLayout==='lr'; const dir=(which==='lib')?(lr?1:-1):(lr?-1:1); const move=ev=>{ let w=startW+dir*(ev.clientX-startX); w=Math.max(168,Math.min(480,w)); this.setState({[key]:w}); }; const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); document.body.style.cursor=''; document.body.style.userSelect=''; }; window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); document.body.style.cursor='col-resize'; document.body.style.userSelect='none'; }
   onCanvasRef = (el)=>{ this._canvasEl=el; if(el){ this.measureCanvas(); if(!this._ro){ this._ro=new ResizeObserver(()=>this.measureCanvas()); } this._ro.disconnect(); this._ro.observe(el); } };
@@ -401,6 +405,24 @@ class BuilderApp extends React.Component {
   setBlockProp(id, key, val){ this.setState(s=>({blocks:s.blocks.map(b=> b.id===id ? {...b,[key]:val} : b)})); }
 
   insertAt(index, block){ this.setState(s=>{ const arr=[...s.blocks]; arr.splice(index,0,block); return {blocks:arr, selectedId:block.id, selectedRole:null, dropAt:null, draggingType:null, dragIndex:null}; }); this.markDirty(); }
+  // ---------- explicit two-step insert (BSO-658) ----------
+  // Clicking a leaf library tile no longer inserts; it SELECTS the tile (libPicked)
+  // and reveals an "Add to canvas" button. The token uniquely identifies the tile so
+  // only the selected one shows the button. `build` lazily makes the block on add.
+  pickTile(token, build, name){ this.setState(s=> s.libPicked && s.libPicked.token===token ? {libPicked:null} : {libPicked:{token, build, name}}); }
+  isPicked(token){ const p=this.state.libPicked; return !!(p && p.token===token); }
+  // Perform the actual insert — at the armed gap if one is set, else append. Clears arm+pick.
+  addPicked(build, name){
+    const idx = this.state.insertIndex!=null ? this.state.insertIndex : this.state.blocks.length;
+    const block = build(); if(!block) return;
+    this.insertAt(idx, block); this.toast((name||'Section')+' added');
+    this.setState({libPicked:null, insertIndex:null});
+  }
+  // Arm a between-section gap as the insert position; open the Library so a tile can be picked.
+  armGap(index){ this.setState(s=> s.insertIndex===index ? {insertIndex:null} : {insertIndex:index, libraryOpen:true}); }
+  // Dev-only debug surface for verification (no behavioral effect).
+  _dbg(){ if(typeof window!=='undefined'){ window.__builderInsertIndex=this.state.insertIndex; window.__builderBlockCount=this.state.blocks.length; } }
+  clearArm(){ if(this.state.insertIndex!=null || this.state.libPicked) this.setState({insertIndex:null, libPicked:null}); }
   onDrop(index){
     const {draggingType, dragIndex} = this.state;
     if(draggingType){
@@ -773,13 +795,20 @@ class BuilderApp extends React.Component {
   // Shared wide-tile shell — used by BOTH the Sections tab (typeTile) and the
   // Layouts tab (layoutTile) so the two can't drift. `thumb` is the rendered
   // preview element on top; `extra` carries hover/drag handlers + cursor.
-  tileShell(thumb, name, multiCount, onClick, extra){
-    const h=React.createElement;
-    return h('div', Object.assign({ onClick,
-        style:{flex:1, minWidth:0, border:'1px solid var(--rule2)', borderRadius:9, overflow:'hidden', cursor:(extra&&extra.cursor)||'pointer', background:'var(--surface)', transition:'border-color .12s'}}, extra&&extra.props),
+  // `add` (optional) = {token, build, name}. When present the tile becomes a
+  // two-step leaf-insert tile: clicking SELECTS it (revealing an Add-to-canvas
+  // overlay) instead of inserting; the overlay button performs the insert.
+  tileShell(thumb, name, multiCount, onClick, extra, add){
+    const h=React.createElement; const picked = add && this.isPicked(add.token);
+    const click = add ? (e=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.pickTile(add.token, add.build, add.name||name); }) : onClick;
+    return h('div', Object.assign({ onClick:click,
+        style:{flex:1, minWidth:0, border:'1px solid '+(picked?'var(--ink)':'var(--rule2)'), borderRadius:9, overflow:'hidden', cursor:(extra&&extra.cursor)||'pointer', background:'var(--surface)', transition:'border-color .12s', boxShadow:picked?'0 0 0 1px var(--ink)':'none'}}, extra&&extra.props),
       h('div',{style:{position:'relative'}},
         thumb,
-        multiCount && h('div',{style:{position:'absolute', top:6, right:6, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'9px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 5px', lineHeight:1.4}}, multiCount)),
+        multiCount && h('div',{style:{position:'absolute', top:6, right:6, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'9px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 5px', lineHeight:1.4}}, multiCount),
+        picked && h('div',{style:{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(1,28,0,.34)'}},
+          h('button',{onClick:e=>{ e.stopPropagation(); this.addPicked(add.build, add.name||name); },
+            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'8px 16px', fontSize:'12px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
       h('div',{style:{padding:'8px 11px 9px', fontSize:'12px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name));
   }
   // ---------- Saved tab (BSO-658) ----------
@@ -798,36 +827,37 @@ class BuilderApp extends React.Component {
       this.savedThumb(t, 80, 0.185),
       h('button',{onClick:e=>{e.stopPropagation(); this.deleteSavedTemplate(t.id);}, 'data-tip':'Delete template',
         style:{position:'absolute', top:6, right:6, zIndex:3, width:20, height:20, borderRadius:99, border:'none', background:'rgba(1,28,0,.66)', color:'#F2F2F0', cursor:'pointer', fontSize:'12px', lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', padding:0}}, '×'));
-    return this.tileShell(thumb, t.name, null, ()=>this.insertSavedTemplate(t.id), {
+    return this.tileShell(thumb, t.name, null, null, {
       cursor:'grab',
       props:{
         draggable:true, title:t.name,
         onDragStart:e=>{ this.setState({draggingType:'saved:'+t.id}); e.dataTransfer.effectAllowed='copy'; },
         onDragEnd:()=>this.setState({draggingType:null, dropAt:null}),
-        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; },
-        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; },
-      }});
+        onMouseEnter:e=>{ if(!this.isPicked('saved:'+t.id)) e.currentTarget.style.borderColor='var(--ink)'; },
+        onMouseLeave:e=>{ if(!this.isPicked('saved:'+t.id)) e.currentTarget.style.borderColor='var(--rule2)'; },
+      }}, {token:'saved:'+t.id, build:()=>this.savedInstance(t.id), name:t.name});
   }
-  typeTile(sec, props, name, multiCount, onClick){
+  typeTile(sec, props, name, multiCount, onClick, add){
+    const tok = add && add.token;
     return this.tileShell(this.thumbFill(sec.type, props, 80, 0.185), name, multiCount, onClick, {
       props:{
-        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:sec.type, props, name, top:r.top, left:r.right+12}}); },
-        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
-      }});
+        onMouseEnter:e=>{ if(!(tok&&this.isPicked(tok))) e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:sec.type, props, name, top:r.top, left:r.right+12}}); },
+        onMouseLeave:e=>{ if(!(tok&&this.isPicked(tok))) e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
+      }}, add);
   }
   // Layouts tab: same wide-tile shell, but the thumbnail is a real render of a
   // synthetic structural block, and the tile is draggable onto the canvas.
   layoutTile(typeKey, name, desc){
     const h=React.createElement;
-    return this.tileShell(this.synthThumb(typeKey, 80, 0.185), name, null, ()=>{ this.insertAt(this.state.blocks.length, this.makeBlock(typeKey,{props:this.placeholders(typeKey), bg:'paper'})); this.toast(name+' added'); }, {
+    return this.tileShell(this.synthThumb(typeKey, 80, 0.185), name, null, null, {
       cursor:'grab',
       props:{
         draggable:true, title:desc,
         onDragStart:e=>{ this.setState({draggingType:'blank:'+typeKey}); e.dataTransfer.effectAllowed='copy'; },
         onDragEnd:()=>this.setState({draggingType:null, dropAt:null}),
-        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{type:typeKey, name, desc, bg:'paper', top:r.top, left:r.right+12}}); },
-        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
-      }});
+        onMouseEnter:e=>{ if(!this.isPicked('layout:'+typeKey)) e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{type:typeKey, name, desc, bg:'paper', top:r.top, left:r.right+12}}); },
+        onMouseLeave:e=>{ if(!this.isPicked('layout:'+typeKey)) e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
+      }}, {token:'layout:'+typeKey, build:()=>this.makeBlock(typeKey,{props:this.placeholders(typeKey), bg:'paper'}), name});
   }
   // Width-filling scaled thumbnail of a synthetic structural block (placeholder
   // copy) — the Layouts-tab counterpart to thumbFill. Renders the same canvas
@@ -860,7 +890,7 @@ class BuilderApp extends React.Component {
                   style:{flex:'0 0 auto', width:16, height:34, display:'inline-flex', alignItems:'center', justifyContent:'center', background:'none', border:'none', cursor:'pointer', color:'var(--muted)', padding:0}},
                   h('span',{style:{display:'inline-block', transform:open?'rotate(90deg)':'none', transition:'transform .14s', fontSize:'10px'}}, '▶'))
                 : h('span',{style:{flex:'0 0 auto', width:16}}),
-              this.typeTile(sec, first.props, sec.name+(multi?' · '+sec.variations.length+' variations':''), multi?sec.variations.length:null, multi?(()=>this.toggleLibType(sec.type)):(()=>this.insertBtVariation(sec.type, first))) ),
+              this.typeTile(sec, first.props, sec.name+(multi?' · '+sec.variations.length+' variations':''), multi?sec.variations.length:null, multi?(()=>this.toggleLibType(sec.type)):null, multi?null:{token:'bt:'+sec.type+':'+first.id, build:()=>({id:this.nid('bt'), type:sec.type, props:this.clone(first.props), real:true}), name:sec.name}) ),
             open && h('div',{style:{marginLeft:20, marginTop:8, display:'flex', flexDirection:'column', gap:8}},
               sec.variations.map((v,i)=> h('div',{key:v.id, style:{display:'flex', alignItems:'center', gap:8}},
                 h('span',{style:{flex:'0 0 auto', width:11, textAlign:'right', fontSize:'10px', color:'var(--faint)', fontFamily:"'JetBrains Mono',monospace"}}, i+1),
@@ -874,12 +904,17 @@ class BuilderApp extends React.Component {
       h('div',{className:'page bt-page', style:{width:1100, zoom:zoom||0.069, pointerEvents:'none'}}, h(Comp, props)));
   }
   btVarCard(type, v){
-    const h=React.createElement;
-    return h('div',{key:v.id, onClick:()=>this.insertBtVariation(type, v),
-      onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:type, props:v.props, name:v.name, top:r.top, left:r.right+12}}); },
-      onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
-      style:{border:'1px solid var(--rule2)', borderRadius:7, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
-      this.thumbFill(type, v.props, 64, 0.148),
+    const h=React.createElement; const tok='btvar:'+type+':'+v.id; const picked=this.isPicked(tok);
+    const build=()=>({id:this.nid('bt'), type, props:this.clone(v.props), real:true});
+    return h('div',{key:v.id, onClick:e=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.pickTile(tok, build, v.name); },
+      onMouseEnter:e=>{ if(!picked) e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:type, props:v.props, name:v.name, top:r.top, left:r.right+12}}); },
+      onMouseLeave:e=>{ if(!picked) e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
+      style:{border:'1px solid '+(picked?'var(--ink)':'var(--rule2)'), borderRadius:7, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s', boxShadow:picked?'0 0 0 1px var(--ink)':'none'}},
+      h('div',{style:{position:'relative'}},
+        this.thumbFill(type, v.props, 64, 0.148),
+        picked && h('div',{style:{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(1,28,0,.34)'}},
+          h('button',{onClick:e=>{ e.stopPropagation(); this.addPicked(build, v.name); },
+            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'6px 13px', fontSize:'11px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
       h('div',{style:{padding:'6px 9px 7px', fontSize:'10.5px', fontWeight:600, color:'var(--ink)'}}, v.name));
   }
   // Scaled, real render of a bt section (exact content) for previews.
@@ -914,16 +949,21 @@ class BuilderApp extends React.Component {
   libCard(typeKey, name, desc, custom, bg, blank){
     const h=React.createElement; const isCustom=String(typeKey).startsWith('custom:');
     const mk=()=> isCustom?this.customInstance(typeKey):(blank?this.makeBlock(typeKey,{props:this.placeholders(typeKey), bg:'paper'}):this.makeBlock(typeKey));
+    const tok='card:'+(blank?'blank-':'')+typeKey; const picked=this.isPicked(tok);
     return h('div',{key:(blank?'blank-':'')+typeKey, draggable:true, title:desc,
         onDragStart:e=>{ this.setState({draggingType:(blank?'blank:':'')+typeKey}); e.dataTransfer.effectAllowed='copy'; },
         onDragEnd:()=>this.setState({draggingType:null, dropAt:null}),
-        onClick:()=>{ this.insertAt(this.state.blocks.length, mk()); this.toast(name+' added'); },
-        style:{border:'1px '+(blank?'dashed':'solid')+' var(--rule2)', borderRadius:7, padding:4, width:152, maxWidth:'100%', margin:'0 auto 8px', cursor:'grab', background:blank?'transparent':'var(--paper)', transition:'border-color .15s, transform .1s'},
-        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{type:isCustom?'custom':typeKey, name, desc, bg, top:r.top, left:r.right+12}}); },
-        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); }},
-      h('div',{style:{display:'flex', flexDirection:'column', gap:5}},
-        this.miniPreview(isCustom?'custom':typeKey, bg, '100%', 90),
-        h('div',{style:{fontSize:'11px', fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', textAlign:'center', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name)),
+        onClick:e=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.pickTile(tok, mk, name); },
+        style:{position:'relative', border:'1px '+(blank?'dashed':'solid')+' '+(picked?'var(--ink)':'var(--rule2)'), borderRadius:7, padding:4, width:152, maxWidth:'100%', margin:'0 auto 8px', cursor:'grab', background:blank?'transparent':'var(--paper)', transition:'border-color .15s, transform .1s', boxShadow:picked?'0 0 0 1px var(--ink)':'none'},
+        onMouseEnter:e=>{ if(!picked) e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{type:isCustom?'custom':typeKey, name, desc, bg, top:r.top, left:r.right+12}}); },
+        onMouseLeave:e=>{ if(!picked) e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); }},
+      h('div',{style:{position:'relative'}},
+        h('div',{style:{display:'flex', flexDirection:'column', gap:5}},
+          this.miniPreview(isCustom?'custom':typeKey, bg, '100%', 90),
+          h('div',{style:{fontSize:'11px', fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', textAlign:'center', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name)),
+        picked && h('div',{style:{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(1,28,0,.34)', borderRadius:5}},
+          h('button',{onClick:e=>{ e.stopPropagation(); this.addPicked(mk, name); },
+            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'7px 14px', fontSize:'11px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
     );
   }
   miniPreview(type, bg, w, hh){
@@ -980,11 +1020,31 @@ class BuilderApp extends React.Component {
       h('div',{style:{fontSize:'22px', fontWeight:600, letterSpacing:'-0.01em', maxWidth:420}}, 'Drag a section from the library, or ask Claude to draft one.'));
   }
   dropzone(index){
-    const h=React.createElement; const active=this.state.dropAt===index && (this.state.draggingType||this.state.dragIndex!=null);
-    return h('div',{onDragOver:e=>{e.preventDefault(); if(this.state.dropAt!==index) this.setState({dropAt:index});}, onDragLeave:()=>{ if(this.state.dropAt===index) this.setState({dropAt:null}); }, onDrop:e=>{e.preventDefault(); this.onDrop(index);},
-      style:{height:active?34:8, transition:'height .12s', display:'flex', alignItems:'center', justifyContent:'center', position:'relative', zIndex:5}},
-      active && h('div',{style:{height:3, background:'#011C00', width:'90%', borderRadius:99, position:'relative'}},
-        h('div',{style:{position:'absolute', left:-1, top:-3.5, width:10, height:10, borderRadius:99, background:'#011C00'}})));
+    const h=React.createElement;
+    const dragActive=this.state.dropAt===index && (this.state.draggingType||this.state.dragIndex!=null);
+    const armed=this.state.insertIndex===index;
+    const hovered=this.state.gapHover===index;
+    // Expanded when: a drag is hovering, this gap is armed, or the pointer is over it.
+    const open = dragActive || armed || hovered;
+    return h('div',{
+        onMouseEnter:()=>{ if(this.state.gapHover!==index) this.setState({gapHover:index}); },
+        onMouseLeave:()=>{ if(this.state.gapHover===index) this.setState({gapHover:null}); },
+        onDragOver:e=>{e.preventDefault(); if(this.state.dropAt!==index) this.setState({dropAt:index});},
+        onDragLeave:()=>{ if(this.state.dropAt===index) this.setState({dropAt:null}); },
+        onDrop:e=>{e.preventDefault(); this.onDrop(index); this.setState({insertIndex:null, libPicked:null});},
+      style:{height:open?34:10, transition:'height .12s', display:'flex', alignItems:'center', justifyContent:'center', position:'relative', zIndex:5}},
+      dragActive
+        // Solid drop indicator while dragging a tile over this gap.
+        ? h('div',{style:{height:3, background:'#011C00', width:'90%', borderRadius:99, position:'relative'}},
+            h('div',{style:{position:'absolute', left:-1, top:-3.5, width:10, height:10, borderRadius:99, background:'#011C00'}}))
+        // Otherwise: dotted line + "+ Insert section" pill (armed = highlighted).
+        : open && h('div',{style:{width:'90%', position:'relative', display:'flex', alignItems:'center', justifyContent:'center'}},
+            h('div',{style:{position:'absolute', left:0, right:0, top:'50%', borderTop:'1.5px dashed '+(armed?'#011C00':'var(--rule)')}}),
+            h('button',{onClick:e=>{ e.stopPropagation(); this.armGap(index); },
+              'data-tip':armed?'Pick a section from the library, or click to cancel':'Insert a section here',
+              style:{position:'relative', zIndex:1, display:'inline-flex', alignItems:'center', gap:6, background:armed?'var(--ink)':'var(--surface)', color:armed?'#F2F2F0':'var(--ink)', border:'1px solid '+(armed?'var(--ink)':'var(--rule)'), borderRadius:99, padding:'3px 11px', fontSize:'11px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 1px 4px rgba(0,0,0,.08)'}},
+              h('span',{style:{display:'inline-flex', alignItems:'center', justifyContent:'center', width:14, height:14, borderRadius:99, border:'1.5px solid '+(armed?'#F2F2F0':'var(--ink)'), fontSize:'11px', lineHeight:1}}, '+'),
+              'Insert section')));
   }
 
   // ---------- one block ----------
@@ -1398,7 +1458,7 @@ class BuilderApp extends React.Component {
     const j = await r.json();
     return (j && j.text) || '';
   }
-  render(){ return React.createElement('div', {style:{height:'100vh', overflow:'hidden'}}, this.renderApp()); }
+  render(){ this._dbg(); return React.createElement('div', {style:{height:'100vh', overflow:'hidden'}}, this.renderApp()); }
 
 }
 
