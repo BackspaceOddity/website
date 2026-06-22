@@ -53,7 +53,7 @@ class BuilderApp extends React.Component {
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'',
-      realPage:null, saveState:'saved', lastSavedBy:null,
+      realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null,
     };
     this.uid = 0;
     this.fileInput = null;
@@ -377,15 +377,25 @@ class BuilderApp extends React.Component {
     const h=React.createElement, F=React.Fragment;
     const {screen, theme} = this.state;
     if(screen==='login') return h('div',{'data-theme':theme, style:{height:'100vh', overflow:'hidden', background:'var(--paper)', color:'var(--ink)'}}, this.renderLogin(), this.state.toast && this.renderToast());
-    return h('div', {'data-theme':theme, style:{height:'100vh', display:'flex', flexDirection:'column', background:'var(--paper)', color:'var(--ink)', overflow:'hidden'}},
+    return h('div', {'data-theme':theme,
+        onMouseOver:e=>{ const t=e.target&&e.target.closest&&e.target.closest('[data-tip]'); if(!t) return; const txt=t.getAttribute('data-tip'); if(!txt){ return; } const r=t.getBoundingClientRect(); this.showTip(txt, Math.round(r.left+r.width/2), Math.round(r.bottom+7)); },
+        onMouseOut:e=>{ const t=e.target&&e.target.closest&&e.target.closest('[data-tip]'); if(t) this.hideTip(); },
+        style:{height:'100vh', display:'flex', flexDirection:'column', background:'var(--paper)', color:'var(--ink)', overflow:'hidden'}},
       this.renderTopbar(),
       h('div', {style:{flex:1, minHeight:0, position:'relative'}},
         screen==='dashboard' ? this.renderDashboard() : screen==='analytics' ? this.renderAnalytics() : screen==='deploy' ? this.renderDeploy() : this.renderEditor()
       ),
       this.state.newPageOpen && this.renderNewPage(),
       this.state.variationsOpen && this.renderVariations(),
+      this.renderTip(),
       this.state.toast && this.renderToast(),
     );
+  }
+  // Tooltip on a fixed layer — never clipped by the topbar's scroll container.
+  showTip(text, x, y){ if(this._tipT) clearTimeout(this._tipT); this._tipT=setTimeout(()=>this.setState({tip:{text, x, y}}), 140); }
+  hideTip(){ if(this._tipT){ clearTimeout(this._tipT); this._tipT=null; } if(this.state.tip) this.setState({tip:null}); }
+  renderTip(){ const h=React.createElement; const t=this.state.tip; if(!t) return null;
+    return h('div',{style:{position:'fixed', left:t.x, top:t.y, transform:'translateX(-50%)', zIndex:200, background:'#011C00', color:'#F2F2F0', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', fontWeight:500, letterSpacing:'.08em', textTransform:'uppercase', padding:'4px 7px', borderRadius:5, whiteSpace:'nowrap', pointerEvents:'none', boxShadow:'0 4px 14px rgba(1,28,0,.22)'}}, t.text);
   }
 
   // ---------- shared atoms ----------
@@ -612,17 +622,23 @@ class BuilderApp extends React.Component {
     return h('div',{style:{padding:'12px 14px'}},
       h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Real sections from this page’s design system. Open a type, pick a variation — hover to see its content.'),
       BT_SECTIONS.map(sec=>{
-        const open=this.state.libOpen===sec.type;
-        return h('div',{key:sec.type, style:{marginBottom:6, border:'1px solid var(--rule)', borderRadius:8, overflow:'hidden', background:'var(--paper)'}},
-          h('button',{onClick:()=>this.setState(s=>({libOpen:s.libOpen===sec.type?null:sec.type})),
-            style:{width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 11px', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit'}},
-            h('span',{style:{fontSize:'12.5px', fontWeight:600, color:'var(--ink)'}}, sec.name),
-            h('span',{style:{display:'flex', alignItems:'center', gap:8}},
-              h('span',{style:this.mono({fontSize:'9px'})}, sec.variations.length>1?sec.variations.length+' variations':'1 variation'),
-              h('span',{style:{fontSize:'9px', color:'var(--muted)', display:'inline-block', transform:open?'rotate(90deg)':'none', transition:'transform .12s'}}, '▶'))),
-          open && h('div',{style:{padding:'0 9px 10px', display:'flex', flexDirection:'column', gap:9}},
+        const open=this.state.libOpen===sec.type; const first=sec.variations[0];
+        return h('div',{key:sec.type, style:{marginBottom:7, border:'1px solid var(--rule)', borderRadius:9, overflow:'hidden', background:'var(--surface)'}},
+          h('button',{onClick:()=>this.setState(s=>({libOpen:s.libOpen===sec.type?null:sec.type})), 'data-tip':open?null:('Open '+sec.name),
+            style:{width:'100%', display:'flex', alignItems:'center', gap:8, padding:'7px 8px', background:open?'var(--soft)':'transparent', border:'none', cursor:'pointer', textAlign:'left'}},
+            this.realThumb(sec.type, first.props, 42, 30),
+            h('span',{style:{flex:1, minWidth:0, fontSize:'12px', fontWeight:600, color:'var(--ink)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, sec.name),
+            sec.variations.length>1 && h('span',{style:{flex:'0 0 auto', fontSize:'10px', color:'var(--muted)', fontFamily:"'JetBrains Mono',monospace"}}, '('+sec.variations.length+')'),
+            h('span',{style:{flex:'0 0 auto', width:11, textAlign:'center', fontSize:'9px', color:'var(--muted)', display:'inline-block', transform:open?'rotate(90deg)':'none', transition:'transform .12s'}}, '▶')),
+          open && h('div',{style:{padding:'2px 8px 9px', display:'flex', flexDirection:'column', gap:8}},
             sec.variations.map(v=> this.btVarCard(sec.type, v))));
       }));
+  }
+  // Fixed-size scaled thumbnail of a real section (for the type tile).
+  realThumb(type, props, w, hh){
+    const h=React.createElement; const Comp=BT_COMPONENTS[type]; if(!Comp) return null;
+    return h('div',{style:{width:w, height:hh, flex:'0 0 auto', overflow:'hidden', borderRadius:5, border:'1px solid var(--rule2)', background:'#F2F2F0'}},
+      h('div',{className:'page bt-page', style:{width:1100, zoom:w/1100, pointerEvents:'none'}}, h(Comp, props)));
   }
   btVarCard(type, v){
     const h=React.createElement;
