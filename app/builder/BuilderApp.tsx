@@ -834,10 +834,15 @@ class BuilderApp extends React.Component {
     const h=React.createElement;
     const inst={id:'__thumb-'+type, type, bg:type==='hero'?'forest':'paper', pad:'M', props:this.placeholders(type), overrides:{}};
     const forest=inst.bg==='forest'; const fg=forest?'#FDFBF4':'#011C00';
+    const heroImg=forest&&type==='hero';
     const bg=forest?'#011C00':'transparent';
-    return h('div',{style:{width:'100%', height:hh, overflow:'hidden', background:forest?'#011C00':'#F2F2F0'}},
-      h('div',{style:{width:1100, zoom:zoom||0.069, pointerEvents:'none', background:bg, color:fg, backgroundImage:(forest&&type==='hero')?'url('+this.imgUrl(inst.props.img||'magenta-green')+')':'none', backgroundSize:'cover', backgroundPosition:'center'}},
-        forest && type==='hero' && h('div',{style:{position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.55))', pointerEvents:'none'}}),
+    // For the forest hero, the image (+gradient overlay) lives on the OUTER
+    // height:hh container so it fills the whole tile regardless of how short the
+    // scaled content is. The inner scaled div stays transparent and just carries
+    // the headline/CTA on top. Non-image layouts keep their plain paper bg.
+    return h('div',{style:{position:'relative', width:'100%', height:hh, overflow:'hidden', background:forest?'#011C00':'#F2F2F0', backgroundImage:heroImg?'url('+this.imgUrl(inst.props.img||'magenta-green')+')':'none', backgroundSize:'cover', backgroundPosition:'center'}},
+      heroImg && h('div',{style:{position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.55))', pointerEvents:'none'}}),
+      h('div',{style:{position:'relative', zIndex:2, width:1100, zoom:zoom||0.069, pointerEvents:'none', background:heroImg?'transparent':bg, color:fg}},
         h('div',{style:{position:'relative', zIndex:2, padding:this.blockPad(inst)}}, this.blockInner(inst, fg))));
   }
   renderBtSections(){
