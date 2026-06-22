@@ -74,7 +74,7 @@ class BuilderApp extends React.Component {
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'',
-      realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{},
+      realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{}, tweakExpanded:{},
       btStyles:{}, roleDefaults:{},
     };
     this.uid = 0;
@@ -949,8 +949,18 @@ class BuilderApp extends React.Component {
           if(fields.fontFamily && seeds.fontFamily===undefined) seeds.fontFamily=cs.fontFamily;
         }
       }
-      return {selectedRole:role, selectedId:null, roleDefaults:Object.assign({}, s.roleDefaults, {[role]:seeds})};
+      const te=Object.assign({}, s.tweakExpanded); te[role]=true;
+      return {selectedRole:role, selectedId:null, tweakExpanded:te, roleDefaults:Object.assign({}, s.roleDefaults, {[role]:seeds})};
     });
+    // scroll the newly-expanded role into view (panel is a separate scroll container)
+    if(typeof window!=='undefined'){ requestAnimationFrame(()=>{ try{ const el=document.querySelector('[data-tweak-role="'+role+'"]'); if(el&&el.scrollIntoView) el.scrollIntoView({block:'nearest', behavior:'smooth'}); }catch(e){} }); }
+  }
+  // Toggle a role's inline property disclosure (mirrors toggleLibType). Seeds computed defaults on first open.
+  toggleTweakRole(role){
+    if(!ROLE_VARS[role]){ return; }
+    const willOpen=!(this.state.tweakExpanded||{})[role];
+    if(willOpen){ this.selectBtRole(role); return; }
+    this.setState(s=>{ const te=Object.assign({}, s.tweakExpanded); delete te[role]; return {tweakExpanded:te}; });
   }
   // Write one field's override into btStyles (immutably), mirror into styles.bt so it
   // persists through the existing PUT, and schedule the debounced save. Live apply is
@@ -1070,14 +1080,13 @@ class BuilderApp extends React.Component {
     const border = side?{borderLeft:'1px solid var(--rule)'}:{borderRight:'1px solid var(--rule)'};
     // Real page \u2192 the bt type-style editor (per-role design-system overrides).
     if(this.state.realPage){
-      const role=this.state.selectedRole;
       return h('div',{className:'bso-scroll', style:Object.assign({width:this.state.tweaksW, flex:'0 0 '+this.state.tweaksW+'px', background:'var(--surface)', overflowY:'auto', height:'100%'}, border)},
         h('div',{style:{padding:'18px 18px 14px', position:'sticky', top:0, background:'var(--surface)', borderBottom:'1px solid var(--rule)', zIndex:2}},
           h('div',{style:{display:'flex', justifyContent:'space-between', alignItems:'center'}},
             h('div',{style:this.mono()}, 'Tweaks'),
             h('button',{onClick:()=>this.setState({tweaksOpen:false}), title:'Collapse', style:{background:'none',border:'none',cursor:'pointer',color:'var(--faint)',fontSize:'16px',padding:0,lineHeight:1}}, '\u00d7')),
-          h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:9}}, role? ('Editing '+(BT_ROLE_META[role]?BT_ROLE_META[role].label:role)+' \u2014 applies to every '+(BT_ROLE_META[role]?BT_ROLE_META[role].label.toLowerCase():role)+' on the page') : 'Type styles \u2014 live design system')),
-        this.btTweaksBody(role));
+          h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:9}}, 'Type styles \u2014 live design system')),
+        this.btTweaksBody());
     }
     const inst=this.state.blocks.find(b=>b.id===this.state.selectedId);
     const role=this.state.selectedRole;
@@ -1089,17 +1098,28 @@ class BuilderApp extends React.Component {
         h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:9}}, inst? (role? 'Editing '+this.roleName(role)+' style' : 'Section selected') : 'Bound to Backspace Oddity DS')),
       !inst ? this.tweaksEmpty() : this.tweaksBody(inst, role));
   }
-  // bt type-style editor body \u2014 role picker (no selection) or per-field controls.
-  btTweaksBody(role){
+  // bt type-style editor body \u2014 inline accordion: each role row toggles its
+  // property controls open in place (mirrors renderBtSections / toggleLibType).
+  btTweaksBody(){
+    const h=React.createElement; const exp=this.state.tweakExpanded||{};
+    const roles=Object.keys(ROLE_VARS).filter(r=>BT_ROLE_META[r]);
+    return h('div',{style:{padding:'14px 0 40px'}},
+      h('div',{style:{padding:'2px 20px 14px', fontSize:'12.5px', color:'var(--muted)', lineHeight:1.5}}, 'Click any text on the page to edit its type style \u2014 or pick a role below.'),
+      roles.map(r=>{
+        const open=!!exp[r]; const nFields=Object.keys(ROLE_VARS[r]).length;
+        return h('div',{key:r, 'data-tweak-role':r, style:{borderTop:'1px solid var(--rule)'}},
+          h('button',{onClick:()=>this.toggleTweakRole(r), 'data-tip':open?'Collapse':'Show properties',
+            style:{width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 20px', background:open?'var(--paper)':'none', border:'none', cursor:'pointer', textAlign:'left'}},
+            h('span',{style:{display:'flex', alignItems:'center', gap:9}},
+              h('span',{style:{display:'inline-block', width:9, transform:open?'rotate(90deg)':'none', transition:'transform .14s', fontSize:'10px', color:'var(--faint)'}}, '\u25b6'),
+              h('span',{style:{fontSize:'13px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, BT_ROLE_META[r].label)),
+            h('span',{style:this.mono({textTransform:'none', letterSpacing:0, fontSize:'10.5px'})}, nFields+' field'+(nFields!==1?'s':''))),
+          open && this.btRoleControls(r));
+      }));
+  }
+  // The inline property controls for one role, indented under its row.
+  btRoleControls(role){
     const h=React.createElement;
-    if(!role){
-      const roles=Object.keys(ROLE_VARS).filter(r=>BT_ROLE_META[r]);
-      return h('div',{style:{padding:'14px 0 40px'}},
-        h('div',{style:{padding:'2px 20px 14px', fontSize:'12.5px', color:'var(--muted)', lineHeight:1.5}}, 'Click any text on the page to edit its type style \u2014 or pick a role below.'),
-        roles.map(r=> h('button',{key:r, onClick:()=>this.selectBtRole(r), style:{width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 20px', background:'none', border:'none', borderTop:'1px solid var(--rule)', cursor:'pointer', textAlign:'left'}},
-          h('span',{style:{fontSize:'13px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, BT_ROLE_META[r].label),
-          h('span',{style:this.mono({textTransform:'none', letterSpacing:0, fontSize:'10.5px'})}, Object.keys(ROLE_VARS[r]).length+' field'+(Object.keys(ROLE_VARS[r]).length!==1?'s':'')))));
-    }
     const fields=ROLE_VARS[role]; const cur=Object.assign({}, this.state.roleDefaults[role], this.state.btStyles[role]);
     const ctl=(field)=>{
       const m=BT_FIELD_META[field]; const raw=cur[field]; const num=parseFloat(raw);
@@ -1116,13 +1136,10 @@ class BuilderApp extends React.Component {
         h('input',{type:'number', step:m.step, value:display, placeholder:'\u2014', onChange:e=>{ const v=e.target.value; this.setBtVar(role, field, v===''?'':(v+m.unit)); }, style:{flex:1, padding:'8px 10px', border:'1px solid var(--rule2)', borderRadius:7, background:'var(--paper)', color:'var(--ink)', fontFamily:'inherit', fontSize:'12.5px'}}),
         m.unit? h('span',{style:this.mono({textTransform:'none', letterSpacing:0, fontSize:'11px'})}, m.unit):null);
     };
-    return h('div',{style:{padding:'8px 0 40px'}},
-      h('div',{style:{padding:'4px 20px 10px'}},
-        h('button',{onClick:()=>this.setState({selectedRole:null}), style:{background:'none', border:'none', cursor:'pointer', color:'var(--muted)', fontSize:'12px', fontFamily:'inherit', padding:0}}, '\u2190 All roles')),
-      this.section('Type \u2014 '+(BT_ROLE_META[role]?BT_ROLE_META[role].label:role),
-        Object.keys(fields).map(field=> h('div',{key:field}, this.row(BT_FIELD_META[field].label, ctl(field))))),
-      Object.keys(this.state.btStyles[role]||{}).length? h('div',{style:{padding:'4px 20px 0'}},
-        h('button',{onClick:()=>{ const s=Object.assign({}, this.state.btStyles); delete s[role]; const styles=Object.assign({}, this.state.styles, {bt:s}); this.setState({btStyles:s, styles}, ()=>this.markDirty()); }, style:{width:'100%', padding:'8px', border:'1px solid var(--rule2)', borderRadius:7, background:'var(--surface)', color:'var(--muted)', cursor:'pointer', fontSize:'12px', fontFamily:'inherit'}}, 'Reset '+(BT_ROLE_META[role]?BT_ROLE_META[role].label:role)+' to default')) : null);
+    return h('div',{style:{padding:'4px 20px 16px 41px', background:'var(--paper)', borderBottom:'1px solid var(--rule)'}},
+      Object.keys(fields).map(field=> h('div',{key:field, style:{marginBottom:14}},
+        h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:7}}, BT_FIELD_META[field].label), ctl(field))),
+      Object.keys(this.state.btStyles[role]||{}).length? h('button',{onClick:()=>{ const s=Object.assign({}, this.state.btStyles); delete s[role]; const styles=Object.assign({}, this.state.styles, {bt:s}); this.setState({btStyles:s, styles}, ()=>this.markDirty()); }, style:{width:'100%', padding:'8px', border:'1px solid var(--rule2)', borderRadius:7, background:'var(--surface)', color:'var(--muted)', cursor:'pointer', fontSize:'12px', fontFamily:'inherit'}}, 'Reset '+(BT_ROLE_META[role]?BT_ROLE_META[role].label:role)+' to default') : null);
   }
   tweaksEmpty(){
     const h=React.createElement;
