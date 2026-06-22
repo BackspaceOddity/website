@@ -795,6 +795,9 @@ class BuilderApp extends React.Component {
     })}));
     this.markDirty();
   }
+  // Reads the rendered section's own corner radius so the editor chrome (outline +
+  // tag) follows its shape instead of a square box that the rounded corners eat.
+  secRadius(el){ const sec=el && el.parentElement && el.parentElement.firstElementChild; if(!sec || typeof window==='undefined') return 0; return Math.round(parseFloat(getComputedStyle(sec).borderTopLeftRadius)||0); }
   // Real-page section: render the actual bt- component, with inline text editing
   // and a light selection chrome. The outline never intercepts clicks (text stays
   // editable); the section tag is the selection handle; links don't navigate in edit.
@@ -810,8 +813,8 @@ class BuilderApp extends React.Component {
     return h('div',{style:{position:'relative'},
         onClickCapture: edit? (ev=>{ const t=ev.target; const a=t&&t.closest&&t.closest('a,button'); if(a) ev.preventDefault(); }) : undefined},
       h(Comp, props),
-      edit && h('div',{key:'o', style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', boxShadow:'inset 0 0 0 '+(sel?'2px #011C00':'1px '+line)}}),
-      edit && h('div',{key:'t', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);}, 'data-tip':'Select section', style:{position:'absolute', top:0, left:0, zIndex:8, cursor:'pointer', padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:tagBg, color:tagFg, borderBottomRightRadius:7}}, this.typeName(inst.type)),
+      edit && h('div',{key:'o', ref:el=>{ if(el) el.style.borderRadius=this.secRadius(el)+'px'; }, style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', boxShadow:'inset 0 0 0 '+(sel?'2px #011C00':'1px '+line)}}),
+      edit && h('div',{key:'t', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);}, 'data-tip':'Select section', ref:el=>{ if(el){ const r=this.secRadius(el); const o=r>1?Math.round(r*0.42):0; el.style.top=o+'px'; el.style.left=o+'px'; } }, style:{position:'absolute', top:0, left:0, zIndex:8, cursor:'pointer', padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:tagBg, color:tagFg, borderRadius:5}}, this.typeName(inst.type)),
       edit && sel && h('div',{key:'tb'}, this.blockToolbar(inst, index)));
   }
   renderBlock(inst, index){
