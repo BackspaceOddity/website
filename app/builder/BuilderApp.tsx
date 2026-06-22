@@ -6,6 +6,7 @@
    (base class, mount, window.claude.complete → /api/builder/generate, asset URLs).
    Design choices (ABC Schengen / Inter / JetBrains Mono / GT Eesti, palette, layout) untouched. */
 import React from 'react';
+import { BT_COMPONENTS, BT_PAGES, BT_TYPE_NAMES } from './blocks/realpages';
 
 class BuilderApp extends React.Component {
   constructor(props){
@@ -32,8 +33,8 @@ class BuilderApp extends React.Component {
       {type:'footer',      name:'Footer',        desc:'Contact · office · lockup'},
     ];
     this.PAGES = [
-      {id:'p8fig', tab:'bso', name:'8FIGURES — Brand Sprint', img:'magenta-green', owner:'Yegor', edited:'just now', status:'Draft', route:'/builder/p8fig'},
-      {id:'pbt', tab:'bso', name:'Brand transformation', img:'terracotta', owner:'Anna', edited:'just now', status:'Draft', route:'/builder/pbt'},
+      {id:'p8fig', tab:'bso', name:'8FIGURES — Brand Sprint', img:'magenta-green', owner:'Yegor', edited:'just now', status:'Draft', real:'p8fig'},
+      {id:'pbt', tab:'bso', name:'Brand transformation', img:'terracotta', owner:'Anna', edited:'just now', status:'Draft', real:'pbt'},
     ];
     this.ARCHETYPES = [
       {id:'landing',  name:'Landing page',   desc:'Hero · statement · proof · footer', recipe:['hero','statement','twocol','projectgrid','footer'], img:'magenta-green'},
@@ -118,7 +119,7 @@ class BuilderApp extends React.Component {
   replaceBtn(target){ const h=React.createElement; if(!(this.state.editMode && !this.state.locked && !this.state.previewVersionId)) return null; const t=this.state.imgTarget; const armed=t && t.blockId===target.blockId && t.tileIndex===target.tileIndex && t.kind===target.kind; return h('button',{onClick:e=>{ e.stopPropagation(); this.armReplace(target); }, 'data-tip':'Replace from library', style:{position:'absolute', bottom:8, right:8, zIndex:7, padding:'5px 11px', borderRadius:7, border:'1px solid rgba(255,255,255,.55)', background:armed?'#F2F2F0':'rgba(1,28,0,.74)', color:armed?'#011C00':'#F2F2F0', cursor:'pointer', fontSize:'11px', fontWeight:600, fontFamily:"'Inter',system-ui,sans-serif"}}, armed?'Choose an image \u2192':'Replace image'); }
   toast(msg){ this.setState({toast:msg}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}), 3200); }
   roleName(r){ return ({label:'Label',heading:'Heading',statement:'Statement',body:'Body',list:'List'})[r]||r; }
-  typeName(t){ return ({hero:'Hero well',statement:'Statement',twocol:'Two-column',casestudy:'Case study',projectgrid:'Project grid',footer:'Footer',custom:'Custom block'})[t]||t; }
+  typeName(t){ if(t&&t.indexOf('bt:')===0) return BT_TYPE_NAMES[t]||t.slice(3); return ({hero:'Hero well',statement:'Statement',twocol:'Two-column',casestudy:'Case study',projectgrid:'Project grid',footer:'Footer',custom:'Custom block'})[t]||t; }
   hashStr(s){ let h=2166136261; s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return Math.abs(h); }
   arnd(p,key,a,b){ return a + (this.hashStr(p.id+'#'+key) % (b-a+1)); }
   fmtDur(s){ const m=Math.floor(s/60), r=s%60; return m>0? m+'m '+r+'s' : r+'s'; }
@@ -218,13 +219,31 @@ class BuilderApp extends React.Component {
   // ---------- navigation ----------
   deletePage(id){ this.setState(s=>({pages:(s.pages||[]).filter(p=>p.id!==id)})); this.toast('Page deleted'); }
   archivePage(id){ this.setState(s=>({pages:(s.pages||[]).map(p=>p.id===id?{...p, archived:true}:p)})); this.toast('Page archived'); }
+  // Inject the active real page's stylesheet (8Figures + brand-transformation ship
+  // different CSS under shared bt- class names, so only one loads at a time).
+  injectPageCss(cssId){
+    if(typeof document==='undefined') return;
+    let link=document.getElementById('bso-page-css');
+    if(!link){ link=document.createElement('link'); link.id='bso-page-css'; link.rel='stylesheet'; document.head.appendChild(link); }
+    link.href='/builder-css/'+cssId+'.css';
+  }
+  clearPageCss(){ if(typeof document==='undefined') return; const l=document.getElementById('bso-page-css'); if(l) l.parentNode.removeChild(l); }
   openPage(p){
-    if(p && p.route){ window.location.href = p.route; return; }
+    if(p && p.real && BT_PAGES[p.real]){
+      const def=BT_PAGES[p.real]; this.injectPageCss(def.css);
+      const cur=this.clone(def.blocks);
+      this.setState({screen:'editor', realPage:p.real, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
+        styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES),
+        selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
+        versions:[{id:'v3', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(cur)}]});
+      return;
+    }
+    this.clearPageCss();
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
     const cur=this.buildPage(p.recipe);
     const v2=this.clone(cur); const hv2=v2.find(b=>b.type==='hero'); if(hv2){ hv2.props.heading='Uncover hidden growth levers.'; hv2.props.label='Backspace Oddity'; hv2.props.cta='Get in touch'; hv2.props.img='terracotta'; }
     const v1=this.clone(cur).filter(b=>b.type==='hero'||b.type==='footer'); const hv1=v1.find(b=>b.type==='hero'); if(hv1){ hv1.props.heading='A new home for Backspace Oddity.'; hv1.props.img='emerald'; }
-    this.setState({screen:'editor', pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur, styles,
+    this.setState({screen:'editor', realPage:null, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur, styles,
       selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
       versions:[
         {id:'v3', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(cur)},
@@ -232,11 +251,12 @@ class BuilderApp extends React.Component {
         {id:'v1', label:'Initial layout', when:'Earlier', author:p.owner, blocks:v1},
       ]});
   }
-  backToDash(){ this.setState({screen:'dashboard', selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
+  backToDash(){ this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
   createFromTemplate(){
     const a = this.state.newPageArche; if(!a) return;
+    this.clearPageCss();
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
-    this.setState({screen:'editor', newPageOpen:false, pageTitle:this.state.newPageName||'Untitled page', pageTab:this.state.dashTab,
+    this.setState({screen:'editor', realPage:null, newPageOpen:false, pageTitle:this.state.newPageName||'Untitled page', pageTab:this.state.dashTab,
       blocks:this.buildPage(a.recipe), styles, selectedId:null, selectedRole:null, editMode:true, locked:false,
       versions:[{id:'v1', label:'Created from '+a.name, when:'Just now', author:'You', current:true}]});
   }
@@ -461,7 +481,11 @@ class BuilderApp extends React.Component {
         h('div',{style:{fontSize:'14px', color:'var(--muted)'}}, p.owner),
         h('div',{style:{fontSize:'14px', color:'var(--muted)'}}, p.edited),
         h('div',null, this.pill(p.status,'')),
-        h('div',{style:{display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7}}, h('button',{onClick:e=>{e.stopPropagation(); this.archivePage(p.id);}, style:{padding:'5px 9px', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'var(--muted)', cursor:'pointer', fontSize:'11.5px', fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Archive'), h('button',{onClick:e=>{e.stopPropagation(); if(typeof window!=='undefined' && window.confirm('Delete this page?')) this.deletePage(p.id);}, style:{padding:'5px 9px', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'#C0392B', cursor:'pointer', fontSize:'11.5px', fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Delete'), h('button',{onClick:e=>{e.stopPropagation(); this.openAnalytics(p);}, 'data-tip':'View analytics', style:{padding:'5px 10px', borderRadius:6, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer', fontSize:'11.5px', fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Analytics'), h('button',{onClick:e=>{e.stopPropagation(); this.openDeploy(p);}, style:{padding:'5px 10px', borderRadius:6, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Deploy')))));
+        h('div',{style:{display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7}},
+          h('button',{onClick:e=>{e.stopPropagation(); this.archivePage(p.id);}, 'data-tip':'Archive', title:'Archive', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'var(--muted)', cursor:'pointer'}}, this.rowIcon('archive','currentColor')),
+          h('button',{onClick:e=>{e.stopPropagation(); if(typeof window!=='undefined' && window.confirm('Delete this page?')) this.deletePage(p.id);}, 'data-tip':'Delete', title:'Delete', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'#C0392B', cursor:'pointer'}}, this.rowIcon('delete','currentColor')),
+          h('button',{onClick:e=>{e.stopPropagation(); this.openAnalytics(p);}, 'data-tip':'View analytics', title:'Analytics', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer'}}, this.rowIcon('analytics','currentColor')),
+          h('button',{onClick:e=>{e.stopPropagation(); this.openDeploy(p);}, style:{padding:'6px 12px', borderRadius:6, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Deploy')))));
   }
   renderGallery(slice){
     const h=React.createElement;
@@ -514,6 +538,13 @@ class BuilderApp extends React.Component {
     if(kind==='sections') return svg([h('rect',{key:1,x:2.5,y:2.5,width:11,height:11,rx:1.6}),h('line',{key:2,x1:5,y1:6,x2:11,y2:6}),h('line',{key:3,x1:5,y1:8.3,x2:11,y2:8.3}),h('line',{key:4,x1:5,y1:10.6,x2:9,y2:10.6})]);
     if(kind==='layouts') return svg([h('rect',{key:1,x:2.5,y:2.5,width:11,height:11,rx:1.6,strokeDasharray:'2.3 1.8'}),h('line',{key:2,x1:5,y1:6.4,x2:11,y2:6.4,strokeDasharray:'2 1.7'}),h('line',{key:3,x1:5,y1:9.4,x2:9,y2:9.4,strokeDasharray:'2 1.7'})]);
     return svg([h('rect',{key:1,x:2.5,y:3,width:11,height:10,rx:1.6}),h('circle',{key:2,cx:6,cy:6.4,r:1.1}),h('path',{key:3,d:'M3.4 12 L6.8 8.6 L9.3 11 L11 9.4 L12.6 11'})]);
+  }
+  rowIcon(kind, c){
+    const h=React.createElement;
+    const svg=kids=>h('svg',{width:15,height:15,viewBox:'0 0 16 16',fill:'none',stroke:c,strokeWidth:1.4,strokeLinecap:'round',strokeLinejoin:'round'},kids);
+    if(kind==='archive') return svg([h('rect',{key:1,x:2.3,y:3,width:11.4,height:2.6,rx:0.6}),h('path',{key:2,d:'M3.3 5.6 V12.6 a0.6 0.6 0 0 0 0.6 0.6 H12.1 a0.6 0.6 0 0 0 0.6 -0.6 V5.6'}),h('line',{key:3,x1:6.4,y1:8.3,x2:9.6,y2:8.3})]);
+    if(kind==='delete') return svg([h('line',{key:1,x1:3,y1:4.4,x2:13,y2:4.4}),h('path',{key:2,d:'M5.2 4.4 V3.3 a0.6 0.6 0 0 1 0.6 -0.6 H10.2 a0.6 0.6 0 0 1 0.6 0.6 V4.4'}),h('path',{key:3,d:'M4.4 4.4 L5 13 a0.6 0.6 0 0 0 0.6 0.6 H10.4 a0.6 0.6 0 0 0 0.6 -0.6 L11.6 4.4'}),h('line',{key:4,x1:6.6,y1:6.6,x2:6.8,y2:11.2}),h('line',{key:5,x1:9.4,y1:6.6,x2:9.2,y2:11.2})]);
+    return svg([h('line',{key:1,x1:3,y1:13,x2:13,y2:13}),h('rect',{key:2,x:3.4,y:8.4,width:2.4,height:3.6,rx:0.5}),h('rect',{key:3,x:6.8,y:5.6,width:2.4,height:6.4,rx:0.5}),h('rect',{key:4,x:10.2,y:3.4,width:2.4,height:8.6,rx:0.5})]);
   }
   // ---------- library panel ----------
   renderLibrary(){
@@ -611,9 +642,9 @@ class BuilderApp extends React.Component {
       style:{flex:1, minWidth:0, overflowY:'auto', height:'100%', background:'var(--soft)', padding:'34px 0 120px'}},
       h('div',{style:{width:1160, margin:'0 auto', zoom:this.state.canvasZoom, background:'#F2F2F0', color:'#011C00', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)', minHeight:300}},
         blocks.length===0 ? this.emptyCanvas() :
-        h('div',null,
-          edit && this.dropzone(0),
-          blocks.map((b,i)=> h(React.Fragment,{key:b.id}, this.renderBlock(b,i), edit && this.dropzone(i+1))))));
+        h('div',{className:this.state.realPage?'bt-page':undefined},
+          [ edit && h(React.Fragment,{key:'dz0'}, this.dropzone(0)) ].concat(
+            blocks.map((b,i)=> h(React.Fragment,{key:b.id}, this.renderBlock(b,i), edit && this.dropzone(i+1)))))));
   }
   emptyCanvas(){
     const h=React.createElement;
@@ -646,7 +677,23 @@ class BuilderApp extends React.Component {
       style:Object.assign({}, this.textStyle(role, inst, color), {outline:'none', cursor:can?'text':'default', borderRadius:3, boxShadow:(sel&&can)?'0 0 0 2px '+(color==='#FDFBF4'?'rgba(253,251,244,.6)':'rgba(1,28,0,.4)'):'none', transition:'box-shadow .12s'}, extra||{})}, inst.props[key]);
   }
   blockPad(inst){ const m={S:'40px 56px', M:'72px 64px', L:'104px 72px'}; return m[inst.pad]||m.M; }
+  // Real-page section: render the actual bt- component, wrapped in editor chrome.
+  renderBtBlock(inst, index){
+    const h=React.createElement; const Comp=BT_COMPONENTS[inst.type]; if(!Comp) return null;
+    const edit=this.state.editMode && !this.state.locked && !this.state.previewVersionId;
+    const sel=this.state.selectedId===inst.id;
+    const dark=({'bt:hero':1,'bt:leverages':1,'bt:final':1})[inst.type];
+    const line= dark?'rgba(253,251,244,.30)':'rgba(1,28,0,.12)';
+    const tagBg= dark?'rgba(253,251,244,.16)':'rgba(1,28,0,.07)'; const tagFg= dark?'rgba(253,251,244,.78)':'rgba(1,28,0,.5)';
+    return h('div',{style:{position:'relative'}},
+      h(Comp, Object.assign({key:'c'}, inst.props)),
+      edit && h('div',{key:'o', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);},
+        style:{position:'absolute', inset:0, zIndex:6, cursor:'pointer', boxShadow:'inset 0 0 0 '+(sel?'2px #011C00':'1px '+line)}}),
+      edit && h('div',{key:'t', style:{position:'absolute', top:0, left:0, zIndex:7, padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:tagBg, color:tagFg, borderBottomRightRadius:7, pointerEvents:'none'}}, this.typeName(inst.type)),
+      edit && sel && h('div',{key:'tb'}, this.blockToolbar(inst, index)));
+  }
   renderBlock(inst, index){
+    if(inst.type && inst.type.indexOf('bt:')===0) return this.renderBtBlock(inst, index);
     const h=React.createElement; const sel=this.state.selectedId===inst.id;
     const forest=inst.bg==='forest'; const fg= forest?'#FDFBF4':'#011C00';
     const bg = forest? '#011C00' : (inst.bg==='soft'?'#E8E8E6':'transparent');

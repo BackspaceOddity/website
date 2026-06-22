@@ -4,7 +4,7 @@
  * but composed from the extracted block components instead of hand-written JSX.
  * If this matches /8figures 1:1, the block extraction is faithful.
  */
-import '../../brand-transformation/brand-transformation.css';
+import '../../8figures/eightfigures.css';
 import { content as c } from '../../8figures/content';
 import {
   CalInit, BtNav, BtHero, BtChallenge, BtEps, BtPhasesSection, BtInvest, BtProjects, BtFinal, BtFooter,
