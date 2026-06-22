@@ -12,9 +12,15 @@ const CAL_TRIGGER = {
   "data-cal-config": '{"layout":"month_view","useSlotsViewOnSmallScreen":"true"}',
 };
 
-function Pill({ label }: { label: string }) {
+// Next-step CTA points at the deep-dive event (shares the initialized namespace for UI config).
+const CAL_TRIGGER_DEEPDIVE = {
+  ...CAL_TRIGGER,
+  "data-cal-link": "team/backspace-oddity/deep-dive",
+};
+
+function Pill({ label, trigger = CAL_TRIGGER }: { label: string; trigger?: Record<string, string> }) {
   return (
-    <button type="button" className="bt-pill" {...CAL_TRIGGER}>
+    <button type="button" className="bt-pill" {...trigger}>
       {label}
       <span className="bt-pill__arrow" aria-hidden="true">→</span>
     </button>
@@ -51,7 +57,7 @@ export function EightFiguresClient() {
           <div className="bt-nav__col">
             <span className="bt-nav__label">{c.nav.contact}</span>
             <a href={MAIL}>yegor@backspaceoddity.com</a>
-            <button type="button" className="bt-cta-link" {...CAL_TRIGGER}>{c.nav.book}</button>
+            <button type="button" className="bt-cta-link" {...CAL_TRIGGER_DEEPDIVE}>{c.nav.book}</button>
           </div>
           <div className="bt-nav__col">
             <span className="bt-nav__label">Office</span>
@@ -172,12 +178,22 @@ export function EightFiguresClient() {
           <div className="bt-projects">
             {c.experience.projects.map((p) => (
               <div className="bt-projitem" key={p.title}>
-                <a className="bt-proj" href={p.href} target="_blank" rel="noopener noreferrer">
+                <div className="bt-proj">
                   <img className="bt-proj__img" src={p.img} alt={p.alt} />
                   <span className="bt-proj__shade" aria-hidden="true"></span>
                   <h3 className="bt-proj__title">{p.title}</h3>
-                </a>
-                <p className="bt-proj__desc">{p.desc}</p>
+                </div>
+                <p className="bt-proj__desc">
+                  {p.linkText && p.linkHref && p.desc.includes(p.linkText) ? (
+                    <>
+                      {p.desc.slice(0, p.desc.indexOf(p.linkText))}
+                      <a href={p.linkHref} target="_blank" rel="noopener noreferrer">{p.linkText}</a>
+                      {p.desc.slice(p.desc.indexOf(p.linkText) + p.linkText.length)}
+                    </>
+                  ) : (
+                    p.desc
+                  )}
+                </p>
               </div>
             ))}
           </div>
@@ -189,7 +205,7 @@ export function EightFiguresClient() {
         <div className="bt-final__inner">
           <h2 className="bt-final__h2">{c.nextStep.eyebrow}</h2>
           <p className="bt-final__copy">{c.nextStep.body}</p>
-          <Pill label={c.nextStep.cta} />
+          <Pill label={c.nextStep.cta} trigger={CAL_TRIGGER_DEEPDIVE} />
           <a className="bt-final__email" href={MAIL}>yegor@backspaceoddity.com</a>
         </div>
       </section>
@@ -210,7 +226,7 @@ export function EightFiguresClient() {
         <div className="bt-footer__col">
           <span className="bt-footer__label">{c.footer.reach}</span>
           <a href={MAIL}>yegor@backspaceoddity.com</a>
-          <button type="button" className="bt-cta-link" {...CAL_TRIGGER}>{c.nav.book}</button>
+          <button type="button" className="bt-cta-link" {...CAL_TRIGGER_DEEPDIVE}>{c.nav.book}</button>
           <span>{c.footer.city}</span>
         </div>
       </footer>
