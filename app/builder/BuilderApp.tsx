@@ -52,7 +52,7 @@ class BuilderApp extends React.Component {
       askPrompt:'', askState:'idle', askResult:null, customTemplates:[], libTab:'sections', draggingAsset:null, assets:[{id:'a1',name:'Magenta · green',val:'magenta-green'},{id:'a2',name:'Terracotta',val:'terracotta'},{id:'a3',name:'Emerald',val:'emerald'},{id:'a4',name:'Warm',val:'warm'}],
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
-      toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'',
+      toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'',
       realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{},
     };
     this.uid = 0;
@@ -62,14 +62,22 @@ class BuilderApp extends React.Component {
     try{ const raw = localStorage.getItem('bso_ds_styles'); if(raw){ this.dsStyles = JSON.parse(raw); } }catch(e){}
     // Deploy / Analytics open in their own tab via ?screen=…&page=… — parse it here.
     let pend=null;
-    try{ const q=new URLSearchParams(window.location.search); const scr=q.get('screen'); if(scr==='deploy'||scr==='analytics'){ const pid=q.get('page'); const pg=this.PAGES.find(p=>p.id===pid)||{id:pid||'cur', name:decodeURIComponent(q.get('name')||'Page'), status:'Draft'}; pend={scr,pg}; } }catch(e){}
+    try{ const q=new URLSearchParams(window.location.search); const scr=q.get('screen'); if(scr==='deploy'||scr==='analytics'){ const pid=q.get('page'); const pg=this.PAGES.find(p=>p.id===pid)||{id:pid||'cur', name:decodeURIComponent(q.get('name')||'Page'), status:'Draft'}; const from=q.get('from')||'dashboard'; pend={scr,pg,from}; } }catch(e){}
     // Restore an existing session — skip the login screen if already signed in.
     fetch('/api/builder/me/').then(r=>r.json()).then(d=>{
-      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}, ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,'dashboard'); else this.openAnalytics(pend.pg,'dashboard'); } }); }
+      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}, ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,pend.from); else this.openAnalytics(pend.pg,pend.from); } }); }
     }).catch(()=>{});
   }
   // Open the deploy / analytics screen in a fresh browser tab (action, not a panel toggle).
-  openInTab(scr, pg){ if(typeof window==='undefined') return; const id=encodeURIComponent((pg&&pg.id)||'cur'); const name=encodeURIComponent((pg&&pg.name)||''); window.open('/builder/?screen='+scr+'&page='+id+'&name='+name, '_blank', 'noopener'); }
+  openInTab(scr, pg, from){ if(typeof window==='undefined') return; const id=encodeURIComponent((pg&&pg.id)||'cur'); const name=encodeURIComponent((pg&&pg.name)||''); const f=from?('&from='+encodeURIComponent(from)):''; window.open('/builder/?screen='+scr+'&page='+id+'&name='+name+f, '_blank', 'noopener'); }
+  // Editor topbar "Deploy ↗": deploy the page currently open in the editor. For a real
+  // page the publish API keys off the DB row id, which equals this.state.realPage — so the
+  // deploy tab MUST carry that id, not the synthetic 'cur' (which has no DB row → 404).
+  openDeployFromEditor(){
+    const rp=this.state.realPage;
+    if(!rp){ this.toast('Save this page before publishing.'); return; }
+    this.openInTab('deploy', {id:rp, name:this.state.pageTitle||'Page', status:'Draft'}, 'editor');
+  }
   componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
   startResize(e, which){ e.preventDefault(); const startX=e.clientX; const key=which==='lib'?'libW':'tweaksW'; const startW=this.state[key]; const lr=this.state.editorLayout==='lr'; const dir=(which==='lib')?(lr?1:-1):(lr?-1:1); const move=ev=>{ let w=startW+dir*(ev.clientX-startX); w=Math.max(168,Math.min(480,w)); this.setState({[key]:w}); }; const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); document.body.style.cursor=''; document.body.style.userSelect=''; }; window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); document.body.style.cursor='col-resize'; document.body.style.userSelect='none'; }
@@ -84,38 +92,97 @@ class BuilderApp extends React.Component {
   uploadAsset(e){ const f=e.target.files&&e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f); this.setState(s=>({assets:[...s.assets, {id:this.nid('a'), name:(f.name||'Upload').replace(/\.[^.]+$/,''), val:url}]})); this.toast('Image added to library'); e.target.value=''; }
   deleteAsset(id){ this.setState(s=>({assets:s.assets.filter(a=>a.id!==id)})); this.toast('Image removed from library'); }
   slugify(s){ return (String(s||'page')).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32) || 'page'; }
-  openDeploy(p, from){ this.setState({screen:'deploy', deployPage:p, deployFrom:from||'dashboard', deploySubdomain:this.slugify(p.name), deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:''}); }
+  openDeploy(p, from){ this.setState({screen:'deploy', deployPage:p, deployFrom:from||'dashboard', deploySubdomain:this.slugify(p.name), deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:''}); }
   nowTime(){ const d=new Date(), z=n=>String(n).padStart(2,'0'); return z(d.getHours())+':'+z(d.getMinutes())+':'+z(d.getSeconds()); }
   pushLog(text, ok){ this.setState(s=>({deployLogs:[...s.deployLogs, {t:this.nowTime(), text, ok:!!ok}]}), ()=>{ if(this._logEl) this._logEl.scrollTop=this._logEl.scrollHeight; }); }
-  startDeploy(){ if(this.state.deployStatus==='running') return; if(this._dep) this._dep.forEach(clearTimeout); this._dep=[]; const sub=this.state.deploySubdomain||'page'; const host=sub+'.backspaceoddity.com'; const p=this.state.deployPage; const nb=(p&&p.recipe&&p.recipe.length)||5; const steps=[ {s:1,text:'agent: picking up deploy job for '+host}, {s:1,text:'snapshotting page \u2014 '+nb+' blocks, 4 brand assets'}, {s:1,text:'resolving Backspace Oddity design tokens'}, {s:2,text:'building static bundle \u2014 next build && next export'}, {s:2,text:'optimising images \u2014 generating .webp at 1\u00d7/2\u00d7'}, {s:2,text:'inlining GT Eesti + ABC Schengen font faces'}, {s:3,text:'provisioning subdomain '+host}, {s:3,text:'issuing TLS certificate via Let\u2019s Encrypt'}, {s:3,text:'uploading 38 files to edge CDN'}, {s:4,text:'running smoke checks \u2014 GET / \u2192 200 OK'}, {s:4,text:'deploy complete \u2014 live at https://'+host, ok:true} ]; this.setState({deployStatus:'running', deployLogs:[], deployStage:1, deployHost:host}); let delay=300; steps.forEach((stp,i)=>{ const tm=setTimeout(()=>{ this.pushLog(stp.text, stp.ok); this.setState({deployStage:stp.s}); if(i===steps.length-1){ this.setState({deployStatus:'live'}); this.toast('Deployed to '+host); } }, delay); this._dep.push(tm); delay += 600 + (i%3)*250; }); }
+  // Real publish pipeline (BSO-658). POSTs the saved blocks to the publish API,
+  // then verifies the public route actually serves before flipping to "live".
+  async startDeploy(){
+    if(this.state.deployStatus==='running') return;
+    const slug=this.state.deploySubdomain||'';
+    const p=this.state.deployPage;
+    if(!slug){ this.toast('Enter an address first'); return; }
+    if(!p || !p.id){ this.toast('No page to publish'); return; }
+    const host=slug+'.backspaceoddity.com';
+    this.setState({deployStatus:'running', deployLogs:[], deployStage:1, deployHost:host, deployUrl:''});
+    // Stage 1 \u2014 Snapshot
+    this.pushLog('Snapshotting current saved blocks\u2026', true);
+    // Stage 2 \u2014 Validate
+    this.setState({deployStage:2});
+    this.pushLog('Validating address '+slug+'\u2026');
+    // Stage 3 \u2014 Publish
+    this.setState({deployStage:3});
+    let data;
+    try{
+      const res=await fetch('/api/builder/pages/'+encodeURIComponent(p.id)+'/publish', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slug})});
+      data=await res.json().catch(()=>({}));
+      if(!res.ok){
+        const msg=res.status===409? 'Address already taken \u2014 pick another' : (data && data.error) || ('publish failed ('+res.status+')');
+        this.pushLog(msg, false);
+        this.setState({deployStatus:'failed'});
+        this.toast(msg);
+        return;
+      }
+    }catch(err){
+      this.pushLog('Publish request failed \u2014 '+(err&&err.message||'network error'), false);
+      this.setState({deployStatus:'failed'});
+      this.toast('Publish failed');
+      return;
+    }
+    this.pushLog('Published \u2014 '+data.url, true);
+    // Stage 4 \u2014 Live: verify the public route actually serves before claiming live.
+    this.setState({deployStage:4});
+    try{
+      const check=await fetch(data.url, {cache:'no-store'});
+      if(!check.ok) throw new Error('GET '+data.url+' \u2192 '+check.status);
+    }catch(err){
+      this.pushLog('Live check failed \u2014 '+(err&&err.message||'unreachable'), false);
+      this.setState({deployStatus:'failed'});
+      this.toast('Published, but live check failed');
+      return;
+    }
+    const liveUrl='https://kern.backspaceoddity.com'+data.url;
+    this.pushLog('Live at '+liveUrl, true);
+    this.setState({deployStatus:'live', deployUrl:liveUrl});
+    this.toast('Published to '+data.url);
+  }
+  // Back from the deploy screen. When deploy was opened from the editor it lives in its
+  // own tab (no editor mounted here), so closing the tab returns to the originating editor;
+  // if this tab can't be closed (or deploy was reached in-app), fall back to the screen state.
+  backFromDeploy(){
+    const from=this.state.deployFrom;
+    if(from==='editor' && typeof window!=='undefined' && window.opener){ window.close(); return; }
+    this.setState({screen:from||'dashboard'});
+  }
   renderDeploy(){
     const h=React.createElement; const p=this.state.deployPage; if(!p) return null;
     const SCH="'ABC Schengen','Inter',system-ui,sans-serif"; const MONO="'JetBrains Mono',monospace";
-    const st=this.state.deployStatus; const host=(this.state.deploySubdomain||'page')+'.backspaceoddity.com'; const stage=this.state.deployStage;
+    const st=this.state.deployStatus; const slug=this.state.deploySubdomain||'page'; const host='kern.backspaceoddity.com/published/'+slug; const liveUrl=this.state.deployUrl||('https://'+host); const stage=this.state.deployStage;
     const bmap={idle:['Not deployed','var(--muted)'], running:['Deploying\u2026','var(--ink)'], live:['Live','#1CAA00'], failed:['Failed','#FF2A00']}; const bm=bmap[st]||bmap.idle;
     const badge=h('span',{style:{display:'inline-flex', alignItems:'center', gap:7, fontFamily:MONO, fontSize:'11px', letterSpacing:'.06em', textTransform:'uppercase', color:bm[1], border:'1px solid '+bm[1], borderRadius:999, padding:'5px 11px'}}, h('span',{style:{width:7,height:7,borderRadius:99, background:bm[1], animation:st==='running'?'bsoblink 1.2s infinite':'none'}}), bm[0]);
-    const stages=['Snapshot','Build','Provision','Live'];
+    const stages=['Snapshot','Validate','Publish','Live'];
     return h('div',{className:'bso-scroll', style:{height:'100%', overflowY:'auto', background:'var(--paper)'}},
       h('div',{style:{maxWidth:920, margin:'0 auto', padding:'34px 32px 72px'}},
-        h('button',{onClick:()=>this.setState({screen:this.state.deployFrom||'dashboard'}), style:{background:'none', border:'none', cursor:'pointer', color:'var(--muted)', fontSize:'13px', fontFamily:'inherit', padding:0, marginBottom:18}}, '\u2190 '+(this.state.deployFrom==='editor'?'Back to editor':'All pages')),
+        h('button',{onClick:()=>this.backFromDeploy(), style:{background:'none', border:'none', cursor:'pointer', color:'var(--muted)', fontSize:'13px', fontFamily:'inherit', padding:0, marginBottom:18}}, '\u2190 '+(this.state.deployFrom==='editor'?'Back to editor':'All pages')),
         h('div',{style:{display:'flex', justifyContent:'space-between', alignItems:'flex-end', gap:16, marginBottom:26, flexWrap:'wrap'}},
           h('div',null, h('div',{style:this.mono({marginBottom:10})}, 'Deploy'), h('h1',{style:{margin:0, fontSize:'34px', fontWeight:700, letterSpacing:'-0.02em', fontFamily:SCH}}, p.name)), badge),
         h('div',{style:{border:'1px solid var(--rule)', borderRadius:12, background:'var(--surface)', padding:'18px 20px', marginBottom:18}},
-          h('div',{style:this.mono({fontSize:'10px', marginBottom:12})}, 'Target subdomain'),
+          h('div',{style:this.mono({fontSize:'10px', marginBottom:12})}, 'Public address'),
           h('div',{style:{display:'flex', alignItems:'center', gap:0, flexWrap:'wrap'}},
-            h('input',{value:this.state.deploySubdomain, disabled:st==='running', onChange:e=>this.setState({deploySubdomain:this.slugify(e.target.value)}), style:{width:190, padding:'10px 12px', borderRadius:'8px 0 0 8px', border:'1px solid var(--rule2)', borderRight:'none', background:'var(--paper)', color:'var(--ink)', fontFamily:MONO, fontSize:'14px'}}),
-            h('span',{style:{padding:'10px 12px', border:'1px solid var(--rule2)', borderRadius:'0 8px 8px 0', background:'var(--soft)', color:'var(--muted)', fontFamily:MONO, fontSize:'14px'}}, '.backspaceoddity.com'),
+            h('span',{style:{padding:'10px 12px', border:'1px solid var(--rule2)', borderRadius:'8px 0 0 8px', borderRight:'none', background:'var(--soft)', color:'var(--muted)', fontFamily:MONO, fontSize:'14px'}}, 'kern.backspaceoddity.com/published/'),
+            h('input',{value:this.state.deploySubdomain, disabled:st==='running', onChange:e=>this.setState({deploySubdomain:this.slugify(e.target.value)}), style:{width:170, padding:'10px 12px', borderRadius:'0 8px 8px 0', border:'1px solid var(--rule2)', background:'var(--paper)', color:'var(--ink)', fontFamily:MONO, fontSize:'14px'}}),
             h('div',{style:{flex:1, minWidth:12}}),
-            st==='live' && h('a',{href:'https://'+host, target:'_blank', rel:'noreferrer', style:{padding:'10px 16px', borderRadius:8, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit', textDecoration:'none', marginRight:10}}, 'Visit site \u2192'),
-            h('button',{onClick:()=>this.startDeploy(), disabled:st==='running', style:{padding:'10px 20px', borderRadius:8, border:'1px solid var(--ink)', background:st==='running'?'var(--muted)':'var(--ink)', color:'var(--paper)', cursor:st==='running'?'default':'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, st==='running'?'Deploying\u2026':(st==='live'?'Redeploy':'Deploy now'))),
-          h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:12, lineHeight:1.45}}, st==='live'? ('Live at https://'+host) : 'An agent builds the page in the Backspace Oddity design system and publishes it to the edge. Nothing is published until you run a deploy.')),
+            st==='live' && h('a',{href:liveUrl, target:'_blank', rel:'noreferrer', style:{padding:'10px 16px', borderRadius:8, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit', textDecoration:'none', marginRight:10}}, 'Visit site \u2192'),
+            h('button',{onClick:()=>this.startDeploy(), disabled:st==='running', style:{padding:'10px 20px', borderRadius:8, border:'1px solid var(--ink)', background:st==='running'?'var(--muted)':'var(--ink)', color:'var(--paper)', cursor:st==='running'?'default':'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, st==='running'?'Publishing\u2026':(st==='live'?'Republish':(st==='failed'?'Retry':'Publish now')))),
+          h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:12, lineHeight:1.45}}, st==='live'? ('Live at '+liveUrl) : (st==='failed'? 'Publish did not complete — see the log below.' : 'Publishes the saved blocks to a public page at kern.backspaceoddity.com/published/. Nothing goes live until you press Publish.'))),
         h('div',{style:{display:'flex', gap:8, marginBottom:18}}, stages.map((sl,i)=>{ const idx=i+1; const done=stage>idx||st==='live'; const active=stage===idx&&st==='running'; return h('div',{key:i, style:{flex:1, padding:'10px 12px', borderRadius:9, border:'1px solid '+((done||active)?'var(--ink)':'var(--rule)'), background:(done||active)?'var(--paper)':'transparent', display:'flex', alignItems:'center', gap:8}}, h('span',{style:{width:7,height:7,borderRadius:99, background:(done||active)?'var(--ink)':'var(--rule2)', animation:active?'bsoblink 1.2s infinite':'none'}}), h('span',{style:{fontSize:'12.5px', fontWeight:500, color:(done||active)?'var(--ink)':'var(--muted)'}}, sl)); })),
         h('div',{style:{borderRadius:12, overflow:'hidden', border:'1px solid var(--rule)'}},
           h('div',{style:{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', background:'#011C00', borderBottom:'1px solid rgba(253,251,244,.12)'}},
             h('span',{style:{fontFamily:MONO, fontSize:'10.5px', letterSpacing:'.08em', textTransform:'uppercase', color:'rgba(253,251,244,.55)'}}, 'Deploy log'),
             h('span',{style:{fontFamily:MONO, fontSize:'10.5px', color:'rgba(253,251,244,.4)'}}, host)),
           h('div',{ref:el=>{this._logEl=el;}, style:{background:'#011C00', color:'#FDFBF4', padding:'14px 16px', height:300, overflowY:'auto', fontFamily:MONO, fontSize:'12.5px', lineHeight:1.7}},
-            this.state.deployLogs.length===0 ? h('div',{style:{color:'rgba(253,251,244,.4)'}}, '$ awaiting deploy \u2014 press Deploy now to start the agent') :
+            this.state.deployLogs.length===0 ? h('div',{style:{color:'rgba(253,251,244,.4)'}}, '$ awaiting publish \u2014 press Publish now to go live') :
             this.state.deployLogs.map((l,i)=> h('div',{key:i, style:{marginBottom:3, color: l.ok?'#7CFF8F':'rgba(253,251,244,.92)'}}, h('span',{style:{color:'rgba(253,251,244,.36)', marginRight:12}}, l.t), (l.ok?'\u2713 ':'')+l.text)),
             st==='running' && h('div',{style:{color:'rgba(253,251,244,.5)'}}, h('span',{style:{animation:'bsoblink 1s infinite'}}, '\u2588'))))));
   }
@@ -476,7 +543,7 @@ class BuilderApp extends React.Component {
       screen==='editor' && h('button',{onClick:()=>this.setState({versionsOpen:!this.state.versionsOpen}), style:this.topBtn(this.state.versionsOpen)}, 'History'),
       screen==='editor' && this.state.realPage && h('button',{onClick:()=>this.savePage(), 'data-tip':this.state.lastSavedBy?('Last saved by '+this.state.lastSavedBy):'Save page', style:Object.assign(this.actBtn(this.state.saveState!=='saved'), this.state.saveState==='error'?{borderColor:'#C0392B', color:'#C0392B', background:'var(--surface)'}:{}), disabled:this.state.saveState==='saving'}, this.saveLabel()),
       screen==='editor' && h('button',{onClick:()=>this.openInTab('analytics', this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}), 'data-tip':'Open analytics in a new tab', style:this.actBtn(false)}, 'Analytics ↗'),
-      screen==='editor' && h('button',{onClick:()=>this.openInTab('deploy', this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}), 'data-tip':'Open deploy in a new tab', style:this.actBtn(false)}, 'Deploy ↗'),
+      screen==='editor' && h('button',{onClick:()=>this.openDeployFromEditor(), 'data-tip':'Open deploy in a new tab', style:this.actBtn(false)}, 'Deploy ↗'),
       screen==='editor' && h('button',{onClick:()=>this.setState({locked:!this.state.locked}), style:this.topBtn(false)}, this.state.locked?'Take over':'Simulate lock'),
       h('button',{onClick:()=>this.setState({variationsOpen:true}), style:this.topBtn(false)}, 'Variations'),
       h('button',{onClick:()=>this.setState({theme:this.state.theme==='light'?'dark':'light'}), style:this.topBtn(false), title:'Toggle builder theme'}, this.state.theme==='light'?'Dark':'Light'),
