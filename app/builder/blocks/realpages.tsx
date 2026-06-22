@@ -42,7 +42,7 @@ export const BT_TYPE_NAMES = {
   'bt:footer': 'Footer', 'bt:leverages': 'Leverages', 'bt:timeline': 'Timeline', 'bt:diagnostic': 'Diagnostic',
 };
 
-const b = (id, type, props) => ({ id, type, props, real: true });
+const b = (id: string, type: string, props: any) => ({ id, type, props, real: true });
 
 /* ---------- 8Figures — Brand Sprint (mirrors app/8figures/EightFiguresClient.tsx) ---------- */
 const P8FIG = [
