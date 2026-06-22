@@ -12,9 +12,15 @@ const CAL_TRIGGER = {
   "data-cal-config": '{"layout":"month_view","useSlotsViewOnSmallScreen":"true"}',
 };
 
-function Pill({ label }: { label: string }) {
+// Next-step CTA points at the deep-dive event (shares the initialized namespace for UI config).
+const CAL_TRIGGER_DEEPDIVE = {
+  ...CAL_TRIGGER,
+  "data-cal-link": "team/backspace-oddity/deep-dive",
+};
+
+function Pill({ label, trigger = CAL_TRIGGER }: { label: string; trigger?: Record<string, string> }) {
   return (
-    <button type="button" className="bt-pill" {...CAL_TRIGGER}>
+    <button type="button" className="bt-pill" {...trigger}>
       {label}
       <span className="bt-pill__arrow" aria-hidden="true">→</span>
     </button>
@@ -146,27 +152,6 @@ export function EightFiguresClient() {
         </div>
       </section>
 
-      {/* ============ WHAT WE'VE DONE ============ */}
-      <section className="bt-sec bt-sec--light" id="experience" data-screen-label="What we've done">
-        <div className="bt-inner">
-          <header className="bt-head bt-head--gap">
-            <h2 className="bt-h2">{c.experience.h2}</h2>
-          </header>
-          <div className="bt-projects">
-            {c.experience.projects.map((p) => (
-              <div className="bt-projitem" key={p.title}>
-                <a className="bt-proj" href={p.href} target="_blank" rel="noopener noreferrer">
-                  <img className="bt-proj__img" src={p.img} alt={p.alt} />
-                  <span className="bt-proj__shade" aria-hidden="true"></span>
-                  <h3 className="bt-proj__title">{p.title}</h3>
-                </a>
-                <p className="bt-proj__desc">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ============ INVESTMENT & TIMELINE (light) ============ */}
       <section className="bt-sec bt-sec--light bt-sec--compact" id="investment" data-screen-label="Investment & timeline">
         <div className="bt-inner">
@@ -184,12 +169,43 @@ export function EightFiguresClient() {
         </div>
       </section>
 
+      {/* ============ WHAT WE'VE DONE ============ */}
+      <section className="bt-sec bt-sec--light" id="experience" data-screen-label="What we've done">
+        <div className="bt-inner">
+          <header className="bt-head bt-head--gap">
+            <h2 className="bt-h2">{c.experience.h2}</h2>
+          </header>
+          <div className="bt-projects">
+            {c.experience.projects.map((p) => (
+              <div className="bt-projitem" key={p.title}>
+                <div className="bt-proj">
+                  <img className="bt-proj__img" src={p.img} alt={p.alt} />
+                  <span className="bt-proj__shade" aria-hidden="true"></span>
+                  <h3 className="bt-proj__title">{p.title}</h3>
+                </div>
+                <p className="bt-proj__desc">
+                  {p.linkText && p.linkHref && p.desc.includes(p.linkText) ? (
+                    <>
+                      {p.desc.slice(0, p.desc.indexOf(p.linkText))}
+                      <a href={p.linkHref} target="_blank" rel="noopener noreferrer">{p.linkText}</a>
+                      {p.desc.slice(p.desc.indexOf(p.linkText) + p.linkText.length)}
+                    </>
+                  ) : (
+                    p.desc
+                  )}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ============ NEXT STEP (final CTA) ============ */}
       <section className="bt-final" id="contact" data-screen-label="Next step">
         <div className="bt-final__inner">
           <h2 className="bt-final__h2">{c.nextStep.eyebrow}</h2>
           <p className="bt-final__copy">{c.nextStep.body}</p>
-          <Pill label={c.nextStep.cta} />
+          <Pill label={c.nextStep.cta} trigger={CAL_TRIGGER_DEEPDIVE} />
           <a className="bt-final__email" href={MAIL}>yegor@backspaceoddity.com</a>
         </div>
       </section>

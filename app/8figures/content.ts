@@ -4,7 +4,7 @@
 // section-for-section, text-for-text. Do not add copy that isn't in the doc.
 
 export type SeePoint = { metric: string; name: string; text: string };
-export type Project = { title: string; desc: string; href: string; img: string; alt: string };
+export type Project = { title: string; desc: string; href: string; img: string; alt: string; linkText?: string; linkHref?: string };
 export type Phase = {
   kicker: string;
   name: string;
@@ -22,8 +22,8 @@ export const content = {
   },
   hero: {
     eyebrow: "Prepared by Backspace Oddity for 8FIGURES",
-    title: "Brand foundations sprint",
-    subtitle: "Groundwork for turning the brand into a growth flywheel",
+    title: "Growth foundations sprint",
+    subtitle: "Groundwork to refine product positioning, update look and feel and set up a hypothesis validation engine",
     cta: "Book a call",
   },
   // § The challenge (one section, two sub-parts — mirrors the doc)
@@ -59,7 +59,7 @@ export const content = {
       {
         metric: "02",
         name: "Everything is a hypothesis",
-        text: "Positioning, identity, the site - bets to test, not truths to polish and defend. Our job is to find the hypothesis most likely to lead us to success, and test that one first.",
+        text: "Positioning, identity, the site — bets to test, not truths to polish and defend. Our job is to find the hypothesis most likely to lead us to success, and test that one first.",
       },
       {
         metric: "03",
@@ -71,10 +71,10 @@ export const content = {
   // § What we'll do (intro)
   sprint: {
     lead:
-      "This is a Brand Foundation Sprint, an MVP of what proper work on turning the brand into a growth lever might look like.",
+      "This is a Growth Foundation Sprint, an MVP of what proper work on making the brand a growth lever and defensible competitive moat might look like.",
     nutshell: [
       "~5 weeks",
-      "async as much as possible",
+      "async",
       "one round of edits",
       "swift feedback, fast iterations, incremental build",
       "AI-native",
@@ -88,7 +88,7 @@ export const content = {
       name: "Project kick-off",
       meta: "",
       summary:
-        "We digest what you already have and treat it as default knowledge, not something to challenge.",
+        "We digest what you already have and treat it as default knowledge, not something to challenge",
       modules: [
         "Sales calls",
         "Product and marketing analytics",
@@ -99,7 +99,7 @@ export const content = {
     {
       kicker: "Phase 2",
       name: "Brand strategy & platform",
-      meta: "workshops",
+      meta: "strategic workshops",
       summary:
         "A series of workshops to define the key parts of the brand platform and positioning",
       modules: [
@@ -124,12 +124,12 @@ export const content = {
       name: "Creative production",
       meta: "website + brand assets",
       summary:
-        "The website and brand assets the user and the investor meet before SF, built on our AI-native stack from templates and components",
+        "The website and brand assets users and the investor meet before Silicon Valley, built on our AI-native stack from templates and components",
       modules: [
-        "Website experience: main landing page (value proposition + sign-up form), About us.",
-        "Assembly of all core templates and pages.",
+        "Main landing page.",
+        "Assembly of all core components into an AI-native design system in Figma.",
         "Responsive behaviors.",
-        "Brand assets: LinkedIn post, profile header images, email signature, meeting backgrounds (2 variants).",
+        "Brand assets: LinkedIn post, profile header images, email signature, Zoom backgrounds.",
         "Final QA and refinements.",
       ],
     },
@@ -145,21 +145,27 @@ export const content = {
         href: "https://miro.com/",
         img: "/images/projects/miro.webp",
         alt: "RealtimeBoard to Miro rebrand",
-        desc: "Full rebrand and brand architecture for the move to Miro - a new name, identity, and platform story that scaled into a category leader.",
+        desc: "Full rebrand and brand architecture for the move to Miro — a new name, identity, and platform story that scaled into a category leader.",
+        linkText: "Miro",
+        linkHref: "https://miro.com/",
       },
       {
         title: "Stape → Kleos",
         href: "https://kleos.io/",
         img: "/images/projects/kleos.webp",
         alt: "Stape to Kleos rebrand",
-        desc: "Renaming, repositioning, and a new identity for a global payroll and compliance platform moving into a new category.",
+        desc: "New name, new repositioning, and a new identity for a global team-management platform previously known as Stape → now Kleos.",
+        linkText: "Kleos",
+        linkHref: "https://kleos.io/",
       },
       {
         title: "Sidekick (acquired by Perplexity)",
         href: "https://www.theinformation.com/briefings/perplexity-buys-browser-startup-sidekick",
         img: "/images/projects/sidekick.webp",
         alt: "Sidekick browser, acquired by Perplexity",
-        desc: "Brand and positioning sharp enough to make the product an acquisition target. Later bought by Perplexity.",
+        desc: "A repositioning sharp enough to make the browser grow organically 5x a year, competing with Google Chrome and becoming an acquisition target for Perplexity.",
+        linkText: "Perplexity",
+        linkHref: "https://www.perplexity.ai/comet",
       },
     ],
   },
@@ -167,15 +173,15 @@ export const content = {
   investment: {
     eyebrow: "Investment & timeline",
     price: "€15,000",
-    terms: "Fixed price · 6 weeks, finished before your August trip.",
+    terms: "Fixed price · ~5 weeks, ready before your trip to Silicon Valley.",
     paymentLabel: "Payment schedule",
-    payment: "50% pre-pay, and 50% after the work is complete.",
+    payment: "50% down payment, 50% after the work is complete. Price excludes VAT.",
   },
   // § Next step
   nextStep: {
     eyebrow: "Next step",
     body:
-      "A short call to confirm the starting segment and the first job, and to lock a start date so the finish lands before your flight.",
+      "A deep-dive call to discuss proposal details, confirm the scope and lock a start date so the finish lands before your first meetings in Silicon Valley.",
     cta: "Book a call",
   },
   footer: {
