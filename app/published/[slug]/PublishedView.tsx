@@ -11,13 +11,17 @@ import { btVarStyle } from '../../builder/btVars';
 
 type Block = { id: string; type: string; props: any };
 
-export default function PublishedView({ blocks, styles }: { blocks: Block[]; styles?: any }) {
+export default function PublishedView({ blocks, styles, slug, seed }: { blocks: Block[]; styles?: any; slug?: string; seed?: any }) {
+  // _ctx carries the published slug to interactive blocks (exercises) so client
+  // answers post to the right page; _seed carries their prior submissions for
+  // restore. Static blocks ignore both.
+  const ctx = { slug };
   return (
     <div className="page bt-page" style={btVarStyle(styles?.bt)}>
       {blocks.map((b) => {
         const Comp = (BT_COMPONENTS as any)[b.type];
         if (!Comp) return null;
-        return <Comp key={b.id} {...b.props} e={{ on: false }} />;
+        return <Comp key={b.id} {...b.props} e={{ on: false }} _ctx={ctx} _seed={seed} />;
       })}
     </div>
   );

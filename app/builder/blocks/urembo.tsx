@@ -18,6 +18,7 @@
 'use client';
 
 import { Ed } from './bt';
+import { UREMBO_EXERCISE_SAMPLES } from './exercises';
 
 /* edit context threaded into every block (mirrors bt.tsx) */
 type E = { on: boolean; set: (k: string, v: string) => void; touch?: () => void } | undefined;
@@ -356,5 +357,23 @@ export const UREMBO_SECTIONS = [
   ] },
   { type: 'ub:docFooter', name: 'Doc footer', variations: [
     { id: 'footer', name: 'Left / right', props: find(UREMBO_PAGE, 'ub:docFooter') },
+  ] },
+  { type: 'ub:exMatrix', name: 'Exercise — Matrix', variations: [
+    { id: 'ex-matrix', name: 'Importance × satisfaction', props: UREMBO_EXERCISE_SAMPLES['ub:exMatrix'] },
+  ] },
+  { type: 'ub:exRank', name: 'Exercise — Rank', variations: [
+    { id: 'ex-rank', name: 'Drag-to-rank problems', props: UREMBO_EXERCISE_SAMPLES['ub:exRank'] },
+  ] },
+  { type: 'ub:exChips', name: 'Exercise — Chips', variations: [
+    { id: 'ex-chips', name: 'Multi-select + add own', props: UREMBO_EXERCISE_SAMPLES['ub:exChips'] },
+  ] },
+  { type: 'ub:exSolutions', name: 'Exercise — Solutions', variations: [
+    { id: 'ex-solutions', name: 'Free-text per job', props: UREMBO_EXERCISE_SAMPLES['ub:exSolutions'] },
+  ] },
+  { type: 'ub:discussionLock', name: 'Discussion — Lock', variations: [
+    { id: 'ex-lock', name: 'Record + lock the decision', props: UREMBO_EXERCISE_SAMPLES['ub:discussionLock'] },
+  ] },
+  { type: 'ub:clientNotes', name: 'Client notes (read-back)', variations: [
+    { id: 'ex-notes', name: 'Your notes — live read-back', props: UREMBO_EXERCISE_SAMPLES['ub:clientNotes'] },
   ] },
 ];

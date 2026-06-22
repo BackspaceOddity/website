@@ -162,3 +162,31 @@ body:has(.bt-page) { background: #F2F2F0; }
   .bt-page h2 { font-size: 34px; }
   .bt-page .pf-branches { grid-template-columns: 1fr; }
 }
+
+/* ---- Dark theme (toggled via html.dark by the floating theme toggle) ---- */
+html.dark {
+  --ink: #e8e2d6;
+  --paper: #0d1209;
+  --paper-soft: #111810;
+  --surface: #172014;
+  --rule: rgba(232, 226, 214, 0.12);
+  --rule-strong: rgba(232, 226, 214, 0.22);
+  --ink-55: rgba(232, 226, 214, 0.55);
+  --ink-40: rgba(232, 226, 214, 0.40);
+  --ink-25: rgba(232, 226, 214, 0.25);
+  --on-dark-primary: rgba(13, 18, 9, 0.88);
+  --on-dark-secondary: rgba(13, 18, 9, 0.65);
+  --on-dark-muted: rgba(13, 18, 9, 0.42);
+  --on-dark-border: rgba(13, 18, 9, 0.22);
+}
+html.dark body, html.dark { background: #0d1209; }
+.theme-toggle {
+  position: fixed; bottom: 24px; right: 24px; width: 40px; height: 40px; border-radius: 50%;
+  border: 1.5px solid var(--rule-strong); background: var(--paper); color: var(--ink);
+  font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s, background 0.15s, color 0.15s; z-index: 999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10); line-height: 1;
+}
+.theme-toggle:hover { border-color: var(--ink-55); }
+@media print { .theme-toggle { display: none; } }
+

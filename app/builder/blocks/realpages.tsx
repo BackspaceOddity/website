@@ -19,6 +19,7 @@ import {
   BtFinal, BtFooter, BtLeverages, BtTimeline, BtDiagnostic,
 } from './bt';
 import { UREMBO_COMPONENTS, UREMBO_TYPE_NAMES } from './urembo';
+import { UREMBO_EXERCISE_COMPONENTS, UREMBO_EXERCISE_TYPE_NAMES } from './exercises';
 
 /* type string -> section component the canvas renders.
    bt: = Backspace Oddity DS; ub: = Urembo Hub DS (BSO-658 Pass 1). Merged into
@@ -37,6 +38,7 @@ export const BT_COMPONENTS = {
   'bt:timeline': BtTimeline,
   'bt:diagnostic': BtDiagnostic,
   ...UREMBO_COMPONENTS,
+  ...UREMBO_EXERCISE_COMPONENTS,
 };
 
 /* human label per type, shown on the section's editor tag */
@@ -45,6 +47,7 @@ export const BT_TYPE_NAMES = {
   'bt:phases': 'Phases', 'bt:invest': 'Investment', 'bt:projects': 'Projects', 'bt:final': 'Final CTA',
   'bt:footer': 'Footer', 'bt:leverages': 'Leverages', 'bt:timeline': 'Timeline', 'bt:diagnostic': 'Diagnostic',
   ...UREMBO_TYPE_NAMES,
+  ...UREMBO_EXERCISE_TYPE_NAMES,
 };
 
 const b = (id: string, type: string, props: any) => ({ id, type, props, real: true });
