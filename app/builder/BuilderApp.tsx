@@ -642,7 +642,7 @@ class BuilderApp extends React.Component {
       style:{flex:1, minWidth:0, overflowY:'auto', height:'100%', background:'var(--soft)', padding:'34px 0 120px'}},
       h('div',{style:{width:1160, margin:'0 auto', zoom:this.state.canvasZoom, background:'#F2F2F0', color:'#011C00', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)', minHeight:300}},
         blocks.length===0 ? this.emptyCanvas() :
-        h('div',{className:this.state.realPage?'bt-page':undefined},
+        h('div',{className:this.state.realPage?'page bt-page':undefined},
           [ edit && h(React.Fragment,{key:'dz0'}, this.dropzone(0)) ].concat(
             blocks.map((b,i)=> h(React.Fragment,{key:b.id}, this.renderBlock(b,i), edit && this.dropzone(i+1)))))));
   }
