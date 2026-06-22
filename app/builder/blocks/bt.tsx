@@ -32,7 +32,7 @@ type E = { on: boolean; set: (k: string, v: string) => void; touch?: () => void 
    `role` tags the element with data-role so the Tweaks type-editor (BSO-658 Phase B)
    can detect which design-system role a clicked text belongs to. Emitted in both
    static and editable modes so role detection works on the published page too. */
-function Ed({ e, k, v, as = 'span', className, role }: { e?: E; k: string; v?: string; as?: any; className?: string; role?: string }) {
+export function Ed({ e, k, v, as = 'span', className, role }: { e?: E; k: string; v?: string; as?: any; className?: string; role?: string }) {
   const As: any = as;
   if (!e || !e.on) return <As className={className} data-role={role}>{v}</As>;
   return (

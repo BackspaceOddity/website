@@ -7,6 +7,7 @@
    Design choices (ABC Schengen / Inter / JetBrains Mono / GT Eesti, palette, layout) untouched. */
 import React from 'react';
 import { BT_COMPONENTS, BT_PAGES, BT_TYPE_NAMES, BT_SECTIONS } from './blocks/realpages';
+import { UREMBO_SECTIONS } from './blocks/urembo';
 import { btVarStyle, ROLE_VARS } from './btVars';
 
 // Default proposal design-system for a NEW page (BSO-658). The two real pages
@@ -30,12 +31,16 @@ const DEFAULT_PAGE_DS = 'pbt';
 //   sections— Library "Sections" tab source for pages on this DS
 // Adding a 3rd system = one entry here.
 const DESIGN_SYSTEMS = [
-  { id: 'bso',    name: 'Backspace Oddity', cssKey: 'pbt', sections: BT_SECTIONS },
-  { id: 'urembo', name: 'Urembo Hub',       cssKey: null,  sections: [] },
+  { id: 'bso',    name: 'Backspace Oddity', cssKey: 'pbt',    sections: BT_SECTIONS },
+  { id: 'urembo', name: 'Urembo Hub',       cssKey: 'urembo', sections: UREMBO_SECTIONS },
 ];
 const DEFAULT_DS_ID = 'bso';
 // Resolve a DS id -> registry entry (fallback to the default 'bso' system).
 function getDs(id){ return DESIGN_SYSTEMS.find(d => d.id === id) || DESIGN_SYSTEMS.find(d => d.id === DEFAULT_DS_ID); }
+// A "real" DS block belongs to either the bt: (Backspace Oddity) or ub: (Urembo) DS.
+// Both render through BT_COMPONENTS + the .bt-page wrapper, so the builder gates them
+// the same way (BSO-658 Pass 1 — Urembo port).
+function isDsType(t){ const s=String(t||''); return s.indexOf('bt:')===0 || s.indexOf('ub:')===0; }
 
 // Human labels + representative on-canvas selector per bt design-system role.
 // The selector seeds the panel's "current value" via getComputedStyle.
@@ -286,7 +291,7 @@ class BuilderApp extends React.Component {
   replaceBtn(target){ const h=React.createElement; if(!(this.state.editMode && !this.state.locked && !this.state.previewVersionId)) return null; const t=this.state.imgTarget; const armed=t && t.blockId===target.blockId && t.tileIndex===target.tileIndex && t.kind===target.kind; return h('button',{onClick:e=>{ e.stopPropagation(); this.armReplace(target); }, 'data-tip':'Replace from library', style:{position:'absolute', bottom:8, right:8, zIndex:7, padding:'5px 11px', borderRadius:7, border:'1px solid rgba(255,255,255,.55)', background:armed?'#F2F2F0':'rgba(1,28,0,.74)', color:armed?'#011C00':'#F2F2F0', cursor:'pointer', fontSize:'11px', fontWeight:600, fontFamily:"'Inter',system-ui,sans-serif"}}, armed?'Choose an image \u2192':'Replace image'); }
   toast(msg){ this.setState({toast:msg}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}), 3200); }
   roleName(r){ return ({label:'Label',heading:'Heading',statement:'Statement',body:'Body',list:'List'})[r]||r; }
-  typeName(t){ if(t&&t.indexOf('bt:')===0) return BT_TYPE_NAMES[t]||t.slice(3); return ({hero:'Hero well',statement:'Statement',twocol:'Two-column',casestudy:'Case study',projectgrid:'Project grid',footer:'Footer',custom:'Custom block',ai:'AI block'})[t]||t; }
+  typeName(t){ if(isDsType(t)) return BT_TYPE_NAMES[t]||t.slice(3); return ({hero:'Hero well',statement:'Statement',twocol:'Two-column',casestudy:'Case study',projectgrid:'Project grid',footer:'Footer',custom:'Custom block',ai:'AI block'})[t]||t; }
   hashStr(s){ let h=2166136261; s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return Math.abs(h); }
   arnd(p,key,a,b){ return a + (this.hashStr(p.id+'#'+key) % (b-a+1)); }
   fmtDur(s){ const m=Math.floor(s/60), r=s%60; return m>0? m+'m '+r+'s' : r+'s'; }
@@ -583,7 +588,7 @@ class BuilderApp extends React.Component {
   // Build a fresh canvas block from a saved template (mirror of customInstance / insertBtVariation).
   savedInstance(id){
     const t=(this.state.savedTemplates||[]).find(x=>x.id===id); if(!t) return null;
-    const isBt = String(t.type).indexOf('bt:')===0;
+    const isBt = isDsType(t.type);
     if(isBt) return { id:this.nid('bt'), type:t.type, props:this.clone(t.props||{}), real:true };
     return this.makeBlock(t.type, { props:this.clone(t.props||{}), bg:t.bg||'paper' });
   }
@@ -599,7 +604,7 @@ class BuilderApp extends React.Component {
   // Thumbnail for a saved template — bt sections via thumbFill, synthetic blocks via a static blockInner render.
   savedThumb(t, hh, zoom){
     const h=React.createElement;
-    if(String(t.type).indexOf('bt:')===0) return this.thumbFill(t.type, t.props||{}, hh||80, zoom||0.185);
+    if(isDsType(t.type)) return this.thumbFill(t.type, t.props||{}, hh||80, zoom||0.185);
     const inst={id:'__saved-'+t.id, type:t.type, bg:t.bg||'paper', pad:'M', props:this.clone(t.props||{}), overrides:{}};
     const forest=inst.bg==='forest'; const fg=forest?'#FDFBF4':'#011C00';
     const bg=forest?'#011C00':'transparent';
@@ -1279,7 +1284,7 @@ class BuilderApp extends React.Component {
     const h=React.createElement; const Comp=BT_COMPONENTS[inst.type]; if(!Comp) return null;
     const edit=this.state.editMode && !this.state.locked && !this.state.previewVersionId;
     const sel=this.state.selectedId===inst.id;
-    const dark=({'bt:hero':1,'bt:leverages':1,'bt:final':1})[inst.type];
+    const dark=({'bt:hero':1,'bt:leverages':1,'bt:final':1,'ub:discussion':1})[inst.type];
     const line= dark?'rgba(253,251,244,.30)':'rgba(1,28,0,.12)';
     const tagBg= dark?'rgba(253,251,244,.16)':'rgba(1,28,0,.07)'; const tagFg= dark?'rgba(253,251,244,.78)':'rgba(1,28,0,.5)';
     const props=Object.assign({key:'c'}, inst.props);
@@ -1329,7 +1334,7 @@ class BuilderApp extends React.Component {
           thinking ? h('span',{style:{display:'inline-flex',alignItems:'center',gap:8}}, h('span',{style:{width:13,height:13,border:'2px solid #011C00',borderTopColor:'transparent',borderRadius:99,display:'inline-block',animation:'bsospin .7s linear infinite'}}), 'Drafting…') : 'Generate block')));
   }
   renderBlock(inst, index){
-    if(inst.type && inst.type.indexOf('bt:')===0) return this.renderBtBlock(inst, index);
+    if(isDsType(inst.type)) return this.renderBtBlock(inst, index);
     if(inst.type==='ai') return this.renderAiBlock(inst, index);
     const h=React.createElement; const sel=this.state.selectedId===inst.id;
     const forest=inst.bg==='forest'; const fg= forest?'#FDFBF4':'#011C00';
