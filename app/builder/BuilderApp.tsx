@@ -555,6 +555,7 @@ class BuilderApp extends React.Component {
       this.state.newPageOpen && this.renderNewPage(),
       this.state.variationsOpen && this.renderVariations(),
       this.renderTip(),
+      this.state.claudeEdit && this.renderClaudeEdit(),
       this.state.toast && this.renderToast(),
     );
   }
@@ -1206,7 +1207,55 @@ class BuilderApp extends React.Component {
       b('\u2193', ()=>this.moveBlock(inst.id,1), {dis:index===n-1, t:'Move down'}),
       b('\u29C9', ()=>this.duplicateBlock(inst.id), {t:'Duplicate'}),
       b('\u2606', ()=>this.saveBlockToLibrary(inst), {t:'Save to library'}),
+      b('\u2726', ()=>this.openClaudeEdit(inst, index), {t:'Edit with Claude Code'}),
       b('\u00d7', ()=>this.deleteBlock(inst.id), {t:'Delete'}));
+  }
+
+  // ---------- Edit-with-Claude-Code (BSO-658) ----------
+  // Sends a block + an instruction to the local Claude Code inbox (:8014),
+  // mirroring the canonical Edit Mode wire format ({threads:{[id]:thread}}).
+  openClaudeEdit(inst, index){ this.setState({claudeEdit:{inst, index, prompt:''}}); }
+  closeClaudeEdit(){ this.setState({claudeEdit:null}); }
+  sendClaudeEdit(){
+    const ce=this.state.claudeEdit; if(!ce) return;
+    const text=(ce.prompt||'').trim();
+    if(!text){ this.toast('Describe the change first'); return; }
+    const id='blockedit-'+Date.now();
+    const thread={
+      id, type:'block-edit', prompt:text,
+      blockType:ce.inst.type, blockIndex:ce.index, blockId:ce.inst.id,
+      pageId:(this.state.realPage || this.state.pageTitle || 'builder-page'),
+      pageName:(this.state.pageTitle || 'Untitled page'),
+      status:'pending', createdAt:new Date().toISOString(),
+    };
+    fetch('http://localhost:8014/inbox', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({threads:{[id]:thread}, source:'builder'})})
+      .then(r=>{ if(!r.ok) throw new Error('bad status'); this.toast('Sent to Claude Code'); this.closeClaudeEdit(); })
+      .catch(()=>this.toast('Claude Code inbox not reachable (run it locally)'));
+  }
+  renderClaudeEdit(){
+    const h=React.createElement; const ce=this.state.claudeEdit; if(!ce) return null;
+    const stop=e=>e.stopPropagation();
+    return h('div',{onClick:()=>this.closeClaudeEdit(),
+        style:{position:'fixed', inset:0, zIndex:90, background:'rgba(1,28,0,.32)', display:'flex', alignItems:'center', justifyContent:'center', padding:20}},
+      h('div',{onClick:stop,
+          style:{width:'min(460px, 92vw)', maxHeight:'88vh', overflow:'auto', background:'var(--surface,#fff)', color:'var(--ink,#011C00)', borderRadius:14, border:'1px solid rgba(1,28,0,.16)', boxShadow:'0 24px 70px rgba(1,28,0,.3)', padding:'22px 22px 18px'}},
+        h('div',{style:{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6}},
+          h('div',{style:{fontSize:'17px', fontWeight:700, letterSpacing:'-0.01em', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, 'Edit this section with Claude Code'),
+          h('button',{onClick:()=>this.closeClaudeEdit(), 'aria-label':'Close',
+            style:{width:28, height:28, border:'1px solid rgba(1,28,0,.18)', background:'#fff', borderRadius:6, cursor:'pointer', fontSize:'15px', lineHeight:1, color:'#011C00'}}, '\u00d7')),
+        h('div',{style:{fontSize:'12px', color:'var(--muted,rgba(1,28,0,.55))', marginBottom:14}},
+          (ce.inst.type||'section')+' \u00b7 block '+(ce.index+1)),
+        h('textarea',{autoFocus:true, value:ce.prompt,
+          onChange:e=>{ const v=e.target.value; this.setState(s=>({claudeEdit:s.claudeEdit?{...s.claudeEdit, prompt:v}:null})); },
+          onKeyDown:e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') this.sendClaudeEdit(); },
+          placeholder:"Describe the change \u2014 e.g. 'make the headline punchier', 'add a third column'",
+          style:{width:'100%', minHeight:120, resize:'vertical', boxSizing:'border-box', padding:'12px 14px', borderRadius:10, border:'1px solid rgba(1,28,0,.2)', fontSize:'14px', lineHeight:1.45, fontFamily:"'Inter',system-ui,sans-serif", outline:'none', color:'#011C00', background:'#fff'}}),
+        h('div',{style:{display:'flex', gap:10, justifyContent:'flex-end', marginTop:16}},
+          h('button',{onClick:()=>this.closeClaudeEdit(),
+            style:{padding:'10px 16px', borderRadius:9, border:'1px solid rgba(1,28,0,.2)', background:'#fff', color:'#011C00', fontSize:'14px', fontWeight:600, cursor:'pointer'}}, 'Cancel'),
+          h('button',{onClick:()=>this.sendClaudeEdit(),
+            style:{padding:'10px 18px', borderRadius:9, border:'1px solid var(--ink,#011C00)', background:'var(--ink,#011C00)', color:'var(--paper,#F2F2F0)', fontSize:'14px', fontWeight:600, cursor:'pointer'}}, 'Send to Claude Code'))));
   }
   blockInner(inst, fg){
     const h=React.createElement; const t=inst.type; const muted= fg==='#FDFBF4'?'rgba(253,251,244,.6)':'rgba(1,28,0,.55)';
