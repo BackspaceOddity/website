@@ -77,6 +77,7 @@ class BuilderApp extends React.Component {
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'',
       realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{}, tweakExpanded:{},
       btStyles:{}, roleDefaults:{},
+      claudeEdit:null, claudeEditPick:null, claudeEditHover:null,
     };
     this.uid = 0;
     this.fileInput = null;
@@ -110,7 +111,7 @@ class BuilderApp extends React.Component {
   }
   componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } if(this._onKey){ window.removeEventListener('keydown', this._onKey); } }
   // Esc clears an armed gap / picked tile (BSO-658).
-  _bindEsc(){ if(this._onKey) return; this._onKey=(e)=>{ if(e.key==='Escape') this.clearArm(); }; if(typeof window!=='undefined') window.addEventListener('keydown', this._onKey); }
+  _bindEsc(){ if(this._onKey) return; this._onKey=(e)=>{ if(e.key==='Escape'){ if(this.state.claudeEditPick && !this.state.claudeEdit){ this.cancelClaudeEditPick(); return; } this.clearArm(); } }; if(typeof window!=='undefined') window.addEventListener('keydown', this._onKey); }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
   startResize(e, which){ e.preventDefault(); const startX=e.clientX; const key=which==='lib'?'libW':'tweaksW'; const startW=this.state[key]; const lr=this.state.editorLayout==='lr'; const dir=(which==='lib')?(lr?1:-1):(lr?-1:1); const move=ev=>{ let w=startW+dir*(ev.clientX-startX); w=Math.max(168,Math.min(480,w)); this.setState({[key]:w}); }; const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); document.body.style.cursor=''; document.body.style.userSelect=''; }; window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); document.body.style.cursor='col-resize'; document.body.style.userSelect='none'; }
   onCanvasRef = (el)=>{ this._canvasEl=el; if(el){ this.measureCanvas(); if(!this._ro){ this._ro=new ResizeObserver(()=>this.measureCanvas()); } this._ro.disconnect(); this._ro.observe(el); } };
@@ -555,6 +556,7 @@ class BuilderApp extends React.Component {
       this.state.newPageOpen && this.renderNewPage(),
       this.state.variationsOpen && this.renderVariations(),
       this.renderTip(),
+      this.state.claudeEditPick && this.renderClaudeEditPickHint(),
       this.state.claudeEdit && this.renderClaudeEdit(),
       this.state.toast && this.renderToast(),
     );
@@ -1003,13 +1005,13 @@ class BuilderApp extends React.Component {
   renderCanvas(){
     const h=React.createElement; const pver=this.state.previewVersionId && this.state.versions.find(v=>v.id===this.state.previewVersionId);
     const blocks = pver && pver.blocks ? pver.blocks : this.state.blocks; const edit=this.state.editMode && !this.state.locked && !pver;
-    return h('div',{className:'bso-scroll', ref:this.onCanvasRef, onClick:(ev)=>{ if(!edit) return; const t=ev.target; if(t&&t.closest&&t.closest('[data-role]')) return; /* keep role just picked from a bt text click */ this.setState({selectedId:null, selectedRole:null}); },
+    return h('div',{className:'bso-scroll', ref:this.onCanvasRef, onClick:(ev)=>{ if(!edit) return; if(this.state.claudeEditPick) return; /* pick mode owns clicks */ const t=ev.target; if(t&&t.closest&&t.closest('[data-role]')) return; /* keep role just picked from a bt text click */ this.setState({selectedId:null, selectedRole:null}); },
       style:{flex:1, minWidth:0, overflowY:'auto', height:'100%', background:'var(--soft)', padding:'34px 0 120px'}},
       h('div',{style:{width:1160, margin:'0 auto', zoom:this.state.canvasZoom, background:'#F2F2F0', color:'#011C00', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)', minHeight:300}},
         blocks.length===0 ? this.emptyCanvas() :
         h('div',{className:this.state.realPage?'page bt-page':undefined,
             style:this.state.realPage?btVarStyle(this.state.btStyles):undefined,
-            onClickCapture:(this.state.realPage&&edit)? (ev=>{ const t=ev.target; const r=t&&t.closest&&t.closest('[data-role]'); if(r&&r.dataset&&r.dataset.role) this.selectBtRole(r.dataset.role); }) : undefined},
+            onClickCapture:(this.state.realPage&&edit)? (ev=>{ if(this.state.claudeEditPick) return; /* pick mode owns clicks */ const t=ev.target; const r=t&&t.closest&&t.closest('[data-role]'); if(r&&r.dataset&&r.dataset.role) this.selectBtRole(r.dataset.role); }) : undefined},
           [ edit && h(React.Fragment,{key:'dz0'}, this.dropzone(0)) ].concat(
             blocks.map((b,i)=> h(React.Fragment,{key:b.id}, this.renderBlock(b,i), edit && this.dropzone(i+1)))))));
   }
@@ -1139,9 +1141,13 @@ class BuilderApp extends React.Component {
     const tagBg= dark?'rgba(253,251,244,.16)':'rgba(1,28,0,.07)'; const tagFg= dark?'rgba(253,251,244,.78)':'rgba(1,28,0,.5)';
     const props=Object.assign({key:'c'}, inst.props);
     if(edit) props.e={on:true, set:(k,v)=>this.setBtText(inst.id,k,v), touch:()=>this.markDirtyLabel()};
-    return h('div',{style:{position:'relative'},
-        onClickCapture: edit? (ev=>{ const t=ev.target; const a=t&&t.closest&&t.closest('a,button'); if(a) ev.preventDefault(); }) : undefined},
+    const pick=edit?this.claudeEditPickProps(inst, index):null;
+    return h('div',{style:Object.assign({position:'relative'}, pick?{cursor:pick.cursor}:{}),
+        onClickCapture: pick? pick.onClickCapture : (edit? (ev=>{ const t=ev.target; const a=t&&t.closest&&t.closest('a,button'); if(a) ev.preventDefault(); }) : undefined),
+        onMouseMoveCapture: pick? pick.onMouseMoveCapture : undefined,
+        onMouseLeave: pick? pick.onMouseLeave : undefined},
       h(Comp, props),
+      pick && this.claudeEditPickOverlay(inst),
       // section-shape outline (rounded, follows the real corner radius)
       edit && h('div',{key:'o', ref:el=>{ if(el) el.style.borderRadius=this.secRadius(el)+'px'; }, style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', boxShadow:'inset 0 0 0 '+(sel?'2px #011C00':'1px '+line)}}),
       // block-bounds rectangular frame — shown only when the section is rounded (so its true extent stays visible)
@@ -1186,8 +1192,11 @@ class BuilderApp extends React.Component {
     const forest=inst.bg==='forest'; const fg= forest?'#FDFBF4':'#011C00';
     const bg = forest? '#011C00' : (inst.bg==='soft'?'#E8E8E6':'transparent');
     const edit=this.state.editMode && !this.state.locked && !this.state.previewVersionId;
-    const wrapStyle={position:'relative', background:bg, color:fg, backgroundImage:(forest&&inst.type==='hero')?'url('+this.imgUrl(inst.props.img||'magenta-green')+')':'none', backgroundSize:'cover', backgroundPosition:'center', cursor:edit?'pointer':'default'};
-    return h('div',Object.assign({onClick:e=>{ if(!edit) return; e.stopPropagation(); this.selectBlock(inst.id);}, style:wrapStyle}, inst.type==='hero'?this.imgDrop(v=>this.setBlockImg(inst.id,v)):{}),
+    const pick=edit?this.claudeEditPickProps(inst, index):null;
+    const wrapStyle={position:'relative', background:bg, color:fg, backgroundImage:(forest&&inst.type==='hero')?'url('+this.imgUrl(inst.props.img||'magenta-green')+')':'none', backgroundSize:'cover', backgroundPosition:'center', cursor:pick?pick.cursor:(edit?'pointer':'default')};
+    return h('div',Object.assign({onClick:e=>{ if(!edit) return; if(pick) return; e.stopPropagation(); this.selectBlock(inst.id);}, style:wrapStyle,
+        onClickCapture: pick?pick.onClickCapture:undefined, onMouseMoveCapture: pick?pick.onMouseMoveCapture:undefined, onMouseLeave: pick?pick.onMouseLeave:undefined}, inst.type==='hero'?this.imgDrop(v=>this.setBlockImg(inst.id,v)):{}),
+      pick && this.claudeEditPickOverlay(inst),
       edit && !sel && h('div',{style:{position:'absolute', inset:0, boxShadow:'inset 0 0 0 1px '+(forest?'rgba(253,251,244,.22)':'rgba(1,28,0,.12)'), pointerEvents:'none', zIndex:6}}),
       edit && sel && h('div',{style:{position:'absolute', inset:0, boxShadow:'inset 0 0 0 2px #011C00', pointerEvents:'none', zIndex:6, mixBlendMode: forest?'difference':'normal'}}),
       edit && h('div',{style:{position:'absolute', top:0, left:0, zIndex:7, padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background: forest?'rgba(253,251,244,.16)':'rgba(1,28,0,.07)', color: forest?'rgba(253,251,244,.75)':'rgba(1,28,0,.5)', borderBottomRightRadius:7, pointerEvents:'none'}}, this.typeName(inst.type)),
@@ -1214,8 +1223,68 @@ class BuilderApp extends React.Component {
   // ---------- Edit-with-Claude-Code (BSO-658) ----------
   // Sends a block + an instruction to the local Claude Code inbox (:8014),
   // mirroring the canonical Edit Mode wire format ({threads:{[id]:thread}}).
-  openClaudeEdit(inst, index){ this.setState({claudeEdit:{inst, index, prompt:''}}); }
+  // When pick mode is armed for THIS block, return capture-phase handlers that
+  // highlight the hovered element and capture the click — without firing inline
+  // editing, link navigation, or the canvas-level Tweaks role-select.
+  claudeEditPickProps(inst, index){
+    const p=this.state.claudeEditPick;
+    if(!p || !p.inst || p.inst.id!==inst.id) return null;
+    return {
+      cursor:'crosshair',
+      onMouseMoveCapture:(ev)=>{ let el=ev.target; if(el&&el.nodeType===3) el=el.parentElement; const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null; const root=ev.currentTarget.getBoundingClientRect(); if(r) this.setState({claudeEditHover:{top:r.top-root.top, left:r.left-root.left, width:r.width, height:r.height}}); },
+      onMouseLeave:()=>{ if(this.state.claudeEditHover) this.setState({claudeEditHover:null}); },
+      onClickCapture:(ev)=>this.pickClaudeEditElement(ev, inst, index),
+    };
+  }
+  // Highlight overlay rendered inside the armed block's wrapper.
+  claudeEditPickOverlay(inst){
+    const p=this.state.claudeEditPick; if(!p || !p.inst || p.inst.id!==inst.id) return null;
+    const hv=this.state.claudeEditHover; if(!hv) return null;
+    return React.createElement('div',{key:'cep', style:{position:'absolute', top:hv.top, left:hv.left, width:hv.width, height:hv.height, zIndex:9, pointerEvents:'none', boxShadow:'0 0 0 2px #011C00, 0 0 0 6px rgba(1,28,0,.18)', borderRadius:4, background:'rgba(1,28,0,.04)'}});
+  }
+  // ✦ now arms ELEMENT-PICK mode: select a specific element inside the section,
+  // then describe how to fix THAT element (falls back to whole-section editing).
+  openClaudeEdit(inst, index){ this.setState({claudeEditPick:{inst, index}, claudeEditHover:null, claudeEdit:null}); }
+  cancelClaudeEditPick(){ this.setState({claudeEditPick:null, claudeEditHover:null}); }
+  // Whole-section fallback — open the popup with no element scope (original behavior).
+  openClaudeEditWhole(){ const p=this.state.claudeEditPick; if(!p) return; this.setState({claudeEdit:{inst:p.inst, index:p.index, prompt:'', element:null}, claudeEditPick:null, claudeEditHover:null}); }
   closeClaudeEdit(){ this.setState({claudeEdit:null}); }
+  // Build a compact, reliable descriptor for the picked element, scoped to the block root.
+  // Returns {role, text, selector} — a Claude Code session uses role+text+selector to find it.
+  describePickedElement(el, blockRoot){
+    if(!el || !blockRoot) return null;
+    const tag=(el.tagName||'').toLowerCase();
+    const role=(el.dataset && el.dataset.role) ? el.dataset.role : tag;
+    let text=''; try{ text=(el.textContent||'').replace(/\s+/g,' ').trim(); }catch(e){}
+    if(text.length>160) text=text.slice(0,157)+'…';
+    // Selector path within the block: prefer a data-role anchor, else an nth-of-type chain.
+    let selector='';
+    try{
+      if(el.dataset && el.dataset.role){
+        const same=Array.prototype.filter.call(blockRoot.querySelectorAll('[data-role="'+el.dataset.role+'"]'), n=>true);
+        const idx=same.indexOf(el);
+        selector='[data-role="'+el.dataset.role+'"]'+(same.length>1?(':nth-of-type-of-role('+(idx+1)+')'):'');
+      } else {
+        const parts=[]; let node=el;
+        while(node && node!==blockRoot && node.nodeType===1){
+          const t=node.tagName.toLowerCase(); let n=1, sib=node;
+          while((sib=sib.previousElementSibling)){ if(sib.tagName===node.tagName) n++; }
+          parts.unshift(t+':nth-of-type('+n+')'); node=node.parentElement;
+        }
+        selector=parts.join(' > ');
+      }
+    }catch(e){ selector=role; }
+    return {role, text, selector};
+  }
+  // Capture a click inside the armed block: identify the element, open the scoped popup.
+  pickClaudeEditElement(ev, inst, index){
+    ev.preventDefault(); ev.stopPropagation();
+    const blockRoot=ev.currentTarget; let el=ev.target;
+    // walk up to the nearest meaningful element (skip bare text nodes / pure wrappers)
+    if(el && el.nodeType===3) el=el.parentElement;
+    const desc=this.describePickedElement(el, blockRoot);
+    this.setState({claudeEdit:{inst, index, prompt:'', element:desc}, claudeEditPick:null, claudeEditHover:null});
+  }
   sendClaudeEdit(){
     const ce=this.state.claudeEdit; if(!ce) return;
     const text=(ce.prompt||'').trim();
@@ -1228,10 +1297,21 @@ class BuilderApp extends React.Component {
       pageName:(this.state.pageTitle || 'Untitled page'),
       status:'pending', createdAt:new Date().toISOString(),
     };
+    if(ce.element){ thread.elementRole=ce.element.role; thread.elementText=ce.element.text; thread.elementSelector=ce.element.selector; }
     fetch('http://localhost:8014/inbox', {method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({threads:{[id]:thread}, source:'builder'})})
       .then(r=>{ if(!r.ok) throw new Error('bad status'); this.toast('Sent to Claude Code'); this.closeClaudeEdit(); })
       .catch(()=>this.toast('Claude Code inbox not reachable (run it locally)'));
+  }
+  // Fixed top-center pill shown while pick mode is armed.
+  renderClaudeEditPickHint(){
+    const h=React.createElement; const p=this.state.claudeEditPick; if(!p || this.state.claudeEdit) return null;
+    const btn=(lab,fn,primary)=>h('button',{onClick:e=>{e.stopPropagation(); fn();},
+      style:{padding:'6px 12px', borderRadius:7, border:'1px solid '+(primary?'rgba(253,251,244,.0)':'rgba(253,251,244,.35)'), background:primary?'#FDFBF4':'transparent', color:primary?'#011C00':'#FDFBF4', fontSize:'12.5px', fontWeight:600, cursor:'pointer', fontFamily:"'Inter',system-ui,sans-serif"}}, lab);
+    return h('div',{style:{position:'fixed', top:64, left:'50%', transform:'translateX(-50%)', zIndex:95, display:'flex', alignItems:'center', gap:12, padding:'9px 12px 9px 16px', borderRadius:11, background:'#011C00', color:'#FDFBF4', boxShadow:'0 14px 44px rgba(1,28,0,.4)', fontFamily:"'Inter',system-ui,sans-serif"}},
+      h('span',{style:{fontSize:'13px', fontWeight:500}}, '✦ Click the element in this section you want Claude to change'),
+      btn('Edit whole section', ()=>this.openClaudeEditWhole(), false),
+      btn('Cancel', ()=>this.cancelClaudeEditPick(), false));
   }
   renderClaudeEdit(){
     const h=React.createElement; const ce=this.state.claudeEdit; if(!ce) return null;
@@ -1241,11 +1321,16 @@ class BuilderApp extends React.Component {
       h('div',{onClick:stop,
           style:{width:'min(460px, 92vw)', maxHeight:'88vh', overflow:'auto', background:'var(--surface,#fff)', color:'var(--ink,#011C00)', borderRadius:14, border:'1px solid rgba(1,28,0,.16)', boxShadow:'0 24px 70px rgba(1,28,0,.3)', padding:'22px 22px 18px'}},
         h('div',{style:{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6}},
-          h('div',{style:{fontSize:'17px', fontWeight:700, letterSpacing:'-0.01em', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, 'Edit this section with Claude Code'),
+          h('div',{style:{fontSize:'17px', fontWeight:700, letterSpacing:'-0.01em', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, ce.element ? 'Edit this element with Claude Code' : 'Edit this section with Claude Code'),
           h('button',{onClick:()=>this.closeClaudeEdit(), 'aria-label':'Close',
             style:{width:28, height:28, border:'1px solid rgba(1,28,0,.18)', background:'#fff', borderRadius:6, cursor:'pointer', fontSize:'15px', lineHeight:1, color:'#011C00'}}, '\u00d7')),
-        h('div',{style:{fontSize:'12px', color:'var(--muted,rgba(1,28,0,.55))', marginBottom:14}},
-          (ce.inst.type||'section')+' \u00b7 block '+(ce.index+1)),
+        // context line \u2014 which element (or whole section) Claude will change
+        ce.element
+          ? h('div',{style:{display:'flex', alignItems:'baseline', gap:8, marginBottom:14, padding:'8px 10px', borderRadius:8, background:'rgba(1,28,0,.05)', border:'1px solid rgba(1,28,0,.1)'}},
+              h('span',{style:{fontSize:'10px', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--muted,rgba(1,28,0,.55))', fontFamily:"'JetBrains Mono',monospace", flexShrink:0}}, this.roleName(ce.element.role)||ce.element.role),
+              h('span',{style:{fontSize:'13px', color:'var(--ink,#011C00)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}, ce.element.text ? '\u2018'+ce.element.text+'\u2019' : '(no text)'))
+          : h('div',{style:{fontSize:'12px', color:'var(--muted,rgba(1,28,0,.55))', marginBottom:14}},
+              'Whole section \u00b7 '+(ce.inst.type||'section')+' \u00b7 block '+(ce.index+1)),
         h('textarea',{autoFocus:true, value:ce.prompt,
           onChange:e=>{ const v=e.target.value; this.setState(s=>({claudeEdit:s.claudeEdit?{...s.claudeEdit, prompt:v}:null})); },
           onKeyDown:e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter') this.sendClaudeEdit(); },
