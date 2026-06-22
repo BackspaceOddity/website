@@ -808,7 +808,7 @@ class BuilderApp extends React.Component {
         multiCount && h('div',{style:{position:'absolute', top:6, right:6, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'9px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 5px', lineHeight:1.4}}, multiCount),
         picked && h('div',{style:{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(1,28,0,.34)'}},
           h('button',{onClick:e=>{ e.stopPropagation(); this.addPicked(add.build, add.name||name); },
-            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'8px 16px', fontSize:'12px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
+            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'12px 24px', fontSize:'15px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
       h('div',{style:{padding:'8px 11px 9px', fontSize:'12px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name));
   }
   // ---------- Saved tab (BSO-658) ----------
@@ -914,7 +914,7 @@ class BuilderApp extends React.Component {
         this.thumbFill(type, v.props, 64, 0.148),
         picked && h('div',{style:{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(1,28,0,.34)'}},
           h('button',{onClick:e=>{ e.stopPropagation(); this.addPicked(build, v.name); },
-            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'6px 13px', fontSize:'11px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
+            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'12px 24px', fontSize:'15px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
       h('div',{style:{padding:'6px 9px 7px', fontSize:'10.5px', fontWeight:600, color:'var(--ink)'}}, v.name));
   }
   // Scaled, real render of a bt section (exact content) for previews.
@@ -963,7 +963,7 @@ class BuilderApp extends React.Component {
           h('div',{style:{fontSize:'11px', fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', textAlign:'center', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name)),
         picked && h('div',{style:{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(1,28,0,.34)', borderRadius:5}},
           h('button',{onClick:e=>{ e.stopPropagation(); this.addPicked(mk, name); },
-            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'7px 14px', fontSize:'11px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
+            style:{background:'var(--ink)', color:'#F2F2F0', border:'none', borderRadius:99, padding:'12px 24px', fontSize:'15px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 10px rgba(0,0,0,.3)'}}, '+ Add to canvas'))),
     );
   }
   miniPreview(type, bg, w, hh){
@@ -1032,19 +1032,22 @@ class BuilderApp extends React.Component {
         onDragOver:e=>{e.preventDefault(); if(this.state.dropAt!==index) this.setState({dropAt:index});},
         onDragLeave:()=>{ if(this.state.dropAt===index) this.setState({dropAt:null}); },
         onDrop:e=>{e.preventDefault(); this.onDrop(index); this.setState({insertIndex:null, libPicked:null});},
-      style:{height:open?34:10, transition:'height .12s', display:'flex', alignItems:'center', justifyContent:'center', position:'relative', zIndex:5}},
-      dragActive
-        // Solid drop indicator while dragging a tile over this gap.
-        ? h('div',{style:{height:3, background:'#011C00', width:'90%', borderRadius:99, position:'relative'}},
-            h('div',{style:{position:'absolute', left:-1, top:-3.5, width:10, height:10, borderRadius:99, background:'#011C00'}}))
-        // Otherwise: dotted line + "+ Insert section" pill (armed = highlighted).
-        : open && h('div',{style:{width:'90%', position:'relative', display:'flex', alignItems:'center', justifyContent:'center'}},
-            h('div',{style:{position:'absolute', left:0, right:0, top:'50%', borderTop:'1.5px dashed '+(armed?'#011C00':'var(--rule)')}}),
-            h('button',{onClick:e=>{ e.stopPropagation(); this.armGap(index); },
-              'data-tip':armed?'Pick a section from the library, or click to cancel':'Insert a section here',
-              style:{position:'relative', zIndex:1, display:'inline-flex', alignItems:'center', gap:6, background:armed?'var(--ink)':'var(--surface)', color:armed?'#F2F2F0':'var(--ink)', border:'1px solid '+(armed?'var(--ink)':'var(--rule)'), borderRadius:99, padding:'3px 11px', fontSize:'11px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 1px 4px rgba(0,0,0,.08)'}},
-              h('span',{style:{display:'inline-flex', alignItems:'center', justifyContent:'center', width:14, height:14, borderRadius:99, border:'1.5px solid '+(armed?'#F2F2F0':'var(--ink)'), fontSize:'11px', lineHeight:1}}, '+'),
-              'Insert section')));
+      style:{height:18, display:'flex', alignItems:'center', justifyContent:'center', position:'relative', zIndex:5}},
+      // Always-mounted overlay that fades in on hover/arm/drag (constant gap height -> no
+      // layout reflow -> smooth, no jitter). The pill overflows the 18px strip as a child,
+      // so hovering it does not fire the parent's mouseLeave.
+      h('div',{style:{position:'absolute', left:'5%', right:'5%', top:'50%', transform:'translateY(-50%)', display:'flex', alignItems:'center', justifyContent:'center', opacity:open?1:0, transition:'opacity .18s ease', pointerEvents:open?'auto':'none'}},
+        dragActive
+          // Solid drop indicator while dragging a tile over this gap.
+          ? h('div',{style:{height:3, background:'#011C00', width:'100%', borderRadius:99, position:'relative'}},
+              h('div',{style:{position:'absolute', left:-1, top:-3.5, width:10, height:10, borderRadius:99, background:'#011C00'}}))
+          // Otherwise: dotted line + "+ Insert section" pill (armed = highlighted).
+          : h(React.Fragment, null,
+              h('div',{style:{position:'absolute', left:0, right:0, top:'50%', borderTop:'1.5px dashed '+(armed?'#011C00':'var(--rule)')}}),
+              h('button',{onClick:e=>{ e.stopPropagation(); this.armGap(index); },
+                style:{position:'relative', zIndex:1, display:'inline-flex', alignItems:'center', gap:8, background:armed?'var(--ink)':'var(--surface)', color:armed?'#F2F2F0':'var(--ink)', border:'1px solid '+(armed?'var(--ink)':'var(--rule)'), borderRadius:99, padding:'8px 18px', fontSize:'14px', fontWeight:600, cursor:'pointer', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif", boxShadow:'0 2px 9px rgba(0,0,0,.13)'}},
+                h('span',{style:{display:'inline-flex', alignItems:'center', justifyContent:'center', width:17, height:17, borderRadius:99, border:'1.5px solid '+(armed?'#F2F2F0':'var(--ink)'), fontSize:'13px', lineHeight:1}}, '+'),
+                'Insert section'))));
   }
 
   // ---------- one block ----------
