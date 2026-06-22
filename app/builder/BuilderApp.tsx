@@ -48,7 +48,7 @@ class BuilderApp extends React.Component {
       editorLayout:'lr', tweaksStyle:'stacked',
       newPageOpen:false, newPageStep:1, newPageArche:null, newPageName:'',
       pageTitle:'', pageTab:'bso', blocks:[], styles:this.clone(this.DEFAULT_STYLES), pages:this.PAGES.slice(),
-      selectedId:null, selectedRole:null, editMode:true, libraryOpen:true, tweaksOpen:true, libW:188, tweaksW:248, dsRole:'heading',
+      selectedId:null, selectedRole:null, editMode:true, libraryOpen:true, tweaksOpen:true, libW:248, tweaksW:248, dsRole:'heading',
       askPrompt:'', askState:'idle', askResult:null, customTemplates:[], libTab:'sections', draggingAsset:null, assets:[{id:'a1',name:'Magenta · green',val:'magenta-green'},{id:'a2',name:'Terracotta',val:'terracotta'},{id:'a3',name:'Emerald',val:'emerald'},{id:'a4',name:'Warm',val:'warm'}],
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
@@ -627,7 +627,7 @@ class BuilderApp extends React.Component {
         onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
         style:{flex:1, minWidth:0, border:'1px solid var(--rule2)', borderRadius:9, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
       h('div',{style:{position:'relative'}},
-        this.thumbFill(sec.type, props, 72, 0.145),
+        this.thumbFill(sec.type, props, 80, 0.185),
         multiCount && h('div',{style:{position:'absolute', top:6, right:6, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'9px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 5px', lineHeight:1.4}}, multiCount)),
       h('div',{style:{padding:'8px 11px 9px', fontSize:'12px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name));
   }
@@ -645,7 +645,7 @@ class BuilderApp extends React.Component {
                   h('span',{style:{display:'inline-block', transform:open?'rotate(90deg)':'none', transition:'transform .14s', fontSize:'10px'}}, '▶'))
                 : h('span',{style:{flex:'0 0 auto', width:16}}),
               this.typeTile(sec, first.props, sec.name+(multi?' · '+sec.variations.length+' variations':''), multi?sec.variations.length:null, multi?(()=>this.toggleLibType(sec.type)):(()=>this.insertBtVariation(sec.type, first))) ),
-            open && h('div',{style:{marginLeft:23, marginTop:8, paddingLeft:11, borderLeft:'2px solid var(--rule)', display:'flex', flexDirection:'column', gap:8}},
+            open && h('div',{style:{marginLeft:20, marginTop:8, display:'flex', flexDirection:'column', gap:8}},
               sec.variations.map((v,i)=> h('div',{key:v.id, style:{display:'flex', alignItems:'center', gap:8}},
                 h('span',{style:{flex:'0 0 auto', width:11, textAlign:'right', fontSize:'10px', color:'var(--faint)', fontFamily:"'JetBrains Mono',monospace"}}, i+1),
                 h('div',{style:{flex:1, minWidth:0}}, this.btVarCard(sec.type, v))))));
@@ -663,8 +663,8 @@ class BuilderApp extends React.Component {
       onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:type, props:v.props, name:v.name, top:r.top, left:r.right+12}}); },
       onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
       style:{border:'1px solid var(--rule2)', borderRadius:7, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
-      this.realPreview(type, v.props, 0.12, 84),
-      h('div',{style:{padding:'6px 9px', fontSize:'11px', fontWeight:600, color:'var(--ink)'}}, v.name));
+      this.thumbFill(type, v.props, 54, 0.16),
+      h('div',{style:{padding:'6px 9px 7px', fontSize:'10.5px', fontWeight:600, color:'var(--ink)'}}, v.name));
   }
   // Scaled, real render of a bt section (exact content) for previews.
   realPreview(type, props, scale, maxH){
