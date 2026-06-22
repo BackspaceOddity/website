@@ -7,6 +7,27 @@
    Design choices (ABC Schengen / Inter / JetBrains Mono / GT Eesti, palette, layout) untouched. */
 import React from 'react';
 import { BT_COMPONENTS, BT_PAGES, BT_TYPE_NAMES, BT_SECTIONS } from './blocks/realpages';
+import { btVarStyle, ROLE_VARS } from './btVars';
+
+// Human labels + representative on-canvas selector per bt design-system role.
+// The selector seeds the panel's "current value" via getComputedStyle.
+const BT_ROLE_META = {
+  h1:      { label: 'Heading 1',  sel: '.bt-hero__title' },
+  h2:      { label: 'Heading 2',  sel: '.bt-h2' },
+  lead:    { label: 'Lead',       sel: '.bt-sublabel, .bt-phase__name' },
+  card:    { label: 'Card title', sel: '.bt-ep__name, .bt-proj__title' },
+  body:    { label: 'Body',       sel: '.bt-intro' },
+  eyebrow: { label: 'Eyebrow',    sel: '.bt-eyebrow' },
+  button:  { label: 'Button',     sel: '.bt-pill, .bt-cta-link' },
+};
+// Display metadata per overridable field: label, unit suffix, input kind.
+const BT_FIELD_META = {
+  fontSize:      { label: 'Font size',      unit: 'px',  step: 1 },
+  lineHeight:    { label: 'Line height',    unit: '',    step: 0.05 },
+  fontWeight:    { label: 'Font weight',    unit: '',    step: 100, weights: [300, 400, 500, 600, 700] },
+  letterSpacing: { label: 'Letter spacing', unit: 'em',  step: 0.01 },
+  fontFamily:    { label: 'Font family',    unit: '',    text: true },
+};
 
 class BuilderApp extends React.Component {
   constructor(props){
@@ -54,6 +75,7 @@ class BuilderApp extends React.Component {
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'',
       realPage:null, saveState:'saved', lastSavedBy:null, tip:null, libOpen:null, libExpanded:{},
+      btStyles:{}, roleDefaults:{},
     };
     this.uid = 0;
     this.fileInput = null;
@@ -307,6 +329,7 @@ class BuilderApp extends React.Component {
       const cur=this.clone(def.blocks);
       this.setState({screen:'editor', realPage:p.real, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
         styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES),
+        btStyles:{}, roleDefaults:{},
         selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
         saveState:'loading',
         versions:[{id:'v3', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(cur)}]});
@@ -314,7 +337,8 @@ class BuilderApp extends React.Component {
       fetch('/api/builder/pages/'+encodeURIComponent(p.real)+'/').then(r=>r.json()).then(d=>{
         if(this.state.realPage!==p.real) return; // navigated away
         if(d && d.saved && d.page && Array.isArray(d.page.blocks) && d.page.blocks.length){
-          this.setState({blocks:this.clone(d.page.blocks), styles:d.page.styles?this.clone(d.page.styles):this.state.styles, saveState:'saved', lastSavedBy:d.page.updated_by||null});
+          const savedStyles=d.page.styles?this.clone(d.page.styles):this.state.styles;
+          this.setState({blocks:this.clone(d.page.blocks), styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null});
         } else { this.setState({saveState:'saved'}); }
       }).catch(()=>this.setState({saveState:'saved'}));
       return;
@@ -815,11 +839,13 @@ class BuilderApp extends React.Component {
   renderCanvas(){
     const h=React.createElement; const pver=this.state.previewVersionId && this.state.versions.find(v=>v.id===this.state.previewVersionId);
     const blocks = pver && pver.blocks ? pver.blocks : this.state.blocks; const edit=this.state.editMode && !this.state.locked && !pver;
-    return h('div',{className:'bso-scroll', ref:this.onCanvasRef, onClick:()=>{ if(edit) this.setState({selectedId:null, selectedRole:null}); },
+    return h('div',{className:'bso-scroll', ref:this.onCanvasRef, onClick:(ev)=>{ if(!edit) return; const t=ev.target; if(t&&t.closest&&t.closest('[data-role]')) return; /* keep role just picked from a bt text click */ this.setState({selectedId:null, selectedRole:null}); },
       style:{flex:1, minWidth:0, overflowY:'auto', height:'100%', background:'var(--soft)', padding:'34px 0 120px'}},
       h('div',{style:{width:1160, margin:'0 auto', zoom:this.state.canvasZoom, background:'#F2F2F0', color:'#011C00', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)', minHeight:300}},
         blocks.length===0 ? this.emptyCanvas() :
-        h('div',{className:this.state.realPage?'page bt-page':undefined},
+        h('div',{className:this.state.realPage?'page bt-page':undefined,
+            style:this.state.realPage?btVarStyle(this.state.btStyles):undefined,
+            onClickCapture:(this.state.realPage&&edit)? (ev=>{ const t=ev.target; const r=t&&t.closest&&t.closest('[data-role]'); if(r&&r.dataset&&r.dataset.role) this.selectBtRole(r.dataset.role); }) : undefined},
           [ edit && h(React.Fragment,{key:'dz0'}, this.dropzone(0)) ].concat(
             blocks.map((b,i)=> h(React.Fragment,{key:b.id}, this.renderBlock(b,i), edit && this.dropzone(i+1)))))));
   }
@@ -863,6 +889,43 @@ class BuilderApp extends React.Component {
       o[keys[keys.length-1]]=value; return {...b, props};
     })}));
     this.markDirty();
+  }
+  // ---------- bt type-style editor (BSO-658 Phase B) ----------
+  // Select a design-system role for the Tweaks type editor and seed the panel's
+  // display values from the live computed style of a representative element, so the
+  // controls show the real starting numbers. Seeds go to roleDefaults (NOT btStyles)
+  // — only user edits land in btStyles, so an untouched field stays "inherit".
+  selectBtRole(role){
+    if(!ROLE_VARS[role]){ return; }
+    this.setState(s=>{
+      const seeds=Object.assign({}, s.roleDefaults[role]);
+      if(typeof window!=='undefined'){
+        const meta=BT_ROLE_META[role]; let el=null;
+        try{ if(meta && meta.sel) el=document.querySelector('.bt-page '+meta.sel.split(',').join(', .bt-page ')); }catch(e){}
+        if(el){
+          const cs=getComputedStyle(el); const fields=ROLE_VARS[role];
+          if(fields.fontSize && seeds.fontSize===undefined) seeds.fontSize=cs.fontSize;
+          if(fields.lineHeight && seeds.lineHeight===undefined){ const lh=cs.lineHeight; const fs=parseFloat(cs.fontSize)||16; seeds.lineHeight=(lh==='normal')?'1.2':(Math.round((parseFloat(lh)/fs)*100)/100+''); }
+          if(fields.fontWeight && seeds.fontWeight===undefined) seeds.fontWeight=cs.fontWeight;
+          if(fields.letterSpacing && seeds.letterSpacing===undefined){ const ls=cs.letterSpacing; const fs=parseFloat(cs.fontSize)||16; seeds.letterSpacing=(ls==='normal')?'0':(Math.round((parseFloat(ls)/fs)*1000)/1000+''); }
+          if(fields.fontFamily && seeds.fontFamily===undefined) seeds.fontFamily=cs.fontFamily;
+        }
+      }
+      return {selectedRole:role, selectedId:null, roleDefaults:Object.assign({}, s.roleDefaults, {[role]:seeds})};
+    });
+  }
+  // Write one field's override into btStyles (immutably), mirror into styles.bt so it
+  // persists through the existing PUT, and schedule the debounced save. Live apply is
+  // automatic: the .bt-page wrapper spreads btVarStyle(btStyles) on every render.
+  setBtVar(role, field, value){
+    this.setState(s=>{
+      const roleObj=Object.assign({}, s.btStyles[role]);
+      if(value===''||value===null||value===undefined){ delete roleObj[field]; }
+      else { roleObj[field]=value; }
+      const btStyles=Object.assign({}, s.btStyles, {[role]:roleObj});
+      const styles=Object.assign({}, s.styles, {bt:btStyles});
+      return {btStyles, styles};
+    }, ()=>this.markDirty());
   }
   // Reads the rendered section's own corner radius so the editor chrome (outline +
   // tag) follows its shape instead of a square box that the rounded corners eat.
@@ -967,6 +1030,17 @@ class BuilderApp extends React.Component {
   renderTweaks(){
     const h=React.createElement; const side=this.state.editorLayout==='lr';
     const border = side?{borderLeft:'1px solid var(--rule)'}:{borderRight:'1px solid var(--rule)'};
+    // Real page \u2192 the bt type-style editor (per-role design-system overrides).
+    if(this.state.realPage){
+      const role=this.state.selectedRole;
+      return h('div',{className:'bso-scroll', style:Object.assign({width:this.state.tweaksW, flex:'0 0 '+this.state.tweaksW+'px', background:'var(--surface)', overflowY:'auto', height:'100%'}, border)},
+        h('div',{style:{padding:'18px 18px 14px', position:'sticky', top:0, background:'var(--surface)', borderBottom:'1px solid var(--rule)', zIndex:2}},
+          h('div',{style:{display:'flex', justifyContent:'space-between', alignItems:'center'}},
+            h('div',{style:this.mono()}, 'Tweaks'),
+            h('button',{onClick:()=>this.setState({tweaksOpen:false}), title:'Collapse', style:{background:'none',border:'none',cursor:'pointer',color:'var(--faint)',fontSize:'16px',padding:0,lineHeight:1}}, '\u00d7')),
+          h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:9}}, role? ('Editing '+(BT_ROLE_META[role]?BT_ROLE_META[role].label:role)+' \u2014 applies to every '+(BT_ROLE_META[role]?BT_ROLE_META[role].label.toLowerCase():role)+' on the page') : 'Type styles \u2014 live design system')),
+        this.btTweaksBody(role));
+    }
     const inst=this.state.blocks.find(b=>b.id===this.state.selectedId);
     const role=this.state.selectedRole;
     return h('div',{className:'bso-scroll', style:Object.assign({width:this.state.tweaksW, flex:'0 0 '+this.state.tweaksW+'px', background:'var(--surface)', overflowY:'auto', height:'100%'}, border)},
@@ -976,6 +1050,41 @@ class BuilderApp extends React.Component {
           h('button',{onClick:()=>this.setState({tweaksOpen:false}), title:'Collapse', style:{background:'none',border:'none',cursor:'pointer',color:'var(--faint)',fontSize:'16px',padding:0,lineHeight:1}}, '\u00d7')),
         h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:9}}, inst? (role? 'Editing '+this.roleName(role)+' style' : 'Section selected') : 'Bound to Backspace Oddity DS')),
       !inst ? this.tweaksEmpty() : this.tweaksBody(inst, role));
+  }
+  // bt type-style editor body \u2014 role picker (no selection) or per-field controls.
+  btTweaksBody(role){
+    const h=React.createElement;
+    if(!role){
+      const roles=Object.keys(ROLE_VARS).filter(r=>BT_ROLE_META[r]);
+      return h('div',{style:{padding:'14px 0 40px'}},
+        h('div',{style:{padding:'2px 20px 14px', fontSize:'12.5px', color:'var(--muted)', lineHeight:1.5}}, 'Click any text on the page to edit its type style \u2014 or pick a role below.'),
+        roles.map(r=> h('button',{key:r, onClick:()=>this.selectBtRole(r), style:{width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 20px', background:'none', border:'none', borderTop:'1px solid var(--rule)', cursor:'pointer', textAlign:'left'}},
+          h('span',{style:{fontSize:'13px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, BT_ROLE_META[r].label),
+          h('span',{style:this.mono({textTransform:'none', letterSpacing:0, fontSize:'10.5px'})}, Object.keys(ROLE_VARS[r]).length+' field'+(Object.keys(ROLE_VARS[r]).length!==1?'s':'')))));
+    }
+    const fields=ROLE_VARS[role]; const cur=Object.assign({}, this.state.roleDefaults[role], this.state.btStyles[role]);
+    const ctl=(field)=>{
+      const m=BT_FIELD_META[field]; const raw=cur[field]; const num=parseFloat(raw);
+      if(field==='fontFamily'){
+        return h('input',{type:'text', value:(raw!=null?String(raw):''), placeholder:'inherit', onChange:e=>this.setBtVar(role,'fontFamily',e.target.value), style:{width:'100%', padding:'8px 10px', border:'1px solid var(--rule2)', borderRadius:7, background:'var(--paper)', color:'var(--ink)', fontFamily:'inherit', fontSize:'12.5px'}});
+      }
+      if(field==='fontWeight'){
+        const wv=(raw!=null && raw!=='')?String(Math.round(num)||raw):'';
+        return h('select',{value:wv, onChange:e=>this.setBtVar(role,'fontWeight',e.target.value), style:{width:'100%', padding:'8px 10px', border:'1px solid var(--rule2)', borderRadius:7, background:'var(--paper)', color:'var(--ink)', fontFamily:'inherit', fontSize:'12.5px'}},
+          [h('option',{key:'_',value:''},'inherit')].concat(m.weights.map(w=>h('option',{key:w,value:String(w)},String(w)))));
+      }
+      const display=isNaN(num)?'':String(num);
+      return h('div',{style:{display:'flex', alignItems:'center', gap:8}},
+        h('input',{type:'number', step:m.step, value:display, placeholder:'\u2014', onChange:e=>{ const v=e.target.value; this.setBtVar(role, field, v===''?'':(v+m.unit)); }, style:{flex:1, padding:'8px 10px', border:'1px solid var(--rule2)', borderRadius:7, background:'var(--paper)', color:'var(--ink)', fontFamily:'inherit', fontSize:'12.5px'}}),
+        m.unit? h('span',{style:this.mono({textTransform:'none', letterSpacing:0, fontSize:'11px'})}, m.unit):null);
+    };
+    return h('div',{style:{padding:'8px 0 40px'}},
+      h('div',{style:{padding:'4px 20px 10px'}},
+        h('button',{onClick:()=>this.setState({selectedRole:null}), style:{background:'none', border:'none', cursor:'pointer', color:'var(--muted)', fontSize:'12px', fontFamily:'inherit', padding:0}}, '\u2190 All roles')),
+      this.section('Type \u2014 '+(BT_ROLE_META[role]?BT_ROLE_META[role].label:role),
+        Object.keys(fields).map(field=> h('div',{key:field}, this.row(BT_FIELD_META[field].label, ctl(field))))),
+      Object.keys(this.state.btStyles[role]||{}).length? h('div',{style:{padding:'4px 20px 0'}},
+        h('button',{onClick:()=>{ const s=Object.assign({}, this.state.btStyles); delete s[role]; const styles=Object.assign({}, this.state.styles, {bt:s}); this.setState({btStyles:s, styles}, ()=>this.markDirty()); }, style:{width:'100%', padding:'8px', border:'1px solid var(--rule2)', borderRadius:7, background:'var(--surface)', color:'var(--muted)', cursor:'pointer', fontSize:'12px', fontFamily:'inherit'}}, 'Reset '+(BT_ROLE_META[role]?BT_ROLE_META[role].label:role)+' to default')) : null);
   }
   tweaksEmpty(){
     const h=React.createElement;

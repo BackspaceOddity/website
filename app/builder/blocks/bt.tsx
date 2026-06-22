@@ -28,13 +28,17 @@ export const CAL_TRIGGER = {
 /* edit context threaded into every block */
 type E = { on: boolean; set: (k: string, v: string) => void; touch?: () => void } | undefined;
 
-/* one inline-editable text field — static unless an edit context is active */
-function Ed({ e, k, v, as = 'span', className }: { e?: E; k: string; v?: string; as?: any; className?: string }) {
+/* one inline-editable text field — static unless an edit context is active.
+   `role` tags the element with data-role so the Tweaks type-editor (BSO-658 Phase B)
+   can detect which design-system role a clicked text belongs to. Emitted in both
+   static and editable modes so role detection works on the published page too. */
+function Ed({ e, k, v, as = 'span', className, role }: { e?: E; k: string; v?: string; as?: any; className?: string; role?: string }) {
   const As: any = as;
-  if (!e || !e.on) return <As className={className}>{v}</As>;
+  if (!e || !e.on) return <As className={className} data-role={role}>{v}</As>;
   return (
     <As
       className={className}
+      data-role={role}
       contentEditable
       suppressContentEditableWarning
       spellCheck={false}
@@ -63,7 +67,7 @@ export function CalInit() {
 export function Pill({ label, e, k = 'cta' }: { label: string; e?: E; k?: string }) {
   return (
     <button type="button" className="bt-pill" {...CAL_TRIGGER}>
-      <Ed e={e} k={k} v={label} />
+      <Ed e={e} k={k} v={label} role="button" />
       <span className="bt-pill__arrow" aria-hidden="true">→</span>
     </button>
   );
@@ -81,7 +85,7 @@ export function BtNav({ contact = 'Contact', book = 'Book a call', office, e }: 
         <div className="bt-nav__col">
           <Ed e={e} k="contact" v={contact} as="span" className="bt-nav__label" />
           <a href={MAIL}>yegor@backspaceoddity.com</a>
-          <button type="button" className="bt-cta-link" {...CAL_TRIGGER}><Ed e={e} k="book" v={book} /></button>
+          <button type="button" className="bt-cta-link" {...CAL_TRIGGER}><Ed e={e} k="book" v={book} role="button" /></button>
         </div>
         <div className="bt-nav__col">
           <span className="bt-nav__label">Office</span>
@@ -98,13 +102,13 @@ export function BtHero({ eyebrow, title, subtitle, principles, cta, e }: { eyebr
   return (
     <header className="bt-hero" id="top" data-screen-label="Hero">
       <div className="bt-hero__inner">
-        <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-hero__eyebrow" />
-        <Ed e={e} k="title" v={title} as="h1" className="bt-hero__title" />
-        {subtitle ? <Ed e={e} k="subtitle" v={subtitle} as="p" className="bt-hero__sub" /> : null}
+        <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-hero__eyebrow" role="eyebrow" />
+        <Ed e={e} k="title" v={title} as="h1" className="bt-hero__title" role="h1" />
+        {subtitle ? <Ed e={e} k="subtitle" v={subtitle} as="p" className="bt-hero__sub" role="body" /> : null}
         {principles && principles.length ? (
           <div className="bt-hero__how">
             {principles.map((p, i) => (
-              <div className="bt-hero__princ" key={i}><Ed e={e} k={`principles.${i}.h3`} v={p.h3} as="h3" /><Ed e={e} k={`principles.${i}.p`} v={p.p} as="p" /></div>
+              <div className="bt-hero__princ" key={i}><Ed e={e} k={`principles.${i}.h3`} v={p.h3} as="h3" role="card" /><Ed e={e} k={`principles.${i}.p`} v={p.p} as="p" role="body" /></div>
             ))}
           </div>
         ) : null}
@@ -119,10 +123,10 @@ export function BtChallenge({ h2, you, we, e }: { h2: string; you: { label: stri
   return (
     <section className="bt-sec bt-sec--light" id="challenge" data-screen-label="The challenge">
       <div className="bt-inner">
-        <header className="bt-head bt-head--gap"><Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" /></header>
+        <header className="bt-head bt-head--gap"><Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" role="h2" /></header>
         <div className="bt-challenge">
-          <div><Ed e={e} k="you.label" v={you.label} as="h3" className="bt-sublabel" /><Ed e={e} k="you.body" v={you.body} as="p" className="bt-intro" /></div>
-          <div><Ed e={e} k="we.label" v={we.label} as="h3" className="bt-sublabel" /><ul className="bt-modules">{we.points.map((p, i) => <Ed key={i} e={e} k={`we.points.${i}`} v={p} as="li" />)}</ul></div>
+          <div><Ed e={e} k="you.label" v={you.label} as="h3" className="bt-sublabel" role="lead" /><Ed e={e} k="you.body" v={you.body} as="p" className="bt-intro" role="body" /></div>
+          <div><Ed e={e} k="we.label" v={we.label} as="h3" className="bt-sublabel" role="lead" /><ul className="bt-modules">{we.points.map((p, i) => <Ed key={i} e={e} k={`we.points.${i}`} v={p} as="li" />)}</ul></div>
         </div>
       </div>
     </section>
@@ -136,13 +140,13 @@ export function BtEps({ id = 'approach', label = 'How we’ll approach', h2, int
     <section className={`bt-sec bt-sec--light${compact ? ' bt-sec--compact' : ''}`} id={id} data-screen-label={label}>
       <div className="bt-inner">
         <header className="bt-head bt-head--gap">
-          {eyebrow ? <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" /> : null}
-          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" />
-          {intro ? <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" /> : null}
+          {eyebrow ? <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" role="eyebrow" /> : null}
+          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" role="h2" />
+          {intro ? <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" role="body" /> : null}
         </header>
         <div className="bt-eps">
           {points.map((p, i) => (
-            <div className="bt-ep" key={i}><Ed e={e} k={`points.${i}.metric`} v={p.metric} as="span" className="bt-ep__num" /><Ed e={e} k={`points.${i}.name`} v={p.name} as="h3" className="bt-ep__name" /><Ed e={e} k={`points.${i}.text`} v={p.text} as="p" className="bt-ep__text" /></div>
+            <div className="bt-ep" key={i}><Ed e={e} k={`points.${i}.metric`} v={p.metric} as="span" className="bt-ep__num" /><Ed e={e} k={`points.${i}.name`} v={p.name} as="h3" className="bt-ep__name" role="card" /><Ed e={e} k={`points.${i}.text`} v={p.text} as="p" className="bt-ep__text" role="body" /></div>
           ))}
         </div>
       </div>
@@ -157,8 +161,8 @@ export function BtPhasesSection({ id = 'phases', label = 'What we’ll do', h2, 
     <section className="bt-sec bt-sec--light" id={id} data-screen-label={label}>
       <div className="bt-inner">
         <header className="bt-head bt-head--compact">
-          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" />
-          {intro ? <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" /> : null}
+          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" role="h2" />
+          {intro ? <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" role="body" /> : null}
         </header>
         {nutshell && nutshell.length ? <ul className="bt-modules">{nutshell.map((n, i) => <Ed key={i} e={e} k={`nutshell.${i}`} v={n} as="li" />)}</ul> : null}
         <ol className="bt-phases">
@@ -166,7 +170,7 @@ export function BtPhasesSection({ id = 'phases', label = 'What we’ll do', h2, 
             <li className="bt-phase" key={pi}>
               <div className="bt-phase__aside">
                 <Ed e={e} k={`phases.${pi}.kicker`} v={ph.kicker} as="span" className="bt-phase__kicker" />
-                <Ed e={e} k={`phases.${pi}.name`} v={ph.name} as="h3" className="bt-phase__name" />
+                <Ed e={e} k={`phases.${pi}.name`} v={ph.name} as="h3" className="bt-phase__name" role="lead" />
                 {(ph.meta || ph.optional) ? (
                   <div className="bt-phase__meta">
                     {ph.meta ? <Ed e={e} k={`phases.${pi}.meta`} v={ph.meta} as="span" className="bt-phase__weeks" /> : null}
@@ -175,7 +179,7 @@ export function BtPhasesSection({ id = 'phases', label = 'What we’ll do', h2, 
                 ) : null}
               </div>
               <div className="bt-phase__main">
-                <Ed e={e} k={`phases.${pi}.summary`} v={ph.summary} as="p" className="bt-phase__summary" />
+                <Ed e={e} k={`phases.${pi}.summary`} v={ph.summary} as="p" className="bt-phase__summary" role="body" />
                 {ph.modules.length ? <ul className="bt-modules">{ph.modules.map((m, i) => <Ed key={i} e={e} k={`phases.${pi}.modules.${i}`} v={m} as="li" />)}</ul> : null}
                 {ph.subhead ? <Ed e={e} k={`phases.${pi}.subhead`} v={ph.subhead} as="div" className="bt-phase__subhead" /> : null}
                 {ph.subModules && ph.subModules.length ? <ul className="bt-modules">{ph.subModules.map((m, i) => <Ed key={i} e={e} k={`phases.${pi}.subModules.${i}`} v={m} as="li" />)}</ul> : null}
@@ -194,11 +198,11 @@ export function BtInvest({ h2, price, terms, paymentLabel, payment, e }: { h2: s
   return (
     <section className="bt-sec bt-sec--light bt-sec--compact" id="investment" data-screen-label="Investment & timeline">
       <div className="bt-inner">
-        <header className="bt-head bt-head--gap"><Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" /></header>
+        <header className="bt-head bt-head--gap"><Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" role="h2" /></header>
         <div className="bt-invest">
           <Ed e={e} k="price" v={price} as="div" className="bt-invest__price" />
-          <Ed e={e} k="terms" v={terms} as="p" className="bt-invest__terms" />
-          <div className="bt-invest__pay"><Ed e={e} k="paymentLabel" v={paymentLabel} as="h3" className="bt-sublabel" /><Ed e={e} k="payment" v={payment} as="p" className="bt-intro" /></div>
+          <Ed e={e} k="terms" v={terms} as="p" className="bt-invest__terms" role="body" />
+          <div className="bt-invest__pay"><Ed e={e} k="paymentLabel" v={paymentLabel} as="h3" className="bt-sublabel" role="lead" /><Ed e={e} k="payment" v={payment} as="p" className="bt-intro" role="body" /></div>
         </div>
       </div>
     </section>
@@ -212,9 +216,9 @@ export function BtProjects({ id = 'experience', label = 'What we’ve done', eye
     <section className="bt-sec bt-sec--light" id={id} data-screen-label={label}>
       <div className="bt-inner">
         <header className="bt-head bt-head--gap">
-          {eyebrow ? <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" /> : null}
-          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" />
-          {intro ? <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" /> : null}
+          {eyebrow ? <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" role="eyebrow" /> : null}
+          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" role="h2" />
+          {intro ? <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" role="body" /> : null}
         </header>
         <div className="bt-projects">
           {projects.map((p, i) => (
@@ -222,7 +226,7 @@ export function BtProjects({ id = 'experience', label = 'What we’ve done', eye
               <a className="bt-proj" href={p.href} target="_blank" rel="noopener noreferrer">
                 <img className="bt-proj__img" src={p.img} alt={p.alt} />
                 <span className="bt-proj__shade" aria-hidden="true"></span>
-                <Ed e={e} k={`projects.${i}.title`} v={p.title} as="h3" className="bt-proj__title" />
+                <Ed e={e} k={`projects.${i}.title`} v={p.title} as="h3" className="bt-proj__title" role="card" />
               </a>
               <Ed e={e} k={`projects.${i}.desc`} v={p.desc} as="p" className="bt-proj__desc" />
             </div>
@@ -238,8 +242,8 @@ export function BtFinal({ h2, copy, cta, e }: { h2: string; copy: string; cta: s
   return (
     <section className="bt-final" id="contact" data-screen-label="Next step">
       <div className="bt-final__inner">
-        <Ed e={e} k="h2" v={h2} as="h2" className="bt-final__h2" />
-        <Ed e={e} k="copy" v={copy} as="p" className="bt-final__copy" />
+        <Ed e={e} k="h2" v={h2} as="h2" className="bt-final__h2" role="h2" />
+        <Ed e={e} k="copy" v={copy} as="p" className="bt-final__copy" role="body" />
         <Pill label={cta} e={e} k="cta" />
         <a className="bt-final__email" href={MAIL}>yegor@backspaceoddity.com</a>
       </div>
@@ -256,7 +260,7 @@ export function BtFooter({ thisPage = 'This page', links, reach = 'Reach us', ci
         <div className="bt-footer__copy">© Backspace Oddity 2026</div>
       </div>
       <div className="bt-footer__col"><Ed e={e} k="thisPage" v={thisPage} as="span" className="bt-footer__label" />{links.map((l, i) => <Ed key={i} e={e} k={`links.${i}.label`} v={l.label} as="a" />)}</div>
-      <div className="bt-footer__col"><Ed e={e} k="reach" v={reach} as="span" className="bt-footer__label" /><a href={MAIL}>yegor@backspaceoddity.com</a><button type="button" className="bt-cta-link" {...CAL_TRIGGER}><Ed e={e} k="book" v={book} /></button><Ed e={e} k="city" v={city} as="span" /></div>
+      <div className="bt-footer__col"><Ed e={e} k="reach" v={reach} as="span" className="bt-footer__label" /><a href={MAIL}>yegor@backspaceoddity.com</a><button type="button" className="bt-cta-link" {...CAL_TRIGGER}><Ed e={e} k="book" v={book} role="button" /></button><Ed e={e} k="city" v={city} as="span" /></div>
     </footer>
   );
 }
@@ -268,16 +272,16 @@ export function BtLeverages({ eyebrow, h2, intro, items, e }: { eyebrow: string;
     <section className="bt-block" id="why" data-screen-label="Why a brand matters">
       <div className="bt-inner">
         <header className="bt-head">
-          <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow bt-eyebrow--on-dark" />
-          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2 bt-h2--on-dark" />
-          <Ed e={e} k="intro" v={intro} as="p" className="bt-intro bt-intro--on-dark" />
+          <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow bt-eyebrow--on-dark" role="eyebrow" />
+          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2 bt-h2--on-dark" role="h2" />
+          <Ed e={e} k="intro" v={intro} as="p" className="bt-intro bt-intro--on-dark" role="body" />
         </header>
         <ol className="bt-leverages">
           {items.map((it, i) => (
             <li className="bt-leverage" key={i}>
               <Ed e={e} k={`items.${i}.metric`} v={it.metric} as="span" className="bt-leverage__metric" />
-              <Ed e={e} k={`items.${i}.name`} v={it.name} as="h3" className="bt-leverage__name" />
-              <Ed e={e} k={`items.${i}.text`} v={it.text} as="p" className="bt-leverage__text" />
+              <Ed e={e} k={`items.${i}.name`} v={it.name} as="h3" className="bt-leverage__name" role="card" />
+              <Ed e={e} k={`items.${i}.text`} v={it.text} as="p" className="bt-leverage__text" role="body" />
             </li>
           ))}
         </ol>
@@ -293,9 +297,9 @@ export function BtTimeline({ eyebrow, h2, intro, rows, totalNum, totalNote, e }:
     <section className="bt-sec bt-sec--light" id="timeline" data-screen-label="Phases & timeline">
       <div className="bt-inner">
         <header className="bt-head bt-head--gap">
-          <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" />
-          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" />
-          <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" />
+          <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" role="eyebrow" />
+          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" role="h2" />
+          <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" role="body" />
         </header>
         <div className="bt-timeline">
           {rows.map((r, i) => (
@@ -319,9 +323,9 @@ export function BtDiagnostic({ eyebrow, h2, intro, e }: { eyebrow: string; h2: s
     <section className="bt-sec bt-sec--light" id="proposal" data-screen-label="The proposal">
       <div className="bt-inner">
         <header className="bt-head bt-head--gap">
-          <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" />
-          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" />
-          <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" />
+          <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" role="eyebrow" />
+          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" role="h2" />
+          <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" role="body" />
         </header>
         <LeadForm />
       </div>

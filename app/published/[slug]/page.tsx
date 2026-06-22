@@ -25,7 +25,7 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
 
   const { data, error } = await supabase
     .from('builder_pages')
-    .select('published_blocks, published_real_page, published_title, published')
+    .select('published_blocks, published_real_page, published_title, published, published_styles')
     .eq('slug', slug)
     .eq('published', true)
     .maybeSingle();
@@ -39,7 +39,7 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
   return (
     <>
       {cssId && <link rel="stylesheet" href={'/builder-css/' + cssId + '.css'} />}
-      <PublishedView blocks={blocks} />
+      <PublishedView blocks={blocks} styles={data.published_styles} />
     </>
   );
 }

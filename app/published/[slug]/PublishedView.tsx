@@ -7,12 +7,13 @@
  */
 import React from 'react';
 import { BT_COMPONENTS } from '../../builder/blocks/realpages';
+import { btVarStyle } from '../../builder/btVars';
 
 type Block = { id: string; type: string; props: any };
 
-export default function PublishedView({ blocks }: { blocks: Block[] }) {
+export default function PublishedView({ blocks, styles }: { blocks: Block[]; styles?: any }) {
   return (
-    <div className="page bt-page">
+    <div className="page bt-page" style={btVarStyle(styles?.bt)}>
       {blocks.map((b) => {
         const Comp = (BT_COMPONENTS as any)[b.type];
         if (!Comp) return null;
