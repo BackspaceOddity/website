@@ -59,11 +59,16 @@ class BuilderApp extends React.Component {
   }
   componentDidMount(){
     try{ const raw = localStorage.getItem('bso_ds_styles'); if(raw){ this.dsStyles = JSON.parse(raw); } }catch(e){}
+    // Deploy / Analytics open in their own tab via ?screen=…&page=… — parse it here.
+    let pend=null;
+    try{ const q=new URLSearchParams(window.location.search); const scr=q.get('screen'); if(scr==='deploy'||scr==='analytics'){ const pid=q.get('page'); const pg=this.PAGES.find(p=>p.id===pid)||{id:pid||'cur', name:decodeURIComponent(q.get('name')||'Page'), status:'Draft'}; pend={scr,pg}; } }catch(e){}
     // Restore an existing session — skip the login screen if already signed in.
     fetch('/api/builder/me/').then(r=>r.json()).then(d=>{
-      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}); }
+      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}, ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,'dashboard'); else this.openAnalytics(pend.pg,'dashboard'); } }); }
     }).catch(()=>{});
   }
+  // Open the deploy / analytics screen in a fresh browser tab (action, not a panel toggle).
+  openInTab(scr, pg){ if(typeof window==='undefined') return; const id=encodeURIComponent((pg&&pg.id)||'cur'); const name=encodeURIComponent((pg&&pg.name)||''); window.open('/builder/?screen='+scr+'&page='+id+'&name='+name, '_blank', 'noopener'); }
   componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
   startResize(e, which){ e.preventDefault(); const startX=e.clientX; const key=which==='lib'?'libW':'tweaksW'; const startW=this.state[key]; const lr=this.state.editorLayout==='lr'; const dir=(which==='lib')?(lr?1:-1):(lr?-1:1); const move=ev=>{ let w=startW+dir*(ev.clientX-startX); w=Math.max(168,Math.min(480,w)); this.setState({[key]:w}); }; const up=()=>{ window.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); document.body.style.cursor=''; document.body.style.userSelect=''; }; window.addEventListener('mousemove',move); window.addEventListener('mouseup',up); document.body.style.cursor='col-resize'; document.body.style.userSelect='none'; }
@@ -435,8 +440,8 @@ class BuilderApp extends React.Component {
       screen==='editor' && h('button',{onClick:()=>this.setState({libraryOpen:!this.state.libraryOpen}), style:this.topBtn(this.state.libraryOpen)}, 'Library'),
       screen==='editor' && h('button',{onClick:()=>this.setState({tweaksOpen:!this.state.tweaksOpen}), style:this.topBtn(this.state.tweaksOpen)}, 'Tweaks'),
       screen==='editor' && h('button',{onClick:()=>this.setState({versionsOpen:!this.state.versionsOpen}), style:this.topBtn(this.state.versionsOpen)}, 'History'),
-      screen==='editor' && h('button',{onClick:()=>this.openAnalytics(this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}, 'editor'), style:this.topBtn(false)}, 'Analytics'),
-      screen==='editor' && h('button',{onClick:()=>this.openDeploy(this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}, 'editor'), style:Object.assign({}, this.topBtn(false), {background:'var(--ink)', color:'var(--paper)', borderColor:'var(--ink)', fontWeight:600})}, 'Deploy'),
+      screen==='editor' && h('button',{onClick:()=>this.openInTab('analytics', this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}), 'data-tip':'Open analytics in a new tab', style:this.actBtn(false)}, 'Analytics ↗'),
+      screen==='editor' && h('button',{onClick:()=>this.openInTab('deploy', this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}), 'data-tip':'Open deploy in a new tab', style:this.actBtn(true)}, 'Deploy ↗'),
       screen==='editor' && h('button',{onClick:()=>this.setState({locked:!this.state.locked}), style:this.topBtn(false)}, this.state.locked?'Take over':'Simulate lock'),
       h('button',{onClick:()=>this.setState({variationsOpen:true}), style:this.topBtn(false)}, 'Variations'),
       h('button',{onClick:()=>this.setState({theme:this.state.theme==='light'?'dark':'light'}), style:this.topBtn(false), title:'Toggle builder theme'}, this.state.theme==='light'?'Dark':'Light'),
@@ -444,6 +449,8 @@ class BuilderApp extends React.Component {
     );
   }
   topBtn(active){ return {height:26, flex:'0 0 auto', padding:'0 10px', display:'inline-flex', alignItems:'center', border:'1px solid '+(active?'var(--ink)':'var(--rule)'), borderRadius:6, background:active?'var(--ink)':'transparent', color:active?'var(--paper)':'var(--muted)', cursor:'pointer', fontSize:'11px', fontWeight:500, fontFamily:"'JetBrains Mono',monospace", letterSpacing:'.02em', whiteSpace:'nowrap', transition:'border-color .12s, color .12s, background .12s'}; }
+  // Action button — triggers/opens something (not a panel toggle). Always solid, never a muted "off" state.
+  actBtn(filled){ return {height:26, flex:'0 0 auto', padding:'0 11px', display:'inline-flex', alignItems:'center', gap:4, border:'1px solid var(--ink)', borderRadius:6, background:filled?'var(--ink)':'var(--surface)', color:filled?'var(--paper)':'var(--ink)', cursor:'pointer', fontSize:'11px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", letterSpacing:'.02em', whiteSpace:'nowrap', boxShadow:'0 1px 2px rgba(1,28,0,.08)'}; }
 
   // ---------- dashboard ----------
   renderDashboard(){
@@ -484,8 +491,8 @@ class BuilderApp extends React.Component {
         h('div',{style:{display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7}},
           h('button',{onClick:e=>{e.stopPropagation(); this.archivePage(p.id);}, 'data-tip':'Archive', title:'Archive', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'var(--muted)', cursor:'pointer'}}, this.rowIcon('archive','currentColor')),
           h('button',{onClick:e=>{e.stopPropagation(); if(typeof window!=='undefined' && window.confirm('Delete this page?')) this.deletePage(p.id);}, 'data-tip':'Delete', title:'Delete', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'#C0392B', cursor:'pointer'}}, this.rowIcon('delete','currentColor')),
-          h('button',{onClick:e=>{e.stopPropagation(); this.openAnalytics(p);}, 'data-tip':'View analytics', title:'Analytics', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer'}}, this.rowIcon('analytics','currentColor')),
-          h('button',{onClick:e=>{e.stopPropagation(); this.openDeploy(p);}, style:{padding:'6px 12px', borderRadius:6, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit', whiteSpace:'nowrap'}}, 'Deploy')))));
+          h('button',{onClick:e=>{e.stopPropagation(); this.openInTab('analytics', p);}, 'data-tip':'Analytics (new tab)', title:'Analytics', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer'}}, this.rowIcon('analytics','currentColor')),
+          h('button',{onClick:e=>{e.stopPropagation(); this.openInTab('deploy', p);}, 'data-tip':'Deploy (new tab)', style:{padding:'6px 12px', borderRadius:6, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit', whiteSpace:'nowrap', display:'inline-flex', alignItems:'center', gap:5}}, 'Deploy', h('span',{style:{fontSize:'10px'}}, '↗'))))));
   }
   renderGallery(slice){
     const h=React.createElement;
