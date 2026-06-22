@@ -618,27 +618,38 @@ class BuilderApp extends React.Component {
   }
   // ---------- real-page sections: type -> variations ----------
   renderBtSections(){
-    const h=React.createElement;
+    const h=React.createElement; const openType=this.state.libOpen;
+    // Level 2 — variations of the opened type (name under each preview).
+    if(openType){
+      const sec=BT_SECTIONS.find(s=>s.type===openType);
+      if(!sec) return h('div',{style:{padding:'12px 14px'}});
+      return h('div',{style:{padding:'12px 14px'}},
+        h('button',{onClick:()=>this.setState({libOpen:null}), style:{display:'inline-flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color:'var(--muted)', fontSize:'11.5px', fontFamily:'inherit', padding:0, marginBottom:11}}, '← All sections'),
+        h('div',{style:{fontSize:'13px', fontWeight:700, marginBottom:11, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, sec.name),
+        h('div',{style:{display:'flex', flexDirection:'column', gap:9}}, sec.variations.map(v=> this.btVarCard(sec.type, v))));
+    }
+    // Level 1 — type tiles in a 2-up grid, name under the thumbnail.
     return h('div',{style:{padding:'12px 14px'}},
-      h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Real sections from this page’s design system. Open a type, pick a variation — hover to see its content.'),
-      BT_SECTIONS.map(sec=>{
-        const open=this.state.libOpen===sec.type; const first=sec.variations[0];
-        return h('div',{key:sec.type, style:{marginBottom:7, border:'1px solid var(--rule)', borderRadius:9, overflow:'hidden', background:'var(--surface)'}},
-          h('button',{onClick:()=>this.setState(s=>({libOpen:s.libOpen===sec.type?null:sec.type})), 'data-tip':open?null:('Open '+sec.name),
-            style:{width:'100%', display:'flex', alignItems:'center', gap:8, padding:'7px 8px', background:open?'var(--soft)':'transparent', border:'none', cursor:'pointer', textAlign:'left'}},
-            this.realThumb(sec.type, first.props, 42, 30),
-            h('span',{style:{flex:1, minWidth:0, fontSize:'12px', fontWeight:600, color:'var(--ink)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, sec.name),
-            sec.variations.length>1 && h('span',{style:{flex:'0 0 auto', fontSize:'10px', color:'var(--muted)', fontFamily:"'JetBrains Mono',monospace"}}, '('+sec.variations.length+')'),
-            h('span',{style:{flex:'0 0 auto', width:11, textAlign:'center', fontSize:'9px', color:'var(--muted)', display:'inline-block', transform:open?'rotate(90deg)':'none', transition:'transform .12s'}}, '▶')),
-          open && h('div',{style:{padding:'2px 8px 9px', display:'flex', flexDirection:'column', gap:8}},
-            sec.variations.map(v=> this.btVarCard(sec.type, v))));
-      }));
+      h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Real sections from this page’s design system. Pick a type, then a variation — hover to preview.'),
+      h('div',{style:{display:'grid', gridTemplateColumns:'1fr 1fr', gap:9}},
+        BT_SECTIONS.map(sec=>{
+          const first=sec.variations[0]; const multi=sec.variations.length>1;
+          return h('div',{key:sec.type,
+            onClick:()=> multi?this.setState({libOpen:sec.type}):this.insertBtVariation(sec.type, first),
+            onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:sec.type, props:first.props, name:sec.name+(multi?' · '+sec.variations.length+' variations':''), top:r.top, left:r.right+12}}); },
+            onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
+            style:{border:'1px solid var(--rule2)', borderRadius:8, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
+            h('div',{style:{position:'relative'}},
+              this.thumbFill(sec.type, first.props, 48),
+              multi && h('div',{style:{position:'absolute', top:4, right:4, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'8.5px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 4px', lineHeight:1.35}}, sec.variations.length)),
+            h('div',{style:{padding:'6px 6px 7px', fontSize:'10.5px', fontWeight:600, lineHeight:1.25, textAlign:'center', color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, sec.name));
+        })));
   }
-  // Fixed-size scaled thumbnail of a real section (for the type tile).
-  realThumb(type, props, w, hh){
+  // Width-filling scaled thumbnail of a real section (for the type tile).
+  thumbFill(type, props, hh){
     const h=React.createElement; const Comp=BT_COMPONENTS[type]; if(!Comp) return null;
-    return h('div',{style:{width:w, height:hh, flex:'0 0 auto', overflow:'hidden', borderRadius:5, border:'1px solid var(--rule2)', background:'#F2F2F0'}},
-      h('div',{className:'page bt-page', style:{width:1100, zoom:w/1100, pointerEvents:'none'}}, h(Comp, props)));
+    return h('div',{style:{width:'100%', height:hh, overflow:'hidden', background:'#F2F2F0'}},
+      h('div',{className:'page bt-page', style:{width:1100, zoom:0.069, pointerEvents:'none'}}, h(Comp, props)));
   }
   btVarCard(type, v){
     const h=React.createElement;
