@@ -817,7 +817,7 @@ class BuilderApp extends React.Component {
   // synthetic structural block, and the tile is draggable onto the canvas.
   layoutTile(typeKey, name, desc){
     const h=React.createElement;
-    return this.tileShell(this.synthThumb(typeKey, 80, 0.1), name, null, ()=>{ this.insertAt(this.state.blocks.length, this.makeBlock(typeKey,{props:this.placeholders(typeKey), bg:'paper'})); this.toast(name+' added'); }, {
+    return this.tileShell(this.synthThumb(typeKey, 80, 0.185), name, null, ()=>{ this.insertAt(this.state.blocks.length, this.makeBlock(typeKey,{props:this.placeholders(typeKey), bg:'paper'})); this.toast(name+' added'); }, {
       cursor:'grab',
       props:{
         draggable:true, title:desc,
