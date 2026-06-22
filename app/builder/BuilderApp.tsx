@@ -663,7 +663,7 @@ class BuilderApp extends React.Component {
       onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; const r=e.currentTarget.getBoundingClientRect(); this.setState({hoverTpl:{real:true, btType:type, props:v.props, name:v.name, top:r.top, left:r.right+12}}); },
       onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; this.setState({hoverTpl:null}); },
       style:{border:'1px solid var(--rule2)', borderRadius:7, overflow:'hidden', cursor:'pointer', background:'var(--surface)', transition:'border-color .12s'}},
-      this.thumbFill(type, v.props, 54, 0.16),
+      this.thumbFill(type, v.props, 64, 0.148),
       h('div',{style:{padding:'6px 9px 7px', fontSize:'10.5px', fontWeight:600, color:'var(--ink)'}}, v.name));
   }
   // Scaled, real render of a bt section (exact content) for previews.
