@@ -26,13 +26,19 @@ body:has(.bt-page) { background: #F2F2F0; }
   --fs-card: 21px;
   --fs-body: 18px;
   --fs-eyebrow: clamp(16px, 1.6vw, 22px);
+  --fs-btn: clamp(16px, 1.6vw, 22px);
   --lh-h1: 0.92;
   --lh-h2: 0.9;
+  --lh-lead: 1.1;
   --lh-body: 1.5;
   --fw-display: 500;
   --fst-display: normal;
   --fw-body: 400;
   --fst-body: normal;
+  --fw-btn: 500;
+  --ls-eyebrow: 0.02em;
+  --ff-display: var(--font-display);
+  --ff-text: var(--font-text);
 }
 
 .bt-page {

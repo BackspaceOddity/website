@@ -14,6 +14,34 @@
    only on this route — the outer body strips showed a warmer shade). */
 body:has(.bt-page) { background: #F2F2F0; }
 
+/* Tweaks-controlled type vars (canonical Edit Mode, BSO-598).
+   MUST live on :root so the Tweaks panel (which writes to document.documentElement)
+   can override them. Defining them on .bt-page shadows the override and Tweaks
+   silently stop applying. Var NAMES mirror p8fig.css exactly; VALUES are pbt's
+   own (this design). Defaults match the original clamp/px so render is
+   unchanged until a slider is moved. */
+:root {
+  --fs-h1: clamp(44px, 7vw, 96px);
+  --fs-h2: clamp(40px, 6vw, 68px);
+  --fs-lead: clamp(22px, 2.4vw, 30px);
+  --fs-card: 21px;
+  --fs-body: 18px;
+  --fs-eyebrow: clamp(16px, 1.6vw, 22px);
+  --fs-btn: clamp(16px, 1.6vw, 22px);
+  --lh-h1: 0.92;
+  --lh-h2: 0.9;
+  --lh-lead: 1.1;
+  --lh-body: 1.5;
+  --fw-display: 500;
+  --fst-display: normal;
+  --fw-body: 400;
+  --fst-body: normal;
+  --fw-btn: 500;
+  --ls-eyebrow: 0.02em;
+  --ff-display: var(--font-display);
+  --ff-text: var(--font-text);
+}
+
 .bt-page {
   /* ai-skills tokens */
   --ink:        #011C00;   /* text + dark surfaces (ai-skills body colour) */
@@ -28,7 +56,7 @@ body:has(.bt-page) { background: #F2F2F0; }
   background: var(--cream);
   color: var(--ink);
   font-family: var(--font-text);
-  font-size: 18px;
+  font-size: var(--fs-body);
   line-height: 1.5;
 }
 
@@ -47,18 +75,18 @@ body:has(.bt-page) { background: #F2F2F0; }
 .bt-head { display: flex; flex-direction: column; gap: 24px; max-width: 940px; }
 .bt-eyebrow {
   font-family: var(--font-text); font-style: italic; font-size: 20px;
-  letter-spacing: 0.02em; color: color-mix(in oklch, var(--ink) 55%, transparent);
+  letter-spacing: var(--ls-eyebrow); color: color-mix(in oklch, var(--ink) 55%, transparent);
 }
 .bt-eyebrow--on-dark { color: color-mix(in oklch, var(--ink) 60%, transparent); }
 .bt-h2 {
-  margin: 0; font-family: var(--font-display); font-weight: 500;
-  font-size: clamp(40px, 6vw, 68px); line-height: 0.9; letter-spacing: -0.02em;
+  margin: 0; font-family: var(--font-display); font-weight: var(--fw-display);
+  font-size: var(--fs-h2); line-height: var(--lh-h2); letter-spacing: -0.02em;
   color: var(--ink); text-wrap: balance;
 }
 .bt-h2--on-dark { color: var(--ink); }
 .bt-intro {
-  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 18px;
-  line-height: 1.5; color: color-mix(in oklch, var(--ink) 70%, transparent);
+  margin: 0; font-family: var(--font-text); font-weight: var(--fw-body); font-size: var(--fs-body);
+  line-height: var(--lh-body); color: color-mix(in oklch, var(--ink) 70%, transparent);
   max-width: 680px; text-wrap: pretty;
 }
 .bt-intro--on-dark { color: color-mix(in oklch, var(--ink) 72%, transparent); }
@@ -106,8 +134,8 @@ body:has(.bt-page) { background: #F2F2F0; }
   letter-spacing: 0.02em; color: color-mix(in oklch, var(--ink) 60%, transparent);
 }
 .bt-hero__title {
-  margin: 0; font-family: var(--font-display); font-weight: 500;
-  font-size: clamp(44px, 7vw, 96px); line-height: 0.92; letter-spacing: -0.02em;
+  margin: 0; font-family: var(--ff-display); font-weight: var(--fw-display);
+  font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: -0.02em;
   color: var(--ink); text-wrap: balance; max-width: 1100px;
 }
 /* Hero: How-we-work in 3 columns */
@@ -117,7 +145,7 @@ body:has(.bt-page) { background: #F2F2F0; }
 }
 .bt-hero__princ { display: flex; flex-direction: column; gap: 10px; }
 .bt-hero__princ h3 {
-  margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 21px;
+  margin: 0; font-family: var(--font-display); font-weight: var(--fw-display); font-size: var(--fs-card);
   line-height: 1.1; letter-spacing: -0.01em; color: var(--ink); text-wrap: balance;
 }
 .bt-hero__princ p {
@@ -128,8 +156,8 @@ body:has(.bt-page) { background: #F2F2F0; }
 /* ---------- CTA — ai-skills squared shadow button ---------- */
 .bt-pill {
   display: inline-flex; align-items: center; gap: 10px; align-self: flex-start;
-  font-family: var(--font-text); font-weight: 500;
-  font-size: clamp(16px, 1.6vw, 22px); letter-spacing: 0.02em;
+  font-family: var(--font-text); font-weight: var(--fw-btn);
+  font-size: var(--fs-btn); letter-spacing: 0.02em;
   color: var(--ivory); background: #000000;
   padding: 16px 32px; border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.20);
@@ -157,8 +185,8 @@ body:has(.bt-page) { background: #F2F2F0; }
   color: var(--ink); text-wrap: balance;
 }
 .bt-row__text {
-  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 18px;
-  line-height: 1.5; color: color-mix(in oklch, var(--ink) 70%, transparent);
+  margin: 0; font-family: var(--font-text); font-weight: var(--fw-body); font-size: var(--fs-body);
+  line-height: var(--lh-body); color: color-mix(in oklch, var(--ink) 70%, transparent);
   text-wrap: pretty; max-width: 820px;
 }
 
@@ -241,8 +269,8 @@ body:has(.bt-page) { background: #F2F2F0; }
   color: var(--ink); text-wrap: balance; max-width: 820px;
 }
 .bt-diagnostic__text {
-  margin: 0; font-family: var(--font-text); font-weight: 400; font-size: 18px;
-  line-height: 1.5; color: color-mix(in oklch, var(--ink) 70%, transparent);
+  margin: 0; font-family: var(--font-text); font-weight: var(--fw-body); font-size: var(--fs-body);
+  line-height: var(--lh-body); color: color-mix(in oklch, var(--ink) 70%, transparent);
   max-width: 760px; text-wrap: pretty;
 }
 
