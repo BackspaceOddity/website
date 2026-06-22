@@ -813,8 +813,12 @@ class BuilderApp extends React.Component {
     return h('div',{style:{position:'relative'},
         onClickCapture: edit? (ev=>{ const t=ev.target; const a=t&&t.closest&&t.closest('a,button'); if(a) ev.preventDefault(); }) : undefined},
       h(Comp, props),
+      // section-shape outline (rounded, follows the real corner radius)
       edit && h('div',{key:'o', ref:el=>{ if(el) el.style.borderRadius=this.secRadius(el)+'px'; }, style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', boxShadow:'inset 0 0 0 '+(sel?'2px #011C00':'1px '+line)}}),
-      edit && h('div',{key:'t', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);}, 'data-tip':'Select section', ref:el=>{ if(el){ const r=this.secRadius(el); const o=r>1?Math.round(r*0.42):0; el.style.top=o+'px'; el.style.left=o+'px'; } }, style:{position:'absolute', top:0, left:0, zIndex:8, cursor:'pointer', padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:tagBg, color:tagFg, borderRadius:5}}, this.typeName(inst.type)),
+      // block-bounds rectangular frame — shown only when the section is rounded (so its true extent stays visible)
+      edit && h('div',{key:'r', ref:el=>{ if(el) el.style.display=this.secRadius(el)>1?'block':'none'; }, style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', border:'1px dashed '+(dark?'rgba(253,251,244,.30)':'rgba(1,28,0,.22)')}}),
+      // type tag at the rectangular corner — solid chip, readable on any background
+      edit && h('div',{key:'t', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);}, 'data-tip':'Select section', style:{position:'absolute', top:0, left:0, zIndex:8, cursor:'pointer', padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:'var(--surface)', color:'var(--muted)', border:'1px solid var(--rule2)', borderRadius:5}}, this.typeName(inst.type)),
       edit && sel && h('div',{key:'tb'}, this.blockToolbar(inst, index)));
   }
   renderBlock(inst, index){
