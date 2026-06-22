@@ -57,7 +57,7 @@ export function EightFiguresClient() {
           <div className="bt-nav__col">
             <span className="bt-nav__label">{c.nav.contact}</span>
             <a href={MAIL}>yegor@backspaceoddity.com</a>
-            <button type="button" className="bt-cta-link" {...CAL_TRIGGER}>{c.nav.book}</button>
+            <button type="button" className="bt-cta-link" {...CAL_TRIGGER_DEEPDIVE}>{c.nav.book}</button>
           </div>
           <div className="bt-nav__col">
             <span className="bt-nav__label">Office</span>
@@ -226,7 +226,7 @@ export function EightFiguresClient() {
         <div className="bt-footer__col">
           <span className="bt-footer__label">{c.footer.reach}</span>
           <a href={MAIL}>yegor@backspaceoddity.com</a>
-          <button type="button" className="bt-cta-link" {...CAL_TRIGGER}>{c.nav.book}</button>
+          <button type="button" className="bt-cta-link" {...CAL_TRIGGER_DEEPDIVE}>{c.nav.book}</button>
           <span>{c.footer.city}</span>
         </div>
       </footer>
