@@ -103,7 +103,7 @@ class BuilderApp extends React.Component {
     const p=this.state.deployPage;
     if(!slug){ this.toast('Enter an address first'); return; }
     if(!p || !p.id){ this.toast('No page to publish'); return; }
-    const host=slug+'.backspaceoddity.com';
+    const host='kern.backspaceoddity.com/published/'+slug;
     this.setState({deployStatus:'running', deployLogs:[], deployStage:1, deployHost:host, deployUrl:''});
     // Stage 1 \u2014 Snapshot
     this.pushLog('Snapshotting current saved blocks\u2026', true);
