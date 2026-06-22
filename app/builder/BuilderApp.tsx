@@ -220,7 +220,7 @@ class BuilderApp extends React.Component {
   replaceBtn(target){ const h=React.createElement; if(!(this.state.editMode && !this.state.locked && !this.state.previewVersionId)) return null; const t=this.state.imgTarget; const armed=t && t.blockId===target.blockId && t.tileIndex===target.tileIndex && t.kind===target.kind; return h('button',{onClick:e=>{ e.stopPropagation(); this.armReplace(target); }, 'data-tip':'Replace from library', style:{position:'absolute', bottom:8, right:8, zIndex:7, padding:'5px 11px', borderRadius:7, border:'1px solid rgba(255,255,255,.55)', background:armed?'#F2F2F0':'rgba(1,28,0,.74)', color:armed?'#011C00':'#F2F2F0', cursor:'pointer', fontSize:'11px', fontWeight:600, fontFamily:"'Inter',system-ui,sans-serif"}}, armed?'Choose an image \u2192':'Replace image'); }
   toast(msg){ this.setState({toast:msg}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}), 3200); }
   roleName(r){ return ({label:'Label',heading:'Heading',statement:'Statement',body:'Body',list:'List'})[r]||r; }
-  typeName(t){ if(t&&t.indexOf('bt:')===0) return BT_TYPE_NAMES[t]||t.slice(3); return ({hero:'Hero well',statement:'Statement',twocol:'Two-column',casestudy:'Case study',projectgrid:'Project grid',footer:'Footer',custom:'Custom block'})[t]||t; }
+  typeName(t){ if(t&&t.indexOf('bt:')===0) return BT_TYPE_NAMES[t]||t.slice(3); return ({hero:'Hero well',statement:'Statement',twocol:'Two-column',casestudy:'Case study',projectgrid:'Project grid',footer:'Footer',custom:'Custom block',ai:'AI block'})[t]||t; }
   hashStr(s){ let h=2166136261; s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return Math.abs(h); }
   arnd(p,key,a,b){ return a + (this.hashStr(p.id+'#'+key) % (b-a+1)); }
   fmtDur(s){ const m=Math.floor(s/60), r=s%60; return m>0? m+'m '+r+'s' : r+'s'; }
@@ -297,6 +297,7 @@ class BuilderApp extends React.Component {
       projectgrid:{label:'Recent', heading:'Selected work', tiles:[{title:'Sidekick Browser', lede:'Product Hunt #1', img:'terracotta'},{title:'Maroo', lede:'Brand system', img:'warm'},{title:'Wayfund', lede:'Product + site', img:'emerald'}]},
       footer:{label:'Get in touch', heading:'Let\u2019s make some of it feel human.', contact:'start@backspaceoddity.com', office:'Vijzelstraat 68-78, 1017 ES Amsterdam', nav:'Work · About · Contact'},
       custom:{label:'New block', heading:'A block proposed by Claude.', body:'Generated copy lives here.'},
+      ai:{prompt:'', state:'idle', error:''},
     };
     return this.clone(m[type] || m.custom);
   }
@@ -473,32 +474,33 @@ class BuilderApp extends React.Component {
   }
 
   // ---------- ask claude ----------
-  async askClaude(){
-    const p = this.state.askPrompt.trim(); if(!p) return;
-    this.setState({askState:'thinking', askResult:null});
+  // ---------- on-canvas AI block (BSO-658) ----------
+  // Update one prop on a single AI block in place (prompt text, state, error).
+  setAiProp(id, key, val){ this.setState(s=>({blocks:s.blocks.map(b=> b.id===id ? {...b, props:{...b.props, [key]:val}} : b)})); }
+  // Generate from an on-canvas AI block: same prompt + complete() path as the
+  // old sidebar, but on success REPLACE the AI block in place (same index) with
+  // the drafted custom section. Loading/error states live on the block itself.
+  async generateAiBlock(inst){
+    const p = String((inst.props&&inst.props.prompt)||'').trim(); if(!p) return;
+    this.setAiProp(inst.id, 'state', 'thinking'); this.setAiProp(inst.id, 'error', '');
     const prompt = 'You are a section generator for a Backspace Oddity landing-page builder. The brand voice is editorial, confident, writerly, uses em-dashes, sentence case, no emoji, no exclamation marks. Given this request: "'+p+'", return ONLY a JSON object (no prose, no code fences) with keys: "label" (short uppercase-ish kicker, 1-3 words), "heading" (one editorial sentence), "body" (1-2 sentences), "bg" (one of "paper","soft","forest"). Keep it on-brand.';
+    let result;
     try{
       const raw = await this.complete(prompt);
       const txt = String(raw||'');
       const s=txt.indexOf('{'), e=txt.lastIndexOf('}');
       const obj = JSON.parse(txt.slice(s, e+1));
-      this.setState({askState:'ready', askResult:{label:obj.label||'New block', heading:obj.heading||'', body:obj.body||'', bg:(['paper','soft','forest'].indexOf(obj.bg)>=0?obj.bg:'paper')}});
+      result = {label:obj.label||'New block', heading:obj.heading||'', body:obj.body||'', bg:(['paper','soft','forest'].indexOf(obj.bg)>=0?obj.bg:'paper')};
     }catch(err){
-      this.setState({askState:'ready', askResult:{label:'New block', heading:'We build ventures that mean something — not just ones that work.', body:'A coherent system linking what you stand for with what your customers actually feel.', bg:'soft'}});
+      // Mark error on the block — keep the prompt so the user can retry.
+      this.setAiProp(inst.id, 'state', 'idle');
+      this.setAiProp(inst.id, 'error', 'Generation failed — try again.');
+      return;
     }
-  }
-  addAskToCanvas(){
-    const r=this.state.askResult; if(!r) return;
-    const b=this.makeBlock('custom'); b.bg=r.bg; b.props={label:r.label, heading:r.heading, body:r.body};
-    this.setState(s=>({blocks:[...s.blocks, b], selectedId:b.id, askState:'idle', askResult:null, askPrompt:''}));
-    this.toast('Block added to canvas');
-  }
-  lockToLibrary(){
-    const r=this.state.askResult; if(!r) return;
-    const key='custom:'+this.nid('c');
-    const tpl={key, type:'custom', name:r.label||'Custom block', desc:'Locked from Claude', props:{label:r.label, heading:r.heading, body:r.body}, bg:r.bg};
-    this.setState(s=>({customTemplates:[...s.customTemplates, tpl], askState:'idle', askResult:null, askPrompt:''}));
-    this.toast('Locked & added to library — now a reusable template');
+    // Replace the AI block in place with the drafted custom section.
+    const b=this.makeBlock('custom'); b.bg=result.bg; b.props={label:result.label, heading:result.heading, body:result.body};
+    this.setState(s=>{ const arr=s.blocks.map(x=> x.id===inst.id ? b : x); return {blocks:arr, selectedId:b.id, selectedRole:null}; });
+    this.markDirty(); this.toast('Block drafted by Claude');
   }
 
   // ---------- versions ----------
@@ -934,26 +936,26 @@ class BuilderApp extends React.Component {
     if(type==='casestudy') return h('div',{style:Object.assign({},base,{flexDirection:'row', gap:4, alignItems:'stretch', background:'var(--paper)'})}, h('div',{style:{width:14, borderRadius:3, background:'#011C00'}}), h('div',{style:{flex:1, display:'flex', flexDirection:'column', gap:3, justifyContent:'center'}}, bar('90%','var(--rule2)'), bar('55%','var(--rule)')));
     return h('div',{style:Object.assign({},base,{background:'var(--paper)'})}, bar('85%','var(--rule2)'), bar('55%','var(--rule)'));
   }
+  // Sidebar entry for the AI block — a single library tile (no inline prompt).
+  // Clicking or dragging it drops an 'ai' prompt block onto the canvas, where
+  // the prompt textarea + Generate button now live (BSO-658).
   renderAsk(){
-    const h=React.createElement; const {askState, askResult, askPrompt}=this.state;
-    return h('div',{style:{marginTop:16, border:'1px solid var(--rule2)', borderRadius:11, overflow:'hidden', background:'var(--paper)'}},
-      h('div',{style:{padding:'12px 13px', borderBottom:'1px solid var(--rule)'}},
-        h('div',{style:{display:'flex', alignItems:'center', gap:8}}, h('div',{style:{width:7,height:7,borderRadius:99,background:'var(--ink)'}}), h('div',{style:{fontSize:'13.5px', fontWeight:600, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, 'Ask Claude for a new block')),
-        h('div',{style:{fontSize:'11.5px', color:'var(--muted)', marginTop:5, lineHeight:1.35}}, 'Describe a section — Claude drafts it in the BSO voice.')),
-      h('div',{style:{padding:'12px 13px'}},
-        h('textarea',{value:askPrompt, onChange:e=>this.setState({askPrompt:e.target.value}), placeholder:'e.g. a pricing section with three plans, editorial tone', rows:3, style:{width:'100%', resize:'vertical', border:'1px solid var(--rule2)', borderRadius:8, padding:'9px 10px', fontFamily:'inherit', fontSize:'12.5px', background:'var(--surface)', color:'var(--ink)', lineHeight:1.4}}),
-        h('button',{onClick:()=>this.askClaude(), disabled:askState==='thinking'||!askPrompt.trim(), style:{marginTop:8, width:'100%', padding:'9px', borderRadius:8, border:'none', background:'var(--ink)', color:'var(--paper)', cursor:askState==='thinking'?'default':'pointer', fontSize:'12.5px', fontWeight:600, fontFamily:'inherit', opacity:(!askPrompt.trim()&&askState!=='thinking')?0.5:1}},
-          askState==='thinking' ? h('span',{style:{display:'inline-flex',alignItems:'center',gap:8}}, h('span',{style:{width:12,height:12,border:'2px solid var(--paper)',borderTopColor:'transparent',borderRadius:99,display:'inline-block',animation:'bsospin .7s linear infinite'}}), 'Drafting…') : 'Generate block'),
-        askState==='ready' && askResult && h('div',{style:{marginTop:12, border:'1px solid var(--rule2)', borderRadius:9, overflow:'hidden'}},
-          h('div',{style:{padding:'12px 12px', background:askResult.bg==='forest'?'#011C00':'var(--surface)', color:askResult.bg==='forest'?'#FDFBF4':'var(--ink)'}},
-            h('div',{style:Object.assign(this.mono(),{color:askResult.bg==='forest'?'rgba(253,251,244,.6)':'var(--faint)', marginBottom:7})}, askResult.label),
-            h('div',{style:{fontSize:'15px', fontWeight:600, lineHeight:1.2, letterSpacing:'-0.01em', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, askResult.heading),
-            askResult.body && h('div',{style:{fontSize:'12.5px', marginTop:7, opacity:.8, lineHeight:1.45}}, askResult.body)),
-          h('div',{style:{display:'flex', gap:7, padding:'9px'}},
-            h('button',{onClick:()=>this.lockToLibrary(), style:{flex:1, padding:'8px', borderRadius:7, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit'}}, 'Lock & add to library'),
-            h('button',{onClick:()=>this.addAskToCanvas(), style:{flex:1, padding:'8px', borderRadius:7, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer', fontSize:'11.5px', fontWeight:500, fontFamily:'inherit'}}, 'Add to canvas')),
-          h('button',{onClick:()=>this.setState({askState:'idle',askResult:null}), style:{width:'100%', padding:'7px', border:'none', borderTop:'1px solid var(--rule)', background:'transparent', color:'var(--faint)', cursor:'pointer', fontSize:'11px', fontFamily:'inherit'}}, 'Discard')))
-    );
+    const h=React.createElement;
+    const thumb=h('div',{style:{position:'relative', width:'100%', height:80, overflow:'hidden', background:'#011C00', display:'flex', alignItems:'center', justifyContent:'center'}},
+      h('div',{style:{width:7,height:7,borderRadius:99,background:'#FDFBF4',position:'absolute',top:10,left:10}}),
+      h('div',{style:{fontFamily:"'JetBrains Mono',monospace", fontSize:'10px', letterSpacing:'0.12em', textTransform:'uppercase', color:'rgba(253,251,244,.85)'}}, '✦ Ask Claude'));
+    return h('div',{style:{marginTop:16}},
+      this.tileShell(thumb, 'Ask Claude for a new block', null,
+        ()=>{ this.insertAt(this.state.blocks.length, this.makeBlock('ai')); this.toast('AI block added — describe your section'); },
+        { cursor:'grab',
+          props:{
+            draggable:true, title:'Describe a section, Claude drafts it',
+            onDragStart:e=>{ this.setState({draggingType:'ai'}); e.dataTransfer.effectAllowed='copy'; },
+            onDragEnd:()=>this.setState({draggingType:null, dropAt:null}),
+            onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; },
+            onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; },
+          }}),
+      h('div',{style:{fontSize:'11.5px', color:'var(--muted)', marginTop:7, lineHeight:1.35, padding:'0 2px'}}, 'Describe a section, Claude drafts it.'));
   }
 
   // ---------- canvas ----------
@@ -1084,8 +1086,38 @@ class BuilderApp extends React.Component {
       edit && h('div',{key:'t', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);}, 'data-tip':'Select section', style:{position:'absolute', top:0, left:0, zIndex:8, cursor:'pointer', padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:'var(--surface)', color:'var(--muted)', border:'1px solid var(--rule2)', borderRadius:5}}, this.typeName(inst.type)),
       edit && sel && h('div',{key:'tb'}, this.blockToolbar(inst, index)));
   }
+  // On-canvas AI prompt block: where the user now types the prompt (relocated
+  // from the sidebar, BSO-658). Generate runs generateAiBlock → replace-in-place.
+  renderAiBlock(inst, index){
+    const h=React.createElement; const sel=this.state.selectedId===inst.id;
+    const edit=this.state.editMode && !this.state.locked && !this.state.previewVersionId;
+    const prompt=String((inst.props&&inst.props.prompt)||'');
+    const aiState=(inst.props&&inst.props.state)||'idle';
+    const error=(inst.props&&inst.props.error)||'';
+    const thinking=aiState==='thinking';
+    return h('div',{onClick:e=>{ if(!edit) return; e.stopPropagation(); this.selectBlock(inst.id);},
+        style:{position:'relative', background:'#011C00', color:'#FDFBF4', cursor:edit?'pointer':'default'}},
+      edit && sel && h('div',{style:{position:'absolute', inset:0, boxShadow:'inset 0 0 0 2px #FDFBF4', pointerEvents:'none', zIndex:6}}),
+      edit && h('div',{style:{position:'absolute', top:0, left:0, zIndex:7, padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:'rgba(253,251,244,.16)', color:'rgba(253,251,244,.78)', borderBottomRightRadius:7, pointerEvents:'none'}}, 'AI block'),
+      edit && sel && h('div',{style:{position:'absolute', top:10, right:10, zIndex:8},
+        }, h('button',{onClick:e=>{e.stopPropagation(); this.deleteBlock(inst.id);}, 'data-tip':'Delete', style:{width:28, height:28, border:'1px solid rgba(253,251,244,.3)', background:'rgba(253,251,244,.08)', color:'#FDFBF4', borderRadius:6, cursor:'pointer', fontSize:'13px'}}, '×')),
+      h('div',{onClick:e=>e.stopPropagation(), style:{maxWidth:680, margin:'0 auto', padding:'72px 40px 80px', textAlign:'center'}},
+        h('div',{style:{display:'inline-flex', alignItems:'center', gap:8, fontFamily:"'JetBrains Mono',monospace", fontSize:'11px', letterSpacing:'0.12em', textTransform:'uppercase', color:'rgba(253,251,244,.6)', marginBottom:18}},
+          h('span',{style:{width:7,height:7,borderRadius:99,background:'#FDFBF4'}}), '✦ Ask Claude for a new block'),
+        h('div',{style:{fontSize:'21px', fontWeight:600, lineHeight:1.25, letterSpacing:'-0.01em', marginBottom:22, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, 'Describe a section — Claude drafts it in the BSO voice.'),
+        h('textarea',{value:prompt, disabled:thinking,
+          onChange:e=>this.setAiProp(inst.id, 'prompt', e.target.value),
+          onClick:e=>e.stopPropagation(),
+          placeholder:'e.g. a pricing section with three plans, editorial tone', rows:3,
+          style:{width:'100%', resize:'vertical', border:'1px solid rgba(253,251,244,.28)', borderRadius:9, padding:'12px 14px', fontFamily:'inherit', fontSize:'14px', background:'rgba(253,251,244,.06)', color:'#FDFBF4', lineHeight:1.5, outline:'none'}}),
+        error && h('div',{style:{marginTop:10, fontSize:'12.5px', color:'#FFB4A8', textAlign:'left'}}, error),
+        h('button',{onClick:e=>{e.stopPropagation(); this.generateAiBlock(inst);}, disabled:thinking||!prompt.trim(),
+          style:{marginTop:14, width:'100%', padding:'12px', borderRadius:9, border:'none', background:'#FDFBF4', color:'#011C00', cursor:thinking?'default':'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit', opacity:(!prompt.trim()&&!thinking)?0.5:1}},
+          thinking ? h('span',{style:{display:'inline-flex',alignItems:'center',gap:8}}, h('span',{style:{width:13,height:13,border:'2px solid #011C00',borderTopColor:'transparent',borderRadius:99,display:'inline-block',animation:'bsospin .7s linear infinite'}}), 'Drafting…') : 'Generate block')));
+  }
   renderBlock(inst, index){
     if(inst.type && inst.type.indexOf('bt:')===0) return this.renderBtBlock(inst, index);
+    if(inst.type==='ai') return this.renderAiBlock(inst, index);
     const h=React.createElement; const sel=this.state.selectedId===inst.id;
     const forest=inst.bg==='forest'; const fg= forest?'#FDFBF4':'#011C00';
     const bg = forest? '#011C00' : (inst.bg==='soft'?'#E8E8E6':'transparent');
