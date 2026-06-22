@@ -70,7 +70,7 @@ class BuilderApp extends React.Component {
       newPageOpen:false, newPageStep:1, newPageArche:null, newPageName:'',
       pageTitle:'', pageTab:'bso', blocks:[], styles:this.clone(this.DEFAULT_STYLES), pages:this.PAGES.slice(),
       selectedId:null, selectedRole:null, editMode:true, libraryOpen:true, tweaksOpen:true, libW:248, tweaksW:248, dsRole:'heading',
-      askPrompt:'', askState:'idle', askResult:null, customTemplates:[], libTab:'sections', draggingAsset:null, assets:[{id:'a1',name:'Magenta · green',val:'magenta-green'},{id:'a2',name:'Terracotta',val:'terracotta'},{id:'a3',name:'Emerald',val:'emerald'},{id:'a4',name:'Warm',val:'warm'}],
+      askPrompt:'', askState:'idle', askResult:null, customTemplates:[], savedTemplates:[], libTab:'sections', draggingAsset:null, assets:[{id:'a1',name:'Magenta · green',val:'magenta-green'},{id:'a2',name:'Terracotta',val:'terracotta'},{id:'a3',name:'Emerald',val:'emerald'},{id:'a4',name:'Warm',val:'warm'}],
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'',
@@ -87,7 +87,13 @@ class BuilderApp extends React.Component {
     try{ const q=new URLSearchParams(window.location.search); const scr=q.get('screen'); if(scr==='deploy'||scr==='analytics'){ const pid=q.get('page'); const pg=this.PAGES.find(p=>p.id===pid)||{id:pid||'cur', name:decodeURIComponent(q.get('name')||'Page'), status:'Draft'}; const from=q.get('from')||'dashboard'; pend={scr,pg,from}; } }catch(e){}
     // Restore an existing session — skip the login screen if already signed in.
     fetch('/api/builder/me/').then(r=>r.json()).then(d=>{
-      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}, ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,pend.from); else this.openAnalytics(pend.pg,pend.from); } }); }
+      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}, ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,pend.from); else this.openAnalytics(pend.pg,pend.from); } }); this.loadSavedTemplates(); }
+    }).catch(()=>{});
+  }
+  // Load the shared saved-template library (BSO-658). Best-effort — failure leaves an empty Saved tab.
+  loadSavedTemplates(){
+    fetch('/api/builder/templates/').then(r=>r.json()).then(d=>{
+      if(d && Array.isArray(d.templates)) this.setState({savedTemplates:d.templates});
     }).catch(()=>{});
   }
   // Open the deploy / analytics screen in a fresh browser tab (action, not a panel toggle).
@@ -396,10 +402,54 @@ class BuilderApp extends React.Component {
   insertAt(index, block){ this.setState(s=>{ const arr=[...s.blocks]; arr.splice(index,0,block); return {blocks:arr, selectedId:block.id, selectedRole:null, dropAt:null, draggingType:null, dragIndex:null}; }); this.markDirty(); }
   onDrop(index){
     const {draggingType, dragIndex} = this.state;
-    if(draggingType){ const blank=draggingType.startsWith('blank:'); const realType=blank?draggingType.slice(6):draggingType; this.insertAt(index, draggingType.startsWith('custom:') ? this.customInstance(draggingType) : (blank?this.makeBlock(realType,{props:this.placeholders(realType), bg:'paper'}):this.makeBlock(realType))); return; }
+    if(draggingType){
+      if(draggingType.startsWith('saved:')){ const b=this.savedInstance(draggingType.slice(6)); if(b) this.insertAt(index, b); return; }
+      const blank=draggingType.startsWith('blank:'); const realType=blank?draggingType.slice(6):draggingType; this.insertAt(index, draggingType.startsWith('custom:') ? this.customInstance(draggingType) : (blank?this.makeBlock(realType,{props:this.placeholders(realType), bg:'paper'}):this.makeBlock(realType))); return; }
     if(dragIndex!=null){ this.setState(s=>{ const arr=[...s.blocks]; const [m]=arr.splice(dragIndex,1); let to=index; if(dragIndex<index) to=index-1; arr.splice(to,0,m); return {blocks:arr, dragIndex:null, dropAt:null}; }); }
   }
   customInstance(key){ const t=this.state.customTemplates.find(x=>x.key===key); if(!t) return this.makeBlock('custom'); const b=this.makeBlock('custom'); b.props=this.clone(t.props); b.bg=t.bg||'paper'; return b; }
+  // ---------- saved template library (BSO-658) ----------
+  // Save the currently-selected section as a reusable template in the shared library.
+  saveBlockToLibrary(inst){
+    if(!inst) return;
+    const def=this.typeName(inst.type)||'Section';
+    const name=(typeof window!=='undefined') ? window.prompt('Name this template', def) : def;
+    if(name===null) return; // user cancelled
+    const payload={ name:(name&&name.trim())||def, type:inst.type, props:this.clone(inst.props||{}), bg:inst.bg||null };
+    fetch('/api/builder/templates/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)})
+      .then(r=>r.json()).then(d=>{
+        if(d && d.template){ this.setState(s=>({savedTemplates:[d.template, ...(s.savedTemplates||[])]})); this.toast('Saved to library'); }
+        else { this.toast('Save failed'); }
+      }).catch(()=>this.toast('Save failed'));
+  }
+  // Build a fresh canvas block from a saved template (mirror of customInstance / insertBtVariation).
+  savedInstance(id){
+    const t=(this.state.savedTemplates||[]).find(x=>x.id===id); if(!t) return null;
+    const isBt = String(t.type).indexOf('bt:')===0;
+    if(isBt) return { id:this.nid('bt'), type:t.type, props:this.clone(t.props||{}), real:true };
+    return this.makeBlock(t.type, { props:this.clone(t.props||{}), bg:t.bg||'paper' });
+  }
+  insertSavedTemplate(id){
+    const b=this.savedInstance(id); if(!b) return;
+    const t=(this.state.savedTemplates||[]).find(x=>x.id===id);
+    this.insertAt(this.state.blocks.length, b); this.toast(((t&&t.name)||'Section')+' added');
+  }
+  deleteSavedTemplate(id){
+    this.setState(s=>({savedTemplates:(s.savedTemplates||[]).filter(t=>t.id!==id)}));
+    fetch('/api/builder/templates/?id='+encodeURIComponent(id), {method:'DELETE'}).catch(()=>{});
+  }
+  // Thumbnail for a saved template — bt sections via thumbFill, synthetic blocks via a static blockInner render.
+  savedThumb(t, hh, zoom){
+    const h=React.createElement;
+    if(String(t.type).indexOf('bt:')===0) return this.thumbFill(t.type, t.props||{}, hh||80, zoom||0.185);
+    const inst={id:'__saved-'+t.id, type:t.type, bg:t.bg||'paper', pad:'M', props:this.clone(t.props||{}), overrides:{}};
+    const forest=inst.bg==='forest'; const fg=forest?'#FDFBF4':'#011C00';
+    const bg=forest?'#011C00':'transparent';
+    return h('div',{style:{width:'100%', height:hh||80, overflow:'hidden', background:forest?'#011C00':'#F2F2F0'}},
+      h('div',{style:{width:1100, zoom:zoom||0.069, pointerEvents:'none', background:bg, color:fg, backgroundImage:(forest&&inst.type==='hero')?'url('+this.imgUrl(inst.props.img||'magenta-green')+')':'none', backgroundSize:'cover', backgroundPosition:'center'}},
+        forest && inst.type==='hero' && h('div',{style:{position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.55))', pointerEvents:'none'}}),
+        h('div',{style:{position:'relative', zIndex:2, padding:this.blockPad(inst)}}, this.blockInner(inst, fg))));
+  }
 
   // ---------- style semantics ----------
   effective(inst, role){ return Object.assign({}, this.state.styles[role], (inst.overrides&&inst.overrides[role])||{}); }
@@ -677,6 +727,7 @@ class BuilderApp extends React.Component {
     const svg=kids=>h('svg',{width:15,height:15,viewBox:'0 0 16 16',fill:'none',stroke:c,strokeWidth:1.4,strokeLinecap:'round',strokeLinejoin:'round'},kids);
     if(kind==='sections') return svg([h('rect',{key:1,x:2.5,y:2.5,width:11,height:11,rx:1.6}),h('line',{key:2,x1:5,y1:6,x2:11,y2:6}),h('line',{key:3,x1:5,y1:8.3,x2:11,y2:8.3}),h('line',{key:4,x1:5,y1:10.6,x2:9,y2:10.6})]);
     if(kind==='layouts') return svg([h('rect',{key:1,x:2.5,y:2.5,width:11,height:11,rx:1.6,strokeDasharray:'2.3 1.8'}),h('line',{key:2,x1:5,y1:6.4,x2:11,y2:6.4,strokeDasharray:'2 1.7'}),h('line',{key:3,x1:5,y1:9.4,x2:9,y2:9.4,strokeDasharray:'2 1.7'})]);
+    if(kind==='saved') return svg([h('path',{key:1,d:'M4 2.6 H12 a0.6 0.6 0 0 1 0.6 0.6 V13.4 L8 10.4 L3.4 13.4 V3.2 a0.6 0.6 0 0 1 0.6 -0.6 Z'})]);
     return svg([h('rect',{key:1,x:2.5,y:3,width:11,height:10,rx:1.6}),h('circle',{key:2,cx:6,cy:6.4,r:1.1}),h('path',{key:3,d:'M3.4 12 L6.8 8.6 L9.3 11 L11 9.4 L12.6 11'})]);
   }
   rowIcon(kind, c){
@@ -695,8 +746,9 @@ class BuilderApp extends React.Component {
         h('div',{style:{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12}},
           h('div',{style:this.mono()}, 'Library'),
           h('button',{onClick:()=>this.setState({libraryOpen:false}), style:{background:'none',border:'none',cursor:'pointer',color:'var(--faint)',fontSize:'16px',padding:0}}, '\u00d7')),
-        h('div',{style:{display:'flex', gap:5}}, [['sections','Sections'],['layouts','Layouts'],['assets','Assets']].map(p=>{ const k=p[0]; const on=this.state.libTab===k; return h('button',{key:k, 'data-tip':p[1], title:p[1], onClick:()=>this.setState({libTab:k}), style:{flex:1, minWidth:0, height:30, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid '+(on?'var(--ink)':'var(--rule)'), background:on?'var(--ink)':'transparent', cursor:'pointer', transition:'border-color .12s, background .12s'}}, this.libTabIcon(k,on)); }))),
+        h('div',{style:{display:'flex', gap:5}}, [['sections','Sections'],['layouts','Layouts'],['saved','Saved'],['assets','Assets']].map(p=>{ const k=p[0]; const on=this.state.libTab===k; return h('button',{key:k, 'data-tip':p[1], title:p[1], onClick:()=>this.setState({libTab:k}), style:{flex:1, minWidth:0, height:30, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid '+(on?'var(--ink)':'var(--rule)'), background:on?'var(--ink)':'transparent', cursor:'pointer', transition:'border-color .12s, background .12s'}}, this.libTabIcon(k,on)); }))),
       this.state.libTab==='assets' ? this.renderAssets()
+      : this.state.libTab==='saved' ? this.renderSaved()
       : this.state.libTab==='layouts' ? h('div',{style:{padding:'12px 14px'}},
           h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Structure only, placeholder text — for designing freely. Drag onto the canvas.'),
           h('div',{style:{display:'flex', flexDirection:'column', gap:10}},
@@ -727,6 +779,32 @@ class BuilderApp extends React.Component {
         thumb,
         multiCount && h('div',{style:{position:'absolute', top:6, right:6, background:'rgba(1,28,0,.82)', color:'#F2F2F0', fontSize:'9px', fontWeight:600, fontFamily:"'JetBrains Mono',monospace", borderRadius:4, padding:'1px 5px', lineHeight:1.4}}, multiCount)),
       h('div',{style:{padding:'8px 11px 9px', fontSize:'12px', fontWeight:600, color:'var(--ink)', fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, name));
+  }
+  // ---------- Saved tab (BSO-658) ----------
+  renderSaved(){
+    const h=React.createElement; const list=this.state.savedTemplates||[];
+    return h('div',{style:{padding:'14px 16px'}},
+      h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:12, lineHeight:1.4}}, 'Sections you saved. Drag onto the canvas or click to add.'),
+      list.length===0
+        ? h('div',{style:{fontSize:'12px', color:'var(--faint)', lineHeight:1.5, padding:'8px 2px'}}, 'No saved templates yet — click the ☆ save button on any section to add it here.')
+        : h('div',{style:{display:'flex', flexDirection:'column', gap:10}}, list.map(t=>h('div',{key:t.id}, this.savedTile(t)))));
+  }
+  // A saved-template tile: same wide-tile shell as Sections/Layouts, draggable + click-to-insert, with a delete affordance.
+  savedTile(t){
+    const h=React.createElement;
+    const thumb=h('div',{style:{position:'relative'}},
+      this.savedThumb(t, 80, 0.185),
+      h('button',{onClick:e=>{e.stopPropagation(); this.deleteSavedTemplate(t.id);}, 'data-tip':'Delete template',
+        style:{position:'absolute', top:6, right:6, zIndex:3, width:20, height:20, borderRadius:99, border:'none', background:'rgba(1,28,0,.66)', color:'#F2F2F0', cursor:'pointer', fontSize:'12px', lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', padding:0}}, '×'));
+    return this.tileShell(thumb, t.name, null, ()=>this.insertSavedTemplate(t.id), {
+      cursor:'grab',
+      props:{
+        draggable:true, title:t.name,
+        onDragStart:e=>{ this.setState({draggingType:'saved:'+t.id}); e.dataTransfer.effectAllowed='copy'; },
+        onDragEnd:()=>this.setState({draggingType:null, dropAt:null}),
+        onMouseEnter:e=>{ e.currentTarget.style.borderColor='var(--ink)'; },
+        onMouseLeave:e=>{ e.currentTarget.style.borderColor='var(--rule2)'; },
+      }});
   }
   typeTile(sec, props, name, multiCount, onClick){
     return this.tileShell(this.thumbFill(sec.type, props, 80, 0.185), name, multiCount, onClick, {
@@ -1027,6 +1105,7 @@ class BuilderApp extends React.Component {
       b('\u2191', ()=>this.moveBlock(inst.id,-1), {dis:index===0, t:'Move up'}),
       b('\u2193', ()=>this.moveBlock(inst.id,1), {dis:index===n-1, t:'Move down'}),
       b('\u29C9', ()=>this.duplicateBlock(inst.id), {t:'Duplicate'}),
+      b('\u2606', ()=>this.saveBlockToLibrary(inst), {t:'Save to library'}),
       b('\u00d7', ()=>this.deleteBlock(inst.id), {t:'Delete'}));
   }
   blockInner(inst, fg){
