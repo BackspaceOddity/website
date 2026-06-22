@@ -53,6 +53,7 @@ class BuilderApp extends React.Component {
       locked:false, lockOwner:'Marnix', versionsOpen:false, versions:[],
       variationsOpen:false, menuOpen:false, draggingType:null, dragIndex:null, dropAt:null,
       toast:null, canvasZoom:1, previewVersionId:null, imgTarget:null, currentPage:null, analyticsPage:null, analyticsFrom:'dashboard', deployPage:null, deployFrom:'dashboard', deploySubdomain:'', deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'',
+      realPage:null, saveState:'saved', lastSavedBy:null,
     };
     this.uid = 0;
     this.fileInput = null;
@@ -240,7 +241,15 @@ class BuilderApp extends React.Component {
       this.setState({screen:'editor', realPage:p.real, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
         styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES),
         selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
+        saveState:'loading',
         versions:[{id:'v3', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(cur)}]});
+      // Load a previously-saved version of this page, if any.
+      fetch('/api/builder/pages/'+encodeURIComponent(p.real)+'/').then(r=>r.json()).then(d=>{
+        if(this.state.realPage!==p.real) return; // navigated away
+        if(d && d.saved && d.page && Array.isArray(d.page.blocks) && d.page.blocks.length){
+          this.setState({blocks:this.clone(d.page.blocks), styles:d.page.styles?this.clone(d.page.styles):this.state.styles, saveState:'saved', lastSavedBy:d.page.updated_by||null});
+        } else { this.setState({saveState:'saved'}); }
+      }).catch(()=>this.setState({saveState:'saved'}));
       return;
     }
     this.clearPageCss();
@@ -256,7 +265,19 @@ class BuilderApp extends React.Component {
         {id:'v1', label:'Initial layout', when:'Earlier', author:p.owner, blocks:v1},
       ]});
   }
-  backToDash(){ this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
+  backToDash(){ if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
+  // ---------- persistence ----------
+  // Mark the page changed and schedule a debounced save (real pages only).
+  markDirty(){ if(!this.state.realPage) return; this.setState({saveState:'dirty'}); if(this._saveT) clearTimeout(this._saveT); this._saveT=setTimeout(()=>this.savePage(), 1400); }
+  savePage(){
+    const id=this.state.realPage; if(!id) return; if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; }
+    this.setState({saveState:'saving'});
+    fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({title:this.state.pageTitle, tab:this.state.pageTab, blocks:this.state.blocks, styles:this.state.styles, realPage:id})})
+      .then(r=>r.json()).then(d=>{ if(d&&d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); } else { this.setState({saveState:'error'}); this.toast('Save failed'); } })
+      .catch(()=>{ this.setState({saveState:'error'}); this.toast('Save failed'); });
+  }
+  saveLabel(){ const s=this.state.saveState; return s==='saving'?'Saving…':s==='dirty'?'Save now':s==='error'?'Retry save':s==='loading'?'Loading…':'Saved ✓'; }
   createFromTemplate(){
     const a = this.state.newPageArche; if(!a) return;
     this.clearPageCss();
@@ -273,12 +294,13 @@ class BuilderApp extends React.Component {
   commitTile(id, idx, key, text){ this.setState(s=>({blocks:s.blocks.map(b=>{ if(b.id!==id) return b; const tiles=b.props.tiles.map((t,i)=> i===idx?{...t,[key]:text}:t); return {...b, props:{...b.props, tiles}}; })})); }
   moveBlock(id, dir){
     this.setState(s=>{ const arr=[...s.blocks]; const i=arr.findIndex(b=>b.id===id); const j=i+dir; if(j<0||j>=arr.length) return {}; const t=arr[i]; arr[i]=arr[j]; arr[j]=t; return {blocks:arr}; });
+    this.markDirty();
   }
-  duplicateBlock(id){ this.setState(s=>{ const i=s.blocks.findIndex(b=>b.id===id); const copy=this.clone(s.blocks[i]); copy.id=this.nid(); const arr=[...s.blocks]; arr.splice(i+1,0,copy); return {blocks:arr, selectedId:copy.id}; }); }
-  deleteBlock(id){ this.setState(s=>({blocks:s.blocks.filter(b=>b.id!==id), selectedId:null, selectedRole:null})); }
+  duplicateBlock(id){ this.setState(s=>{ const i=s.blocks.findIndex(b=>b.id===id); const copy=this.clone(s.blocks[i]); copy.id=this.nid(); const arr=[...s.blocks]; arr.splice(i+1,0,copy); return {blocks:arr, selectedId:copy.id}; }); this.markDirty(); }
+  deleteBlock(id){ this.setState(s=>({blocks:s.blocks.filter(b=>b.id!==id), selectedId:null, selectedRole:null})); this.markDirty(); }
   setBlockProp(id, key, val){ this.setState(s=>({blocks:s.blocks.map(b=> b.id===id ? {...b,[key]:val} : b)})); }
 
-  insertAt(index, block){ this.setState(s=>{ const arr=[...s.blocks]; arr.splice(index,0,block); return {blocks:arr, selectedId:block.id, selectedRole:null, dropAt:null, draggingType:null, dragIndex:null}; }); }
+  insertAt(index, block){ this.setState(s=>{ const arr=[...s.blocks]; arr.splice(index,0,block); return {blocks:arr, selectedId:block.id, selectedRole:null, dropAt:null, draggingType:null, dragIndex:null}; }); this.markDirty(); }
   onDrop(index){
     const {draggingType, dragIndex} = this.state;
     if(draggingType){ const blank=draggingType.startsWith('blank:'); const realType=blank?draggingType.slice(6):draggingType; this.insertAt(index, draggingType.startsWith('custom:') ? this.customInstance(draggingType) : (blank?this.makeBlock(realType,{props:this.placeholders(realType), bg:'paper'}):this.makeBlock(realType))); return; }
@@ -440,6 +462,7 @@ class BuilderApp extends React.Component {
       screen==='editor' && h('button',{onClick:()=>this.setState({libraryOpen:!this.state.libraryOpen}), style:this.topBtn(this.state.libraryOpen)}, 'Library'),
       screen==='editor' && h('button',{onClick:()=>this.setState({tweaksOpen:!this.state.tweaksOpen}), style:this.topBtn(this.state.tweaksOpen)}, 'Tweaks'),
       screen==='editor' && h('button',{onClick:()=>this.setState({versionsOpen:!this.state.versionsOpen}), style:this.topBtn(this.state.versionsOpen)}, 'History'),
+      screen==='editor' && this.state.realPage && h('button',{onClick:()=>this.savePage(), 'data-tip':this.state.lastSavedBy?('Last saved by '+this.state.lastSavedBy):'Save page', style:Object.assign(this.actBtn(this.state.saveState!=='saved'), this.state.saveState==='error'?{borderColor:'#C0392B', color:'#C0392B', background:'var(--surface)'}:{}), disabled:this.state.saveState==='saving'}, this.saveLabel()),
       screen==='editor' && h('button',{onClick:()=>this.openInTab('analytics', this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}), 'data-tip':'Open analytics in a new tab', style:this.actBtn(false)}, 'Analytics ↗'),
       screen==='editor' && h('button',{onClick:()=>this.openInTab('deploy', this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}), 'data-tip':'Open deploy in a new tab', style:this.actBtn(true)}, 'Deploy ↗'),
       screen==='editor' && h('button',{onClick:()=>this.setState({locked:!this.state.locked}), style:this.topBtn(false)}, this.state.locked?'Take over':'Simulate lock'),
@@ -737,6 +760,7 @@ class BuilderApp extends React.Component {
       for(let i=0;i<keys.length-1;i++){ o=o[keys[i]]; if(o==null) return b; }
       o[keys[keys.length-1]]=value; return {...b, props};
     })}));
+    this.markDirty();
   }
   // Real-page section: render the actual bt- component, with inline text editing
   // and a light selection chrome. The outline never intercepts clicks (text stays
