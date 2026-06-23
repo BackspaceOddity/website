@@ -803,9 +803,40 @@ class BuilderApp extends React.Component {
   }
 
   // ---------- versions ----------
-  saveVersion(){ const v={id:this.nid('v'), label:'Manual save', when:'Just now', author:'You', current:true, blocks:this.clone(this.state.blocks)}; this.setState(s=>({versions:[v, ...s.versions.map(x=>({...x,current:false}))], previewVersionId:null})); this.toast('Version saved'); }
+  // Real version history (BSO-682 #2): list lives in builder_page_versions, not memory.
+  // Loaded lazily when the History panel opens. A synthetic '__draft' row at the top is
+  // the live editor state (always "current"); the rest are immutable saved snapshots.
+  loadVersions(){
+    const draft={id:'__draft', label:'Current draft', when:'Now', author:'You', current:true, blocks:this.clone(this.state.blocks)};
+    const id=this.state.realPage;
+    if(!id){ this.setState({versions:[draft]}); return; }
+    fetch('/api/builder/pages/'+encodeURIComponent(id)+'/versions/').then(r=>r.json()).then(d=>{
+      if(this.state.realPage!==id) return;
+      const real=(d&&Array.isArray(d.versions))?d.versions.map(v=>({id:v.id, label:v.label||'Version', when:this.agoLabel(v.created_at), author:(v.created_by||'').split('@')[0]||'You', blocks:Array.isArray(v.blocks)?v.blocks:[], styles:v.styles||null})):[];
+      this.setState({versions:[draft, ...real]});
+    }).catch(()=>this.setState({versions:[draft]}));
+  }
+  saveVersion(){
+    const id=this.state.realPage;
+    if(!id){ this.toast('Open a saved page first'); return; }
+    fetch('/api/builder/pages/'+encodeURIComponent(id)+'/versions/', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({label:'Manual save', blocks:this.state.blocks, styles:this.state.styles, css_key:this.activeDs(), realPage:id})})
+      .then(r=>r.json()).then(d=>{ if(d&&d.ok){ this.toast('Version saved'); this.loadVersions(); } else this.toast('Could not save version'); })
+      .catch(()=>this.toast('Could not save version'));
+  }
   previewVersion(v){ this.setState({previewVersionId: v.current?null:v.id, selectedId:null, selectedRole:null}); }
-  restoreVersion(id){ const ver=this.state.versions.find(v=>v.id===id); this.setState(s=>({blocks: ver&&ver.blocks?this.clone(ver.blocks):s.blocks, previewVersionId:null, versionsOpen:false, selectedId:null, selectedRole:null, versions:s.versions.map(x=>({...x,current:x.id===id}))})); this.toast('Restored: '+(ver?ver.label:'version')); }
+  // Restore loads the snapshot into the live editor and marks it dirty, so autosave
+  // persists the restored content to the row (and a later snapshot captures it).
+  restoreVersion(id){
+    const ver=this.state.versions.find(v=>v.id===id); if(!ver) return;
+    this.setState(s=>({
+      blocks: ver.blocks?this.clone(ver.blocks):s.blocks,
+      styles: ver.styles?this.clone(ver.styles):s.styles,
+      btStyles:(ver.styles&&ver.styles.bt)?this.clone(ver.styles.bt):s.btStyles,
+      previewVersionId:null, versionsOpen:false, selectedId:null, selectedRole:null,
+    }), ()=>this.markDirty());
+    this.toast('Restored: '+(ver.label||'version'));
+  }
   renderPreviewBanner(){
     const h=React.createElement; const v=this.state.versions.find(x=>x.id===this.state.previewVersionId); if(!v) return null;
     return h('div',{style:{position:'absolute', top:14, left:'50%', transform:'translateX(-50%)', zIndex:46, background:'var(--ink)', color:'var(--paper)', borderRadius:10, padding:'9px 12px 9px 16px', display:'flex', alignItems:'center', gap:12, boxShadow:'var(--shadow)', animation:'bsofade .3s both'}},
@@ -931,7 +962,7 @@ class BuilderApp extends React.Component {
       screen==='editor' && h('button',{onClick:()=>this.setState({editMode:!this.state.editMode}), style:this.topBtn(this.state.editMode && !this.state.locked)}, this.state.editMode?'Edit mode: on':'Edit mode: off'),
       screen==='editor' && h('button',{onClick:()=>this.setState({libraryOpen:!this.state.libraryOpen}), style:this.topBtn(this.state.libraryOpen)}, 'Library'),
       screen==='editor' && h('button',{onClick:()=>this.setState({tweaksOpen:!this.state.tweaksOpen}), style:this.topBtn(this.state.tweaksOpen)}, 'Tweaks'),
-      screen==='editor' && h('button',{onClick:()=>this.setState({versionsOpen:!this.state.versionsOpen}), style:this.topBtn(this.state.versionsOpen)}, 'History'),
+      screen==='editor' && h('button',{onClick:()=>{ const open=!this.state.versionsOpen; this.setState({versionsOpen:open, previewVersionId:null}); if(open) this.loadVersions(); }, style:this.topBtn(this.state.versionsOpen)}, 'History'),
       screen==='editor' && this.state.realPage && h('button',{onClick:()=>this.savePage(), 'data-tip':this.state.lastSavedBy?('Last saved by '+this.state.lastSavedBy):'Save page', style:Object.assign(this.actBtn(this.state.saveState!=='saved'), this.state.saveState==='error'?{borderColor:'#C0392B', color:'#C0392B', background:'var(--surface)'}:{}), disabled:this.state.saveState==='saving'}, this.saveLabel()),
       screen==='editor' && h('button',{onClick:()=>this.openAnalytics(this.state.currentPage||{id:this.state.realPage, name:this.state.pageTitle, status:'Draft'}, 'editor'), 'data-tip':'Open analytics', style:this.actBtn(false)}, 'Analytics'),
       screen==='editor' && h('button',{onClick:()=>this.openDeployFromEditor(), 'data-tip':'Open deploy', style:this.actBtn(false)}, 'Deploy'),
