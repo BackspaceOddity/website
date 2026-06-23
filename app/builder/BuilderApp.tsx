@@ -128,20 +128,16 @@ class BuilderApp extends React.Component {
     // hiccup (e.g. an intermittent 401 from an expiring cookie) can NEVER blank the
     // dashboard — loadPages refreshes it on success. (BSO-658 disappearing-pages.)
     try{ const pc = JSON.parse(localStorage.getItem('bso_pages_cache')||'null'); if(Array.isArray(pc) && pc.length){ this.setState({pages:pc}); } }catch(e){}
-    // Deploy / Analytics open in their own tab via ?screen=…&page=… — parse it here.
-    let pend=null;
-    try{ const q=new URLSearchParams(window.location.search); const scr=q.get('screen'); if(scr==='deploy'||scr==='analytics'){ const pid=q.get('page'); const pg=this.PAGES.find(p=>p.id===pid)||{id:pid||'cur', name:decodeURIComponent(q.get('name')||'Page'), status:'Draft'}; const from=q.get('from')||'dashboard'; pend={scr,pg,from}; } }catch(e){}
-    // Restore an existing session. Initial screen is 'boot' (a quiet splash) so a
-    // signed-in user never sees the login form flash on reload — /me decides the real
-    // screen here: authed -> restore the view, not-authed/error -> login.
+    // Restore an existing session. Initial screen is 'boot' (a quiet splash) so a signed-in
+    // user never sees the login form flash on reload. /me decides: authed -> restore the view
+    // from the URL (BSO-682: URL is the source of truth), not-authed/error -> login.
     fetch('/api/builder/me/').then(r=>r.json()).then(d=>{
       if(d && d.authed){
-        this.setState(s=> ({loginEmail:d.email||s.loginEmail}), ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,pend.from); else this.openAnalytics(pend.pg,pend.from); } });
+        this.setState(s=> ({loginEmail:d.email||s.loginEmail}));
         this.loadSavedTemplates();
-        // loadPages then restores the open page from ?p=<id> (reload returns you to the
-        // page you had open, not the dashboard). If pend already drove deploy/analytics,
-        // don't override that view.
-        this.loadPages(()=>{ if(!pend) this.restoreOpenPage(); });
+        // After pages load, restore screen + page from ?p / ?v so reload + deep-link return
+        // you to exactly where you were, not the dashboard.
+        this.loadPages(()=>this.applyUrlNav());
       } else {
         this.setState({screen:'login'});
       }
@@ -151,16 +147,9 @@ class BuilderApp extends React.Component {
     // componentWillUnmount can remove every one.
     this._onFocus=()=>this.refreshLive();
     this._onVis=()=>this.refreshLive();
-    if(typeof window!=='undefined'){ window.addEventListener('focus', this._onFocus); document.addEventListener('visibilitychange', this._onVis); this._liveT=setInterval(()=>this.refreshLive(), 25000); }
-  }
-  // After loadPages has populated this.state.pages, restore the page named in ?p=<id>.
-  // Open the FULL page row (not a bare id) so title/tab/ds are correct before the
-  // per-page GET resolves; if no/unknown ?p, fall back to the dashboard.
-  restoreOpenPage(){
-    if(typeof window==='undefined'){ this.setState({screen:'dashboard'}); return; }
-    let pid=null; try{ pid=new URLSearchParams(window.location.search).get('p'); }catch(e){}
-    const pg = pid && (this.state.pages||[]).find(p=>String(p.id)===String(pid));
-    if(pg){ this.openPage(pg); } else { this.setState({screen:'dashboard'}); }
+    // Browser Back/Forward restore screen+page from the URL (no new history entry).
+    this._onPop=()=>this.applyUrlNav();
+    if(typeof window!=='undefined'){ window.addEventListener('focus', this._onFocus); document.addEventListener('visibilitychange', this._onVis); window.addEventListener('popstate', this._onPop); this._liveT=setInterval(()=>this.refreshLive(), 25000); }
   }
   // Re-fetch on window focus / tab becomes visible / background poll. Runs ONLY when
   // the tab is actually visible. Quiet by design — no toast spam on each poll.
@@ -229,17 +218,26 @@ class BuilderApp extends React.Component {
       this.setState({pages:merged}, after);
     }).catch(after);
   }
-  // Open the deploy / analytics screen in a fresh browser tab (action, not a panel toggle).
-  openInTab(scr, pg, from){ if(typeof window==='undefined') return; const id=encodeURIComponent((pg&&pg.id)||'cur'); const name=encodeURIComponent((pg&&pg.name)||''); const f=from?('&from='+encodeURIComponent(from)):''; window.open('/builder/?screen='+scr+'&page='+id+'&name='+name+f, '_blank', 'noopener'); }
-  // Editor topbar "Deploy ↗": deploy the page currently open in the editor. For a real
-  // page the publish API keys off the DB row id, which equals this.state.realPage — so the
-  // deploy tab MUST carry that id, not the synthetic 'cur' (which has no DB row → 404).
+  // ---------- navigation (BSO-682 foundation #1: URL is the source of truth) ----------
+  // Single /builder route; the URL alone says which screen + page is open:
+  //   dashboard = /builder | editor = ?p=<id> | deploy/analytics = ?p=<id>&v=deploy|analytics
+  // Forward nav PUSHES a history entry; restore (boot / popstate) REPLACES — so the browser
+  // Back/Forward buttons, reload, and deep-links all work, and deploy/analytics no longer
+  // open in a separate tab (the old window.open → "deploy back → empty page" class).
+  navUrl(screen, pageId){ if(screen==='dashboard'||!pageId) return '/builder'; const b='/builder?p='+encodeURIComponent(pageId); if(screen==='deploy') return b+'&v=deploy'; if(screen==='analytics') return b+'&v=analytics'; return b; }
+  navTo(screen, pageId, push){ if(typeof window==='undefined') return; const url=this.navUrl(screen, pageId); try{ if(push) history.pushState({screen, pageId:pageId||null}, '', url); else history.replaceState({screen, pageId:pageId||null}, '', url); }catch(e){} }
+  // Flush a pending editor save before leaving the editor (same discipline as backToDash).
+  _flushEditor(){ if(this.state.saveState==='dirty' && this.state.realPage){ this.savePage(); } else if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } }
+  // Restore screen + page from the current URL WITHOUT pushing history (boot + popstate).
+  applyUrlNav(){ if(typeof window==='undefined') return; let pid=null, v=null; try{ const q=new URLSearchParams(window.location.search); pid=q.get('p'); v=q.get('v'); }catch(e){} if(!pid){ this.backToDash(false); return; } const pg=(this.state.pages||[]).find(p=>String(p.id)===String(pid)); if(!pg){ this.backToDash(false); return; } if(v==='deploy'){ this.openDeploy({id:pg.id, name:pg.name, status:'Draft'}, 'editor', false); } else if(v==='analytics'){ this.openAnalytics(pg, 'editor', false); } else { this.openPage(pg, false); } }
+  // Editor topbar "Deploy ↗": deploy the page currently open in the editor. The publish API
+  // keys off the DB row id, which equals this.state.realPage — carry that id, not 'cur'.
   openDeployFromEditor(){
     const rp=this.state.realPage;
     if(!rp){ this.toast('Save this page before publishing.'); return; }
-    this.openInTab('deploy', {id:rp, name:this.state.pageTitle||'Page', status:'Draft'}, 'editor');
+    this.openDeploy({id:rp, name:this.state.pageTitle||'Page', status:'Draft'}, 'editor');
   }
-  componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } if(this._onKey){ window.removeEventListener('keydown', this._onKey); } if(this._onBeforeUnload){ window.removeEventListener('beforeunload', this._onBeforeUnload); } if(this._onFocus){ window.removeEventListener('focus', this._onFocus); } if(this._onVis){ document.removeEventListener('visibilitychange', this._onVis); } if(this._liveT){ clearInterval(this._liveT); this._liveT=null; } }
+  componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } if(this._onKey){ window.removeEventListener('keydown', this._onKey); } if(this._onBeforeUnload){ window.removeEventListener('beforeunload', this._onBeforeUnload); } if(this._onFocus){ window.removeEventListener('focus', this._onFocus); } if(this._onVis){ document.removeEventListener('visibilitychange', this._onVis); } if(this._onPop){ window.removeEventListener('popstate', this._onPop); } if(this._liveT){ clearInterval(this._liveT); this._liveT=null; } }
   // Esc clears an armed gap / picked tile (BSO-658).
   _bindEsc(){ if(this._onKey) return; this._onKey=(e)=>{ if(e.key==='Escape'){ if(this.state.claudeEditPick && !this.state.claudeEdit){ this.cancelClaudeEditPick(); return; } this.clearArm(); } }; if(typeof window!=='undefined') window.addEventListener('keydown', this._onKey); }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
@@ -255,7 +253,7 @@ class BuilderApp extends React.Component {
   uploadAsset(e){ const f=e.target.files&&e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f); this.setState(s=>({assets:[...s.assets, {id:this.nid('a'), name:(f.name||'Upload').replace(/\.[^.]+$/,''), val:url}]})); this.toast('Image added to library'); e.target.value=''; }
   deleteAsset(id){ this.setState(s=>({assets:s.assets.filter(a=>a.id!==id)})); this.toast('Image removed from library'); }
   slugify(s){ return (String(s||'page')).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32) || 'page'; }
-  openDeploy(p, from){ this.setState({screen:'deploy', deployPage:p, deployFrom:from||'dashboard', deploySubdomain:this.slugify(p.name), deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'', deployStale:false});
+  openDeploy(p, from, push){ if(push===undefined) push=true; if(this.state.screen==='editor') this._flushEditor(); this.navTo('deploy', p&&p.id, push); this.setState({screen:'deploy', deployPage:p, deployFrom:from||'dashboard', deploySubdomain:this.slugify(p.name), deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'', deployStale:false});
     // BSO-670: surface whether the draft has changed since the last publish, so the
     // user knows the live page is stale and needs a republish.
     if(p && p.id && p.id!=='cur'){ fetch('/api/builder/pages/'+encodeURIComponent(p.id)+'/').then(r=>r.json()).then(d=>{ const pub=d&&d.published_at; const stale=pub && d.updated_at && new Date(d.updated_at).getTime() > new Date(pub).getTime(); this.setState({deployStale:!!stale}); }).catch(()=>{}); }
@@ -317,18 +315,16 @@ class BuilderApp extends React.Component {
   // Back from the deploy screen. When deploy was opened from the editor it lives in its
   // own tab (no editor mounted here), so closing the tab returns to the originating editor;
   // if this tab can't be closed (or deploy was reached in-app), fall back to the screen state.
+  // Deploy is now an in-app screen (BSO-682), so "Back" navigates within the app instead
+  // of closing a tab — which removes the old window.close → blank-editor "empty page" bug.
+  // Land where you came from: the editor (with the page reloaded) or the dashboard.
   backFromDeploy(){
-    // Deploy always opens in its OWN tab (openInTab → window.open). 'Back' closes that tab,
-    // returning to the editor/dashboard tab that opened it. window.open uses `noopener`, so
-    // window.opener is null — the old gate never fired and it fell through to screen:'editor'
-    // in THIS tab, which never loaded the page → a blank canvas (the reported "empty page"
-    // bug). Close the tab; if the browser blocks close, land on the dashboard (populated),
-    // NEVER the editor.
-    if(typeof window!=='undefined'){
-      try{ history.replaceState(null,'','/builder'); }catch(e){}
-      try{ window.close(); }catch(e){}
+    const pid=this.state.deployPage&&this.state.deployPage.id;
+    if(this.state.deployFrom==='editor' && pid){
+      const pg=(this.state.pages||[]).find(p=>String(p.id)===String(pid));
+      if(pg){ this.setState({deployPage:null}); this.openPage(pg); return; }
     }
-    this.setState({screen:'dashboard', realPage:null, deployPage:null, selectedId:null, selectedRole:null});
+    this.setState({deployPage:null}); this.backToDash();
   }
   renderDeploy(){
     const h=React.createElement; const p=this.state.deployPage; if(!p) return null;
@@ -372,7 +368,16 @@ class BuilderApp extends React.Component {
   hashStr(s){ let h=2166136261; s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return Math.abs(h); }
   arnd(p,key,a,b){ return a + (this.hashStr(p.id+'#'+key) % (b-a+1)); }
   fmtDur(s){ const m=Math.floor(s/60), r=s%60; return m>0? m+'m '+r+'s' : r+'s'; }
-  openAnalytics(p, from){ this.setState({screen:'analytics', analyticsPage:p, analyticsFrom:from||'dashboard'}); }
+  openAnalytics(p, from, push){ if(push===undefined) push=true; if(this.state.screen==='editor') this._flushEditor(); this.navTo('analytics', p&&p.id, push); this.setState({screen:'analytics', analyticsPage:p, analyticsFrom:from||'dashboard'}); }
+  // Mirror backFromDeploy: in-app back to the editor (page reloaded) or the dashboard.
+  backFromAnalytics(){
+    const pid=this.state.analyticsPage&&this.state.analyticsPage.id;
+    if(this.state.analyticsFrom==='editor' && pid){
+      const pg=(this.state.pages||[]).find(p=>String(p.id)===String(pid));
+      if(pg){ this.openPage(pg); return; }
+    }
+    this.backToDash();
+  }
   analyticsFor(p){
     const visits=this.arnd(p,'visits',210,1340);
     const uniques=Math.round(visits*(0.55+this.arnd(p,'uniq',5,34)/100));
@@ -399,7 +404,7 @@ class BuilderApp extends React.Component {
       h('div',{style:this.mono({fontSize:'10px', marginBottom:16})}, title), body);
     return h('div',{className:'bso-scroll', style:{height:'100%', overflowY:'auto', background:'var(--paper)'}},
       h('div',{style:{maxWidth:1080, margin:'0 auto', padding:'34px 32px 72px'}},
-        h('button',{onClick:()=>this.setState({screen:this.state.analyticsFrom||'dashboard'}), style:{background:'none', border:'none', cursor:'pointer', color:'var(--muted)', fontSize:'13px', fontFamily:'inherit', padding:0, marginBottom:18}}, '← '+(this.state.analyticsFrom==='editor'?'Back to editor':'All pages')),
+        h('button',{onClick:()=>this.backFromAnalytics(), style:{background:'none', border:'none', cursor:'pointer', color:'var(--muted)', fontSize:'13px', fontFamily:'inherit', padding:0, marginBottom:18}}, '← '+(this.state.analyticsFrom==='editor'?'Back to editor':'All pages')),
         h('div',{style:{display:'flex', justifyContent:'space-between', alignItems:'flex-end', flexWrap:'wrap', gap:16, marginBottom:28}},
           h('div',null,
             h('div',{style:this.mono({marginBottom:10})}, 'Analytics'),
@@ -497,9 +502,7 @@ class BuilderApp extends React.Component {
   // off its own per-instance stylesheet (p8fig/pbt); any other page resolves its
   // DS's cssKey from the registry (may be null → no stylesheet, e.g. Urembo).
   activeDs(){ const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return BT_PAGES[rp].css; return getDs(this.activeDsId()).cssKey; }
-  // Persist the open page in the URL so a reload returns you to it (not the dashboard).
-  syncUrlForPage(p){ if(typeof window==='undefined') return; const id=(p&&(p.id||p.real))||''; try{ history.replaceState(null, '', '/builder?p='+encodeURIComponent(id)); }catch(e){} }
-  openPage(p){
+  openPage(p, push){ if(push===undefined) push=true;
     // Opening another page must not let a pending debounced save from the OUTGOING
     // page fire AFTER we've switched — savePage() reads this.state.realPage at fire
     // time, so a stale timer would write the previous page's content under the newly
@@ -524,7 +527,7 @@ class BuilderApp extends React.Component {
           this.setState({blocks:this.clone(d.page.blocks), styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null});
         } else { this.setState({saveState:'saved'}); }
       }).catch(()=>this.setState({saveState:'saved'}));
-      this.syncUrlForPage(p);
+      this.navTo('editor', (p&&(p.id||p.real)), push);
       return;
     }
     // DB-backed page that is NOT a built-in real page (e.g. created from a template).
@@ -550,7 +553,7 @@ class BuilderApp extends React.Component {
             versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(savedBlocks)}]});
         } else { this.setState({saveState:'saved'}); }
       }).catch(()=>this.setState({saveState:'saved'}));
-      this.syncUrlForPage(p);
+      this.navTo('editor', (p&&(p.id||p.real)), push);
       return;
     }
     // Non-real page: still load a proposal DS stylesheet so any real `bt:` section
@@ -567,9 +570,9 @@ class BuilderApp extends React.Component {
         {id:'v2', label:'Hero copy revision', when:p.edited, author:p.owner, blocks:v2},
         {id:'v1', label:'Initial layout', when:'Earlier', author:p.owner, blocks:v1},
       ]});
-    this.syncUrlForPage(p);
+    this.navTo('editor', (p&&(p.id||p.real)), push);
   }
-  backToDash(){ if(this.state.saveState==='dirty'){ this.savePage(); } else if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } this.clearPageCss(); if(typeof window!=='undefined'){ try{ history.replaceState(null, '', '/builder'); }catch(e){} } this.setState({screen:'dashboard', realPage:null, pageDs:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
+  backToDash(push){ if(push===undefined) push=true; this._flushEditor(); this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, pageDs:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); this.navTo('dashboard', null, push); }
   // ---------- persistence ----------
   // Mark the page changed and schedule a debounced save (real pages only).
   markDirty(){ if(!this.state.realPage) return; this.setState({saveState:'dirty'}); if(this._saveT) clearTimeout(this._saveT); this._saveT=setTimeout(()=>this.savePage(), 1400); }
@@ -618,6 +621,7 @@ class BuilderApp extends React.Component {
       blocks, styles, btStyles:(styles&&styles.bt)?this.clone(styles.bt):{}, roleDefaults:{},
       selectedId:null, selectedRole:null, editMode:true, locked:false, saveState:'saving', previewVersionId:null, imgTarget:null,
       versions:[{id:'v1', label:'Created from '+a.name, when:'Just now', author:'You', current:true, blocks:this.clone(blocks)}]});
+    this.navTo('editor', id, true);
     // Persist the initial row NOW (create-on-create), not only on first edit.
     fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({title, tab, blocks, styles, realPage:id, ds:dsId})})
@@ -892,8 +896,8 @@ class BuilderApp extends React.Component {
       screen==='editor' && h('button',{onClick:()=>this.setState({tweaksOpen:!this.state.tweaksOpen}), style:this.topBtn(this.state.tweaksOpen)}, 'Tweaks'),
       screen==='editor' && h('button',{onClick:()=>this.setState({versionsOpen:!this.state.versionsOpen}), style:this.topBtn(this.state.versionsOpen)}, 'History'),
       screen==='editor' && this.state.realPage && h('button',{onClick:()=>this.savePage(), 'data-tip':this.state.lastSavedBy?('Last saved by '+this.state.lastSavedBy):'Save page', style:Object.assign(this.actBtn(this.state.saveState!=='saved'), this.state.saveState==='error'?{borderColor:'#C0392B', color:'#C0392B', background:'var(--surface)'}:{}), disabled:this.state.saveState==='saving'}, this.saveLabel()),
-      screen==='editor' && h('button',{onClick:()=>this.openInTab('analytics', this.state.currentPage||{id:'cur', name:this.state.pageTitle, status:'Draft'}), 'data-tip':'Open analytics in a new tab', style:this.actBtn(false)}, 'Analytics ↗'),
-      screen==='editor' && h('button',{onClick:()=>this.openDeployFromEditor(), 'data-tip':'Open deploy in a new tab', style:this.actBtn(false)}, 'Deploy ↗'),
+      screen==='editor' && h('button',{onClick:()=>this.openAnalytics(this.state.currentPage||{id:this.state.realPage, name:this.state.pageTitle, status:'Draft'}, 'editor'), 'data-tip':'Open analytics', style:this.actBtn(false)}, 'Analytics'),
+      screen==='editor' && h('button',{onClick:()=>this.openDeployFromEditor(), 'data-tip':'Open deploy', style:this.actBtn(false)}, 'Deploy'),
       screen==='editor' && h('button',{onClick:()=>this.setState({locked:!this.state.locked}), style:this.topBtn(false)}, this.state.locked?'Take over':'Simulate lock'),
       h('button',{onClick:()=>this.setState({variationsOpen:true}), style:this.topBtn(false)}, 'Variations'),
       h('button',{onClick:()=>this.setState({theme:this.state.theme==='light'?'dark':'light'}), style:this.topBtn(false), title:'Toggle builder theme'}, this.state.theme==='light'?'Dark':'Light'),
@@ -949,8 +953,8 @@ class BuilderApp extends React.Component {
         h('div',{style:{display:'flex', alignItems:'center', justifyContent:'flex-end', gap:7}},
           h('button',{onClick:e=>{e.stopPropagation(); this.archivePage(p.id);}, 'data-tip':'Archive', title:'Archive', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'var(--muted)', cursor:'pointer'}}, this.rowIcon('archive','currentColor')),
           h('button',{onClick:e=>{e.stopPropagation(); if(typeof window!=='undefined' && window.confirm('Delete this page?')) this.deletePage(p.id);}, 'data-tip':'Delete', title:'Delete', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'transparent', color:'#C0392B', cursor:'pointer'}}, this.rowIcon('delete','currentColor')),
-          h('button',{onClick:e=>{e.stopPropagation(); this.openInTab('analytics', p);}, 'data-tip':'Analytics (new tab)', title:'Analytics', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer'}}, this.rowIcon('analytics','currentColor')),
-          h('button',{onClick:e=>{e.stopPropagation(); this.openInTab('deploy', p);}, 'data-tip':'Deploy (new tab)', style:{padding:'6px 12px', borderRadius:6, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit', whiteSpace:'nowrap', display:'inline-flex', alignItems:'center', gap:5}}, 'Deploy', h('span',{style:{fontSize:'10px'}}, '↗'))))));
+          h('button',{onClick:e=>{e.stopPropagation(); this.openAnalytics(p,'dashboard');}, 'data-tip':'Analytics', title:'Analytics', style:{width:28, height:28, padding:0, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:6, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', cursor:'pointer'}}, this.rowIcon('analytics','currentColor')),
+          h('button',{onClick:e=>{e.stopPropagation(); this.openDeploy(p,'dashboard');}, 'data-tip':'Deploy', style:{padding:'6px 12px', borderRadius:6, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'11.5px', fontWeight:600, fontFamily:'inherit', whiteSpace:'nowrap', display:'inline-flex', alignItems:'center', gap:5}}, 'Deploy')))));
   }
   renderGallery(slice){
     const h=React.createElement;
