@@ -892,19 +892,25 @@ class BuilderApp extends React.Component {
     const h=React.createElement; const {dashTab, dashView, dashPageIdx} = this.state;
     const all = (this.state.pages||[]).filter(p=>p.tab===dashTab && !p.archived);
     const per = dashView==='rows'?6:8; const pages=Math.ceil(all.length/per)||1; const slice=all.slice(dashPageIdx*per,(dashPageIdx+1)*per);
+    // Tabs are DATA-DRIVEN: bso + community always, plus any other tab a page actually
+    // uses (e.g. 'product' from the Merz pages). A hardcoded tab list hid pages created
+    // under a new tab — they existed in the DB but had no tab to show under. (BSO-658.)
+    const TAB_LABELS = { bso:'BSO', community:'Community Sprints', product:'Product' };
+    const tabName = (k)=> TAB_LABELS[k] || (String(k||'').charAt(0).toUpperCase()+String(k||'').slice(1));
+    const tabKeys = Array.from(new Set(['bso','community', ...(this.state.pages||[]).filter(p=>!p.archived).map(p=>p.tab||'bso')]));
     return h('div',{className:'bso-scroll', style:{height:'100%', overflowY:'auto', background:'var(--paper)'}},
       h('div',{style:{maxWidth:1080, margin:'0 auto', padding:'40px 32px 64px'}},
         h('div',{style:{display:'flex', alignItems:'flex-end', justifyContent:'space-between', marginBottom:28, flexWrap:'wrap', gap:16}},
           h('div',null,
             h('div',{style:this.mono({marginBottom:10})}, 'Workspace'),
             h('h1',{style:{margin:0, fontSize:'42px', fontWeight:700, letterSpacing:'-0.025em', lineHeight:1.05, fontFamily:"'ABC Schengen','Inter',system-ui,sans-serif"}}, 'Pages'),
-            h('div',{style:{fontSize:'15px', color:'var(--muted)', marginTop:8}}, all.length+' pages · '+(dashTab==='bso'?'Backspace Oddity':'Community Sprints'))),
+            h('div',{style:{fontSize:'15px', color:'var(--muted)', marginTop:8}}, all.length+' pages · '+tabName(dashTab))),
           h('div',{style:{display:'flex', gap:10, alignItems:'center'}},
             this.seg([{v:'rows',l:'Rows'},{v:'gallery',l:'Grid'}], dashView, v=>this.setState({dashView:v})),
             h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:'', newPageDsId:DEFAULT_DS_ID}), style:{padding:'9px 16px', border:'1px solid var(--ink)', borderRadius:8, background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, 'New page from template'))),
         // tabs
         h('div',{style:{display:'flex', gap:24, borderBottom:'1px solid var(--rule)', marginBottom:24}},
-          [['bso','BSO'],['community','Community Sprints']].map(([k,l])=> h('button',{key:k, onClick:()=>this.setState({dashTab:k, dashPageIdx:0}), style:{padding:'0 0 12px', background:'none', border:'none', borderBottom:'2px solid '+(dashTab===k?'var(--ink)':'transparent'), marginBottom:-1, cursor:'pointer', fontSize:'15px', fontWeight:dashTab===k?600:500, color:dashTab===k?'var(--ink)':'var(--muted)', fontFamily:'inherit'}}, l))),
+          tabKeys.map((k)=> h('button',{key:k, onClick:()=>this.setState({dashTab:k, dashPageIdx:0}), style:{padding:'0 0 12px', background:'none', border:'none', borderBottom:'2px solid '+(dashTab===k?'var(--ink)':'transparent'), marginBottom:-1, cursor:'pointer', fontSize:'15px', fontWeight:dashTab===k?600:500, color:dashTab===k?'var(--ink)':'var(--muted)', fontFamily:'inherit'}}, tabName(k)))),
         dashView==='rows' ? this.renderRows(slice) : this.renderGallery(slice),
         pages>1 && h('div',{style:{display:'flex', gap:8, justifyContent:'center', marginTop:32}},
           Array.from({length:pages}).map((_,i)=> h('button',{key:i, onClick:()=>this.setState({dashPageIdx:i}), style:{width:34, height:34, borderRadius:8, border:'1px solid var(--rule2)', background:i===dashPageIdx?'var(--ink)':'var(--surface)', color:i===dashPageIdx?'var(--paper)':'var(--muted)', cursor:'pointer', fontFamily:"'IBM Plex Mono',monospace", fontSize:'12px'}}, i+1)))
