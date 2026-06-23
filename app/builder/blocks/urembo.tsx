@@ -300,6 +300,9 @@ export const UREMBO_PAGE = [
     heading: 'Which of these slow you down most?',
     intro: 'We pulled these from our call. Drag each onto the grid — left to right is how important it is to you (1–10), bottom to top is how well it’s handled today (1–10). The ones that matter most but still run painfully are where the time really goes. Tap ＋ note on any card to tell us why (type or record a voice note).',
     exerciseId: 'jtbd-matrix',
+    wide: true,
+    hideUnderservedZone: true,
+    editable: true,
     axisX: { label: 'How important to you', low: 'Minor', high: 'Critical' },
     axisY: { label: 'How well it’s handled today', low: 'Painful', high: 'Handled' },
     jobs: [
@@ -316,6 +319,7 @@ export const UREMBO_PAGE = [
     heading: 'Within each job, what hurts most?',
     intro: 'We grouped the problems under each part of the operation. Inside each group, drag them so the one that bites most sits on top. (Draft problem lists — we’ll refine these together.)',
     exerciseId: 'problem-rank',
+    editable: true,
     groups: [
       {
         jobId: 'approve',
