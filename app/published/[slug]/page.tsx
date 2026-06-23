@@ -95,7 +95,12 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
           }} />
           <script dangerouslySetInnerHTML={{ __html:
             "(function(){function s(){document.documentElement.classList.add('fonts-ready');}"+
-            "try{if(document.fonts&&document.fonts.ready){document.fonts.ready.then(s);setTimeout(s,1500);}else{s();}}catch(e){s();}})();"
+            "try{if(document.fonts&&document.fonts.load){"+
+            // Explicitly load ABC Schengen (Medium + Bold) and reveal only when THOSE are
+            // ready — not document.fonts.ready, which can resolve before the font is even
+            // requested and reveal in the fallback (the 'page renders in Inter' regression).
+            "Promise.all([document.fonts.load(\"500 1em 'ABC Schengen'\"),document.fonts.load(\"700 1em 'ABC Schengen'\")]).then(s).catch(s);"+
+            "setTimeout(s,2500);}else{s();}}catch(e){s();}})();"
           }} />
         </>
       )}
