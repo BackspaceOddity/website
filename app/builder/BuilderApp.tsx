@@ -198,9 +198,10 @@ class BuilderApp extends React.Component {
   loadPages(done, tries){
     if(tries===undefined) tries=2; // retry a transient pages-fetch blip so it self-heals (BSO-682 #2)
     const after=()=>{ if(typeof done==='function') done(); };
-    const retryOrDone=()=>{ if(tries>1){ setTimeout(()=>this.loadPages(done, tries-1), 1200); } else { after(); } };
-    fetch('/api/builder/pages/').then(r=>r.json()).then(d=>{
-      if(!d || !Array.isArray(d.pages)){ retryOrDone(); return; }
+    const retryOrDone=(authLost)=>{ if(tries>1){ setTimeout(()=>this.loadPages(done, tries-1), 1200); } else { if(authLost) this._onAuthLost(); after(); } };
+    fetch('/api/builder/pages/').then(r=>{ if(r.status===401) return {__authLost:true}; return r.json(); }).then(d=>{
+      if(d && d.__authLost){ retryOrDone(true); return; }
+      if(!d || !Array.isArray(d.pages)){ retryOrDone(false); return; }
       const meta={}; this.PAGES.forEach(p=>{ meta[p.id]=p; });
       const imgs=['magenta-green','terracotta','emerald','warm'];
       const merged=d.pages.filter(row=>!row.archived).map(row=>{
@@ -218,7 +219,7 @@ class BuilderApp extends React.Component {
       // Cache the good list so a later transient failure can fall back to it (BSO-658).
       try{ localStorage.setItem('bso_pages_cache', JSON.stringify(merged)); }catch(e){}
       this.setState({pages:merged}, after);
-    }).catch(retryOrDone);
+    }).catch(()=>retryOrDone(false));
   }
   // ---------- navigation (BSO-682 foundation #1: URL is the source of truth) ----------
   // Single /builder route; the URL alone says which screen + page is open:
@@ -230,6 +231,10 @@ class BuilderApp extends React.Component {
   navTo(screen, pageId, push){ if(typeof window==='undefined') return; const url=this.navUrl(screen, pageId); try{ if(push) history.pushState({screen, pageId:pageId||null}, '', url); else history.replaceState({screen, pageId:pageId||null}, '', url); }catch(e){} }
   // Flush a pending editor save before leaving the editor (same discipline as backToDash).
   _flushEditor(){ if(this.state.saveState==='dirty' && this.state.realPage){ this.savePage(); } else if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } }
+  // Session is genuinely dead (server already tried to refresh and a 401 still came back,
+  // confirmed after a retry so the rare refresh-token rotation race can't false-trigger it).
+  // Bounce to login cleanly instead of leaving a half-broken UI / silent save failures.
+  _onAuthLost(){ if(this.state.screen==='login') return; this.toast('Session expired — sign in to continue'); this.setState({screen:'login', loginErr:'Your session expired. Sign in to continue.'}); }
   // Restore screen + page from the current URL WITHOUT pushing history (boot + popstate).
   applyUrlNav(){ if(typeof window==='undefined') return; let pid=null, v=null; try{ const q=new URLSearchParams(window.location.search); pid=q.get('p'); v=q.get('v'); }catch(e){} if(!pid){ this.backToDash(false); return; } const pg=(this.state.pages||[]).find(p=>String(p.id)===String(pid)); if(!pg){ this.backToDash(false); return; } if(v==='deploy'){ this.openDeploy({id:pg.id, name:pg.name, status:'Draft'}, 'editor', false); } else if(v==='analytics'){ this.openAnalytics(pg, 'editor', false); } else { this.openPage(pg, false); } }
   // Editor topbar "Deploy ↗": deploy the page currently open in the editor. The publish API
@@ -580,12 +585,17 @@ class BuilderApp extends React.Component {
   markDirty(){ if(!this.state.realPage) return; this.setState({saveState:'dirty'}); if(this._saveT) clearTimeout(this._saveT); this._saveT=setTimeout(()=>this.savePage(), 1400); }
   // Flip the Save button to "unsaved" on the first touch of editing (before the blur/commit).
   markDirtyLabel(){ if(this.state.realPage && this.state.saveState!=='saving' && this.state.saveState!=='dirty') this.setState({saveState:'dirty'}); }
-  savePage(){
+  savePage(tries){
     const id=this.state.realPage; if(!id) return; if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; }
+    if(tries===undefined) tries=2;
     this.setState({saveState:'saving'});
     fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', keepalive:true, headers:{'Content-Type':'application/json'},
       body:JSON.stringify({title:this.state.pageTitle, tab:this.state.pageTab, blocks:this.state.blocks, styles:this.state.styles, realPage:id, ds:this.activeDsId()})})
-      .then(r=>r.json()).then(d=>{ if(d&&d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); } else { this.setState({saveState:'error'}); this.toast('Save failed'); } })
+      .then(r=>{ if(r.status===401) return {__authLost:true}; return r.json(); }).then(d=>{
+        // Dead session: retry once (absorbs the refresh-token rotation race), then bounce to
+        // login so the edit isn't silently lost against an expired session (BSO-682 #3).
+        if(d && d.__authLost){ if(tries>1){ setTimeout(()=>this.savePage(tries-1), 1000); } else { this.setState({saveState:'error'}); this._onAuthLost(); } return; }
+        if(d&&d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); } else { this.setState({saveState:'error'}); this.toast('Save failed'); } })
       .catch(()=>{ this.setState({saveState:'error'}); this.toast('Save failed'); });
   }
   saveLabel(){ const s=this.state.saveState; return s==='saving'?'Saving…':s==='dirty'?'Save changes':s==='error'?'Retry save':s==='loading'?'Loading…':'Saved ✓'; }
