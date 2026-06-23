@@ -138,6 +138,13 @@ body:has(.bt-page) { background: #F2F2F0; }
   font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: -0.02em;
   color: var(--ink); text-wrap: balance; max-width: 1100px;
 }
+/* Hero standfirst — edited via the "Lead" type role (BSO-658). var() fallback keeps
+   the body size where a DS has no lead scale, so no DS regresses. */
+.bt-hero__sub {
+  margin: 0; font-family: var(--font-text); font-weight: var(--fw-body);
+  font-size: var(--fs-lead, var(--fs-body)); line-height: var(--lh-lead, var(--lh-body));
+  color: color-mix(in oklch, var(--ink) 72%, transparent); max-width: 680px; text-wrap: pretty;
+}
 /* Hero: How-we-work in 3 columns */
 .bt-hero__how {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;

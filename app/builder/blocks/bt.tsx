@@ -115,7 +115,7 @@ export function BtHero({ eyebrow, title, subtitle, principles, cta, ctaHref, e }
       <div className="bt-hero__inner">
         <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-hero__eyebrow" role="eyebrow" />
         <Ed e={e} k="title" v={title} as="h1" className="bt-hero__title" role="h1" />
-        {subtitle ? <Ed e={e} k="subtitle" v={subtitle} as="p" className="bt-hero__sub" role="body" /> : null}
+        {subtitle ? <Ed e={e} k="subtitle" v={subtitle} as="p" className="bt-hero__sub" role="lead" /> : null}
         {principles && principles.length ? (
           <div className="bt-hero__how">
             {principles.map((p, i) => (

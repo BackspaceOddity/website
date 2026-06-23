@@ -49,7 +49,7 @@ function isDsType(t){ const s=String(t||''); return s.indexOf('bt:')===0 || s.in
 const BT_ROLE_META = {
   h1:      { label: 'Heading 1',  sel: '.bt-hero__title' },
   h2:      { label: 'Heading 2',  sel: '.bt-h2' },
-  lead:    { label: 'Lead',       sel: '.bt-sublabel, .bt-phase__name' },
+  lead:    { label: 'Lead',       sel: '.bt-hero__sub, .bt-sublabel, .bt-phase__name' },
   card:    { label: 'Card title', sel: '.bt-ep__name, .bt-proj__title' },
   body:    { label: 'Body',       sel: '.bt-intro' },
   eyebrow: { label: 'Eyebrow',    sel: '.bt-eyebrow' },
