@@ -34,19 +34,33 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
 
   const { data, error } = await supabase
     .from('builder_pages')
-    .select('published_blocks, published_real_page, published_title, published, published_styles, ds, css_key, published_css_key')
+    .select('published_blocks, published_real_page, published_title, published, published_styles, ds, css_key, published_css_key, published_version_id')
     .eq('slug', slug)
     .eq('published', true)
     .maybeSingle();
 
   if (error || !data) notFound();
 
-  const blocks = Array.isArray(data.published_blocks) ? data.published_blocks : [];
-  const realPage = data.published_real_page as string | null;
+  // Canonical model (BSO-682 #2): render from the pinned version snapshot when present;
+  // fall back to the legacy published_* columns otherwise (transition safety).
+  let ver: { blocks?: unknown; styles?: unknown; css_key?: string | null; real_page?: string | null } | null = null;
+  if (data.published_version_id) {
+    const { data: v } = await supabase
+      .from('builder_page_versions')
+      .select('blocks, styles, css_key, real_page')
+      .eq('id', data.published_version_id)
+      .maybeSingle();
+    ver = v ?? null;
+  }
+  const blocks = Array.isArray(ver?.blocks) ? (ver!.blocks as any[])
+    : (Array.isArray(data.published_blocks) ? data.published_blocks : []);
+  const pubStyles = ver?.styles ?? data.published_styles;
+  const realPage = (ver?.real_page ?? data.published_real_page) as string | null;
   const ds = (data.ds as string | null) || 'bso';
-  // Stylesheet is a stored property now (BSO-682 canonical model): prefer the pinned
+  // Stylesheet is a stored property now: prefer the pinned version's key, then the
   // published key, then the draft key, then the legacy derivation as a safety net.
-  const cssId = (data.published_css_key as string | null)
+  const cssId = (ver?.css_key as string | null)
+    || (data.published_css_key as string | null)
     || (data.css_key as string | null)
     || (realPage && REAL_CSS[realPage]) || DS_CSS[ds] || null;
 
@@ -109,7 +123,7 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
         </>
       )}
       {cssId && <link rel="stylesheet" href={'/builder-css/' + cssId + '.css'} />}
-      <PublishedView blocks={blocks} styles={data.published_styles} slug={slug} seed={seed} />
+      <PublishedView blocks={blocks} styles={pubStyles} slug={slug} seed={seed} />
       <div dangerouslySetInnerHTML={{ __html: THEME_TOGGLE_HTML }} />
       {editPanel && <script dangerouslySetInnerHTML={{ __html: editPanel }} />}
     </>

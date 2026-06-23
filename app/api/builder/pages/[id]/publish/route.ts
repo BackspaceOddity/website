@@ -63,9 +63,23 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     if (clash) return NextResponse.json({ error: 'slug taken' }, { status: 409 });
 
     const publishedAt = new Date().toISOString();
+    // Canonical model (BSO-682 #2): publishing PINS an immutable version snapshot of the
+    // current draft. The published_* columns are still dual-written below as a fallback
+    // until the render path is fully migrated, but published_version_id is the new truth.
+    const { data: ver } = await supabase.from('builder_page_versions').insert({
+      page_id: id,
+      label: 'Published',
+      blocks: page.blocks ?? [],
+      styles: page.styles ?? null,
+      css_key: page.css_key ?? null,
+      real_page: page.real_page ?? null,
+      title: page.title ?? null,
+      created_by: email,
+    }).select('id').single();
     const { error: upErr } = await supabase.from('builder_pages').update({
       slug,
       published: true,
+      published_version_id: ver?.id ?? null,
       published_blocks: page.blocks ?? [],
       published_styles: page.styles ?? null,
       published_real_page: page.real_page ?? null,
