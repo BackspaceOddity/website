@@ -14,7 +14,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Ed } from './bt';
 
 type E = { on: boolean; set: (k: string, v: string) => void; touch?: () => void } | undefined;
@@ -156,13 +156,21 @@ export function KosDemo({
   src = '/merz-demo/index.html',
   e,
 }: { caption?: string; src?: string; e?: E }) {
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const goFull = () => {
+    const el = frameRef.current as any;
+    if (el?.requestFullscreen) el.requestFullscreen();
+    else if (el?.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else window.open(src, '_blank');
+  };
   return (
-    <section className="bt-sec bt-sec--light kos-demo" id="demo-live" data-screen-label="Live demo">
-      <div className="bt-inner">
+    <section className="kos-demo" id="demo-live" data-screen-label="Live demo">
+      <div className="kos-demo__bar">
         <p className="kos-demo__cap"><Ed e={e} k="caption" v={caption} as="span" /></p>
-        <div className="kos-demo__frame">
-          <iframe src={src} title="Merz live demo" loading="lazy" />
-        </div>
+        <button type="button" className="kos-demo__full" onClick={goFull} aria-label="Open the demo full screen">⤢ Full screen</button>
+      </div>
+      <div className="kos-demo__frame" ref={frameRef}>
+        <iframe src={src} title="Merz live demo" loading="lazy" />
       </div>
     </section>
   );
