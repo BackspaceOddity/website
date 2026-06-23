@@ -1383,7 +1383,11 @@ class BuilderApp extends React.Component {
     const h=React.createElement; const Comp=BT_COMPONENTS[inst.type]; if(!Comp) return null;
     const edit=this.state.editMode && !this.state.locked && !this.state.previewVersionId;
     const sel=this.state.selectedId===inst.id;
-    const dark=({'bt:hero':1,'bt:leverages':1,'bt:final':1,'ub:discussion':1,'ub:discussionLock':1})[inst.type];
+    // Editor-chrome colour follows the section's real background. bt:hero/leverages/final
+    // are dark only in the BSO (gradient) DS; in the light DSs (kos / quiet) they are
+    // light, so dark-chrome (near-white) would be invisible on them.
+    const lightDs = (() => { try { return this.activeDsId() === 'kos' || this.activeDsId() === 'quiet'; } catch { return false; } })();
+    const dark= lightDs ? 0 : ({'bt:hero':1,'bt:leverages':1,'bt:final':1,'ub:discussion':1,'ub:discussionLock':1})[inst.type];
     const line= dark?'rgba(253,251,244,.30)':'rgba(1,28,0,.12)';
     const tagBg= dark?'rgba(253,251,244,.16)':'rgba(1,28,0,.07)'; const tagFg= dark?'rgba(253,251,244,.78)':'rgba(1,28,0,.5)';
     const props=Object.assign({key:'c'}, inst.props);
