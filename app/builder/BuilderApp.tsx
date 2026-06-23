@@ -318,9 +318,17 @@ class BuilderApp extends React.Component {
   // own tab (no editor mounted here), so closing the tab returns to the originating editor;
   // if this tab can't be closed (or deploy was reached in-app), fall back to the screen state.
   backFromDeploy(){
-    const from=this.state.deployFrom;
-    if(from==='editor' && typeof window!=='undefined' && window.opener){ window.close(); return; }
-    this.setState({screen:from||'dashboard'});
+    // Deploy always opens in its OWN tab (openInTab → window.open). 'Back' closes that tab,
+    // returning to the editor/dashboard tab that opened it. window.open uses `noopener`, so
+    // window.opener is null — the old gate never fired and it fell through to screen:'editor'
+    // in THIS tab, which never loaded the page → a blank canvas (the reported "empty page"
+    // bug). Close the tab; if the browser blocks close, land on the dashboard (populated),
+    // NEVER the editor.
+    if(typeof window!=='undefined'){
+      try{ history.replaceState(null,'','/builder'); }catch(e){}
+      try{ window.close(); }catch(e){}
+    }
+    this.setState({screen:'dashboard', realPage:null, deployPage:null, selectedId:null, selectedRole:null});
   }
   renderDeploy(){
     const h=React.createElement; const p=this.state.deployPage; if(!p) return null;
