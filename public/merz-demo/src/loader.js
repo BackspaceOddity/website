@@ -8,7 +8,7 @@
 // real loader will produce against the user's vault.
 //
 // Once Claude Code is wired in, the call site becomes:
-//   const fsReads = await readDir('~/Cursor/Home space/Backspace Oddity/');
+//   const fsReads = await readDir('~/Cursor/Home space/Merz/');
 //   window.__RAW_NODES = window.KOSLoader.loadNodes(fsReads);
 // — no other changes needed; parser/buildGraph already accept {id, raw}.
 
