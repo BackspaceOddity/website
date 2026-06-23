@@ -824,7 +824,7 @@ class BuilderApp extends React.Component {
     fetch('/api/builder/login/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email, password:this.state.loginPw, mode})})
       .then(async r=>{ const j=await r.json().catch(()=>({}));
         if(r.ok && j.magic){ this.setState({loginBusy:false, loginErr:''}); this.toast('Magic link sent — check your email.'); }
-        else if(r.ok){ this.setState({loginBusy:false, loginPw:'', screen:'dashboard'}); }
+        else if(r.ok){ this.setState({loginBusy:false, loginPw:'', screen:'dashboard'}); this.loadPages(); this.loadSavedTemplates(); }
         else { this.setState({loginBusy:false, loginErr: j.error || 'Sign-in failed.'}); }
       })
       .catch(()=>this.setState({loginBusy:false, loginErr:'Network error — try again.'}));
