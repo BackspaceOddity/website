@@ -124,6 +124,10 @@ class BuilderApp extends React.Component {
     this._onBeforeUnload=()=>{ if(this.state.saveState==='dirty') this.savePage(); };
     if(typeof window!=='undefined') window.addEventListener('beforeunload', this._onBeforeUnload);
     try{ const raw = localStorage.getItem('bso_ds_styles'); if(raw){ this.dsStyles = JSON.parse(raw); } }catch(e){}
+    // Seed the pages list from the last-good snapshot so a transient /api/builder/pages
+    // hiccup (e.g. an intermittent 401 from an expiring cookie) can NEVER blank the
+    // dashboard — loadPages refreshes it on success. (BSO-658 disappearing-pages.)
+    try{ const pc = JSON.parse(localStorage.getItem('bso_pages_cache')||'null'); if(Array.isArray(pc) && pc.length){ this.setState({pages:pc}); } }catch(e){}
     // Deploy / Analytics open in their own tab via ?screen=…&page=… — parse it here.
     let pend=null;
     try{ const q=new URLSearchParams(window.location.search); const scr=q.get('screen'); if(scr==='deploy'||scr==='analytics'){ const pid=q.get('page'); const pg=this.PAGES.find(p=>p.id===pid)||{id:pid||'cur', name:decodeURIComponent(q.get('name')||'Page'), status:'Draft'}; const from=q.get('from')||'dashboard'; pend={scr,pg,from}; } }catch(e){}
@@ -220,6 +224,8 @@ class BuilderApp extends React.Component {
       });
       // Keep any built-in real page that has no DB row yet (defensive — both ship rows).
       this.PAGES.forEach(p=>{ if(!merged.some(m=>m.id===p.id)) merged.push(p); });
+      // Cache the good list so a later transient failure can fall back to it (BSO-658).
+      try{ localStorage.setItem('bso_pages_cache', JSON.stringify(merged)); }catch(e){}
       this.setState({pages:merged}, after);
     }).catch(after);
   }
