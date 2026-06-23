@@ -140,7 +140,7 @@
     });
     toggle = el('button', 'mz-hs-toggle');
     toggle.innerHTML = '<span class="mz-hs-tdot"></span>Explore features';
-    toggle.onclick = function () { shown = !shown; if (!shown) closePop(); sync(); toggle.childNodes[1].nodeValue = shown ? 'Hide hotspots' : 'Explore features'; };
+    toggle.onclick = function () { shown = !shown; if (shown) SPOTS.forEach(function (s) { s._dismissed = false; }); else closePop(); sync(); toggle.childNodes[1].nodeValue = shown ? 'Hide hotspots' : 'Explore features'; };
     document.body.appendChild(toggle);
     document.addEventListener('click', function () { closePop(); });
     window.addEventListener('scroll', sync, true);
@@ -152,7 +152,7 @@
     if (!layerBuilt) return;
     SPOTS.forEach(function (spot) {
       var w = spot._wrap; if (!w) return;
-      if (!shown) { w.style.display = 'none'; return; }
+      if (!shown || spot._dismissed) { w.style.display = 'none'; return; }
       var anchor = resolve(spot);
       var r = anchor && anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : null;
       if (r && inView(r)) {
@@ -178,7 +178,10 @@
     pop.innerHTML = html;
     pop.querySelector('h4').textContent = spot.title;
     pop.querySelector('.mz-hs-body').textContent = spot.body;
-    pop.querySelector('.mz-hs-x').onclick = function (e) { e.stopPropagation(); closePop(); };
+    // × dismisses the whole hotspot (dot + label), so the user can clear the
+    // marks one by one and then play with a clean UI. Clicking outside just
+    // closes the card and leaves the dot in place.
+    pop.querySelector('.mz-hs-x').onclick = function (e) { e.stopPropagation(); spot._dismissed = true; if (spot._wrap) spot._wrap.style.display = 'none'; closePop(); };
     if (spot.action) {
       var b = el('button', 'mz-hs-act'); b.textContent = spot.action.label;
       b.onclick = function (e) { e.stopPropagation(); spot.action.run(b); };
