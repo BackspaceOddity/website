@@ -558,18 +558,31 @@ class BuilderApp extends React.Component {
         selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
         saveState:'loading',
         versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:[]}]});
-      fetch('/api/builder/pages/'+encodeURIComponent(p.id)+'/').then(r=>r.json()).then(d=>{
-        if(this.state.realPage!==p.id) return; // navigated away
-        if(d && d.saved && d.page){
-          const savedStyles=d.page.styles?this.clone(d.page.styles):this.state.styles;
-          const savedBlocks=Array.isArray(d.page.blocks)?this.clone(d.page.blocks):[];
-          // The DB row is the source of truth — re-inject its stored stylesheet (css_key),
-          // falling back to the ds-derived sheet only when the key isn't stored yet.
-          const dsId=d.page.ds||dsId0; const cssId=d.page.css_key||getDs(dsId).cssKey; this.injectPageCss(cssId);
-          this.setState({blocks:savedBlocks, styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, pageTitle:d.page.title||p.name, pageDs:cssId, pageCssKey:(d.page.css_key||cssId), pageDsId:dsId, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null,
-            versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(savedBlocks)}]});
-        } else { this.setState({saveState:'saved'}); }
-      }).catch(()=>this.setState({saveState:'saved'}));
+      // Resilient page load (BSO-682 #3): the restore-on-reload path fires this GET in a
+      // burst with /me + loadPages, so a transient blip or a 401 must NOT silently leave an
+      // empty canvas (the reported reload bug). And it must NOT mark the page 'saved' on
+      // failure — that would let autosave later clobber a real row with empty blocks. Retry
+      // once; on a persistent 401 bounce to login; on a hard failure mark 'error' (autosave
+      // only fires from 'dirty', never 'error'), so the row is never overwritten.
+      const loadRow=(tries)=>{
+        fetch('/api/builder/pages/'+encodeURIComponent(p.id)+'/').then(r=>{ if(r.status===401) return {__authLost:true}; return r.json(); }).then(d=>{
+          if(this.state.realPage!==p.id) return; // navigated away mid-fetch
+          if(d && d.__authLost){ if(tries>1){ setTimeout(()=>loadRow(tries-1), 900); } else { this.setState({saveState:'error'}); this._onAuthLost(); } return; }
+          if(d && d.saved && d.page){
+            const savedStyles=d.page.styles?this.clone(d.page.styles):this.state.styles;
+            const savedBlocks=Array.isArray(d.page.blocks)?this.clone(d.page.blocks):[];
+            // The DB row is the source of truth — re-inject its stored stylesheet (css_key),
+            // falling back to the ds-derived sheet only when the key isn't stored yet.
+            const dsId=d.page.ds||dsId0; const cssId=d.page.css_key||getDs(dsId).cssKey; this.injectPageCss(cssId);
+            this.setState({blocks:savedBlocks, styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, pageTitle:d.page.title||p.name, pageDs:cssId, pageCssKey:(d.page.css_key||cssId), pageDsId:dsId, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null,
+              versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(savedBlocks)}]});
+          } else if(d && d.saved===false){
+            this.setState({saveState:'saved'}); // genuinely a new/empty row — nothing to load
+          } else if(tries>1){ setTimeout(()=>loadRow(tries-1), 900); }
+          else { this.setState({saveState:'error'}); this.toast('Couldn’t load this page — check your connection and retry'); }
+        }).catch(()=>{ if(this.state.realPage!==p.id) return; if(tries>1){ setTimeout(()=>loadRow(tries-1), 900); } else { this.setState({saveState:'error'}); this.toast('Couldn’t load this page — check your connection and retry'); } });
+      };
+      loadRow(2);
       this.navTo('editor', (p&&(p.id||p.real)), push);
       return;
     }
@@ -1295,12 +1308,20 @@ class BuilderApp extends React.Component {
     return h('div',{className:'bso-scroll', ref:this.onCanvasRef, onClick:(ev)=>{ if(!edit) return; if(this.state.claudeEditPick) return; /* pick mode owns clicks */ const t=ev.target; if(t&&t.closest&&t.closest('[data-role]')) return; /* keep role just picked from a bt text click */ this.setState({selectedId:null, selectedRole:null}); },
       style:{flex:1, minWidth:0, overflowY:'auto', height:'100%', background:'var(--soft)', padding:'34px 0 120px'}},
       h('div',{style:{width:1160, margin:'0 auto', zoom:this.state.canvasZoom, background:'#F2F2F0', color:'#011C00', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)', minHeight:300}},
-        blocks.length===0 ? this.emptyCanvas() :
+        blocks.length===0 ? (this.state.saveState==='loading' ? this.loadingCanvas() : this.emptyCanvas()) :
         h('div',{className:ds?'page bt-page':undefined,
             style:ds?btVarStyle(this.state.btStyles):undefined,
             onClickCapture:(ds&&edit)? (ev=>{ if(this.state.claudeEditPick) return; /* pick mode owns clicks */ const t=ev.target; const r=t&&t.closest&&t.closest('[data-role]'); if(r&&r.dataset&&r.dataset.role) this.selectBtRole(r.dataset.role); }) : undefined},
           [ edit && h(React.Fragment,{key:'dz0'}, this.dropzone(0)) ].concat(
             blocks.map((b,i)=> h(React.Fragment,{key:b.id}, this.renderBlock(b,i), edit && this.dropzone(i+1)))))));
+  }
+  // Shown while a page's blocks are still loading (e.g. restore-on-reload), so the canvas
+  // reads as "loading" instead of flashing the empty "drag a section" prompt (BSO-682 #3).
+  loadingCanvas(){
+    const h=React.createElement;
+    return h('div',{style:{padding:'80px 40px', minHeight:340, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:16}},
+      h('div',{style:{width:18, height:18, border:'2px solid rgba(1,28,0,.18)', borderTopColor:'#011C00', borderRadius:99, animation:'bsospin .7s linear infinite'}}),
+      h('div',{style:{fontFamily:"'IBM Plex Mono',monospace", fontSize:'11px', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(1,28,0,.4)'}}, 'Loading page…'));
   }
   emptyCanvas(){
     const h=React.createElement;
