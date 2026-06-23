@@ -54,6 +54,11 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     if (!slug) return NextResponse.json({ error: 'empty slug' }, { status: 400 });
 
     // Load the page being published.
+    // BSO-667 (accepted): this SELECT + the UPDATE below are two round-trips, so a save
+    // landing between them could publish a pre-save snapshot. Accepted for this single-
+    // editor tool — the window is sub-second and the editor auto-saves (debounced 1.4s)
+    // before opening Deploy. If concurrent editors arrive, move to an rpc() with
+    // SELECT FOR UPDATE (or a version/etag guard on the UPDATE).
     const { data: page, error: loadErr } = await supabase
       .from('builder_pages').select('*').eq('id', id).maybeSingle();
     if (loadErr) return NextResponse.json({ error: loadErr.message }, { status: 500 });
@@ -76,7 +81,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       published_at: publishedAt,
       published_by: email,
     }).eq('id', id);
-    if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
+    if (upErr) {
+      // A concurrent publisher can trip the partial unique index
+      // (builder_pages_slug_published_uniq) between the clash check above and this
+      // UPDATE — return 409, not a 500 that leaks the Postgres index name (BSO-671).
+      if ((upErr as any).code === '23505') return NextResponse.json({ error: 'slug taken' }, { status: 409 });
+      return NextResponse.json({ error: upErr.message }, { status: 500 });
+    }
 
     return NextResponse.json({ url: '/published/' + slug, slug, publishedAt });
   } catch (e: any) {

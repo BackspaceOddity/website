@@ -117,6 +117,10 @@ class BuilderApp extends React.Component {
   }
   componentDidMount(){
     this._bindEsc();
+    // Tab-close safety net for the debounced auto-save (BSO-664): flush a pending
+    // dirty edit on unload. keepalive on the PUT lets the request finish after navigation.
+    this._onBeforeUnload=()=>{ if(this.state.saveState==='dirty') this.savePage(); };
+    if(typeof window!=='undefined') window.addEventListener('beforeunload', this._onBeforeUnload);
     try{ const raw = localStorage.getItem('bso_ds_styles'); if(raw){ this.dsStyles = JSON.parse(raw); } }catch(e){}
     // Deploy / Analytics open in their own tab via ?screen=…&page=… — parse it here.
     let pend=null;
@@ -175,7 +179,7 @@ class BuilderApp extends React.Component {
     if(!rp){ this.toast('Save this page before publishing.'); return; }
     this.openInTab('deploy', {id:rp, name:this.state.pageTitle||'Page', status:'Draft'}, 'editor');
   }
-  componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } if(this._onKey){ window.removeEventListener('keydown', this._onKey); } }
+  componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } if(this._onKey){ window.removeEventListener('keydown', this._onKey); } if(this._onBeforeUnload){ window.removeEventListener('beforeunload', this._onBeforeUnload); } }
   // Esc clears an armed gap / picked tile (BSO-658).
   _bindEsc(){ if(this._onKey) return; this._onKey=(e)=>{ if(e.key==='Escape'){ if(this.state.claudeEditPick && !this.state.claudeEdit){ this.cancelClaudeEditPick(); return; } this.clearArm(); } }; if(typeof window!=='undefined') window.addEventListener('keydown', this._onKey); }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
@@ -191,7 +195,11 @@ class BuilderApp extends React.Component {
   uploadAsset(e){ const f=e.target.files&&e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f); this.setState(s=>({assets:[...s.assets, {id:this.nid('a'), name:(f.name||'Upload').replace(/\.[^.]+$/,''), val:url}]})); this.toast('Image added to library'); e.target.value=''; }
   deleteAsset(id){ this.setState(s=>({assets:s.assets.filter(a=>a.id!==id)})); this.toast('Image removed from library'); }
   slugify(s){ return (String(s||'page')).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32) || 'page'; }
-  openDeploy(p, from){ this.setState({screen:'deploy', deployPage:p, deployFrom:from||'dashboard', deploySubdomain:this.slugify(p.name), deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:''}); }
+  openDeploy(p, from){ this.setState({screen:'deploy', deployPage:p, deployFrom:from||'dashboard', deploySubdomain:this.slugify(p.name), deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'', deployStale:false});
+    // BSO-670: surface whether the draft has changed since the last publish, so the
+    // user knows the live page is stale and needs a republish.
+    if(p && p.id && p.id!=='cur'){ fetch('/api/builder/pages/'+encodeURIComponent(p.id)+'/').then(r=>r.json()).then(d=>{ const pub=d&&d.published_at; const stale=pub && d.updated_at && new Date(d.updated_at).getTime() > new Date(pub).getTime(); this.setState({deployStale:!!stale}); }).catch(()=>{}); }
+  }
   nowTime(){ const d=new Date(), z=n=>String(n).padStart(2,'0'); return z(d.getHours())+':'+z(d.getMinutes())+':'+z(d.getSeconds()); }
   pushLog(text, ok){ this.setState(s=>({deployLogs:[...s.deployLogs, {t:this.nowTime(), text, ok:!!ok}]}), ()=>{ if(this._logEl) this._logEl.scrollTop=this._logEl.scrollHeight; }); }
   // Real publish pipeline (BSO-658). POSTs the saved blocks to the publish API,
@@ -275,6 +283,7 @@ class BuilderApp extends React.Component {
             st==='live' && h('a',{href:liveUrl, target:'_blank', rel:'noreferrer', style:{padding:'10px 16px', borderRadius:8, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit', textDecoration:'none', marginRight:10}}, 'Visit site \u2192'),
             h('button',{onClick:()=>this.startDeploy(), disabled:st==='running', style:{padding:'10px 20px', borderRadius:8, border:'1px solid var(--ink)', background:st==='running'?'var(--muted)':'var(--ink)', color:'var(--paper)', cursor:st==='running'?'default':'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, st==='running'?'Publishing\u2026':(st==='live'?'Republish':(st==='failed'?'Retry':'Publish now')))),
           h('div',{style:{fontSize:'12.5px', color:'var(--muted)', marginTop:12, lineHeight:1.45}}, st==='live'? ('Live at '+liveUrl) : (st==='failed'? 'Publish did not complete — see the log below.' : 'Publishes the saved blocks to a public page at kern.backspaceoddity.com/published/. Nothing goes live until you press Publish.'))),
+        this.state.deployStale && h('div',{style:{border:'1px solid #C2913F', background:'rgba(194,145,63,.10)', color:'#8a6a2a', borderRadius:10, padding:'11px 14px', marginBottom:18, fontSize:'12.5px', lineHeight:1.45}}, 'Draft has unsaved changes since the last publish — press Republish to update the live page.'),
         h('div',{style:{display:'flex', gap:8, marginBottom:18}}, stages.map((sl,i)=>{ const idx=i+1; const done=stage>idx||st==='live'; const active=stage===idx&&st==='running'; return h('div',{key:i, style:{flex:1, padding:'10px 12px', borderRadius:9, border:'1px solid '+((done||active)?'var(--ink)':'var(--rule)'), background:(done||active)?'var(--paper)':'transparent', display:'flex', alignItems:'center', gap:8}}, h('span',{style:{width:7,height:7,borderRadius:99, background:(done||active)?'var(--ink)':'var(--rule2)', animation:active?'bsoblink 1.2s infinite':'none'}}), h('span',{style:{fontSize:'12.5px', fontWeight:500, color:(done||active)?'var(--ink)':'var(--muted)'}}, sl)); })),
         h('div',{style:{borderRadius:12, overflow:'hidden', border:'1px solid var(--rule)'}},
           h('div',{style:{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', background:'#011C00', borderBottom:'1px solid rgba(253,251,244,.12)'}},
@@ -480,7 +489,7 @@ class BuilderApp extends React.Component {
         {id:'v1', label:'Initial layout', when:'Earlier', author:p.owner, blocks:v1},
       ]});
   }
-  backToDash(){ if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, pageDs:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
+  backToDash(){ if(this.state.saveState==='dirty'){ this.savePage(); } else if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, pageDs:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
   // ---------- persistence ----------
   // Mark the page changed and schedule a debounced save (real pages only).
   markDirty(){ if(!this.state.realPage) return; this.setState({saveState:'dirty'}); if(this._saveT) clearTimeout(this._saveT); this._saveT=setTimeout(()=>this.savePage(), 1400); }
@@ -489,7 +498,7 @@ class BuilderApp extends React.Component {
   savePage(){
     const id=this.state.realPage; if(!id) return; if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; }
     this.setState({saveState:'saving'});
-    fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', headers:{'Content-Type':'application/json'},
+    fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', keepalive:true, headers:{'Content-Type':'application/json'},
       body:JSON.stringify({title:this.state.pageTitle, tab:this.state.pageTab, blocks:this.state.blocks, styles:this.state.styles, realPage:id, ds:this.activeDsId()})})
       .then(r=>r.json()).then(d=>{ if(d&&d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); } else { this.setState({saveState:'error'}); this.toast('Save failed'); } })
       .catch(()=>{ this.setState({saveState:'error'}); this.toast('Save failed'); });

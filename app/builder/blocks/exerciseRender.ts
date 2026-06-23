@@ -198,7 +198,7 @@ export function exerciseMatrix(b: any, slug: string, serverSeed: any[] = [], liv
   saveBtn.addEventListener('click',function(){
     if(!LIVE){ statusEl.textContent=PREVIEW; saveBtn.disabled=true; return; }
     saveBtn.disabled=true; statusEl.textContent=${JSON.stringify(u.saving)};
-    var items=Object.keys(P).map(function(id){ return {id:id,label:P[id].label,importance:P[id].importance,satisfaction:P[id].satisfaction,comment:P[id].comment||'',hasAudio:!!P[id].audio,audio:P[id].audio||null}; });
+    var items=Object.keys(P).map(function(id){ return {id:id,label:P[id].label,importance:P[id].importance,satisfaction:P[id].satisfaction,comment:P[id].comment||'',hasAudio:!!P[id].audio}; }); /* BSO-669: audio data-URL dropped from the payload (voice notes are ephemeral, played during the session only) — keeps rows small and avoids the storage-bloat vector */
     fetch('/api/builder/exercise',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:'${slug}',exercise:'${esc(b.exerciseId)}',payload:{placements:items}})})
       .then(function(r){ return r.json(); })
       .then(function(j){ statusEl.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.saveFail)}; saveBtn.disabled=!j.ok; })

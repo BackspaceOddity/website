@@ -50,6 +50,13 @@ export async function POST(req: Request) {
   if (body.payload == null || typeof body.payload !== 'object') {
     return NextResponse.json({ error: 'missing payload' }, { status: 400 });
   }
+  // BSO-668: bound the stored payload so a public POST can't bloat the table.
+  // 512KB is generous for matrix placements / rankings / chips / text answers
+  // (audio is no longer carried — see BSO-669). True per-slug rate-limiting needs
+  // a shared counter store and is tracked separately on the issue.
+  if (JSON.stringify(body.payload).length > 512 * 1024) {
+    return NextResponse.json({ error: 'payload too large' }, { status: 413 });
+  }
 
   // Guard: only accept responses for a slug that is an actually-published page.
   const { data: page, error: pErr } = await supabase
