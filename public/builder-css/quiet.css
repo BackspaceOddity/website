@@ -533,14 +533,15 @@ html.dark body, html.dark { background: #0d1209; }
   --fw-display: 500; --fw-body: 400; --fw-btn: 500;
   --ls-eyebrow: 0.14em;
 }
-body:has(.bt-page){ background:#FFFFFF; }
+body:has(.bt-page){ background:#FAF9F6; }
 
 .bt-page{
-  --ink:#18181B; --ink-2:#52525B; --ink-3:#A1A1AA;
-  --line:#EAEAEA; --line-2:#F4F4F5;
-  --cream:#FFFFFF; --cream-soft:#FAFAFA; --ivory:#FFFFFF; --green:#18181B;
-  --signal:#2E9E5B; --grad:#FFFFFF;
-  background:#FFFFFF; color:#18181B; letter-spacing:-0.005em;
+  /* marriage: quiet type scale + KOS warm palette (cream surfaces, warm neutrals) */
+  --ink:#1A1A1A; --ink-2:#6B6B6B; --ink-3:#9A9A9A;
+  --line:#E5E3DC; --line-2:#EFEDE6;
+  --cream:#FAF9F6; --cream-soft:#F1EFE9; --ivory:#FFFFFF; --green:#1A1A1A;
+  --signal:#2E9E5B; --grad:#FAF9F6;
+  background:#FAF9F6; color:#1A1A1A; letter-spacing:-0.005em;
 }
 
 /* sections: more air, hairline rhythm */
@@ -567,7 +568,7 @@ body:has(.bt-page){ background:#FFFFFF; }
 .bt-cta-link{ color:var(--ink); font-size:14px; }
 
 /* hero — flat white, lots of air, restrained title, NO gradient/border */
-.bt-hero{ background:#FFFFFF; border:0; min-height:auto; padding:128px var(--pad-content) 96px; }
+.bt-hero{ background:#FAF9F6; border:0; min-height:auto; padding:128px var(--pad-content) 96px; }
 .bt-hero__inner{ gap:28px; max-width:900px; }
 .bt-hero__title{ font-family:var(--font-display); font-weight:var(--fw-display); font-size:var(--fs-h1); line-height:var(--lh-h1); letter-spacing:-0.03em; color:var(--ink); }
 .bt-hero__sub{ font-size:var(--fs-lead); line-height:var(--lh-lead); color:var(--ink-2); max-width:620px; }
