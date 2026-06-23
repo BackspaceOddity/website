@@ -23,7 +23,10 @@ Supabase dashboard → project `cgfifhprwfyurusfbxlb` → **Database → Backups
 - **Pro + PITR add-on:** point-in-time recovery to any second within the retention window
   (2–28 days). This is what you want once real client data is in.
 
-Record the answer here once known: `TIER: ____   RETENTION: ____   PITR: yes/no`.
+Recorded (observed in dashboard 2026-06-23): `TIER: Pro | RETENTION: daily, 7 days | PITR: NO (off)`.
+To enable PITR the project must first move to compute ≥ Small (paid), then the PITR add-on:
+7 days = $100/mo, 14 days = $200/mo, 28 days = $400/mo (+ the compute upsize). So PITR is a
+real monthly spend, not a free toggle — deferred until the first real client (see Step 0 reco).
 
 **Recommendation:** before onboarding a real client, enable PITR (Pro add-on). Workshop
 responses are not regenerable, so a 24h daily-only window is the real exposure.
