@@ -295,6 +295,127 @@ export const UREMBO_PAGE = [
     ],
   }),
   b('ub-div5', 'ub:divider', {}),
+  b('ub-ex-matrix', 'ub:exMatrix', {
+    sectionNum: '06 — Over to you',
+    heading: 'Which of these slow you down most?',
+    intro: 'We pulled these from our call. Drag each onto the grid — left to right is how important it is to you (1–10), bottom to top is how well it’s handled today (1–10). The ones that matter most but still run painfully are where the time really goes. Tap ＋ note on any card to tell us why (type or record a voice note).',
+    exerciseId: 'jtbd-matrix',
+    axisX: { label: 'How important to you', low: 'Minor', high: 'Critical' },
+    axisY: { label: 'How well it’s handled today', low: 'Painful', high: 'Handled' },
+    jobs: [
+      { id: 'approve', label: 'Approve a new merchant without the 3–5 day wait' },
+      { id: 'verify', label: 'Check documents and business authenticity' },
+      { id: 'paystack', label: 'Set up the Paystack sub-account for each merchant' },
+      { id: 'support', label: 'Handle support tickets as volume grows' },
+      { id: 'audit', label: 'Keep a clear record of every approval and reason' },
+    ],
+  }),
+  b('ub-div6', 'ub:divider', {}),
+  b('ub-ex-rank', 'ub:exRank', {
+    sectionNum: '07 — Where each part hurts',
+    heading: 'Within each job, what hurts most?',
+    intro: 'We grouped the problems under each part of the operation. Inside each group, drag them so the one that bites most sits on top. (Draft problem lists — we’ll refine these together.)',
+    exerciseId: 'problem-rank',
+    groups: [
+      {
+        jobId: 'approve',
+        jobLabel: 'Approving a new merchant',
+        problems: [
+          { id: 'approve-wait', label: '3–5 day wait before they can start' },
+          { id: 'approve-desk', label: 'Only moves when you’re at the desk' },
+          { id: 'approve-eta', label: 'Merchants don’t know when they’ll be live' },
+        ],
+      },
+      {
+        jobId: 'verify',
+        jobLabel: 'Checking documents & authenticity',
+        problems: [
+          { id: 'verify-byhand', label: 'Reading every document by hand' },
+          { id: 'verify-fakes', label: 'Hard to spot fake or low-quality docs' },
+          { id: 'verify-formats', label: 'Every merchant submits a different format' },
+        ],
+      },
+      {
+        jobId: 'paystack',
+        jobLabel: 'Setting up the Paystack sub-account',
+        problems: [
+          { id: 'paystack-manual', label: 'Manual setup for each merchant' },
+          { id: 'paystack-errors', label: 'A mistake means redoing it' },
+          { id: 'paystack-status', label: 'No clear view of what’s done' },
+        ],
+      },
+      {
+        jobId: 'support',
+        jobLabel: 'Handling support as volume grows',
+        problems: [
+          { id: 'support-repeat', label: 'The same questions over and over' },
+          { id: 'support-pileup', label: 'Tickets pile up when you’re busy' },
+          { id: 'support-triage', label: 'No way to sort urgent from routine' },
+        ],
+      },
+      {
+        jobId: 'audit',
+        jobLabel: 'Keeping a record of every approval',
+        problems: [
+          { id: 'audit-why', label: 'No log of why a merchant was approved' },
+          { id: 'audit-trace', label: 'Hard to answer “why this one?” later' },
+        ],
+      },
+    ],
+  }),
+  b('ub-div7', 'ub:divider', {}),
+  b('ub-ex-chips', 'ub:exChips', {
+    sectionNum: '08 — The moment it lands',
+    heading: 'When does the need actually arise?',
+    intro: 'A category entry point is the exact moment the work shows up — mapped across five questions (Sharp & Romaniuk). For merchant onboarding, pick what fits and add your own.',
+    exerciseId: 'entry-points',
+    questions: [
+      {
+        id: 'why',
+        q: 'Why',
+        example: 'a new merchant is ready to start selling',
+        options: ['A new merchant signs up', 'A merchant is ready to sell', 'You promised a fast launch', 'A partner referred them'],
+      },
+      {
+        id: 'when',
+        q: 'When',
+        example: 'after a marketing push',
+        options: ['Right after a marketing push', 'End of the day', 'Over the weekend', 'The moment documents land'],
+      },
+      {
+        id: 'where',
+        q: 'Where',
+        example: 'on your phone, away from the desk',
+        options: ['At your desk', 'On your phone', 'Away from the office', 'Inside the admin dashboard'],
+      },
+      {
+        id: 'with-whom',
+        q: 'With whom',
+        example: 'with the merchant waiting on you',
+        options: ['Just you', 'With a VA or assistant', 'With the merchant waiting', 'With your co-founder'],
+      },
+      {
+        id: 'with-what',
+        q: 'With what',
+        example: 'alongside the dashboard and WhatsApp',
+        options: ['The admin dashboard', 'WhatsApp / chat', 'Paystack', 'Spreadsheets or email'],
+      },
+    ],
+  }),
+  b('ub-div8', 'ub:divider', {}),
+  b('ub-ex-solutions', 'ub:exSolutions', {
+    sectionNum: '09 — What you do today',
+    heading: 'How do you handle each one now?',
+    intro: 'For each step, tell us how it works today — the tool, the workaround, the manual step. This is how we learn what to build around.',
+    exerciseId: 'current-solutions',
+    jobs: [
+      { id: 'approve', label: 'Approving a new merchant' },
+      { id: 'verify', label: 'Checking documents & business authenticity' },
+      { id: 'paystack', label: 'Setting up the Paystack sub-account' },
+      { id: 'support', label: 'Handling merchant support questions' },
+      { id: 'audit', label: 'Keeping a record of every approval' },
+    ],
+  }),
   b('ub-next', 'ub:nextSteps', {
     sectionNum: '10 — From our side',
     heading: 'What happens next',

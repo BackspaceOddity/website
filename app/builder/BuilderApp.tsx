@@ -32,7 +32,7 @@ const DEFAULT_PAGE_DS = 'pbt';
 // Adding a 3rd system = one entry here.
 const DESIGN_SYSTEMS = [
   { id: 'bso',    name: 'Backspace Oddity', cssKey: 'pbt',    sections: BT_SECTIONS },
-  { id: 'urembo', name: 'Urembo Hub',       cssKey: 'urembo', sections: UREMBO_SECTIONS },
+  { id: 'urembo', name: 'Green light',      cssKey: 'urembo', sections: UREMBO_SECTIONS },
 ];
 const DEFAULT_DS_ID = 'bso';
 // Resolve a DS id -> registry entry (fallback to the default 'bso' system).
