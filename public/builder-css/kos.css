@@ -514,9 +514,9 @@ html.dark body, html.dark { background: #0d1209; }
    Fuses BSO Web design system structure with the Knowledge OS visual
    language (tana-skin.css tokens, "extracted from Knowledge OS v8").
    ============================================================ */
-@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Regular.otf') format('opentype');font-weight:400;font-display:swap}
-@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Medium.otf') format('opentype');font-weight:500;font-display:swap}
-@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Bold.otf') format('opentype');font-weight:700;font-display:swap}
+@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Regular.otf') format('opentype');font-weight:400;font-display:block}
+@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Medium.otf') format('opentype');font-weight:500;font-display:block}
+@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Bold.otf') format('opentype');font-weight:700;font-display:block}
 
 :root{
   --font-display:'ABC Schengen', ui-sans-serif, sans-serif;

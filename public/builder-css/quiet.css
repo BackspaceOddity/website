@@ -514,9 +514,9 @@ html.dark body, html.dark { background: #0d1209; }
    Calm: near-white surfaces, hairline borders, generous air,
    tight type scale, mono micro-labels, one sage accent used sparingly.
    ============================================================ */
-@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Regular.otf') format('opentype');font-weight:400;font-display:swap}
-@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Medium.otf') format('opentype');font-weight:500;font-display:swap}
-@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Bold.otf') format('opentype');font-weight:700;font-display:swap}
+@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Regular.otf') format('opentype');font-weight:400;font-display:block}
+@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Medium.otf') format('opentype');font-weight:500;font-display:block}
+@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Bold.otf') format('opentype');font-weight:700;font-display:block}
 :root{
   --font-display:'ABC Schengen', -apple-system, system-ui, ui-sans-serif, sans-serif;
   --font-text:'Inter', -apple-system, system-ui, 'Segoe UI', ui-sans-serif, sans-serif;

@@ -75,6 +75,12 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: THEME_HEAD_SCRIPT }} />
+      {(cssId === 'kos' || cssId === 'quiet') && (
+        <>
+          <link rel="preload" as="font" type="font/otf" crossOrigin="anonymous" href="/fonts/ABCSchengenACyrillic-Medium.otf" />
+          <link rel="preload" as="font" type="font/otf" crossOrigin="anonymous" href="/fonts/ABCSchengenACyrillic-Bold.otf" />
+        </>
+      )}
       {cssId && <link rel="stylesheet" href={'/builder-css/' + cssId + '.css'} />}
       <PublishedView blocks={blocks} styles={data.published_styles} slug={slug} seed={seed} />
       <div dangerouslySetInnerHTML={{ __html: THEME_TOGGLE_HTML }} />
