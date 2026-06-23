@@ -1492,7 +1492,7 @@ class BuilderApp extends React.Component {
     if(!p || !p.inst || p.inst.id!==inst.id) return null;
     return {
       cursor:'crosshair',
-      onMouseMoveCapture:(ev)=>{ let el=ev.target; if(el&&el.nodeType===3) el=el.parentElement; const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null; const root=ev.currentTarget.getBoundingClientRect(); if(r) this.setState({claudeEditHover:{top:r.top-root.top, left:r.left-root.left, width:r.width, height:r.height}}); },
+      onMouseMoveCapture:(ev)=>{ let el=ev.target; if(el&&el.nodeType===3) el=el.parentElement; const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null; const root=ev.currentTarget.getBoundingClientRect(); const z=this.state.canvasZoom||1; /* getBoundingClientRect returns post-zoom px; the overlay lives INSIDE the zoom:canvasZoom canvas so it gets scaled again — divide by z so the highlight lines up with the element at any zoom (no-op at z=1). */ if(r) this.setState({claudeEditHover:{top:(r.top-root.top)/z, left:(r.left-root.left)/z, width:r.width/z, height:r.height/z}}); },
       onMouseLeave:()=>{ if(this.state.claudeEditHover) this.setState({claudeEditHover:null}); },
       onClickCapture:(ev)=>this.pickClaudeEditElement(ev, inst, index),
     };
