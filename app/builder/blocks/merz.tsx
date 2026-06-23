@@ -150,16 +150,36 @@ export function MerzFooter({ brand = 'Merz', tagline = 'Knowledge that compounds
   );
 }
 
+/* ---------- Embedded live demo — the real v11 KOS UI on mock data ---------- */
+export function KosDemo({
+  caption = 'Live demo — click around. This is the real Merz running on sample data.',
+  src = '/merz-demo/index.html',
+  e,
+}: { caption?: string; src?: string; e?: E }) {
+  return (
+    <section className="bt-sec bt-sec--light kos-demo" id="demo-live" data-screen-label="Live demo">
+      <div className="bt-inner">
+        <p className="kos-demo__cap"><Ed e={e} k="caption" v={caption} as="span" /></p>
+        <div className="kos-demo__frame">
+          <iframe src={src} title="Merz live demo" loading="lazy" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- registry (merged into BT_COMPONENTS / BT_TYPE_NAMES) ---------- */
 export const MERZ_COMPONENTS = {
   'merz:nav': MerzNav,
   'merz:demo': BtDemoSignup,
   'merz:footer': MerzFooter,
+  'kos:demo': KosDemo,
 };
 export const MERZ_TYPE_NAMES = {
   'merz:nav': 'Merz nav',
   'merz:demo': 'Demo signup',
   'merz:footer': 'Merz footer',
+  'kos:demo': 'Live demo',
 };
 
 /* ---------- the Merz page block-list (seeded into builder_pages) ---------- */
@@ -174,6 +194,7 @@ export const MERZ_PAGE = [
     cta: 'Book a demo',
     ctaHref: '#demo',
   }),
+  b('merz-demo-live', 'kos:demo', { caption: 'Live demo — click around. This is the real Merz running on sample data.' }),
   b('merz-how', 'bt:eps', {
     id: 'how', label: 'How it works', eyebrow: 'How it works', h2: 'Three steps — and the picture builds itself',
     intro: 'You just capture. Merz does the rest.',
