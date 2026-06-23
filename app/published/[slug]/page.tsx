@@ -26,7 +26,7 @@ const REAL_CSS: Record<string, string> = { p8fig: 'p8fig', pbt: 'pbt' };
 // Fallback when the page isn't one of the two seeded real pages: inject the CSS
 // for its design system (bso -> pbt tokens, urembo -> urembo). Without this a
 // published Urembo page (where the exercise blocks live) would render unstyled.
-const DS_CSS: Record<string, string> = { bso: 'pbt', urembo: 'urembo', kos: 'kos' };
+const DS_CSS: Record<string, string> = { bso: 'pbt', urembo: 'urembo', kos: 'kos', quiet: 'quiet' };
 
 export default async function PublishedPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

@@ -34,6 +34,7 @@ const DESIGN_SYSTEMS = [
   { id: 'bso',    name: 'Backspace Oddity', cssKey: 'pbt',    sections: BT_SECTIONS },
   { id: 'urembo', name: 'Green light',      cssKey: 'urembo', sections: UREMBO_SECTIONS },
   { id: 'kos',    name: 'Knowledge OS',     cssKey: 'kos',    sections: BT_SECTIONS },
+  { id: 'quiet',  name: 'Quiet (Merz)',     cssKey: 'quiet',  sections: BT_SECTIONS },
 ];
 const DEFAULT_DS_ID = 'bso';
 // Resolve a DS id -> registry entry (fallback to the default 'bso' system).

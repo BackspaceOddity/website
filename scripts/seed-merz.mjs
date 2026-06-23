@@ -50,7 +50,7 @@ const sb = createClient(url, key, { auth: { persistSession: false } });
 const id = 'merz';
 const title = 'Merz — demo';
 const row = {
-  id, title, tab: 'product', blocks: MERZ_PAGE, styles: {}, real_page: null, ds: 'kos', archived: false,
+  id, title, tab: 'product', blocks: MERZ_PAGE, styles: {}, real_page: null, ds: 'quiet', archived: false,
   // published snapshot (live immediately)
   slug: 'merz', published: true,
   published_blocks: MERZ_PAGE, published_real_page: null, published_title: title, published_styles: {},
