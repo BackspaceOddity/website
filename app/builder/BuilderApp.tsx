@@ -430,6 +430,13 @@ class BuilderApp extends React.Component {
   // DS's cssKey from the registry (may be null → no stylesheet, e.g. Urembo).
   activeDs(){ const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return BT_PAGES[rp].css; return getDs(this.activeDsId()).cssKey; }
   openPage(p){
+    // Opening another page must not let a pending debounced save from the OUTGOING
+    // page fire AFTER we've switched — savePage() reads this.state.realPage at fire
+    // time, so a stale timer would write the previous page's content under the newly
+    // opened page's id and clobber it (the urembo-hub data-loss, BSO-658). Flush the
+    // old page's dirty edits first, then kill the timer — same discipline as backToDash().
+    if(this.state.saveState==='dirty' && this.state.realPage){ this.savePage(); }
+    if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; }
     if(p && p.real && BT_PAGES[p.real]){
       const def=BT_PAGES[p.real]; this.injectPageCss(def.css);
       const cur=this.clone(def.blocks);
