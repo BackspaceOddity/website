@@ -19,6 +19,8 @@ export async function GET() {
       .select('id,title,tab,real_page,ds,archived,updated_at,updated_by')
       .order('updated_at', { ascending: false });
     if (error) return NextResponse.json({ pages: [], error: error.message }, { status: 500 });
+    // TEMP DIAGNOSTIC (BSO-658 disappearing-pages): log exactly what tabs we return.
+    console.log('[pages-diag] user=' + email + ' rows=' + (data ?? []).map((r: any) => r.id + ':' + r.tab + (r.archived ? ':ARCH' : '')).join(','));
     return NextResponse.json({ pages: data ?? [] });
   } catch (e: unknown) {
     return NextResponse.json({ pages: [], error: (e as Error).message }, { status: 500 });
