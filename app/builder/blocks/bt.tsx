@@ -221,7 +221,7 @@ export function BtInvest({ h2, price, terms, paymentLabel, payment, e }: { h2: s
 }
 
 /* ---------- Projects ---------- */
-type Project = { title: string; href: string; img: string; alt: string; desc: string };
+type Project = { title: string; href: string; img: string; alt: string; desc: string; linkText?: string; linkHref?: string };
 export function BtProjects({ id = 'experience', label = 'What we’ve done', eyebrow, h2, intro, projects, e }: { id?: string; label?: string; eyebrow?: string; h2: string; intro?: string; projects: Project[]; e?: E }) {
   return (
     <section className="bt-sec bt-sec--light" id={id} data-screen-label={label}>
@@ -232,16 +232,31 @@ export function BtProjects({ id = 'experience', label = 'What we’ve done', eye
           {intro ? <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" role="body" /> : null}
         </header>
         <div className="bt-projects">
-          {projects.map((p, i) => (
-            <div className="bt-projitem" key={i}>
-              <a className="bt-proj" href={p.href} target="_blank" rel="noopener noreferrer">
-                <img className="bt-proj__img" src={p.img} alt={p.alt} />
-                <span className="bt-proj__shade" aria-hidden="true"></span>
-                <Ed e={e} k={`projects.${i}.title`} v={p.title} as="h3" className="bt-proj__title" role="card" />
-              </a>
-              <Ed e={e} k={`projects.${i}.desc`} v={p.desc} as="p" className="bt-proj__desc" />
-            </div>
-          ))}
+          {projects.map((p, i) => {
+            // 1:1 with the live 8figures page: the image is NOT a link; instead the
+            // description splices linkText/linkHref as an inline anchor (Miro/Kleos/…).
+            // Keep the desc editable in the editor; render the inline link only when not
+            // editing (a link inside contentEditable would break editing).
+            const linked = !(e && e.on) && p.linkText && p.linkHref && p.desc.includes(p.linkText);
+            return (
+              <div className="bt-projitem" key={i}>
+                <div className="bt-proj">
+                  <img className="bt-proj__img" src={p.img} alt={p.alt} />
+                  <span className="bt-proj__shade" aria-hidden="true"></span>
+                  <Ed e={e} k={`projects.${i}.title`} v={p.title} as="h3" className="bt-proj__title" role="card" />
+                </div>
+                {linked ? (
+                  <p className="bt-proj__desc">
+                    {p.desc.slice(0, p.desc.indexOf(p.linkText!))}
+                    <a href={p.linkHref} target="_blank" rel="noopener noreferrer">{p.linkText}</a>
+                    {p.desc.slice(p.desc.indexOf(p.linkText!) + p.linkText!.length)}
+                  </p>
+                ) : (
+                  <Ed e={e} k={`projects.${i}.desc`} v={p.desc} as="p" className="bt-proj__desc" />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
