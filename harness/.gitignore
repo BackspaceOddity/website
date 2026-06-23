@@ -1,0 +1,9 @@
+# Raw scanner outputs from the Ultimate QA run — noisy, regenerable, not version-controlled.
+gitleaks-*.json
+gitleaks-*.log
+semgrep.json
+semgrep.log
+osv.json
+osv.log
+npm-audit.json
+npm-audit.err
