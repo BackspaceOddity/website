@@ -195,10 +195,12 @@ class BuilderApp extends React.Component {
   // id so real pages keep their styling and any saved page (incl. ones created from a
   // template) shows up and survives reload. Best-effort: a fetch failure leaves the
   // hardcoded PAGES so the dashboard is never empty.
-  loadPages(done){
+  loadPages(done, tries){
+    if(tries===undefined) tries=2; // retry a transient pages-fetch blip so it self-heals (BSO-682 #2)
     const after=()=>{ if(typeof done==='function') done(); };
+    const retryOrDone=()=>{ if(tries>1){ setTimeout(()=>this.loadPages(done, tries-1), 1200); } else { after(); } };
     fetch('/api/builder/pages/').then(r=>r.json()).then(d=>{
-      if(!d || !Array.isArray(d.pages)){ after(); return; }
+      if(!d || !Array.isArray(d.pages)){ retryOrDone(); return; }
       const meta={}; this.PAGES.forEach(p=>{ meta[p.id]=p; });
       const imgs=['magenta-green','terracotta','emerald','warm'];
       const merged=d.pages.filter(row=>!row.archived).map(row=>{
@@ -216,7 +218,7 @@ class BuilderApp extends React.Component {
       // Cache the good list so a later transient failure can fall back to it (BSO-658).
       try{ localStorage.setItem('bso_pages_cache', JSON.stringify(merged)); }catch(e){}
       this.setState({pages:merged}, after);
-    }).catch(after);
+    }).catch(retryOrDone);
   }
   // ---------- navigation (BSO-682 foundation #1: URL is the source of truth) ----------
   // Single /builder route; the URL alone says which screen + page is open:
@@ -791,11 +793,13 @@ class BuilderApp extends React.Component {
       const logo = h('svg',{viewBox:'0 0 80 80', width:30, height:30, fill:'currentColor', style:{display:'block'}},
         h('ellipse',{cx:14.718,cy:40,rx:14.718,ry:30.732}), h('ellipse',{cx:33.283,cy:40,rx:10.31,ry:38.537}),
         h('ellipse',{cx:47.615,cy:40,rx:3.544,ry:40}), h('ellipse',{cx:59.5,cy:40,rx:5,ry:32}), h('ellipse',{cx:72,cy:40,rx:3.3,ry:18}));
-      return h('div',{'data-theme':theme, style:{height:'100vh', overflow:'hidden', background:'var(--paper)', color:'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center'}},
+      return h('div',{'data-theme':theme, style:{height:'100vh', overflow:'hidden', background:'var(--paper)', color:'var(--ink)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:20}},
         h('div',{style:{display:'flex', alignItems:'center', gap:12, color:'var(--ink)'}}, logo,
           h('div',{style:{lineHeight:1}},
             h('div',{style:{fontWeight:700, fontSize:'15px', letterSpacing:'-0.01em'}}, 'Backspace Oddity'),
-            h('div',{style:this.mono({fontSize:'9.5px', marginTop:3})}, 'Landing builder'))));
+            h('div',{style:this.mono({fontSize:'9.5px', marginTop:3})}, 'Landing builder'))),
+        // Spinner so a slow load reads as "loading", not a frozen/blank screen (BSO-682 #2).
+        h('div',{style:{width:16, height:16, border:'2px solid var(--rule2)', borderTopColor:'var(--ink)', borderRadius:99, animation:'bsospin .7s linear infinite'}}));
     }
     if(screen==='login') return h('div',{'data-theme':theme, style:{height:'100vh', overflow:'hidden', background:'var(--paper)', color:'var(--ink)'}}, this.renderLogin(), this.state.toast && this.renderToast());
     return h('div', {'data-theme':theme,
