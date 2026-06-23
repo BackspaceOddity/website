@@ -260,6 +260,15 @@ class BuilderApp extends React.Component {
   uploadAsset(e){ const f=e.target.files&&e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f); this.setState(s=>({assets:[...s.assets, {id:this.nid('a'), name:(f.name||'Upload').replace(/\.[^.]+$/,''), val:url}]})); this.toast('Image added to library'); e.target.value=''; }
   deleteAsset(id){ this.setState(s=>({assets:s.assets.filter(a=>a.id!==id)})); this.toast('Image removed from library'); }
   slugify(s){ return (String(s||'page')).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32) || 'page'; }
+  // ---------- workspace tabs (BSO-682 #4: tabs are data-driven, not a hardcoded list) ----------
+  // Display label for a tab key. bso/community/product have nice names; any other key
+  // (a user-created tab) falls back to a capitalised slug — so new tabs render automatically.
+  tabLabel(k){ return ({bso:'BSO', community:'Community Sprints', product:'Product'})[k] || (String(k||'').charAt(0).toUpperCase()+String(k||'').slice(1)); }
+  // Every tab that currently exists = the two seeded ones + every distinct tab on a page.
+  existingTabKeys(){ return Array.from(new Set(['bso','community', ...(this.state.pages||[]).filter(p=>!p.archived).map(p=>p.tab||'bso')])); }
+  // Resolve a user-typed tab label/key to a tab key: match an existing tab by key or label,
+  // else slugify it as a brand-new tab (which then appears in the tab bar without a code edit).
+  resolveTabKey(raw){ const s=String(raw||'').trim(); if(!s) return 'bso'; const slug=this.slugify(s); for(const k of this.existingTabKeys()){ if(k===slug || this.tabLabel(k).toLowerCase()===s.toLowerCase()) return k; } return slug||'bso'; }
   openDeploy(p, from, push){ if(push===undefined) push=true; if(this.state.screen==='editor') this._flushEditor(); this.navTo('deploy', p&&p.id, push); this.setState({screen:'deploy', deployPage:p, deployFrom:from||'dashboard', deploySubdomain:this.slugify(p.name), deployStatus:'idle', deployLogs:[], deployStage:0, deployHost:'', deployUrl:'', deployStale:false});
     // BSO-670: surface whether the draft has changed since the last publish, so the
     // user knows the live page is stale and needs a republish.
@@ -624,11 +633,11 @@ class BuilderApp extends React.Component {
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
     const title = (this.state.newPageName && this.state.newPageName.trim()) || 'Untitled page';
     const id = this.uniquePageId(title);
-    const tab = this.state.dashTab || 'bso';
+    const tab = this.resolveTabKey(this.state.newPageTab!==undefined ? this.state.newPageTab : (this.state.dashTab||'bso'));
     const blocks = this.buildPage(a.recipe);
     // Treat the new page as a DB-backed real page: realPage=id wires markDirty/savePage
     // to it so every subsequent edit auto-saves to this row.
-    this.setState({screen:'editor', realPage:id, pageDs:cssId, pageDsId:dsId, newPageOpen:false, newPageName:'', newPageArche:null, newPageDsId:DEFAULT_DS_ID,
+    this.setState({screen:'editor', realPage:id, pageDs:cssId, pageDsId:dsId, newPageOpen:false, newPageName:'', newPageArche:null, newPageDsId:DEFAULT_DS_ID, newPageTab:undefined, dashTab:tab,
       pageTitle:title, pageTab:tab, currentPage:{id, name:title, tab, real:id, status:'Draft', ds:dsId},
       blocks, styles, btStyles:(styles&&styles.bt)?this.clone(styles.bt):{}, roleDefaults:{},
       selectedId:null, selectedRole:null, editMode:true, locked:false, saveState:'saving', previewVersionId:null, imgTarget:null,
@@ -915,7 +924,7 @@ class BuilderApp extends React.Component {
       screen==='editor' && h('button',{onClick:()=>this.setState({locked:!this.state.locked}), style:this.topBtn(false)}, this.state.locked?'Take over':'Simulate lock'),
       h('button',{onClick:()=>this.setState({variationsOpen:true}), style:this.topBtn(false)}, 'Variations'),
       h('button',{onClick:()=>this.setState({theme:this.state.theme==='light'?'dark':'light'}), style:this.topBtn(false), title:'Toggle builder theme'}, this.state.theme==='light'?'Dark':'Light'),
-      screen==='dashboard' && h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:'', newPageDsId:DEFAULT_DS_ID}), style:Object.assign(this.topBtn(false),{background:'var(--ink)', color:'var(--paper)', borderColor:'var(--ink)', fontWeight:600})}, '+ New page'),
+      screen==='dashboard' && h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:'', newPageDsId:DEFAULT_DS_ID, newPageTab:undefined}), style:Object.assign(this.topBtn(false),{background:'var(--ink)', color:'var(--paper)', borderColor:'var(--ink)', fontWeight:600})}, '+ New page'),
     );
   }
   topBtn(active){ return {height:26, flex:'0 0 auto', padding:'0 10px', display:'inline-flex', alignItems:'center', border:'1px solid '+(active?'var(--ink)':'var(--rule)'), borderRadius:6, background:active?'var(--ink)':'transparent', color:active?'var(--paper)':'var(--muted)', cursor:'pointer', fontSize:'11px', fontWeight:500, fontFamily:"'JetBrains Mono',monospace", letterSpacing:'.02em', whiteSpace:'nowrap', transition:'border-color .12s, color .12s, background .12s'}; }
@@ -930,9 +939,8 @@ class BuilderApp extends React.Component {
     // Tabs are DATA-DRIVEN: bso + community always, plus any other tab a page actually
     // uses (e.g. 'product' from the Merz pages). A hardcoded tab list hid pages created
     // under a new tab — they existed in the DB but had no tab to show under. (BSO-658.)
-    const TAB_LABELS = { bso:'BSO', community:'Community Sprints', product:'Product' };
-    const tabName = (k)=> TAB_LABELS[k] || (String(k||'').charAt(0).toUpperCase()+String(k||'').slice(1));
-    const tabKeys = Array.from(new Set(['bso','community', ...(this.state.pages||[]).filter(p=>!p.archived).map(p=>p.tab||'bso')]));
+    const tabName = (k)=> this.tabLabel(k);
+    const tabKeys = this.existingTabKeys();
     return h('div',{className:'bso-scroll', style:{height:'100%', overflowY:'auto', background:'var(--paper)'}},
       h('div',{style:{maxWidth:1080, margin:'0 auto', padding:'40px 32px 64px'}},
         h('div',{style:{display:'flex', alignItems:'flex-end', justifyContent:'space-between', marginBottom:28, flexWrap:'wrap', gap:16}},
@@ -942,7 +950,7 @@ class BuilderApp extends React.Component {
             h('div',{style:{fontSize:'15px', color:'var(--muted)', marginTop:8}}, all.length+' pages · '+tabName(dashTab))),
           h('div',{style:{display:'flex', gap:10, alignItems:'center'}},
             this.seg([{v:'rows',l:'Rows'},{v:'gallery',l:'Grid'}], dashView, v=>this.setState({dashView:v})),
-            h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:'', newPageDsId:DEFAULT_DS_ID}), style:{padding:'9px 16px', border:'1px solid var(--ink)', borderRadius:8, background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, 'New page from template'))),
+            h('button',{onClick:()=>this.setState({newPageOpen:true, newPageStep:1, newPageArche:null, newPageName:'', newPageDsId:DEFAULT_DS_ID, newPageTab:undefined}), style:{padding:'9px 16px', border:'1px solid var(--ink)', borderRadius:8, background:'var(--ink)', color:'var(--paper)', cursor:'pointer', fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, 'New page from template'))),
         // tabs
         h('div',{style:{display:'flex', gap:24, borderBottom:'1px solid var(--rule)', marginBottom:24}},
           tabKeys.map((k)=> h('button',{key:k, onClick:()=>this.setState({dashTab:k, dashPageIdx:0}), style:{padding:'0 0 12px', background:'none', border:'none', borderBottom:'2px solid '+(dashTab===k?'var(--ink)':'transparent'), marginBottom:-1, cursor:'pointer', fontSize:'15px', fontWeight:dashTab===k?600:500, color:dashTab===k?'var(--ink)':'var(--muted)', fontFamily:'inherit'}}, tabName(k)))),
@@ -1834,7 +1842,7 @@ class BuilderApp extends React.Component {
 
   // ---------- new page modal ----------
   renderNewPage(){
-    const h=React.createElement; const {newPageArche, newPageName, newPageDsId}=this.state;
+    const h=React.createElement; const {newPageArche, newPageName, newPageDsId, newPageTab, dashTab}=this.state;
     return h('div',{onClick:()=>this.setState({newPageOpen:false}), style:{position:'absolute', inset:0, zIndex:60, background:'rgba(1,28,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', padding:24, animation:'bsofade .2s both'}},
       h('div',{onClick:e=>e.stopPropagation(), style:{width:720, maxWidth:'100%', maxHeight:'90%', overflow:'auto', background:'var(--surface)', borderRadius:16, border:'1px solid var(--rule)', boxShadow:'var(--shadow)'}},
         h('div',{style:{padding:'22px 26px 18px', borderBottom:'1px solid var(--rule)'}},
@@ -1854,7 +1862,12 @@ class BuilderApp extends React.Component {
                 h('div',{style:{fontSize:'11.5px', marginTop:3, color:on?'rgba(242,242,240,.75)':'var(--muted)'}}, empty? 'sections coming soon' : d.sections.length+' section types')); }))),
           h('div',{style:{marginTop:22}},
             h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:7}}, 'Page name'),
-            h('input',{value:newPageName, onChange:e=>this.setState({newPageName:e.target.value}), placeholder:'e.g. Q3 partnership proposal', style:{width:'100%', padding:'11px 13px', borderRadius:9, border:'1px solid var(--rule2)', background:'var(--paper)', color:'var(--ink)', fontSize:'15px', fontFamily:'inherit'}}))),
+            h('input',{value:newPageName, onChange:e=>this.setState({newPageName:e.target.value}), placeholder:'e.g. Q3 partnership proposal', style:{width:'100%', padding:'11px 13px', borderRadius:9, border:'1px solid var(--rule2)', background:'var(--paper)', color:'var(--ink)', fontSize:'15px', fontFamily:'inherit'}})),
+          h('div',{style:{marginTop:22}},
+            h('div',{style:{fontSize:'12px', color:'var(--muted)', marginBottom:7}}, 'Workspace tab'),
+            h('input',{list:'bso-tablist', value:(newPageTab!==undefined?newPageTab:this.tabLabel(dashTab||'bso')), onChange:e=>this.setState({newPageTab:e.target.value}), placeholder:'BSO, Community Sprints, or a new tab', style:{width:'100%', padding:'11px 13px', borderRadius:9, border:'1px solid var(--rule2)', background:'var(--paper)', color:'var(--ink)', fontSize:'15px', fontFamily:'inherit'}}),
+            h('datalist',{id:'bso-tablist'}, this.existingTabKeys().map(k=>h('option',{key:k, value:this.tabLabel(k)}))),
+            h('div',{style:{fontSize:'11.5px', color:'var(--muted)', marginTop:6}}, 'Pick an existing tab or type a new one — it becomes a tab automatically.'))),
         h('div',{style:{padding:'16px 26px', borderTop:'1px solid var(--rule)', display:'flex', justifyContent:'flex-end', gap:10}},
           h('button',{onClick:()=>this.setState({newPageOpen:false}), style:{padding:'10px 18px', borderRadius:8, border:'1px solid var(--rule2)', background:'transparent', color:'var(--ink)', cursor:'pointer', fontSize:'13.5px', fontFamily:'inherit'}}, 'Cancel'),
           h('button',{onClick:()=>this.createFromTemplate(), disabled:!newPageArche, style:{padding:'10px 20px', borderRadius:8, border:'1px solid var(--ink)', background:'var(--ink)', color:'var(--paper)', cursor:newPageArche?'pointer':'default', opacity:newPageArche?1:0.45, fontSize:'13.5px', fontWeight:600, fontFamily:'inherit'}}, 'Create & open editor'))));
