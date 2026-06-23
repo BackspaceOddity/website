@@ -119,7 +119,7 @@ export function BtDemoSignup({
             </label>
             <label className="bt-field">
               <span><Ed e={e} k="reasonLabel" v={reasonLabel} as="span" /></span>
-              <textarea rows={3} value={reason} onChange={(ev) => setReason(ev.target.value)} placeholder="e.g. notes pile up but never add up to a picture…" />
+              <textarea rows={3} value={reason} onChange={(ev) => setReason(ev.target.value)} placeholder="Notion, Obsidian, Google Docs, a pile of browser tabs…" />
             </label>
             {/* honeypot */}
             <input className="bt-hp" tabIndex={-1} autoComplete="off" aria-hidden="true" value={hp} onChange={(ev) => setHp(ev.target.value)} />
@@ -147,6 +147,25 @@ export function MerzFooter({ brand = 'Merz', tagline = 'Knowledge that compounds
         <Ed e={e} k="tagline" v={tagline} as="span" className="bt-footer__label" />
       </div>
     </footer>
+  );
+}
+
+/* ---------- Text-only statement section (hinge / methodology / why-own-UI) ----------
+ * Pure content block: eyebrow + h2 + intro, no form, no cards. Reuses the
+ * already-styled .bt-head / .bt-eyebrow / .bt-h2 / .bt-intro classes so it needs
+ * zero new CSS. Used for the "show → reveal" bridges where BtDiagnostic can't be
+ * used (that one embeds a LeadForm). */
+export function MerzStatement({ eyebrow = '', h2 = '', intro = '', id = 'note', e }: { eyebrow?: string; h2?: string; intro?: string; id?: string; e?: E }) {
+  return (
+    <section className="bt-sec bt-sec--light" id={id} data-screen-label={eyebrow || 'Note'}>
+      <div className="bt-inner">
+        <header className="bt-head bt-head--gap">
+          {eyebrow ? <Ed e={e} k="eyebrow" v={eyebrow} as="span" className="bt-eyebrow" role="eyebrow" /> : null}
+          <Ed e={e} k="h2" v={h2} as="h2" className="bt-h2" role="h2" />
+          {intro ? <Ed e={e} k="intro" v={intro} as="p" className="bt-intro" role="body" /> : null}
+        </header>
+      </div>
+    </section>
   );
 }
 
@@ -181,12 +200,14 @@ export const MERZ_COMPONENTS = {
   'merz:nav': MerzNav,
   'merz:demo': BtDemoSignup,
   'merz:footer': MerzFooter,
+  'merz:statement': MerzStatement,
   'kos:demo': KosDemo,
 };
 export const MERZ_TYPE_NAMES = {
   'merz:nav': 'Merz nav',
   'merz:demo': 'Demo signup',
   'merz:footer': 'Merz footer',
+  'merz:statement': 'Statement',
   'kos:demo': 'Live demo',
 };
 
@@ -194,43 +215,95 @@ export const MERZ_TYPE_NAMES = {
 const b = (id: string, type: string, props: any) => ({ id, type, props, real: true });
 
 export const MERZ_PAGE = [
-  b('merz-nav', 'merz:nav', { brand: 'Merz', cta: 'Book a demo', slug: 'merz' }),
+  b('merz-nav', 'merz:nav', { brand: 'Merz', cta: 'Request access', slug: 'merz' }),
+
+  /* ── SHOW ── result-first hero (IFR: the outcome with none of the labor) → routes into the demo, not a form */
   b('merz-hero', 'bt:hero', {
-    eyebrow: 'AI-native space for your knowledge',
-    title: 'Knowledge that compounds — instead of getting lost',
-    subtitle: 'Merz takes everything you capture on the fly, turns it into a connected picture on its own, and hands it back the moment you need it. No manual sorting, no folders nobody opens later.',
-    cta: 'Book a demo',
-    ctaHref: '#demo',
+    eyebrow: 'An AI-native knowledge workspace',
+    title: 'Everything you capture becomes a connected second brain — without you sorting a thing.',
+    subtitle: 'Drop in a thought, a link, a fragment of a call. Merz breaks it down, connects it to what you already know, and hands the whole picture back the moment you ask. No folders, no tagging, no upkeep.',
+    cta: 'See it work',
+    ctaHref: '#demo-live',
   }),
-  b('merz-demo-live', 'kos:demo', { caption: 'Live demo — click around. This is the real Merz running on sample data.' }),
-  b('merz-how', 'bt:eps', {
-    id: 'how', label: 'How it works', eyebrow: 'How it works', h2: 'Three steps — and the picture builds itself',
-    intro: 'You just capture. Merz does the rest.',
+
+  /* the demo IS the pitch — let the visitor perform the trick themselves */
+  b('merz-demo-live', 'kos:demo', {
+    caption: 'The real Merz, running on a sample workspace. Open a node, follow a connection, search by meaning.',
+  }),
+
+  /* ── REVEAL ── the "how did you do that?" bridge: wow → curiosity, magician register */
+  b('merz-hinge', 'merz:statement', {
+    id: 'hinge',
+    eyebrow: 'How did you do that?',
+    h2: 'You didn’t sort, tag, or file anything. The connections were already there.',
+    intro: 'That’s the point. You did what you’d normally do — captured a thought. The structure formed underneath you. Here’s what makes that happen.',
+  }),
+
+  /* two-layer architecture — infrastructure, not an app */
+  b('merz-twolayer', 'bt:eps', {
+    id: 'architecture', label: 'Architecture', compact: false,
+    eyebrow: 'Infrastructure, not an app',
+    h2: 'Two layers: one that lasts, one that changes',
+    intro: 'Merz isn’t a notes app you’ll migrate off in a year. It’s two separated layers — and that separation is why your knowledge keeps compounding no matter which tools you use.',
     points: [
-      { metric: '01', name: 'Capture on the fly', text: 'A thought, a link, a piece of a conversation — drop it into Merz like a message. No folders to choose.' },
-      { metric: '02', name: 'It connects itself', text: 'Merz breaks every note into its meaningful parts and links them to what you already know. The picture forms without you.' },
-      { metric: '03', name: 'It comes back in time', text: 'Ask in plain words — Merz pulls out what you need and shows how it connects to the rest.' },
+      { metric: 'Layer 1', name: 'The substrate', text: 'Your knowledge lives as plain, portable atoms in an open graph you own — independent of any one app, vendor, or format. This layer is permanent.' },
+      { metric: 'Layer 2', name: 'The surface', text: 'What you read and write through: this workspace, your editor, a chat, an MCP client. Surfaces come and go. The substrate underneath never moves.' },
     ],
   }),
-  b('merz-challenge', 'bt:challenge', {
-    h2: 'Why notes usually don’t work',
-    you: { label: 'The usual way', body: 'You diligently write everything down — in notes, in Notion, across a dozen tools. Six months later it’s a graveyard you can’t search, so you start over.' },
-    we: { label: 'With Merz', points: [
-      'You capture in one place, with no folder to pick.',
-      'Connections appear on their own — you don’t tag them.',
-      'Search works by meaning, not the exact word.',
-      'The longer you use it, the more useful it gets: knowledge compounds instead of going stale.',
-    ] },
+
+  /* why we built our own surface */
+  b('merz-ownui', 'merz:statement', {
+    id: 'why-own-ui',
+    eyebrow: 'Why we built our own',
+    h2: 'A surface you can see into — for the people other tools assume away.',
+    intro: 'Most knowledge tools assume you live in Notion. Most people don’t. Merz runs on plain markdown and git — the formats that outlive any app — and gives the majority who never adopted Notion a home that fits how they already think. Building the surface ourselves means nothing about how it works stays hidden from you.',
   }),
+
+  /* depth engine — three tiers, signal of real engineering */
+  b('merz-engine', 'bt:eps', {
+    id: 'engine', label: 'Under the hood', compact: false,
+    eyebrow: 'Under the hood',
+    h2: 'A three-tier engine doing the work you don’t see',
+    intro: 'Capture is one tap. Everything that makes it useful happens in three tiers beneath it.',
+    points: [
+      { metric: '01', name: 'Ambient capture', text: 'Anything you drop in — a message, a link, a voice note — lands without a decision. No folder to pick, no form to fill.' },
+      { metric: '02', name: 'Atomize & connect', text: 'A model breaks each capture into its meaningful parts and links them to what you already know — reviewed before anything enters your graph, so it compounds safely.' },
+      { metric: '03', name: 'Recall by meaning', text: 'Ask in plain words. Merz returns what fits — by meaning, not exact match — and shows how it connects to the rest of your thinking.' },
+    ],
+  }),
+
+  /* the moat — methodology delivered through MCP */
+  b('merz-methodology', 'merz:statement', {
+    id: 'methodology',
+    eyebrow: 'The part that’s hard to copy',
+    h2: 'A piece of our brain, wired into yours.',
+    intro: 'The graph is yours. How it stays trustworthy is ours: the checks that run the moment knowledge is written, the way claims get grounded before they’re relied on. That methodology is delivered live through MCP — the difference between storing notes and building knowledge that holds up. The longer you run it, the more that judgment compounds in your favor.',
+  }),
+
+  /* use cases — three teams, three different jobs */
+  b('merz-usecases', 'bt:eps', {
+    id: 'who', label: 'Who it’s for', compact: false,
+    eyebrow: 'Who it’s for',
+    h2: 'Three teams, three different jobs',
+    intro: 'The same engine, pointed at very different problems.',
+    points: [
+      { metric: 'Startups', name: 'Move without losing the thread', text: 'Decisions, research, and context pile up fast across five tools. Merz keeps the whole picture in one place, so the next hire — or the next you — can pick it up cold.' },
+      { metric: 'Mid-size', name: 'Turn scattered work into shared memory', text: 'Teams know things that never leave one person’s head. Merz turns individual capture into a connected memory the whole team can search by meaning.' },
+      { metric: 'Enterprise', name: 'Compounding knowledge, safely', text: 'Capability is granted per action, not per session. Observation is wide; nothing leaves or changes without a human yes. Knowledge that compounds without handing an agent the keys.' },
+    ],
+  }),
+
+  /* ── SELL ── request access + segment signal (what's your stack) */
   b('merz-demo', 'merz:demo', {
     eyebrow: 'Early access',
-    h2: 'Book a demo',
-    intro: 'Merz is in private beta. Leave your email — we’ll invite you to a live demo and get you in among the first.',
-    cta: 'Book a demo',
-    done: 'Done — we’ll be in touch and invite you to a demo in the coming days.',
-    emailLabel: 'Email',
-    reasonLabel: 'What are you trying to solve? — optional',
+    h2: 'Get your team in',
+    intro: 'Merz is in private beta. Tell us what you’re running today — we’ll get you set up and walk you through it live.',
+    cta: 'Request access',
+    done: 'You’re in the queue — we’ll be in touch shortly to get you set up.',
+    emailLabel: 'Work email',
+    reasonLabel: 'What’s your team running today? — optional',
     slug: 'merz',
   }),
+
   b('merz-footer', 'merz:footer', { brand: 'Merz', tagline: 'Knowledge that compounds.' }),
 ];
