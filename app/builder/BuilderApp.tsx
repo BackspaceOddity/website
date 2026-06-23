@@ -517,7 +517,7 @@ class BuilderApp extends React.Component {
   // The cssKey (stylesheet id) active for the open page. A built-in real page keys
   // off its own per-instance stylesheet (p8fig/pbt); any other page resolves its
   // DS's cssKey from the registry (may be null → no stylesheet, e.g. Urembo).
-  activeDs(){ const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return BT_PAGES[rp].css; return getDs(this.activeDsId()).cssKey; }
+  activeDs(){ if(this.state.pageCssKey) return this.state.pageCssKey; const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return BT_PAGES[rp].css; return getDs(this.activeDsId()).cssKey; }
   openPage(p, push){ if(push===undefined) push=true;
     // Opening another page must not let a pending debounced save from the OUTGOING
     // page fire AFTER we've switched — savePage() reads this.state.realPage at fire
@@ -529,7 +529,7 @@ class BuilderApp extends React.Component {
     if(p && p.real && BT_PAGES[p.real]){
       const def=BT_PAGES[p.real]; this.injectPageCss(def.css);
       const cur=this.clone(def.blocks);
-      this.setState({screen:'editor', realPage:p.real, pageDs:null, pageDsId:'bso', pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
+      this.setState({screen:'editor', realPage:p.real, pageDs:null, pageCssKey:def.css, pageDsId:'bso', pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
         styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES),
         btStyles:{}, roleDefaults:{},
         selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
@@ -551,9 +551,9 @@ class BuilderApp extends React.Component {
     // and load its saved blocks/styles from the DB so a reload restores content (BSO-658).
     if(p && p.id && !BT_PAGES[p.id]){
       // Resolve the page's DS from the list row's ds (if present) -> registry cssKey.
-      const dsId0=p.ds||DEFAULT_DS_ID; const css0=getDs(dsId0).cssKey;
+      const dsId0=p.ds||DEFAULT_DS_ID; const css0=p.css_key||getDs(dsId0).cssKey;
       this.injectPageCss(css0);
-      this.setState({screen:'editor', realPage:p.id, pageDs:css0, pageDsId:dsId0, pageTitle:p.name, pageTab:p.tab||'bso', currentPage:p,
+      this.setState({screen:'editor', realPage:p.id, pageDs:css0, pageCssKey:(p.css_key||css0), pageDsId:dsId0, pageTitle:p.name, pageTab:p.tab||'bso', currentPage:p,
         blocks:[], styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES), btStyles:{}, roleDefaults:{},
         selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
         saveState:'loading',
@@ -563,9 +563,10 @@ class BuilderApp extends React.Component {
         if(d && d.saved && d.page){
           const savedStyles=d.page.styles?this.clone(d.page.styles):this.state.styles;
           const savedBlocks=Array.isArray(d.page.blocks)?this.clone(d.page.blocks):[];
-          // The DB row is the source of truth for the page's DS — re-inject its CSS.
-          const dsId=d.page.ds||dsId0; const cssId=getDs(dsId).cssKey; this.injectPageCss(cssId);
-          this.setState({blocks:savedBlocks, styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, pageTitle:d.page.title||p.name, pageDs:cssId, pageDsId:dsId, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null,
+          // The DB row is the source of truth — re-inject its stored stylesheet (css_key),
+          // falling back to the ds-derived sheet only when the key isn't stored yet.
+          const dsId=d.page.ds||dsId0; const cssId=d.page.css_key||getDs(dsId).cssKey; this.injectPageCss(cssId);
+          this.setState({blocks:savedBlocks, styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, pageTitle:d.page.title||p.name, pageDs:cssId, pageCssKey:(d.page.css_key||cssId), pageDsId:dsId, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null,
             versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(savedBlocks)}]});
         } else { this.setState({saveState:'saved'}); }
       }).catch(()=>this.setState({saveState:'saved'}));
@@ -579,7 +580,7 @@ class BuilderApp extends React.Component {
     const cur=this.buildPage(p.recipe);
     const v2=this.clone(cur); const hv2=v2.find(b=>b.type==='hero'); if(hv2){ hv2.props.heading='Uncover hidden growth levers.'; hv2.props.label='Backspace Oddity'; hv2.props.cta='Get in touch'; hv2.props.img='terracotta'; }
     const v1=this.clone(cur).filter(b=>b.type==='hero'||b.type==='footer'); const hv1=v1.find(b=>b.type==='hero'); if(hv1){ hv1.props.heading='A new home for Backspace Oddity.'; hv1.props.img='emerald'; }
-    this.setState({screen:'editor', realPage:null, pageDs:DEFAULT_PAGE_DS, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur, styles,
+    this.setState({screen:'editor', realPage:null, pageDs:DEFAULT_PAGE_DS, pageCssKey:DEFAULT_PAGE_DS, pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur, styles,
       selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
       versions:[
         {id:'v3', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(cur)},
@@ -599,7 +600,7 @@ class BuilderApp extends React.Component {
     if(tries===undefined) tries=2;
     this.setState({saveState:'saving'});
     fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', keepalive:true, headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({title:this.state.pageTitle, tab:this.state.pageTab, blocks:this.state.blocks, styles:this.state.styles, realPage:id, ds:this.activeDsId()})})
+      body:JSON.stringify({title:this.state.pageTitle, tab:this.state.pageTab, blocks:this.state.blocks, styles:this.state.styles, realPage:id, ds:this.activeDsId(), css_key:this.activeDs()})})
       .then(r=>{ if(r.status===401) return {__authLost:true}; return r.json(); }).then(d=>{
         // Dead session: retry once (absorbs the refresh-token rotation race), then bounce to
         // login so the edit isn't silently lost against an expired session (BSO-682 #3).
@@ -637,7 +638,7 @@ class BuilderApp extends React.Component {
     const blocks = this.buildPage(a.recipe);
     // Treat the new page as a DB-backed real page: realPage=id wires markDirty/savePage
     // to it so every subsequent edit auto-saves to this row.
-    this.setState({screen:'editor', realPage:id, pageDs:cssId, pageDsId:dsId, newPageOpen:false, newPageName:'', newPageArche:null, newPageDsId:DEFAULT_DS_ID, newPageTab:undefined, dashTab:tab,
+    this.setState({screen:'editor', realPage:id, pageDs:cssId, pageCssKey:cssId, pageDsId:dsId, newPageOpen:false, newPageName:'', newPageArche:null, newPageDsId:DEFAULT_DS_ID, newPageTab:undefined, dashTab:tab,
       pageTitle:title, pageTab:tab, currentPage:{id, name:title, tab, real:id, status:'Draft', ds:dsId},
       blocks, styles, btStyles:(styles&&styles.bt)?this.clone(styles.bt):{}, roleDefaults:{},
       selectedId:null, selectedRole:null, editMode:true, locked:false, saveState:'saving', previewVersionId:null, imgTarget:null,
@@ -645,7 +646,7 @@ class BuilderApp extends React.Component {
     this.navTo('editor', id, true);
     // Persist the initial row NOW (create-on-create), not only on first edit.
     fetch('/api/builder/pages/'+encodeURIComponent(id)+'/', {method:'PUT', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({title, tab, blocks, styles, realPage:id, ds:dsId})})
+      body:JSON.stringify({title, tab, blocks, styles, realPage:id, ds:dsId, css_key:cssId})})
       .then(r=>r.json()).then(d=>{
         if(this.state.realPage!==id) return;
         if(d && d.ok){ this.setState({saveState:'saved', lastSavedBy:d.updated_by||null}); this.loadPages(); }

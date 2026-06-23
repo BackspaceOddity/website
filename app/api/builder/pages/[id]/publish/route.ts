@@ -69,6 +69,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       published_blocks: page.blocks ?? [],
       published_styles: page.styles ?? null,
       published_real_page: page.real_page ?? null,
+      published_css_key: page.css_key ?? null, // pin the stylesheet at publish time (BSO-682 canonical model)
       published_title: page.title ?? null,
       published_at: publishedAt,
       published_by: email,

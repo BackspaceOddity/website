@@ -34,7 +34,7 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
 
   const { data, error } = await supabase
     .from('builder_pages')
-    .select('published_blocks, published_real_page, published_title, published, published_styles, ds')
+    .select('published_blocks, published_real_page, published_title, published, published_styles, ds, css_key, published_css_key')
     .eq('slug', slug)
     .eq('published', true)
     .maybeSingle();
@@ -44,7 +44,11 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
   const blocks = Array.isArray(data.published_blocks) ? data.published_blocks : [];
   const realPage = data.published_real_page as string | null;
   const ds = (data.ds as string | null) || 'bso';
-  const cssId = (realPage && REAL_CSS[realPage]) || DS_CSS[ds] || null;
+  // Stylesheet is a stored property now (BSO-682 canonical model): prefer the pinned
+  // published key, then the draft key, then the legacy derivation as a safety net.
+  const cssId = (data.published_css_key as string | null)
+    || (data.css_key as string | null)
+    || (realPage && REAL_CSS[realPage]) || DS_CSS[ds] || null;
 
   // Seed the interactive blocks with the client's prior submissions so a
   // returning visitor sees their matrix placements / locked decision / notes.

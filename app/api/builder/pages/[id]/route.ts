@@ -26,7 +26,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   const { id } = await ctx.params;
   let body: any = {};
   try { body = await req.json(); } catch {}
-  const row = {
+  const row: Record<string, unknown> = {
     id,
     title: body.title ?? null,
     tab: body.tab ?? null,
@@ -38,6 +38,9 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     updated_at: new Date().toISOString(),
     updated_by: email,
   };
+  // The page's stylesheet is a stored property (BSO-682 canonical model). Only write it
+  // when the client sends it, so a save without it never clobbers the stored key.
+  if (body.css_key) row.css_key = body.css_key;
   const { error } = await supabase.from('builder_pages').upsert(row, { onConflict: 'id' });
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true, updated_at: row.updated_at, updated_by: email });
