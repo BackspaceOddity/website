@@ -87,7 +87,15 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
             "@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Regular.otf') format('opentype');font-weight:400;font-display:block}"+
             "@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Medium.otf') format('opentype');font-weight:500;font-display:block}"+
             "@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Bold.otf') format('opentype');font-weight:700;font-display:block}"+
-            ".page.bt-page{--font-display:'ABC Schengen',-apple-system,system-ui,sans-serif;--font-text:'Inter',-apple-system,system-ui,sans-serif;--ff-display:'ABC Schengen',-apple-system,system-ui,sans-serif;--ff-text:'Inter',-apple-system,system-ui,sans-serif}"
+            ".page.bt-page{--font-display:'ABC Schengen',-apple-system,system-ui,sans-serif;--font-text:'Inter',-apple-system,system-ui,sans-serif;--ff-display:'ABC Schengen',-apple-system,system-ui,sans-serif;--ff-text:'Inter',-apple-system,system-ui,sans-serif}"+
+            // Reveal-on-fonts-ready: keep the page hidden until ABC Schengen has actually
+            // loaded, then fade in. This is mechanism-proof — no system-font frame is ever
+            // painted, regardless of font-display quirks. Safety timeout reveals anyway.
+            ".page.bt-page{opacity:0;transition:opacity .18s ease}html.fonts-ready .page.bt-page{opacity:1}"
+          }} />
+          <script dangerouslySetInnerHTML={{ __html:
+            "(function(){function s(){document.documentElement.classList.add('fonts-ready');}"+
+            "try{if(document.fonts&&document.fonts.ready){document.fonts.ready.then(s);setTimeout(s,1500);}else{s();}}catch(e){s();}})();"
           }} />
         </>
       )}
