@@ -79,6 +79,16 @@ export default async function PublishedPage({ params }: { params: Promise<{ slug
         <>
           <link rel="preload" as="font" type="font/otf" crossOrigin="anonymous" href="/fonts/ABCSchengenACyrillic-Medium.otf" />
           <link rel="preload" as="font" type="font/otf" crossOrigin="anonymous" href="/fonts/ABCSchengenACyrillic-Bold.otf" />
+          {/* Critical font, inlined in <head> so ABC Schengen + the font-family vars
+              apply on the FIRST paint — not after the async DS stylesheet loads.
+              Without this the hero renders in the global GT Eesti for a frame, then
+              swaps to ABC Schengen (the "fallback then real" flash). */}
+          <style dangerouslySetInnerHTML={{ __html:
+            "@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Regular.otf') format('opentype');font-weight:400;font-display:block}"+
+            "@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Medium.otf') format('opentype');font-weight:500;font-display:block}"+
+            "@font-face{font-family:'ABC Schengen';src:url('/fonts/ABCSchengenACyrillic-Bold.otf') format('opentype');font-weight:700;font-display:block}"+
+            ".page.bt-page{--font-display:'ABC Schengen',-apple-system,system-ui,sans-serif;--font-text:'Inter',-apple-system,system-ui,sans-serif;--ff-display:'ABC Schengen',-apple-system,system-ui,sans-serif;--ff-text:'Inter',-apple-system,system-ui,sans-serif}"
+          }} />
         </>
       )}
       {cssId && <link rel="stylesheet" href={'/builder-css/' + cssId + '.css'} />}
