@@ -590,6 +590,15 @@ class BuilderApp extends React.Component {
     const rnd = (typeof crypto!=='undefined' && crypto.randomUUID) ? crypto.randomUUID().slice(0,8) : Math.random().toString(36).slice(2,10);
     return 'page-'+rnd;
   }
+  // Readable page id from the title (slug), unique across existing pages — so a new page
+  // reads /brand-sprint, not /page-a4bc3d29 (the random-id complaint). Falls back to a
+  // numeric suffix only on collision, never a hex salad.
+  uniquePageId(title){
+    const base = this.slugify(title) || 'page';
+    const taken = new Set((this.state.pages||[]).map(p=>p.id).concat(['p8fig','pbt']));
+    if(!taken.has(base)) return base;
+    let n=2; while(taken.has(base+'-'+n)) n++; return base+'-'+n;
+  }
   createFromTemplate(){
     const a = this.state.newPageArche; if(!a) return;
     // Bind the new page to the chosen design system (registry id -> cssKey). A DS
@@ -598,8 +607,8 @@ class BuilderApp extends React.Component {
     const cssId = getDs(dsId).cssKey;
     this.injectPageCss(cssId);
     const styles = this.dsStyles ? this.clone(this.dsStyles) : this.clone(this.DEFAULT_STYLES);
-    const id = this.newPageId();
     const title = (this.state.newPageName && this.state.newPageName.trim()) || 'Untitled page';
+    const id = this.uniquePageId(title);
     const tab = this.state.dashTab || 'bso';
     const blocks = this.buildPage(a.recipe);
     // Treat the new page as a DB-backed real page: realPage=id wires markDirty/savePage
