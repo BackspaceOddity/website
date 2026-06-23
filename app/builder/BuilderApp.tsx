@@ -1409,9 +1409,10 @@ class BuilderApp extends React.Component {
       pick && this.claudeEditPickOverlay(inst),
       // section-shape outline (rounded, follows the real corner radius)
       edit && h('div',{key:'o', ref:el=>{ if(el) el.style.borderRadius=this.secRadius(el)+'px'; }, style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', boxShadow:'inset 0 0 0 '+(sel?'2px #011C00':'1px '+line)}}),
-      // block-bounds rectangular frame — always shown so flat (non-rounded) sections
-      // get a visible editor frame too; rounded sections still show it over the rounded outline
-      edit && h('div',{key:'r', style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', border:'1px dashed '+(dark?'rgba(253,251,244,.30)':'rgba(1,28,0,.22)')}}),
+      // block-bounds dashed frame — only for rounded sections (BSO DS), where it shows
+      // the true extent over the rounded outline. Flat sections (kos/quiet) rely on the
+      // delicate solid inset outline above — no dashed frame.
+      edit && h('div',{key:'r', ref:el=>{ if(el) el.style.display=this.secRadius(el)>1?'block':'none'; }, style:{position:'absolute', inset:0, zIndex:6, pointerEvents:'none', border:'1px dashed '+(dark?'rgba(253,251,244,.30)':'rgba(1,28,0,.22)')}}),
       // type tag at the rectangular corner — solid chip, readable on any background
       edit && h('div',{key:'t', onClick:e=>{e.stopPropagation(); this.selectBlock(inst.id);}, 'data-tip':'Select section', style:{position:'absolute', top:0, left:0, zIndex:8, cursor:'pointer', padding:'3px 8px', fontFamily:"'JetBrains Mono',monospace", fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', background:'var(--surface)', color:'var(--muted)', border:'1px solid var(--rule2)', borderRadius:5}}, this.typeName(inst.type)),
       edit && sel && h('div',{key:'tb'}, this.blockToolbar(inst, index)));
