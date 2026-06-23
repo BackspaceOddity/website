@@ -126,9 +126,60 @@ class BuilderApp extends React.Component {
     // Deploy / Analytics open in their own tab via ?screen=…&page=… — parse it here.
     let pend=null;
     try{ const q=new URLSearchParams(window.location.search); const scr=q.get('screen'); if(scr==='deploy'||scr==='analytics'){ const pid=q.get('page'); const pg=this.PAGES.find(p=>p.id===pid)||{id:pid||'cur', name:decodeURIComponent(q.get('name')||'Page'), status:'Draft'}; const from=q.get('from')||'dashboard'; pend={scr,pg,from}; } }catch(e){}
-    // Restore an existing session — skip the login screen if already signed in.
+    // Restore an existing session. Initial screen is 'boot' (a quiet splash) so a
+    // signed-in user never sees the login form flash on reload — /me decides the real
+    // screen here: authed -> restore the view, not-authed/error -> login.
     fetch('/api/builder/me/').then(r=>r.json()).then(d=>{
-      if(d && d.authed){ this.setState(s=> s.screen==='login' ? {screen:'dashboard', loginEmail:d.email||s.loginEmail} : {}, ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,pend.from); else this.openAnalytics(pend.pg,pend.from); } }); this.loadSavedTemplates(); this.loadPages(); }
+      if(d && d.authed){
+        this.setState(s=> ({loginEmail:d.email||s.loginEmail}), ()=>{ if(pend){ if(pend.scr==='deploy') this.openDeploy(pend.pg,pend.from); else this.openAnalytics(pend.pg,pend.from); } });
+        this.loadSavedTemplates();
+        // loadPages then restores the open page from ?p=<id> (reload returns you to the
+        // page you had open, not the dashboard). If pend already drove deploy/analytics,
+        // don't override that view.
+        this.loadPages(()=>{ if(!pend) this.restoreOpenPage(); });
+      } else {
+        this.setState({screen:'login'});
+      }
+    }).catch(()=>{ this.setState({screen:'login'}); });
+    // Focus/visibility refetch + light background poll — refresh live without a manual
+    // reload (the "most SaaS" lightweight path). Handles stored on the instance so
+    // componentWillUnmount can remove every one.
+    this._onFocus=()=>this.refreshLive();
+    this._onVis=()=>this.refreshLive();
+    if(typeof window!=='undefined'){ window.addEventListener('focus', this._onFocus); document.addEventListener('visibilitychange', this._onVis); this._liveT=setInterval(()=>this.refreshLive(), 25000); }
+  }
+  // After loadPages has populated this.state.pages, restore the page named in ?p=<id>.
+  // Open the FULL page row (not a bare id) so title/tab/ds are correct before the
+  // per-page GET resolves; if no/unknown ?p, fall back to the dashboard.
+  restoreOpenPage(){
+    if(typeof window==='undefined'){ this.setState({screen:'dashboard'}); return; }
+    let pid=null; try{ pid=new URLSearchParams(window.location.search).get('p'); }catch(e){}
+    const pg = pid && (this.state.pages||[]).find(p=>String(p.id)===String(pid));
+    if(pg){ this.openPage(pg); } else { this.setState({screen:'dashboard'}); }
+  }
+  // Re-fetch on window focus / tab becomes visible / background poll. Runs ONLY when
+  // the tab is actually visible. Quiet by design — no toast spam on each poll.
+  refreshLive(){
+    if(typeof document!=='undefined' && document.visibilityState!=='visible') return;
+    // Keep the session fresh; if it lapsed, no-op rather than yanking the user mid-edit.
+    fetch('/api/builder/me/').then(r=>r.json()).then(d=>{
+      if(!(d && d.authed)) return; // session lapsed — do nothing disruptive
+      if(this.state.screen==='dashboard'){ this.loadPages(); return; }
+      if(this.state.screen==='editor'){
+        const rp=this.state.realPage; if(!rp) return;
+        // SAFETY-CRITICAL: only overwrite the editor's blocks/styles when the page is
+        // 'saved'. If 'dirty'/'saving'/'loading', a refetch would clobber the user's
+        // unsaved edits — we already had one data-loss incident here; do not reintroduce.
+        if(this.state.saveState!=='saved') return;
+        fetch('/api/builder/pages/'+encodeURIComponent(rp)+'/').then(r=>r.json()).then(d2=>{
+          if(this.state.realPage!==rp) return;           // navigated away mid-fetch
+          if(this.state.saveState!=='saved') return;     // user started editing mid-fetch — re-check the guard
+          if(d2 && d2.saved && d2.page && Array.isArray(d2.page.blocks)){
+            const savedStyles=d2.page.styles?this.clone(d2.page.styles):this.state.styles;
+            this.setState({blocks:this.clone(d2.page.blocks), styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, lastSavedBy:d2.page.updated_by||this.state.lastSavedBy});
+          }
+        }).catch(()=>{});
+      }
     }).catch(()=>{});
   }
   // Load the shared saved-template library (BSO-658). Best-effort — failure leaves an empty Saved tab.
@@ -150,9 +201,10 @@ class BuilderApp extends React.Component {
   // id so real pages keep their styling and any saved page (incl. ones created from a
   // template) shows up and survives reload. Best-effort: a fetch failure leaves the
   // hardcoded PAGES so the dashboard is never empty.
-  loadPages(){
+  loadPages(done){
+    const after=()=>{ if(typeof done==='function') done(); };
     fetch('/api/builder/pages/').then(r=>r.json()).then(d=>{
-      if(!d || !Array.isArray(d.pages)) return;
+      if(!d || !Array.isArray(d.pages)){ after(); return; }
       const meta={}; this.PAGES.forEach(p=>{ meta[p.id]=p; });
       const imgs=['magenta-green','terracotta','emerald','warm'];
       const merged=d.pages.filter(row=>!row.archived).map(row=>{
@@ -167,8 +219,8 @@ class BuilderApp extends React.Component {
       });
       // Keep any built-in real page that has no DB row yet (defensive — both ship rows).
       this.PAGES.forEach(p=>{ if(!merged.some(m=>m.id===p.id)) merged.push(p); });
-      this.setState({pages:merged});
-    }).catch(()=>{});
+      this.setState({pages:merged}, after);
+    }).catch(after);
   }
   // Open the deploy / analytics screen in a fresh browser tab (action, not a panel toggle).
   openInTab(scr, pg, from){ if(typeof window==='undefined') return; const id=encodeURIComponent((pg&&pg.id)||'cur'); const name=encodeURIComponent((pg&&pg.name)||''); const f=from?('&from='+encodeURIComponent(from)):''; window.open('/builder/?screen='+scr+'&page='+id+'&name='+name+f, '_blank', 'noopener'); }
@@ -180,7 +232,7 @@ class BuilderApp extends React.Component {
     if(!rp){ this.toast('Save this page before publishing.'); return; }
     this.openInTab('deploy', {id:rp, name:this.state.pageTitle||'Page', status:'Draft'}, 'editor');
   }
-  componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } if(this._onKey){ window.removeEventListener('keydown', this._onKey); } if(this._onBeforeUnload){ window.removeEventListener('beforeunload', this._onBeforeUnload); } }
+  componentWillUnmount(){ if(this._ro){ this._ro.disconnect(); } if(this._dep){ this._dep.forEach(clearTimeout); } if(this._onKey){ window.removeEventListener('keydown', this._onKey); } if(this._onBeforeUnload){ window.removeEventListener('beforeunload', this._onBeforeUnload); } if(this._onFocus){ window.removeEventListener('focus', this._onFocus); } if(this._onVis){ document.removeEventListener('visibilitychange', this._onVis); } if(this._liveT){ clearInterval(this._liveT); this._liveT=null; } }
   // Esc clears an armed gap / picked tile (BSO-658).
   _bindEsc(){ if(this._onKey) return; this._onKey=(e)=>{ if(e.key==='Escape'){ if(this.state.claudeEditPick && !this.state.claudeEdit){ this.cancelClaudeEditPick(); return; } this.clearArm(); } }; if(typeof window!=='undefined') window.addEventListener('keydown', this._onKey); }
   resizeBar(which){ const h=React.createElement; return h('div',{onMouseDown:e=>this.startResize(e,which), title:'Drag to resize', style:{flex:'0 0 7px', cursor:'col-resize', display:'flex', alignItems:'stretch', justifyContent:'center', background:'var(--surface)', zIndex:6}}, h('div',{style:{width:1, background:'var(--rule)'}})); }
@@ -430,6 +482,8 @@ class BuilderApp extends React.Component {
   // off its own per-instance stylesheet (p8fig/pbt); any other page resolves its
   // DS's cssKey from the registry (may be null → no stylesheet, e.g. Urembo).
   activeDs(){ const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return BT_PAGES[rp].css; return getDs(this.activeDsId()).cssKey; }
+  // Persist the open page in the URL so a reload returns you to it (not the dashboard).
+  syncUrlForPage(p){ if(typeof window==='undefined') return; const id=(p&&(p.id||p.real))||''; try{ history.replaceState(null, '', '/builder?p='+encodeURIComponent(id)); }catch(e){} }
   openPage(p){
     // Opening another page must not let a pending debounced save from the OUTGOING
     // page fire AFTER we've switched — savePage() reads this.state.realPage at fire
@@ -455,6 +509,7 @@ class BuilderApp extends React.Component {
           this.setState({blocks:this.clone(d.page.blocks), styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null});
         } else { this.setState({saveState:'saved'}); }
       }).catch(()=>this.setState({saveState:'saved'}));
+      this.syncUrlForPage(p);
       return;
     }
     // DB-backed page that is NOT a built-in real page (e.g. created from a template).
@@ -480,6 +535,7 @@ class BuilderApp extends React.Component {
             versions:[{id:'v1', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(savedBlocks)}]});
         } else { this.setState({saveState:'saved'}); }
       }).catch(()=>this.setState({saveState:'saved'}));
+      this.syncUrlForPage(p);
       return;
     }
     // Non-real page: still load a proposal DS stylesheet so any real `bt:` section
@@ -496,8 +552,9 @@ class BuilderApp extends React.Component {
         {id:'v2', label:'Hero copy revision', when:p.edited, author:p.owner, blocks:v2},
         {id:'v1', label:'Initial layout', when:'Earlier', author:p.owner, blocks:v1},
       ]});
+    this.syncUrlForPage(p);
   }
-  backToDash(){ if(this.state.saveState==='dirty'){ this.savePage(); } else if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } this.clearPageCss(); this.setState({screen:'dashboard', realPage:null, pageDs:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
+  backToDash(){ if(this.state.saveState==='dirty'){ this.savePage(); } else if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; } this.clearPageCss(); if(typeof window!=='undefined'){ try{ history.replaceState(null, '', '/builder'); }catch(e){} } this.setState({screen:'dashboard', realPage:null, pageDs:null, selectedId:null, selectedRole:null, previewVersionId:null, imgTarget:null}); }
   // ---------- persistence ----------
   // Mark the page changed and schedule a debounced save (real pages only).
   markDirty(){ if(!this.state.realPage) return; this.setState({saveState:'dirty'}); if(this._saveT) clearTimeout(this._saveT); this._saveT=setTimeout(()=>this.savePage(), 1400); }
@@ -700,6 +757,18 @@ class BuilderApp extends React.Component {
   renderApp(){
     const h=React.createElement, F=React.Fragment;
     const {screen, theme} = this.state;
+    // Boot splash — shown until /me resolves, so a signed-in user never sees the login
+    // form flash on reload. Quiet centered wordmark on var(--paper); no form, no spinner.
+    if(screen==='boot'){
+      const logo = h('svg',{viewBox:'0 0 80 80', width:30, height:30, fill:'currentColor', style:{display:'block'}},
+        h('ellipse',{cx:14.718,cy:40,rx:14.718,ry:30.732}), h('ellipse',{cx:33.283,cy:40,rx:10.31,ry:38.537}),
+        h('ellipse',{cx:47.615,cy:40,rx:3.544,ry:40}), h('ellipse',{cx:59.5,cy:40,rx:5,ry:32}), h('ellipse',{cx:72,cy:40,rx:3.3,ry:18}));
+      return h('div',{'data-theme':theme, style:{height:'100vh', overflow:'hidden', background:'var(--paper)', color:'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center'}},
+        h('div',{style:{display:'flex', alignItems:'center', gap:12, color:'var(--ink)'}}, logo,
+          h('div',{style:{lineHeight:1}},
+            h('div',{style:{fontWeight:700, fontSize:'15px', letterSpacing:'-0.01em'}}, 'Backspace Oddity'),
+            h('div',{style:this.mono({fontSize:'9.5px', marginTop:3})}, 'Landing builder'))));
+    }
     if(screen==='login') return h('div',{'data-theme':theme, style:{height:'100vh', overflow:'hidden', background:'var(--paper)', color:'var(--ink)'}}, this.renderLogin(), this.state.toast && this.renderToast());
     return h('div', {'data-theme':theme,
         onMouseOver:e=>{ const t=e.target&&e.target.closest&&e.target.closest('[data-tip]'); if(!t) return; const txt=t.getAttribute('data-tip'); if(!txt){ return; } const r=t.getBoundingClientRect(); this.showTip(txt, Math.round(r.left+r.width/2), Math.round(r.bottom+7)); },
