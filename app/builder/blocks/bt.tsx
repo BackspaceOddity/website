@@ -64,7 +64,18 @@ export function CalInit() {
   );
 }
 
-export function Pill({ label, e, k = 'cta' }: { label: string; e?: E; k?: string }) {
+export function Pill({ label, e, k = 'cta', href }: { label: string; e?: E; k?: string; href?: string }) {
+  // When `href` is passed the pill becomes an in-page anchor (e.g. scroll to a
+  // form) tagged for funnel tracking, instead of the default Cal.com trigger.
+  // Existing pages pass no href → identical render.
+  if (href) {
+    return (
+      <a className="bt-pill" href={href} data-cta="demo">
+        <Ed e={e} k={k} v={label} role="button" />
+        <span className="bt-pill__arrow" aria-hidden="true">→</span>
+      </a>
+    );
+  }
   return (
     <button type="button" className="bt-pill" {...CAL_TRIGGER}>
       <Ed e={e} k={k} v={label} role="button" />
@@ -98,7 +109,7 @@ export function BtNav({ contact = 'Contact', book = 'Book a call', office, e }: 
 
 /* ---------- Hero (subtitle variant + optional principles variant) ---------- */
 type Princ = { h3: string; p: string };
-export function BtHero({ eyebrow, title, subtitle, principles, cta, e }: { eyebrow: string; title: string; subtitle?: string; principles?: Princ[]; cta?: string; e?: E }) {
+export function BtHero({ eyebrow, title, subtitle, principles, cta, ctaHref, e }: { eyebrow: string; title: string; subtitle?: string; principles?: Princ[]; cta?: string; ctaHref?: string; e?: E }) {
   return (
     <header className="bt-hero" id="top" data-screen-label="Hero">
       <div className="bt-hero__inner">
@@ -112,7 +123,7 @@ export function BtHero({ eyebrow, title, subtitle, principles, cta, e }: { eyebr
             ))}
           </div>
         ) : null}
-        {cta ? <Pill label={cta} e={e} k="cta" /> : null}
+        {cta ? <Pill label={cta} e={e} k="cta" href={ctaHref} /> : null}
       </div>
     </header>
   );
