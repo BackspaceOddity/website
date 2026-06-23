@@ -4,21 +4,13 @@
  *       including pages created from a template. Auth-gated like /api/builder/me.
  */
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { supabase } from '@/lib/supabase';
+import { readSession } from '@/lib/builder-auth';
 
 export const runtime = 'nodejs';
 
-async function getEmail(): Promise<string | null> {
-  const token = (await cookies()).get('bso_b_sess')?.value;
-  if (!token && process.env.NODE_ENV !== 'production' && process.env.BUILDER_DEV_LOGIN) return process.env.BUILDER_DEV_LOGIN;
-  if (!token || !supabase) return null;
-  const { data, error } = await supabase.auth.getUser(token);
-  return error || !data.user ? null : (data.user.email || 'unknown');
-}
-
 export async function GET() {
-  const email = await getEmail();
+  const email = await readSession();
   if (!email) return NextResponse.json({ authed: false }, { status: 401 });
   if (!supabase) return NextResponse.json({ pages: [] });
   try {
@@ -34,7 +26,7 @@ export async function GET() {
 }
 
 export async function DELETE(req: Request) {
-  const email = await getEmail();
+  const email = await readSession();
   if (!email) return NextResponse.json({ authed: false }, { status: 401 });
   if (!supabase) return NextResponse.json({ ok: false, error: 'no-db' }, { status: 503 });
   const id = new URL(req.url).searchParams.get('id');

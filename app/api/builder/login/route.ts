@@ -1,12 +1,12 @@
 /**
  * Builder sign-in — real email+password auth via Supabase Auth (BSO-659).
- * On success sets an httpOnly session cookie (the Supabase access token).
+ * On success sets an httpOnly session cookie holding BOTH the access and refresh
+ * tokens, so the session survives a reload and auto-refreshes (see lib/builder-auth).
  * `mode: 'magic'` sends a magic-link email instead (best-effort; needs SMTP).
  */
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-
-const COOKIE = 'bso_b_sess';
+import { SESSION_COOKIE, sessionCookieValue, sessionCookieOptions } from '@/lib/builder-auth';
 
 export async function POST(req: Request) {
   if (!supabase) {
@@ -35,12 +35,10 @@ export async function POST(req: Request) {
   }
 
   const res = NextResponse.json({ email: data.user?.email });
-  res.cookies.set(COOKIE, data.session.access_token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 8,
-  });
+  res.cookies.set(
+    SESSION_COOKIE,
+    sessionCookieValue(data.session.access_token, data.session.refresh_token),
+    sessionCookieOptions,
+  );
   return res;
 }
