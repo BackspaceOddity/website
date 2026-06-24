@@ -4,9 +4,50 @@ import { redirect } from "next/navigation";
 import { EightFiguresClient } from "./EightFiguresClient";
 import { token, cookieName } from "@/lib/proposal-workspace/chrome";
 import { getWorkspacePassword } from "@/lib/proposal-workspace/auth";
+import { supabase } from "@/lib/supabase";
+import PublishedView from "../published/[slug]/PublishedView";
 import "./eightfigures.css";
 
 const SLUG = "8figures";
+
+// BSO-684 step 5: render the page from the canonical DB row instead of the
+// bespoke EightFiguresClient + content.ts. Behind a flag, OFF by default — so
+// deploying this is inert; flipping EIGHTFIGURES_FROM_DB=1 is the deliberate
+// switch and unsetting it is the instant rollback (AC#0: the live page must not
+// change without a verified, reversible switch). The DB render matches the live
+// page: identical bt- markup (Bt* components mirror EightFiguresClient) and
+// p8fig.css is a strict superset of eightfigures.css (0 rules lost, 6 default
+// tweak vars added). If the row is missing/empty, fall through to the code render.
+async function renderFromDb() {
+  if (!supabase) return null;
+  const { data: page } = await supabase
+    .from("builder_pages")
+    .select("published_version_id, published_blocks, published_styles, published_css_key, css_key")
+    .eq("id", "p8fig")
+    .maybeSingle();
+  if (!page) return null;
+  let ver: { blocks?: unknown; styles?: unknown; css_key?: string | null } | null = null;
+  if (page.published_version_id) {
+    const { data: v } = await supabase
+      .from("builder_page_versions")
+      .select("blocks, styles, css_key")
+      .eq("id", page.published_version_id)
+      .maybeSingle();
+    ver = v ?? null;
+  }
+  const blocks = Array.isArray(ver?.blocks) ? (ver!.blocks as any[])
+    : (Array.isArray(page.published_blocks) ? (page.published_blocks as any[]) : []);
+  if (!blocks.length) return null;
+  const styles = (ver?.styles ?? page.published_styles) as any;
+  const cssId = (ver?.css_key as string | null) || (page.published_css_key as string | null)
+    || (page.css_key as string | null) || "p8fig";
+  return (
+    <>
+      <link rel="stylesheet" href={"/builder-css/" + cssId + ".css"} />
+      <PublishedView blocks={blocks} styles={styles} slug={SLUG} seed={{ matrix: {}, lock: undefined, questions: undefined } as any} />
+    </>
+  );
+}
 
 // Force per-request rendering: the password gate reads cookies() + Supabase at
 // request time. Without this, an empty build-time password prerenders the page
@@ -34,6 +75,10 @@ export default async function EightFiguresPage() {
     const jar = await cookies();
     const ok = jar.get(cookieName(SLUG))?.value === token(accessKey, SLUG);
     if (!ok) redirect("/8figures/login");
+  }
+  if (process.env.EIGHTFIGURES_FROM_DB === "1") {
+    const fromDb = await renderFromDb();
+    if (fromDb) return fromDb;
   }
   return <EightFiguresClient />;
 }
