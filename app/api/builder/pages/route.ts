@@ -16,7 +16,7 @@ export async function GET() {
   try {
     const { data, error } = await supabase
       .from('builder_pages')
-      .select('id,title,tab,real_page,ds,archived,updated_at,updated_by')
+      .select('id,title,tab,real_page,ds,css_key,archived,updated_at,updated_by')
       .order('updated_at', { ascending: false });
     if (error) return NextResponse.json({ pages: [], error: error.message }, { status: 500 });
     return NextResponse.json({ pages: data ?? [] });

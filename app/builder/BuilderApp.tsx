@@ -6,7 +6,7 @@
    (base class, mount, window.claude.complete → /api/builder/generate, asset URLs).
    Design choices (ABC Schengen / Inter / JetBrains Mono / GT Eesti, palette, layout) untouched. */
 import React from 'react';
-import { BT_COMPONENTS, BT_PAGES, BT_TYPE_NAMES, BT_SECTIONS } from './blocks/realpages';
+import { BT_COMPONENTS, BT_TYPE_NAMES, BT_SECTIONS } from './blocks/realpages';
 import { UREMBO_SECTIONS } from './blocks/urembo';
 import { btVarStyle, ROLE_VARS } from './btVars';
 
@@ -206,12 +206,12 @@ class BuilderApp extends React.Component {
       const imgs=['magenta-green','terracotta','emerald','warm'];
       const merged=d.pages.filter(row=>!row.archived).map(row=>{
         const base=meta[row.id];
-        if(base) return {...base, name:row.title||base.name, tab:row.tab||base.tab, ds:row.ds||'bso', edited:this.agoLabel(row.updated_at)};
+        if(base) return {...base, name:row.title||base.name, tab:row.tab||base.tab, ds:row.ds||'bso', css_key:row.css_key, edited:this.agoLabel(row.updated_at)};
         return {
           id:row.id, tab:row.tab||'bso', name:row.title||'Untitled page',
           img:imgs[this.hashStr(row.id)%imgs.length],
           owner:(row.updated_by||'').split('@')[0]||'You', edited:this.agoLabel(row.updated_at),
-          status:'Draft', real:row.real_page||row.id, ds:row.ds||'bso',
+          status:'Draft', real:row.real_page||row.id, ds:row.ds||'bso', css_key:row.css_key,
         };
       });
       // Keep any built-in real page that has no DB row yet (defensive — both ship rows).
@@ -513,11 +513,11 @@ class BuilderApp extends React.Component {
   // The registry id of the design system the OPEN page belongs to. Built-in real
   // pages (p8fig/pbt) are both instances of the Backspace Oddity DS → 'bso'.
   // Every other page carries its chosen `ds` id in state.pageDsId.
-  activeDsId(){ const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return 'bso'; return this.state.pageDsId||DEFAULT_DS_ID; }
+  activeDsId(){ return this.state.pageDsId||DEFAULT_DS_ID; }
   // The cssKey (stylesheet id) active for the open page. A built-in real page keys
   // off its own per-instance stylesheet (p8fig/pbt); any other page resolves its
   // DS's cssKey from the registry (may be null → no stylesheet, e.g. Urembo).
-  activeDs(){ if(this.state.pageCssKey) return this.state.pageCssKey; const rp=this.state.realPage; if(rp && BT_PAGES[rp]) return BT_PAGES[rp].css; return getDs(this.activeDsId()).cssKey; }
+  activeDs(){ if(this.state.pageCssKey) return this.state.pageCssKey; return getDs(this.activeDsId()).cssKey; }
   openPage(p, push){ if(push===undefined) push=true;
     // Opening another page must not let a pending debounced save from the OUTGOING
     // page fire AFTER we've switched — savePage() reads this.state.realPage at fire
@@ -526,30 +526,11 @@ class BuilderApp extends React.Component {
     // old page's dirty edits first, then kill the timer — same discipline as backToDash().
     if(this.state.saveState==='dirty' && this.state.realPage){ this.savePage(); }
     if(this._saveT){ clearTimeout(this._saveT); this._saveT=null; }
-    if(p && p.real && BT_PAGES[p.real]){
-      const def=BT_PAGES[p.real]; this.injectPageCss(def.css);
-      const cur=this.clone(def.blocks);
-      this.setState({screen:'editor', realPage:p.real, pageDs:null, pageCssKey:def.css, pageDsId:'bso', pageTitle:p.name, pageTab:p.tab, currentPage:p, blocks:cur,
-        styles:this.dsStyles?this.clone(this.dsStyles):this.clone(this.DEFAULT_STYLES),
-        btStyles:{}, roleDefaults:{},
-        selectedId:null, selectedRole:null, editMode:true, locked:false, versionsOpen:false, previewVersionId:null, imgTarget:null,
-        saveState:'loading',
-        versions:[{id:'v3', label:'Current draft', when:'Just now', author:'You', current:true, blocks:this.clone(cur)}]});
-      // Load a previously-saved version of this page, if any.
-      fetch('/api/builder/pages/'+encodeURIComponent(p.real)+'/').then(r=>r.json()).then(d=>{
-        if(this.state.realPage!==p.real) return; // navigated away
-        if(d && d.saved && d.page && Array.isArray(d.page.blocks) && d.page.blocks.length){
-          const savedStyles=d.page.styles?this.clone(d.page.styles):this.state.styles;
-          this.setState({blocks:this.clone(d.page.blocks), styles:savedStyles, btStyles:(savedStyles&&savedStyles.bt)?this.clone(savedStyles.bt):{}, roleDefaults:{}, selectedRole:null, saveState:'saved', lastSavedBy:d.page.updated_by||null});
-        } else { this.setState({saveState:'saved'}); }
-      }).catch(()=>this.setState({saveState:'saved'}));
-      this.navTo('editor', (p&&(p.id||p.real)), push);
-      return;
-    }
-    // DB-backed page that is NOT a built-in real page (e.g. created from a template).
-    // Key persistence off its own id: set realPage=id so markDirty/savePage target it,
-    // and load its saved blocks/styles from the DB so a reload restores content (BSO-658).
-    if(p && p.id && !BT_PAGES[p.id]){
+    // Every page — including the former code built-ins p8fig/pbt — loads as a uniform DB
+    // row (BSO-684 step 3: the BT_PAGES special-case is gone; the seeded rows are the
+    // single source). Key persistence off the page id: set realPage=id so markDirty/savePage
+    // target it, and load saved blocks/styles from the DB so a reload restores content.
+    if(p && p.id){
       // Resolve the page's DS from the list row's ds (if present) -> registry cssKey.
       const dsId0=p.ds||DEFAULT_DS_ID; const css0=p.css_key||getDs(dsId0).cssKey;
       this.injectPageCss(css0);
