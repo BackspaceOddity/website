@@ -846,7 +846,7 @@ class BuilderApp extends React.Component {
         // Spinner so a slow load reads as "loading", not a frozen/blank screen (BSO-682 #2).
         h('div',{style:{width:16, height:16, border:'2px solid var(--rule2)', borderTopColor:'var(--ink)', borderRadius:99, animation:'bsospin .7s linear infinite'}}));
     }
-    if(screen==='login') return h('div',{'data-theme':theme, style:{height:'100vh', overflow:'hidden', background:'var(--paper)', color:'var(--ink)'}}, this.renderLogin(), this.state.toast && this.renderToast());
+    if(screen==='login') return h('div',{'data-theme':theme, className:'bso-login-screen', style:{height:'100vh', overflow:'hidden', background:'var(--paper)', color:'var(--ink)'}}, this.renderLogin(), this.state.toast && this.renderToast());
     return h('div', {'data-theme':theme,
         onMouseOver:e=>{ const t=e.target&&e.target.closest&&e.target.closest('[data-tip]'); if(!t) return; const txt=t.getAttribute('data-tip'); if(!txt){ return; } const r=t.getBoundingClientRect(); this.showTip(txt, Math.round(r.left+r.width/2), Math.round(r.bottom+7)); },
         onMouseOut:e=>{ const t=e.target&&e.target.closest&&e.target.closest('[data-tip]'); if(t) this.hideTip(); },
@@ -899,18 +899,26 @@ class BuilderApp extends React.Component {
     const field=(label, node)=> h('div',{style:{marginBottom:16}}, h('div',{style:this.mono({fontSize:'10px', marginBottom:8})}, label), node);
     const inputStyle={width:'100%', padding:'12px 13px', borderRadius:9, border:'1px solid var(--rule2)', background:'var(--surface)', color:'var(--ink)', fontSize:'14.5px', fontFamily:'inherit', outline:'none'};
     const onKey=e=>{ if(e.key==='Enter') this.doLogin(); };
-    return h('div',{style:{height:'100%', display:'flex'}},
+    const mobileCss='@media (max-width:760px){'
+      +'.bso-login-screen{height:auto !important;min-height:100vh;overflow-y:auto !important;}'
+      +'.bso-login{flex-direction:column !important;height:auto !important;min-height:100vh;}'
+      +'.bso-login__brand{flex:none !important;padding:34px 24px 28px !important;gap:28px;}'
+      +'.bso-login__brand-head{font-size:30px !important;line-height:1.14 !important;}'
+      +'.bso-login__form{flex:none !important;padding:30px 24px 44px !important;}'
+      +'}';
+    return h('div',{className:'bso-login', style:{height:'100%', display:'flex'}},
+      h('style',null,mobileCss),
       // brand well
-      h('div',{style:{flex:'1 1 52%', position:'relative', background:'#011C00', color:'#FDFBF4', backgroundImage:'url('+this.grad('magenta-green')+')', backgroundSize:'cover', backgroundPosition:'center', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'48px 52px', overflow:'hidden'}},
+      h('div',{className:'bso-login__brand', style:{flex:'1 1 52%', position:'relative', background:'#011C00', color:'#FDFBF4', backgroundImage:'url('+this.grad('magenta-green')+')', backgroundSize:'cover', backgroundPosition:'center', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'48px 52px', overflow:'hidden'}},
         h('div',{style:{position:'absolute', inset:0, background:'linear-gradient(150deg, rgba(1,28,0,.42), rgba(1,28,0,.72))', pointerEvents:'none'}}),
         h('div',{style:{position:'relative', display:'flex', alignItems:'center', gap:12}}, logo, h('div',{style:{fontFamily:SCH, fontWeight:600, fontSize:'17px', letterSpacing:'-0.01em'}}, 'Backspace Oddity')),
         h('div',{style:{position:'relative', maxWidth:480}},
           h('div',{style:this.mono({color:'rgba(253,251,244,.65)', marginBottom:22})}, 'Landing builder'),
-          h('h1',{style:{fontFamily:GTD, fontWeight:400, fontSize:'46px', lineHeight:1.08, letterSpacing:'-0.01em', margin:0}}, 'We live in a world where everything works, but nothing matters.'),
+          h('h1',{className:'bso-login__brand-head', style:{fontFamily:GTD, fontWeight:400, fontSize:'46px', lineHeight:1.08, letterSpacing:'-0.01em', margin:0}}, 'We live in a world where everything works, but nothing matters.'),
           h('p',{style:{fontFamily:"'GT Eesti Pro Text','Inter',system-ui,sans-serif", fontSize:'17px', lineHeight:1.5, color:'rgba(253,251,244,.78)', marginTop:22, maxWidth:430}}, 'Assemble client landing and proposal pages from our own section system \u2014 then publish them where they belong.')),
         h('div',{style:{position:'relative', fontFamily:"'GT Eesti Pro Text','Inter',system-ui,sans-serif", fontSize:'14px', color:'rgba(253,251,244,.6)'}}, 'Vijzelstraat 68-78, 1017 ES Amsterdam')),
       // form
-      h('div',{style:{flex:'1 1 48%', display:'flex', alignItems:'center', justifyContent:'center', padding:'40px', background:'var(--paper)'}},
+      h('div',{className:'bso-login__form', style:{flex:'1 1 48%', display:'flex', alignItems:'center', justifyContent:'center', padding:'40px', background:'var(--paper)'}},
         h('div',{style:{width:'100%', maxWidth:360}},
           h('div',{style:{fontFamily:SCH, fontWeight:700, fontSize:'27px', letterSpacing:'-0.02em', marginBottom:8}}, 'Sign in'),
           h('div',{style:{fontSize:'14px', color:'var(--muted)', marginBottom:28, lineHeight:1.45}}, 'Use your Backspace Oddity workspace account.'),
