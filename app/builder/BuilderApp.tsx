@@ -8,6 +8,8 @@
 import React from 'react';
 import { BT_COMPONENTS, BT_TYPE_NAMES, BT_SECTIONS } from './blocks/realpages';
 import { UREMBO_SECTIONS } from './blocks/urembo';
+import { MERZ_SECTIONS } from './blocks/merz';
+import { KOS_PRODUCT_SECTIONS } from './blocks/cascade';
 import { btVarStyle, ROLE_VARS } from './btVars';
 
 // Default proposal design-system for a NEW page (BSO-658). The two real pages
@@ -33,9 +35,9 @@ const DEFAULT_PAGE_DS = 'pbt';
 const DESIGN_SYSTEMS = [
   { id: 'bso',    name: 'Backspace Oddity', cssKey: 'pbt',    sections: BT_SECTIONS },
   { id: 'urembo', name: 'Green light',      cssKey: 'urembo', sections: UREMBO_SECTIONS },
-  { id: 'kos',    name: 'Knowledge OS',     cssKey: 'kos',    sections: BT_SECTIONS },
-  { id: 'quiet',  name: 'Quiet (Merz)',     cssKey: 'quiet',  sections: BT_SECTIONS },
-  { id: 'puma',   name: 'Puma (Runbook)',   cssKey: 'puma',   sections: BT_SECTIONS },
+  { id: 'kos',    name: 'Knowledge OS',     cssKey: 'kos',    sections: KOS_PRODUCT_SECTIONS },
+  { id: 'quiet',  name: 'Merz (marketing)', cssKey: 'quiet',  sections: MERZ_SECTIONS },
+  { id: 'puma',   name: 'Puma (Runbook)',   cssKey: 'puma',   sections: KOS_PRODUCT_SECTIONS },
 ];
 const DEFAULT_DS_ID = 'bso';
 // Resolve a DS id -> registry entry (fallback to the default 'bso' system).

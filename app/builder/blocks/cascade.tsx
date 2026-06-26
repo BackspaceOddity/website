@@ -134,3 +134,14 @@ export function BtCascade({
 }
 
 export default BtCascade;
+
+/* ---------- KOS product Library: product-UI blocks (BSO-696).
+   The Knowledge OS / Puma PRODUCT facet — app screens assembled block by block,
+   NOT the BSO landing library. Starts with the cascade screen; grows as the
+   product prototype (app/puma) is decomposed into blocks: next kos:shell,
+   kos:board, kos:roadmap, kos:query (see BSO-695). */
+export const KOS_PRODUCT_SECTIONS = [
+  { type: 'bt:cascade', name: 'Cascade screen', variations: [
+    { id: 'cascade-selfies', name: 'Ask-your-graph + cascade', props: { brand: 'Puma in a Tank', eyebrow: 'Puma in a Tank · Runbook', title: 'Ask your graph', caseName: 'SELFIES' } },
+  ] },
+];

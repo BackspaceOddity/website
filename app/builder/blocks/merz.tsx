@@ -307,3 +307,36 @@ export const MERZ_PAGE = [
 
   b('merz-footer', 'merz:footer', { brand: 'Merz', tagline: 'Knowledge that compounds.' }),
 ];
+
+/* ---------- Merz marketing Library: section types -> variations (BSO-696).
+   Merz is the MARKETING facet on the KOS system — landing blocks, NOT the BSO
+   landing library. Built from MERZ_PAGE so the Library carries real Merz copy. */
+const mp = (id: string) => (MERZ_PAGE.find((x) => x.id === id) || ({} as any)).props;
+
+export const MERZ_SECTIONS = [
+  { type: 'merz:nav', name: 'Nav', variations: [
+    { id: 'merz-nav', name: 'Brand + request access', props: mp('merz-nav') },
+  ] },
+  { type: 'bt:hero', name: 'Hero', variations: [
+    { id: 'merz-hero', name: 'Result-first hero', props: mp('merz-hero') },
+  ] },
+  { type: 'kos:demo', name: 'Live demo', variations: [
+    { id: 'merz-demo-live', name: 'Embedded product demo', props: mp('merz-demo-live') },
+  ] },
+  { type: 'merz:statement', name: 'Statement', variations: [
+    { id: 'st-hinge', name: 'Hinge — “how did you do that?”', props: mp('merz-hinge') },
+    { id: 'st-ownui', name: 'Why we built our own', props: mp('merz-ownui') },
+    { id: 'st-method', name: 'Methodology moat', props: mp('merz-methodology') },
+  ] },
+  { type: 'bt:eps', name: 'Numbered cards', variations: [
+    { id: 'eps-2layer', name: 'Two-layer architecture', props: mp('merz-twolayer') },
+    { id: 'eps-engine', name: 'Three-tier engine', props: mp('merz-engine') },
+    { id: 'eps-usecases', name: 'Use cases', props: mp('merz-usecases') },
+  ] },
+  { type: 'merz:demo', name: 'Request access', variations: [
+    { id: 'merz-demo', name: 'Access form', props: mp('merz-demo') },
+  ] },
+  { type: 'merz:footer', name: 'Footer', variations: [
+    { id: 'merz-footer', name: 'Brand + tagline', props: mp('merz-footer') },
+  ] },
+];
