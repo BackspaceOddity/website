@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CascadeSankey from "./kos/cascade-sankey";
+import QueryBlocks from "./components/QueryBlocks";
 import { SEED } from "./lib/cascade";
 import { toCascade } from "./lib/toCascade";
 
@@ -19,7 +20,7 @@ export default function PumaRunbook() {
   useEffect(() => {
     const html = document.documentElement;
     const prev = html.getAttribute("data-theme");
-    html.setAttribute("data-theme", "dark");
+    html.setAttribute("data-theme", "light");
     return () => {
       if (prev) html.setAttribute("data-theme", prev);
       else html.removeAttribute("data-theme");
@@ -90,6 +91,9 @@ export default function PumaRunbook() {
                 ))}
               </div>
             </section>
+
+            <div className="kos-pin-label">Saved queries</div>
+            <QueryBlocks />
 
             <div className="kos-pin-label">Pinned · Selfies current cascade</div>
             <div className="kos-block-wrap">
