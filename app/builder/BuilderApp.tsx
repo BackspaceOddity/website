@@ -37,7 +37,9 @@ const DESIGN_SYSTEMS = [
   { id: 'urembo', name: 'Green light',      cssKey: 'urembo', sections: UREMBO_SECTIONS },
   { id: 'kos',    name: 'Knowledge OS',     cssKey: 'kos',    sections: KOS_PRODUCT_SECTIONS },
   { id: 'quiet',  name: 'Merz (marketing)', cssKey: 'quiet',  sections: MERZ_SECTIONS },
-  { id: 'puma',   name: 'Puma (Runbook)',   cssKey: 'puma',   sections: KOS_PRODUCT_SECTIONS },
+  // NOTE: 'puma' is NOT a design system — Puma/JetBrains are client PAGES built
+  // from the Knowledge OS (kos) system. The puma-runbook page row was migrated to
+  // ds='kos' (keeps its stored css_key='puma' = the vendored KOS dark theme).
 ];
 const DEFAULT_DS_ID = 'bso';
 // Resolve a DS id -> registry entry (fallback to the default 'bso' system).
