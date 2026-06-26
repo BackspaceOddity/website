@@ -1,0 +1,160 @@
+/* App shell (sidebar + main). Plain CSS, imported LAST so it is not subject to
+ * Tailwind v4 / Lightning CSS layer processing (which dropped these rules when
+ * they lived in globals.css). Colour tokens come from tana-skin (dark theme). */
+
+.kos-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+.kos-side {
+  width: 248px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-default);
+  background: var(--bg-secondary);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.kos-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 8px 12px;
+  color: var(--text-primary);
+}
+.kos-brand-mark {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--accent);
+  display: inline-block;
+}
+.kos-side-search {
+  width: 100%;
+  border: 1px solid var(--border-default);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 12px;
+  margin-bottom: 6px;
+  outline: none;
+}
+.kos-side-label {
+  font-family: var(--font-jb-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 14px 8px 6px;
+}
+.kos-nav-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.kos-nav-item:hover {
+  background: var(--bg-tertiary, var(--accent-soft));
+  color: var(--text-primary);
+}
+.kos-nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 500;
+}
+.kos-badge {
+  font-family: var(--font-jb-mono), monospace;
+  font-size: 10px;
+  color: var(--accent);
+}
+.kos-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.kos-topbar {
+  height: 48px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 22px;
+  font-family: var(--font-jb-mono), monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.kos-crumb {
+  color: var(--text-muted);
+}
+.kos-crumb strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.kos-topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.kos-seg {
+  display: inline-flex;
+  border: 1px solid var(--border-default);
+  border-radius: 7px;
+  overflow: hidden;
+}
+.kos-seg span {
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.kos-seg span.on {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+.kos-search-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 7px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.kos-content {
+  padding: 0 36px 96px;
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+}
+.kos-block-wrap {
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  background: var(--bg-secondary);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.kos-pin-label {
+  font-family: var(--font-jb-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 26px 0 0;
+}

@@ -1,0 +1,14 @@
+/* Puma Runbook base screen — fonts + CSS-var bridge so the vendored KOS/shell
+ * CSS (which references var(--font-inter) / var(--font-jb-mono)) resolves. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  --font-inter: "Inter", system-ui, sans-serif;
+  --font-jb-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Scope guard: this route owns the dark KOS canvas. */
+.puma-root {
+  min-height: 100vh;
+  background: var(--bg-primary, #1a1a1a);
+}
