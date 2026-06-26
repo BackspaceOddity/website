@@ -220,3 +220,12 @@
 [2026-05-30 01:37] Edit → lib/proposal-workspace/clients/urembo.ts
 [2026-05-30 01:39] Edit → lib/proposal-workspace/clients/urembo.ts
 [2026-05-30 01:41] Edit → lib/proposal-workspace/clients/urembo.ts
+[2026-06-26 11:18] Write → app/puma/puma.css
+[2026-06-26 11:18] Write → app/puma/layout.tsx
+[2026-06-26 11:19] Write → app/puma/page.tsx
+[2026-06-26 11:46] Write → app/builder/blocks/cascade.tsx
+[2026-06-26 11:46] Edit → app/builder/blocks/realpages.tsx
+[2026-06-26 11:47] Edit → app/builder/BuilderApp.tsx
+[2026-06-26 11:47] Edit → app/published/[slug]/page.tsx
+[2026-06-26 11:47] Write → scripts/seed-puma.mjs
+[2026-06-26 13:39] Edit → app/puma/page.tsx

@@ -21,6 +21,7 @@ import {
 import { UREMBO_COMPONENTS, UREMBO_TYPE_NAMES } from './urembo';
 import { UREMBO_EXERCISE_COMPONENTS, UREMBO_EXERCISE_TYPE_NAMES } from './exercises';
 import { MERZ_COMPONENTS, MERZ_TYPE_NAMES } from './merz';
+import { BtCascade } from './cascade';
 import { buildBuiltinPages, PBT_PROJECTS } from '../../8figures/builtin-pages';
 
 /* type string -> section component the canvas renders.
@@ -39,6 +40,7 @@ export const BT_COMPONENTS = {
   'bt:leverages': BtLeverages,
   'bt:timeline': BtTimeline,
   'bt:diagnostic': BtDiagnostic,
+  'bt:cascade': BtCascade,
   ...UREMBO_COMPONENTS,
   ...UREMBO_EXERCISE_COMPONENTS,
   ...MERZ_COMPONENTS,
@@ -49,6 +51,7 @@ export const BT_TYPE_NAMES = {
   'bt:nav': 'Nav', 'bt:hero': 'Hero', 'bt:challenge': 'Challenge', 'bt:eps': 'Numbered cards',
   'bt:phases': 'Phases', 'bt:invest': 'Investment', 'bt:projects': 'Projects', 'bt:final': 'Final CTA',
   'bt:footer': 'Footer', 'bt:leverages': 'Leverages', 'bt:timeline': 'Timeline', 'bt:diagnostic': 'Diagnostic',
+  'bt:cascade': 'Cascade',
   ...UREMBO_TYPE_NAMES,
   ...UREMBO_EXERCISE_TYPE_NAMES,
   ...MERZ_TYPE_NAMES,
