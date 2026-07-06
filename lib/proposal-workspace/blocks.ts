@@ -11,7 +11,7 @@ import type {
   DocHeaderBlock, DividerBlock, StatementBlock, HeardItBlock, BeforeAfterBlock,
   EmphasisFrameBlock, NarrativeBlock, DemoBlock, ProcessFlowBlock, PhasesBlock,
   WhatStayedBlock, NextStepsBlock, DiscussionBlock, ExerciseMatrixBlock, ExerciseRankBlock,
-  ExerciseChipsBlock, ExerciseSolutionsBlock, DocFooterBlock,
+  ExerciseChipsBlock, ExerciseSolutionsBlock, PlanDetailBlock, DocFooterBlock,
 } from './types';
 
 /** Escape plain-text fields. Rich fields (documented in types.ts) are inserted raw. */
@@ -628,6 +628,115 @@ export function exerciseSolutions(b: ExerciseSolutionsBlock, slug: string): stri
     </div>
   </div>
   <script>${js}</script>
+</section>`;
+}
+
+export function planDetail(b: PlanDetailBlock): string {
+  const hcell = (v: string) => `<span class="plan-hcell">${esc(v)}</span>`;
+
+  const week = (w: PlanDetailBlock['weeks'][number]) => {
+    const rows = w.tasks.map(t => `<div class="plan-row">
+        <div class="plan-row-main">
+          <div class="plan-task">${t.task}</div>
+          <div class="plan-produces">${t.produces}</div>
+        </div>
+        <div class="plan-hours">${hcell(t.lead)}${hcell(t.eng)}</div>
+      </div>`).join('\n      ');
+    return `<div class="plan-week">
+      <div class="plan-week-h">
+        <span class="plan-week-title">${esc(w.label)}</span>
+        <span class="plan-hours plan-week-cols">${hcell('Lead')}${hcell('Eng')}</span>
+      </div>
+      ${rows}
+      <div class="plan-row plan-subtotal">
+        <div class="plan-row-main"><div class="plan-task">Subtotal</div></div>
+        <div class="plan-hours">${hcell(w.subtotal.lead)}${hcell(w.subtotal.eng)}<span class="plan-total">${esc(w.subtotal.total)}</span></div>
+      </div>
+    </div>`;
+  };
+
+  const team = b.team ? `<div class="plan-group">
+      <h3>${esc(b.team.label)}</h3>
+      <div class="plan-team">
+        ${b.team.roles.map(r => `<div class="plan-role">
+          <div class="plan-role-top">
+            <span class="plan-role-name">${esc(r.role)}</span>
+            <span class="plan-role-hours">${esc(r.hours)}</span>
+          </div>
+          <p class="plan-role-desc">${r.desc}</p>
+        </div>`).join('\n        ')}
+      </div>
+      ${b.team.note ? `<p class="plan-note">${b.team.note}</p>` : ''}
+    </div>` : '';
+
+  const stepList = (items: { title: string; desc: string }[]) =>
+    `<div class="steps">
+        ${items.map((s, i) => `<div class="step-row">
+          <span class="step-num">${String(i + 1).padStart(2, '0')}</span>
+          <div class="step-body">
+            <div class="step-title">${esc(s.title)}</div>
+            <div class="step-desc">${s.desc}</div>
+          </div>
+        </div>`).join('\n        ')}
+      </div>`;
+
+  const sessions = b.sessions ? `<div class="plan-group">
+      <h3>${esc(b.sessions.label)}</h3>
+      ${b.sessions.intro ? `<p class="plan-sub-intro">${b.sessions.intro}</p>` : ''}
+      ${stepList(b.sessions.items)}
+    </div>` : '';
+
+  const deliverables = b.deliverables ? `<div class="plan-group">
+      <h3>${esc(b.deliverables.label)}</h3>
+      ${stepList(b.deliverables.items)}
+    </div>` : '';
+
+  const css = `
+  .plan { margin-top: 10px; }
+  .plan-lead { margin: 30px 0 8px; }
+  .plan-lead p { font-family: var(--text); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); }
+  .plan-group { margin-top: 40px; }
+  .plan-group > h3 { margin-bottom: 16px; }
+  .plan-week { margin-top: 34px; }
+  .plan-week-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 12px; border-bottom: 1.5px solid var(--ink); }
+  .plan-week-title { font-family: var(--mono); font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink); }
+  .plan-week-cols .plan-hcell { font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-40); }
+  .plan-row { display: grid; grid-template-columns: 1fr auto; gap: 16px 24px; align-items: baseline; padding: 15px 0; border-bottom: 1px solid var(--rule); }
+  .plan-row-main { min-width: 0; }
+  .plan-task { font-family: var(--text); font-weight: 500; font-size: 17px; line-height: 1.3; color: var(--ink); }
+  .plan-produces { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); margin-top: 5px; }
+  .plan-hours { display: flex; gap: 14px; align-items: baseline; justify-content: flex-end; font-family: var(--mono); font-size: 12px; color: var(--ink-55); white-space: nowrap; }
+  .plan-hcell { display: inline-block; min-width: 50px; text-align: right; }
+  .plan-subtotal { border-top: 1.5px solid var(--ink); border-bottom: none; margin-top: 2px; }
+  .plan-subtotal .plan-task { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 400; color: var(--ink-55); }
+  .plan-subtotal .plan-hours { color: var(--ink); }
+  .plan-total { display: inline-block; min-width: 46px; text-align: right; color: var(--ink); padding-left: 14px; border-left: 1px solid var(--rule-strong); }
+  .plan-team { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .plan-role { padding: 22px; background: var(--surface); }
+  .plan-role-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .plan-role-name { font-family: var(--text); font-weight: 500; font-size: var(--fs-list-item); color: var(--ink); }
+  .plan-role-hours { font-family: var(--mono); font-size: 12px; color: var(--ink); border: 1px solid var(--rule-strong); border-radius: 2px; padding: 3px 9px; white-space: nowrap; flex-shrink: 0; }
+  .plan-role-desc { font-family: var(--text); font-size: var(--fs-secondary); line-height: var(--lh-body); color: var(--ink-55); }
+  .plan-role-desc em { color: var(--ink-40); }
+  .plan-note { font-family: var(--text); font-style: italic; font-size: var(--fs-note); color: var(--ink-40); margin-top: 14px; }
+  .plan-sub-intro { font-family: var(--text); font-size: var(--fs-small); line-height: var(--lh-body); color: var(--ink-55); margin-bottom: 16px; }
+  @media (max-width: 640px) {
+    .plan-team { grid-template-columns: 1fr; }
+    .plan-hcell { min-width: 42px; }
+  }`;
+
+  return `<section>
+  ${sectionNum(b.sectionNum)}
+  <h2>${esc(b.heading)}</h2>
+  ${b.intro ? `<div class="statement">${b.intro}</div>` : ''}
+  <style>${css}</style>
+  <div class="plan">
+    ${b.lead ? `<div class="plan-group"><h3>${esc(b.lead.label)}</h3><div class="plan-lead"><p>${b.lead.body}</p></div></div>` : ''}
+    ${b.weeks.map(week).join('\n    ')}
+    ${team}
+    ${sessions}
+    ${deliverables}
+  </div>
 </section>`;
 }
 

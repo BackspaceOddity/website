@@ -44,6 +44,7 @@ export type Block =
   | ExerciseRankBlock
   | ExerciseChipsBlock
   | ExerciseSolutionsBlock
+  | PlanDetailBlock
   | DocFooterBlock;
 
 export interface DocHeaderBlock {
@@ -212,6 +213,35 @@ export interface ExerciseSolutionsBlock {
   intro?: Rich;
   exerciseId: string;
   jobs: { id: string; label: string; placeholder?: string }[];
+}
+
+/** The sprint plan in detail — a week-by-week hour breakdown, the team, the
+ *  sessions, and the deliverables. Static, editorial. Mirrors the Notion
+ *  proposal's "Plan" section; the hour tables are the distinctive part. */
+export interface PlanDetailBlock {
+  block: 'planDetail';
+  sectionNum?: string;
+  heading: string;
+  /** italic pull-quote under the heading */
+  intro?: Rich;
+  /** framing paragraph ("What the sprint is for") */
+  lead?: { label: string; body: Rich };
+  /** week tables: each row is a task with its two hour figures + what it produces */
+  weeks: {
+    label: string;
+    tasks: { task: Rich; produces: Rich; lead: string; eng: string }[];
+    subtotal: { lead: string; eng: string; total: string };
+  }[];
+  /** the two roles and their hours */
+  team?: {
+    label: string;
+    roles: { role: string; desc: Rich; hours: string }[];
+    note?: Rich;
+  };
+  /** working sessions with the client */
+  sessions?: { label: string; intro?: Rich; items: { title: string; desc: Rich }[] };
+  /** what the client receives at the end */
+  deliverables?: { label: string; items: { title: string; desc: Rich }[] };
 }
 
 export interface DocFooterBlock {

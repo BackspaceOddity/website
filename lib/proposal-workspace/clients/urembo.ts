@@ -286,24 +286,176 @@ export const uremboPage: ClientPage = {
     },
 
     {
-      block: 'discussion',
-      sectionNum: '12 — To align on',
-      heading: 'Questions for our call',
-      intro: 'Add your own — this page is yours, and we’ll keep building on it as we go.',
-      questions: [
+      block: 'planDetail',
+      sectionNum: '12 — The plan',
+      heading: 'The two weeks, in detail',
+      intro:
+        'The concrete work, the people on it, the hours, and exactly what you receive at the end.',
+      lead: {
+        label: 'What the sprint is for',
+        body:
+          'Two weeks to turn merchant onboarding from something only you can do into something we can build — and to put a firm price and timeline on that build before you commit to it. We haven’t seen your system yet — week one is where we do. So the plan below is detailed about our work, and deliberately open about what we learn from yours.',
+      },
+      weeks: [
         {
-          q: 'Does starting with the two-week discovery sprint feel like the right first step?',
-          note: 'If the shape or the timing gives you any pause, that’s the thing to talk through first.',
+          label: 'Week 1 — Map and capture',
+          tasks: [
+            {
+              task: 'Kickoff &amp; access setup',
+              produces:
+                'Access to the codebase, database, admin dashboard, and Paystack; a working agreement for the two weeks.',
+              lead: '2h',
+              eng: '2h',
+            },
+            {
+              task: 'Session 1 — walk the current onboarding flow end to end',
+              produces: 'A shared, written map of how onboarding works today.',
+              lead: '2h',
+              eng: '1.5h',
+            },
+            {
+              task: 'Read the codebase &amp; back office',
+              produces: 'Technical map of the current system and where automation hooks in.',
+              lead: '—',
+              eng: '10h',
+            },
+            {
+              task: 'Audit the documents &amp; data a merchant submits',
+              produces: 'Inventory of the document types and fields captured today.',
+              lead: '1h',
+              eng: '4h',
+            },
+            {
+              task: 'Session 2 — capture your approval criteria',
+              produces:
+                'Your manual judgement on record: what makes an application genuine, the red flags, the edge cases.',
+              lead: '2.5h',
+              eng: '1h',
+            },
+            {
+              task: 'Write up the approval criteria (first-pass decision logic)',
+              produces: 'Draft decision rules.',
+              lead: '4h',
+              eng: '—',
+            },
+            {
+              task: 'Document-AI feasibility spike on a sample of your real documents',
+              produces:
+                'What an AI can read and validate, with confidence levels and what still needs a human.',
+              lead: '—',
+              eng: '8h',
+            },
+          ],
+          subtotal: { lead: '11.5h', eng: '26.5h', total: '38h' },
         },
         {
-          q: 'When you approve a merchant today, what’s the first thing you check to know they’re genuine?',
-          note: 'This is the judgement the sprint is built to capture — a few minutes on it now gives us a running start.',
-        },
-        {
-          q: 'Looking at what’s in and out of the build in section 08, is there anything you’d move?',
-          note: 'Better to draw that line together now than after we’ve scoped it.',
+          label: 'Week 2 — Design and size',
+          tasks: [
+            {
+              task: 'Design the decision logic &amp; escalation line',
+              produces: 'The auto-approve rules, the confidence thresholds, and what always comes to you.',
+              lead: '5h',
+              eng: '2h',
+            },
+            {
+              task: 'Design the integration',
+              produces:
+                'How the automation triggers, runs on your stack, writes back, and keeps the audit trail.',
+              lead: '1h',
+              eng: '9h',
+            },
+            {
+              task: 'Risk &amp; edge-case review',
+              produces: 'Failure modes, spoofed documents, fallbacks to a human, data handling.',
+              lead: '2h',
+              eng: '2h',
+            },
+            {
+              task: 'Size &amp; price the build',
+              produces: 'The build broken into work packages, with effort, timeline, and a firm fixed price.',
+              lead: '3h',
+              eng: '5h',
+            },
+            {
+              task: 'Session 3 — review with you',
+              produces: 'The spec, escalation policy and quote walked through together and adjusted.',
+              lead: '2h',
+              eng: '1h',
+            },
+            {
+              task: 'Assemble the deliverables',
+              produces: 'The four documents below, finalised and handed over.',
+              lead: '4h',
+              eng: '2h',
+            },
+            {
+              task: 'Final adjustments &amp; handover',
+              produces: 'Loose ends closed; everything handed over.',
+              lead: '1h',
+              eng: '1h',
+            },
+          ],
+          subtotal: { lead: '18h', eng: '22h', total: '40h' },
         },
       ],
+      team: {
+        label: 'Team and hours',
+        roles: [
+          {
+            role: 'Engagement Lead',
+            desc:
+              'Runs the sessions, pulls the approval criteria out of your head, frames the build, owns the spec and the quote. <em>Strategy, AI solution design, facilitation.</em>',
+            hours: '~30h',
+          },
+          {
+            role: 'AI / Solutions Engineer',
+            desc:
+              'Technical mapping of your stack, document-AI feasibility, integration design, build sizing. <em>AI/LLM engineering, backend integration, document processing.</em>',
+            hours: '~50h',
+          },
+        ],
+        note: 'Around 80 focused hours across the two weeks.',
+      },
+      sessions: {
+        label: 'Sessions with you',
+        intro: 'Three working sessions across the two weeks, about 60–90 minutes each.',
+        items: [
+          {
+            title: 'Session 1 · Week 1',
+            desc: 'Walk your current onboarding and approval flow end to end.',
+          },
+          {
+            title: 'Session 2 · Week 1',
+            desc: 'Capture the approval criteria: how you decide a merchant is genuine.',
+          },
+          {
+            title: 'Session 3 · Week 2',
+            desc: 'Review the spec, the escalation policy, and the firm build quote together.',
+          },
+        ],
+      },
+      deliverables: {
+        label: 'What you get at the end',
+        items: [
+          {
+            title: 'Onboarding decision spec',
+            desc:
+              'Your approval logic in plain terms: the criteria, the auto-approve rules, the escalation policy.',
+          },
+          {
+            title: 'Technical integration plan',
+            desc: 'How the automation fits your existing stack, end to end.',
+          },
+          {
+            title: 'Document-AI feasibility note',
+            desc: 'What can be automated, with what confidence, and what still needs a human.',
+          },
+          {
+            title: 'A firm fixed price and timeline for the build',
+            desc: 'For Stage two — so you decide on the build with the full picture.',
+          },
+        ],
+      },
     },
 
     {

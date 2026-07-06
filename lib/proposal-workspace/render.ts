@@ -29,6 +29,7 @@ export function renderBlock(block: Block, slug: string): string {
     case 'exerciseRank':   return B.exerciseRank(block, slug);
     case 'exerciseChips':  return B.exerciseChips(block, slug);
     case 'exerciseSolutions': return B.exerciseSolutions(block, slug);
+    case 'planDetail':     return B.planDetail(block);
     case 'docFooter':      return B.docFooter(block);
     default: {
       // Exhaustiveness guard — a new Block variant must be handled above.
