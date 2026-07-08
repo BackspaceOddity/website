@@ -13,7 +13,7 @@ import type {
   WhatStayedBlock, NextStepsBlock, DiscussionBlock, ClientInputBlock, BookingEmbedBlock, ExerciseMatrixBlock, ExerciseRankBlock,
   ExerciseChipsBlock, ExerciseSolutionsBlock, DocFooterBlock,
 } from './types';
-import type { LockAnswer } from './responses';
+import type { LockAnswer, SavedQuestion } from './responses';
 
 /** Escape plain-text fields. Rich fields (documented in types.ts) are inserted raw. */
 export function esc(s: string): string {
@@ -383,16 +383,19 @@ export function discussion(b: DiscussionBlock, slug: string, savedLock?: LockAns
   var root=document.getElementById('cq-${esc(slug)}'); if(!root) return;
   var ta=root.querySelector('.cq-ta'), btn=root.querySelector('.cq-btn'), st=root.querySelector('.cq-status');
   var KEY='ws:${slug}:questions';
-  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(_){ return []; } }
+  function legacyId(t){ var h=0; for(var i=0;i<t.length;i++){ h=(Math.imul(h,31)+t.charCodeAt(i))|0; } return 'q'+(h>>>0).toString(36); }
+  function uuid(){ try{ return crypto.randomUUID(); }catch(_){ return 'q'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); } }
+  function norm(a){ return (a||[]).map(function(x){ return typeof x==='string'?{id:legacyId(x),text:x}:x; }).filter(function(x){ return x&&typeof x.text==='string'&&x.text.trim(); }); }
+  function load(){ try{ return norm(JSON.parse(localStorage.getItem(KEY)||'[]')); }catch(_){ return []; } }
   function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(_){} }
   function update(){ btn.disabled = ta.value.trim().length===0; }
   ta.addEventListener('input',update); update();
   function add(){ var t=ta.value.trim(); if(!t) return;
-    var a=load(); a.push(t); save(a); ta.value=''; update();
+    var a=load(); a.push({id:uuid(),text:t}); save(a); ta.value=''; update();
     st.textContent='Saving…';
     fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'client-questions',payload:{questions:a}})})
       .then(function(r){ return r.json(); })
-      .then(function(j){ st.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.savedLocal)}; })
+      .then(function(j){ st.textContent=j.ok?${JSON.stringify(u.saved)}:${JSON.stringify(u.savedLocal)}; try{ window.dispatchEvent(new CustomEvent('ws:${esc(slug)}:questions-changed')); }catch(_){} })
       .catch(function(){ st.textContent=${JSON.stringify(u.savedLocal)}; });
   }
   btn.addEventListener('click',add);
@@ -421,47 +424,115 @@ export function discussion(b: DiscussionBlock, slug: string, savedLock?: LockAns
 </div>`;
 }
 
-export function clientInput(b: ClientInputBlock, slug: string, saved: string[] = []): string {
+export function clientInput(b: ClientInputBlock, slug: string, saved: SavedQuestion[] = []): string {
   const ns = `${slug}`.replace(/[^a-zA-Z0-9_]/g, '_');
   const listId = `ci-list-${ns}`;
   const empty = String(b.emptyNote ?? 'Nothing added yet — your notes from this page will appear here.');
   const css = `
   .ci-list { margin-top: 22px; display: flex; flex-direction: column; gap: 16px; }
-  .ci-card { border: 1px solid var(--rule-strong); border-radius: 8px; padding: 18px 20px; background: var(--paper-soft, transparent); }
+  .ci-card { position: relative; border: 1px solid var(--rule-strong); border-radius: 8px; padding: 18px 20px; background: var(--paper-soft, transparent); }
   .ci-num { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); margin-bottom: 8px; display: block; }
   .ci-text { font-family: var(--text); font-weight: var(--w-body); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); white-space: pre-wrap; }
   .ci-empty { font-family: var(--text); font-size: var(--fs-small); color: var(--ink-55); font-style: italic; margin-top: 18px; }
+  .ci-actions { position: absolute; top: 14px; right: 14px; display: flex; gap: 2px; }
+  .ci-act { background: none; border: none; padding: 5px; cursor: pointer; color: var(--ink-40); line-height: 0; border-radius: 5px; }
+  .ci-act:hover { color: var(--ink); background: var(--surface); }
+  .ci-act svg { width: 15px; height: 15px; display: block; }
+  .ci-ta { display: block; width: 100%; box-sizing: border-box; border: 1px solid var(--rule-strong); border-radius: 6px; padding: 10px 12px; font-family: var(--text); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); background: var(--surface); resize: vertical; min-height: 60px; outline: none; }
+  .ci-ta:focus { border-color: var(--ink); }
+  .ci-edit-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .ci-btn { background: var(--ink); color: var(--paper); border: none; border-radius: 6px; padding: 8px 16px; font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .ci-btn:disabled { opacity: .4; cursor: default; }
+  .ci-cancel { background: none; border: 1px solid var(--rule-strong); color: var(--ink); border-radius: 6px; padding: 8px 16px; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .ci-status { font-family: var(--mono); font-size: 10px; color: var(--ink-40); }
   `;
+  // Server render = read-only cards (no-JS fallback); JS re-renders on load to
+  // attach edit/delete affordances for the client's OWN notes (localStorage id
+  // set). Text via textContent (safe). BSO-792.
   const inner = saved.length
-    ? saved.map((t, i) => `<div class="ci-card">
+    ? saved.map((q, i) => `<div class="ci-card" data-qid="${esc(q.id)}">
       <span class="ci-num">From you · ${String(i + 1).padStart(2, '0')}</span>
-      <div class="ci-text">${esc(t)}</div>
+      <div class="ci-text">${esc(q.text)}</div>
     </div>`).join('\n    ')
     : `<p class="ci-empty">${esc(empty)}</p>`;
-  // Live poll: new submissions appear without a page reload (closes the
-  // "added something, see nothing" gap — the cards re-render when the
-  // server-side count changes). Client text set via textContent (safe).
+  const initialData = JSON.stringify(saved);
   const js =
 `(function(){
   var box=document.getElementById('${listId}'); if(!box) return;
-  function pad(n){return n<10?'0'+n:''+n;}
-  function render(arr){
+  var KEY='ws:${slug}:questions';
+  var PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  var CROSS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>';
+  function legacyId(t){ var h=0; for(var i=0;i<t.length;i++){ h=(Math.imul(h,31)+t.charCodeAt(i))|0; } return 'q'+(h>>>0).toString(36); }
+  function norm(a){ return (a||[]).map(function(x){ return typeof x==='string'?{id:legacyId(x),text:x}:x; }).filter(function(x){ return x&&typeof x.text==='string'&&x.text.trim(); }); }
+  function loadMine(){ try{ return norm(JSON.parse(localStorage.getItem(KEY)||'[]')); }catch(_){ return []; } }
+  function saveMine(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(_){} }
+  function mineSet(){ var m={}; loadMine().forEach(function(x){ m[x.id]=1; }); return m; }
+  function pad(n){ return n<10?'0'+n:''+n; }
+  var LIST=norm(${initialData});
+  var editing=null;
+  saveMine(loadMine()); // migrate legacy string[] -> [{id,text}] once
+  function postList(){
+    return fetch('/w/${slug}/exercise/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exercise:'client-questions',payload:{questions:LIST}})}).then(function(r){ return r.json(); });
+  }
+  function render(){
     box.innerHTML='';
-    if(!arr.length){ var p=document.createElement('p'); p.className='ci-empty'; p.textContent=${JSON.stringify(empty)}; box.appendChild(p); return; }
-    arr.forEach(function(t,i){
-      var c=document.createElement('div'); c.className='ci-card';
+    if(!LIST.length){ var p=document.createElement('p'); p.className='ci-empty'; p.textContent=${JSON.stringify(empty)}; box.appendChild(p); return; }
+    var mine=mineSet();
+    LIST.forEach(function(q,i){
+      var c=document.createElement('div'); c.className='ci-card'; c.setAttribute('data-qid',q.id);
       var n=document.createElement('span'); n.className='ci-num'; n.textContent='From you \\u00b7 '+pad(i+1);
-      var x=document.createElement('div'); x.className='ci-text'; x.textContent=t;
-      c.appendChild(n); c.appendChild(x); box.appendChild(c);
+      var tx=document.createElement('div'); tx.className='ci-text'; tx.textContent=q.text;
+      c.appendChild(n); c.appendChild(tx);
+      if(mine[q.id]){
+        var acts=document.createElement('div'); acts.className='ci-actions';
+        var eb=document.createElement('button'); eb.className='ci-act'; eb.type='button'; eb.title='Edit'; eb.setAttribute('aria-label','Edit'); eb.innerHTML=PEN;
+        eb.addEventListener('click',function(){ startEdit(q.id); });
+        var db=document.createElement('button'); db.className='ci-act'; db.type='button'; db.title='Delete'; db.setAttribute('aria-label','Delete'); db.innerHTML=CROSS;
+        db.addEventListener('click',function(){ del(q.id); });
+        acts.appendChild(eb); acts.appendChild(db); c.appendChild(acts);
+      }
+      box.appendChild(c);
     });
   }
-  var current=${saved.length};
+  function startEdit(id){
+    var item=null; for(var i=0;i<LIST.length;i++){ if(LIST[i].id===id){ item=LIST[i]; break; } }
+    if(!item) return;
+    editing=id;
+    var card=box.querySelector('.ci-card[data-qid="'+id+'"]'); if(!card){ editing=null; return; }
+    card.innerHTML='';
+    var ta=document.createElement('textarea'); ta.className='ci-ta'; ta.value=item.text;
+    var row=document.createElement('div'); row.className='ci-edit-row';
+    var save=document.createElement('button'); save.className='ci-btn'; save.type='button'; save.textContent='Save';
+    var cancel=document.createElement('button'); cancel.className='ci-cancel'; cancel.type='button'; cancel.textContent='Cancel';
+    var st=document.createElement('span'); st.className='ci-status';
+    row.appendChild(save); row.appendChild(cancel); row.appendChild(st);
+    card.appendChild(ta); card.appendChild(row); ta.focus();
+    function commit(){
+      var v=ta.value.trim(); if(!v){ ta.focus(); return; }
+      item.text=v;
+      saveMine(loadMine().map(function(x){ return x.id===id?{id:id,text:v}:x; }));
+      editing=null; save.disabled=true; st.textContent='Saving…';
+      postList().then(function(){ render(); }).catch(function(){ poll(); });
+    }
+    save.addEventListener('click',commit);
+    ta.addEventListener('keydown',function(e){ if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){ e.preventDefault(); commit(); } if(e.key==='Escape'){ e.preventDefault(); editing=null; render(); } });
+    cancel.addEventListener('click',function(){ editing=null; render(); });
+  }
+  function del(id){
+    LIST=LIST.filter(function(q){ return q.id!==id; });
+    saveMine(loadMine().filter(function(x){ return x.id!==id; }));
+    if(editing===id) editing=null;
+    render();
+    postList().catch(function(){ poll(); });
+  }
   function poll(){
     fetch('/w/${slug}/exercise/',{headers:{accept:'application/json'}})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(j){ if(j&&j.questions&&j.questions.length!==current){ current=j.questions.length; render(j.questions); } })
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){ if(j&&j.questions&&!editing){ var next=norm(j.questions); if(JSON.stringify(next)!==JSON.stringify(LIST)){ LIST=next; render(); } } })
       .catch(function(){});
   }
+  render();
+  window.addEventListener('ws:${esc(slug)}:questions-changed', poll);
   setInterval(poll, 12000);
 })();`;
   return `<section>

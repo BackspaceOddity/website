@@ -90,8 +90,14 @@ export const demoPage: ClientPage = {
       link: { href: 'https://backspaceoddity.com/ai-skills/', label: 'See how we work' },
     },
     {
+      block: 'clientInput',
+      sectionNum: '07 — What you told us',
+      heading: 'Your notes',
+      intro: 'Anything you add below lands here. You can edit or delete the notes you added.',
+    },
+    {
       block: 'discussion',
-      sectionNum: '07 — To align on',
+      sectionNum: '08 — To align on',
       heading: 'Questions for our next conversation',
       intro: 'Add your own — this page is shared.',
       questions: [

@@ -67,13 +67,39 @@ export function savedMatrixPlacements(r: SavedResponses, exerciseId: string): Ma
   return [];
 }
 
-/** Extract the client's added questions (§07) from saved responses, safely. */
-export function savedQuestions(r: SavedResponses): string[] {
+export type SavedQuestion = { id: string; text: string };
+
+/** Deterministic id for a legacy string question — stable across renders so a
+ *  pre-uuid note keeps identity (the client recomputes the same id to match its
+ *  own localStorage entry). MUST stay identical to the client-side legacyId()
+ *  in blocks.ts (discussion + clientInput). */
+export function legacyQuestionId(text: string): string {
+  let h = 0;
+  for (let i = 0; i < text.length; i++) h = (Math.imul(h, 31) + text.charCodeAt(i)) | 0;
+  return 'q' + (h >>> 0).toString(36);
+}
+
+/** Extract the client's added questions (§07) from saved responses, safely.
+ *  New shape: [{id,text}]. Back-compat: legacy string[] rows map to
+ *  {id: legacyQuestionId(text), text} so old submissions keep rendering and the
+ *  client can still edit/delete them (same id on both sides). BSO-792. */
+export function savedQuestions(r: SavedResponses): SavedQuestion[] {
   const p = r['client-questions'] as { questions?: unknown } | undefined;
-  if (p && Array.isArray(p.questions)) {
-    return p.questions.filter((x): x is string => typeof x === 'string' && x.trim().length > 0);
+  if (!p || !Array.isArray(p.questions)) return [];
+  const out: SavedQuestion[] = [];
+  for (const q of p.questions) {
+    if (typeof q === 'string') {
+      const text = q.trim();
+      if (text) out.push({ id: legacyQuestionId(text), text });
+    } else if (q && typeof q === 'object') {
+      const obj = q as { id?: unknown; text?: unknown };
+      const text = typeof obj.text === 'string' ? obj.text.trim() : '';
+      if (!text) continue;
+      const id = typeof obj.id === 'string' && obj.id ? obj.id : legacyQuestionId(text);
+      out.push({ id, text });
+    }
   }
-  return [];
+  return out;
 }
 
 export type LockAnswer = { q: string; a: string };

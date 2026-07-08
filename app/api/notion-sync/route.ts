@@ -32,7 +32,12 @@ const bullet = (s: string) => ({ object: 'block', type: 'bulleted_list_item', bu
 function renderExercise(exercise: string, payload: Record<string, unknown>): object[] {
   const blocks: object[] = [];
   if (exercise === 'client-questions') {
-    const qs = (payload.questions as string[]) ?? [];
+    // BSO-792: payload is now [{id,text}]; back-compat with legacy string[].
+    const raw = (payload.questions as unknown[]) ?? [];
+    const qs = raw
+      .map((q) => (typeof q === 'string' ? q : q && typeof q === 'object' ? String((q as { text?: unknown }).text ?? '') : ''))
+      .map((s) => s.trim())
+      .filter(Boolean);
     blocks.push(h3('Questions the client added'));
     if (qs.length) qs.forEach((q) => blocks.push(bullet(q)));
     else blocks.push(para('—'));
