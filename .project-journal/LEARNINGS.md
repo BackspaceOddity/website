@@ -1,5 +1,15 @@
 # Learnings
 
+## Session 2026-07-08 — BSO-792 §07 edit/delete + Linear stdio migration
+
+[2026-07-08] [WIN] [LOCAL]: **BSO-792 §07 client edit/delete shipped.** Payload `client-questions` `string[]` → `[{id,text}]` with deterministic `legacyId()` back-compat — same hash on server (`responses.ts`) and client (`blocks.ts`), so migrated localStorage ids match server ids and pre-feature notes stay editable. Edit/delete = re-POST the full array via the existing exercise endpoint (append-only, latest-row-wins) — no new route, no `deleted_at`. Affordances gated by localStorage id set; §08 `discussion` read-only. Verified live on `/w/_demo`.
+
+[2026-07-08] [LEARN] [LOCAL]: **`exercise_responses` has a FK to `workspaces(slug)`.** POSTing under a slug with no workspaces row → `exercise_responses_slug_fkey` violation; the client swallows it and falls back to "saved on this device" (localStorage), so §07 never shows the note. To test on `_demo`: insert an ungated `_demo` workspaces row (`password=''` keeps `getWorkspacePassword` falsy → gate skipped, `notion_page_id=null` → no sync). `_demo` also lacked a `clientInput` block — added one as showcase + test surface.
+
+[2026-07-08] [LEARN] [CROSS-PROJECT]: **Linear is now a local stdio MCP (BSO-790) — needs the key in `~/.config/linear/.env` + a CC restart.** New session: `linear-server` failed to connect because `AUTH_HEADER` was still the `PASTE_HERE` placeholder. After the key is set + CC restarts, tools surface under a UUID-prefixed server name (`mcp__<uuid>__get_issue`). Verify via `ToolSearch`, never from the start-time snapshot.
+
+[2026-07-08] [LEARN] [LOCAL]: **`origin/main` is ~1400 lines behind the live `/w` engine.** The engine + jetbrains + urembo-v2 + 8figures all live on `8figures-proposal`, unmerged to main. Engine feature branches must base off `8figures-proposal` (or the real integration line), not main — else the PR carries 1400 lines of unrelated delta.
+
 ## Session 2026-05-28 — Font tweaks panel + ej-frame copy
 
 [2026-05-28] [WIN] [CROSS-PROJECT]: **Live CSS var tweaks panel pattern.** Self-contained vanilla JS IIFE before `</body>` — sliders update CSS custom properties in `:root` in real-time, persisted to localStorage. "Save to Claude" POSTs payload to `localhost:8002/inbox` (inbox-server.py), which writes `_edit-inbox.json`. CC Monitor watches the file; fires INBOX_READY with full payload. Zero round-trips for iterating typography. `inbox-server.py` lives at project root; `_edit-inbox.json` gitignored as runtime artifact.
