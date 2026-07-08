@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-07-08 — BSO-792 §07 edit/delete + BSO-793 Trashformas migration (live)
+
+**What happened:**
+- **BSO-792** shipped: §07 client edit/delete of their own pre-meeting notes. Payload `client-questions` `string[]`→`[{id,text}]` + deterministic `legacyId` back-compat; edit/delete = re-POST full array via existing exercise endpoint (no new route/column, append-only + latest-row-wins preserved). Affordances localStorage-gated; §08 read-only. Added `clientInput` to `_demo`. Verified e2e on `/w/_demo`. Commit `46f84e7`, branch `yegor/bso-792-...`.
+- **BSO-793** shipped LIVE: Trashformas migrated from bespoke route to /w engine at `trashformas.backspaceoddity.com` — seamless (same URL + reused live access code). `clients/trashformas.ts` reproduces the LIVE page 1:1 (title, §02 cores, §04 accept/escalate processFlow, prefixed §07 questions) + adds §07 `clientInput`. Deployed `dpl_6uD1TQJtUMR32VVBrX638rMCgDt7`, aliased subdomain only; apex + urembo untouched. Commits `f507508` + `0ed555e`, branch `yegor/bso-793-...`.
+- **Engine fix:** discussion decision-lock form Russian→English default, overridable via `ExerciseUI` (jetbrains keeps Russian).
+- **Email:** Act-0 cover drafted (reply to Thara, "Re: Your AI form", tharaatta@gmail.com) with subdomain link + access-code placeholder; sent by Yegor from the app.
+
+**Decisions made:**
+- Trashformas migration reproduces the LIVE page (a hand-polished edit of Anna's draft), not the raw draft — matching live = seamless.
+- Feature branches for engine work base off `8figures-proposal` (origin/main ~1400 lines behind the live /w engine).
+- Reuse the existing live access code, never regenerate — seamless-migration invariant.
+
+**Not pushed** — branches await Yegor's push/merge + issue-close decision.
+
 ## 2026-05-20 — Dynamic OG image live + CC+Webflow strategic assessment
 
 **What happened:**

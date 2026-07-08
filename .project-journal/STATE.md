@@ -1,5 +1,33 @@
 # Backspace Oddity Website — Current State
 
+**Last updated:** 2026-07-08
+**Status:** 🟢 **Trashformas migrated to /w engine + LIVE on trashformas.backspaceoddity.com (seamless — same URL + reused code). §07 client edit/delete shipped (BSO-792). Branches `yegor/bso-792` + `yegor/bso-793` committed, NOT pushed.**
+
+## Session summary — 2026-07-08 (BSO-792 + BSO-793)
+
+**BSO-792 — §07 client edit/delete** (shipped, verified, commit `46f84e7`, branch `yegor/bso-792-...`):
+- Payload `client-questions` `string[]`→`[{id,text}]` with deterministic `legacyId()` back-compat (same hash in server `responses.ts` + client `blocks.ts`).
+- Edit/delete = re-POST the full array via the existing exercise endpoint (append-only, latest-row-wins) — no new route, no `deleted_at`.
+- §07 `clientInput` cards: pencil/✕ gated by localStorage id set; §08 `discussion` read-only. Added `clientInput` to `_demo` as showcase + test surface.
+- Verified e2e on `/w/_demo`: add→edit→delete round-trip to Supabase; legacy `string[]` back-compat; per-item gate; cross-device add-only.
+
+**BSO-793 — Trashformas migration** (LIVE, verified, commits `f507508` + `0ed555e`, branch `yegor/bso-793-...` stacked on 792):
+- `clients/trashformas.ts` reproduces the LIVE bespoke page 1:1 (title "Conceptual proposal — Trashformas", §02 cores + "The shift this is really about", §04 accept/escalate `processFlow`, §06, prefixed §07 questions). The live copy is a hand-polished edit of Anna's draft (Notion 660c96f9), NOT verbatim — matching live = seamless. Added §07 `clientInput` (brings BSO-792). Registered in `clients/index.ts`.
+- Engine fix: discussion decision-lock form was hardcoded Russian ("Записать решение") leaking to all English clients → English defaults, overridable via `ExerciseUI`; jetbrains keeps Russian via `ui` overrides.
+- Supabase `workspaces` row for `trashformas`: reused the LIVE access code (from `.workspace-secrets/trashformas.txt`, never regenerated) + mapped Notion Deal page `39140251-1cda-8046-adcc-da7b705a4edc`.
+- Deployed `dpl_6uD1TQJtUMR32VVBrX638rMCgDt7` → aliased **subdomain only** (`trashformas.backspaceoddity.com`). Verified live by content: gate + live code unlocks the new page, English form, no Russian leak, **apex + urembo untouched**.
+
+**Email:** Act-0 cover drafted (reply in "Re: Your AI form", tharaatta@gmail.com) with the subdomain link + access-code placeholder. Yegor sent it from the app.
+
+**Infra:** Linear migrated to a local stdio MCP (BSO-790) — needed the key in `~/.config/linear/.env` + a CC restart; tools surface under a UUID-prefixed server name.
+
+## Open (Yegor's call)
+- Push + merge `yegor/bso-792` + `yegor/bso-793` (proposed base `8figures-proposal`; origin/main ~1400 lines behind the live engine). Close BSO-792 + BSO-793.
+- `_demo` Supabase workspaces row (ungated) added for testing — keep (demo persists) or remove.
+- BSO-793 §07 edit/delete NOT e2e'd on the live client page (to avoid polluting their data); proven on `_demo` (same engine).
+
+---
+
 **Last updated:** 2026-05-27
 **Status:** 🟢 **`/ajtbd-naming-brief` standalone page live on backspaceoddity.com. Ivan Zamesin naming methodology brief (EN). Route handler pattern confirmed working.**
 

@@ -11,10 +11,13 @@ _(picked up by next /resume — surface for re-decision or drop)_
 
 - [2026-05-20 /wrap] Kleos / Stape pilot strategy | context: CC + Webflow MCP two-question assessment completed. Strategic direction: defer BSO Website Webflow migration, use Kleos as CMS-first pilot. No explicit "start building" approval — Yegor said "continue from where you left off" but didn't confirm next step on Kleos. Verify: should we kick off Kleos Webflow CMS architecture session?
 
+- [2026-07-08 /wrap] `_demo` Supabase workspaces row (ungated) | context: added an ungated `_demo` workspaces row (empty password, no Notion) so the FK let me test BSO-792; kept it so the block-demo persists submissions. Yegor didn't confirm. Decide: keep (demo works end-to-end) or remove (restore `_demo` to non-persisting).
+- [2026-07-08 /wrap] Push + merge + close for BSO-792/793 | context: branches `yegor/bso-792-...` + `yegor/bso-793-...` committed, NOT pushed. origin/main is ~1400 lines behind the live /w engine (engine lives on `8figures-proposal`) → proposed PR base = `8figures-proposal`. Yegor's call on push/merge + closing BSO-792 + BSO-793. Note: BSO-793 §07 edit/delete not e2e'd on the live client page (to avoid polluting their data); proven on `_demo` (same engine).
+
 ## Approved, awaiting Linear filing
 _(filled only if /wrap detects approved-without-issue and fails to file — anomaly state)_
 
 - (none)
 
 ---
-_Last updated by /wrap on 2026-05-20._
+_Last updated by /wrap on 2026-07-08._
