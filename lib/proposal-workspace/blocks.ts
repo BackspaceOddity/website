@@ -260,10 +260,12 @@ export function discussion(b: DiscussionBlock, slug: string, savedLock?: LockAns
   const u = {
     questionPlaceholder: "Type a question you’d like to cover…", addQuestion: 'Add question',
     saved: "✓ Saved — it’ll appear in “Your notes” above", savedLocal: 'Saved on this device',
-    lockBtnLabel: 'Зафиксировать',
-    lockedBadge: 'Зафиксировано',
-    locking: 'Фиксируем…',
-    lockFail: 'Ошибка — попробуйте ещё раз',
+    lockFormLabel: 'Record the decision',
+    lockAnswerPlaceholder: 'Your answer…',
+    lockBtnLabel: 'Lock it in',
+    lockedBadge: 'Recorded',
+    locking: 'Saving…',
+    lockFail: 'Something went wrong — try again',
     ...(b.ui || {}),
   };
 
@@ -328,10 +330,10 @@ export function discussion(b: DiscussionBlock, slug: string, savedLock?: LockAns
   const qTexts = JSON.stringify(b.questions.map(q => String(q.q)));
 
   const lockForm = `<div class="dl-form" id="${lockFormId}">
-    <div class="dl-form-label">Записать решение</div>
+    <div class="dl-form-label">${esc(u.lockFormLabel)}</div>
     ${b.questions.map((q, i) => `<div class="dl-q-row">
       <div class="dl-q-label">${q.q}</div>
-      <textarea class="dl-ta" data-idx="${i}" placeholder="Ваш ответ…" rows="2"></textarea>
+      <textarea class="dl-ta" data-idx="${i}" placeholder="${esc(u.lockAnswerPlaceholder)}" rows="2"></textarea>
     </div>`).join('\n    ')}
     <div class="dl-footer">
       <button type="button" class="dl-btn">${esc(u.lockBtnLabel)}</button>

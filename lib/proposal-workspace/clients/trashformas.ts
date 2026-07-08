@@ -2,10 +2,10 @@
  * Trashformas — initial assessment (BSO-793).
  *
  * Migration of the live bespoke `trashformas.backspaceoddity.com` route onto the
- * /w block engine. Content is Anna's canon-format draft "Conceptual proposal —
- * Trashformas" (Notion Internal Docs 660c96f9-f6f9-4c45-ae19-c9f92d72a9ac),
- * mapped 1:1 to blocks. Body text is verbatim from that draft; before/after
- * cores and step titles are the block-format glue (same pattern as urembo.ts).
+ * /w block engine. Reproduces the LIVE page 1:1 (verified against the authed
+ * live render, 2026-07-08) — the live copy is a hand-polished edit of Anna's
+ * Notion draft 660c96f9, NOT verbatim. The one intentional addition is the §07
+ * `clientInput` "Your notes" section, which brings the BSO-792 edit/delete.
  *
  * Company: Trashformas — biogas / circular infrastructure, Nigeria.
  * Contact: Thara Aisha Atta. CRM: Deal "[Trashformas] Context graph" — Proposal.
@@ -20,13 +20,13 @@ import type { ClientPage } from '../types';
 
 export const trashformasPage: ClientPage = {
   slug: 'trashformas',
-  title: 'Trashformas — Initial Assessment',
+  title: 'Conceptual proposal — Trashformas',
   blocks: [
     {
       block: 'docHeader',
-      label: 'Initial Assessment · Trashformas',
+      label: 'Conceptual proposal',
       meta: 'Prepared by Backspace Oddity · for Thara Aisha Atta',
-      version: 'Conceptual proposal',
+      version: 'v0.1',
       date: 'July 2026',
     },
 
@@ -53,16 +53,16 @@ export const trashformasPage: ClientPage = {
     {
       block: 'beforeAfter',
       sectionNum: '02 — The core challenge',
-      heading: 'Diagnosis before solution',
+      heading: 'The shift this is really about',
       before: {
         label: 'Today',
-        core: 'Every question has one address — yours',
+        core: 'Every question has one address — you',
         body:
-          'You hand a task to your outsourced marketing team, with a written guideline and battle cards already in their hands. They open a WhatsApp group. Inside it, they still direct every question straight to you — so you sit in the group answering things the guideline already covered, and the intermediary you brought on to save your time now spends it. The same pattern shows up inside the team: you explain a decision in one meeting, and a week later you explain it again, because there’s nowhere it stayed.',
+          'You hand a task to your outsourced marketing team, with a written guideline and battle cards already in their hands. They open a WhatsApp group — and still direct every question straight to you, so the intermediary you brought on to save your time now spends it. The same pattern shows up inside the team: you explain a decision in one meeting, and a week later you explain it again, because there’s nowhere it stayed.',
       },
       after: {
         label: 'Where this goes',
-        core: 'The team asks the system, not you',
+        core: 'The system holds the context, so you don’t',
         body:
           'A place that already holds the business context — so the marketing partner asks the system instead of you, a decision made once stays made, and you can step out of conversations that don’t need you while the team still moves forward.',
       },
@@ -89,11 +89,39 @@ export const trashformasPage: ClientPage = {
     { block: 'divider' },
 
     {
-      block: 'narrative',
+      block: 'processFlow',
       sectionNum: '04 — What it might look like',
-      heading: 'A hypothesis to co-shape, not a fixed plan',
-      body: [
-        'The first artifact would likely be a <strong>decision log</strong> — a single structured record of what the team decided, why, and what it rules out. Walk it through your marketing example: a question lands in the WhatsApp group; if the answer already sits in the log — a settled guideline, a prior decision — the system surfaces it to the partner directly, and you never see the ping. If it’s genuinely new or unclear, it routes to you or the COO for a call, and that answer goes back into the log so it’s only ever answered once. It’s the same accept-or-escalate logic your COO sign-off gate already implies. Treat the name loosely — we’d shape it with you once we’ve walked a real week of your decisions together.',
+      heading: 'What it might look like',
+      intro:
+        'A hypothesis to co-shape, not a fixed plan. The first artifact would likely be a <strong>decision log</strong> — a single structured record of what the team decided, why, and what it rules out.',
+      steps: [
+        {
+          title: 'A question lands',
+          desc:
+            'Someone — say your outsourced marketing partner — asks a question in the WhatsApp group.',
+        },
+        {
+          title: 'The system checks the log',
+          desc:
+            'If the answer already sits in the decision log — a settled guideline, a prior decision — it surfaces straight to them, and you never see the ping.',
+          branches: [
+            {
+              label: 'Already decided',
+              body: 'Surfaced to the asker directly. You’re not pulled in.',
+              primary: true,
+            },
+            {
+              label: 'New or unclear',
+              body:
+                'Routes to you or the COO for a call — and that answer goes back into the log, so it’s only ever answered once.',
+            },
+          ],
+        },
+        {
+          title: 'Answered once, kept forever',
+          desc:
+            'It’s the same accept-or-escalate logic your COO sign-off gate already implies. We’d shape the artifact with you once we’ve walked a real week of your decisions together.',
+        },
       ],
     },
 
@@ -113,15 +141,16 @@ export const trashformasPage: ClientPage = {
     {
       block: 'nextSteps',
       sectionNum: '06 — What happens next',
-      heading: 'Two steps, co-owned',
+      heading: 'What happens next',
+      intro: 'Two steps, co-owned.',
       steps: [
         {
           title: 'Walk one real week together',
           desc:
-            'The marketing escalations, the two-app roadmap debate, the decisions you had to repeat — we mark exactly where context went missing and who had to step in.',
+            'The marketing escalations, the two-app roadmap debate, the decisions you had to repeat — and mark exactly where context went missing and who had to step in.',
         },
         {
-          title: 'Agree on the one signal that it’s working',
+          title: 'Agree on the one signal that says it’s working',
           desc:
             'The clearest candidate from the call is you being absent from a decision that still moves forward — let’s define what that looks like before anything gets built.',
         },
@@ -143,30 +172,28 @@ export const trashformasPage: ClientPage = {
     {
       block: 'discussion',
       sectionNum: '08 — Questions for our next call',
-      heading: 'Sharp, one per theme',
-      intro:
-        'The questions below are our agenda for the call. If anything else comes to mind, add it — this page stays yours.',
-      addLabel: 'Anything else to add?',
+      heading: 'Questions for our next call',
+      addLabel: 'Add your own question',
       questions: [
         {
-          q: 'Which decisions should the system answer on its own, and which must always wait for the COO’s sign-off?',
+          q: 'Decision rights: which decisions should the system answer on its own, and which must always wait for the COO?',
           note: 'You want the COO’s sign-off gate respected.',
         },
         {
-          q: 'The B2B institutional and estate-contract blueprint from your email didn’t surface on the call — is that still a live use case, and does it belong to Trashformas or to a separate venture?',
-          note: 'The test case from your email.',
+          q: 'The test case: is the B2B institutional / estate-contract blueprint still live, and does it belong to Trashformas or a separate venture?',
+          note: 'It didn’t surface on the call.',
         },
         {
-          q: 'Is capture happening consistently across every meeting, or does the system also need to fix the habit of recording in the first place?',
+          q: 'Capture habit: is recording with Fathom consistent across every meeting, or does the system also need to fix the habit of capturing?',
           note: 'You’re recording with Fathom today.',
         },
         {
-          q: 'Should the internal context layer wait for the collection app, or stand on its own with meetings first and connect to the app later?',
+          q: 'App data: should the internal context layer wait for the collection app, or stand on its own with meetings first and connect later?',
           note: 'The collection app isn’t built yet.',
         },
         {
-          q: 'Should we design the first build to be portable from day one, or prove it once at Trashformas first?',
-          note: 'You want this to carry over to transport, textiles, and logistics.',
+          q: 'Replicability: design the first build portable from day one, or prove it once at Trashformas first?',
+          note: 'You want this to carry to transport, textiles, logistics.',
         },
       ],
     },

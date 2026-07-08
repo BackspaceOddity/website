@@ -49,6 +49,12 @@ const ru: ExerciseUI = {
   newStickerPlaceholder: 'Своя работа…',
   addProblem: '＋ Добавить проблему',
   newProblemPlaceholder: 'Своя проблема…',
+  lockFormLabel: 'Записать решение',
+  lockAnswerPlaceholder: 'Ваш ответ…',
+  lockBtnLabel: 'Зафиксировать',
+  lockedBadge: 'Зафиксировано',
+  locking: 'Фиксируем…',
+  lockFail: 'Ошибка — попробуйте ещё раз',
 };
 
 export const jetbrainsPage: ClientPage = {
@@ -263,6 +269,12 @@ export const jetbrainsPage: ClientPage = {
         addQuestion: 'Добавить',
         questionPlaceholder: 'Ваша метрика…',
         savedLocal: '✓ Сохранено локально',
+        lockFormLabel: 'Записать решение',
+        lockAnswerPlaceholder: 'Ваш ответ…',
+        lockBtnLabel: 'Зафиксировать',
+        lockedBadge: 'Зафиксировано',
+        locking: 'Фиксируем…',
+        lockFail: 'Ошибка — попробуйте ещё раз',
       },
     },
 

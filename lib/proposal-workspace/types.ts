@@ -241,6 +241,14 @@ export interface ExerciseUI {
   addProblem?: string;
   /** placeholder shown in an empty new problem row. Default "Your problem…". */
   newProblemPlaceholder?: string;
+  /** discussion decision-lock form. Defaults are English (source language);
+   *  Russian clients (jetbrains) override via these keys. */
+  lockFormLabel?: string;         // dl-form heading. Default "Record the decision".
+  lockAnswerPlaceholder?: string; // per-question textarea. Default "Your answer…".
+  lockBtnLabel?: string;          // submit button. Default "Lock it in".
+  lockedBadge?: string;           // locked-state badge. Default "Recorded".
+  locking?: string;               // in-flight status. Default "Saving…".
+  lockFail?: string;              // error status. Default "Something went wrong — try again".
 }
 
 /** One-way workshop, Exercise 1: place pre-filled underserved-job cards on a
