@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-07-10 — Edit Mode daemon-relay: fixed spaced-slug bug (cross-project, no site changes)
+
+**What happened:**
+- Diagnosed and fixed a bug in the shared Edit Mode daemon-relay (`Second Brain/_system/skills/edit-mode-panel/`) where project slugs containing a space — including "BSO Website" — failed to register with the watcher.
+- Root cause: `watch-inbox.sh` put the raw slug in URL paths (a literal space breaks curl's URL parser outright); `edit-mode-daemon.py`'s `_route()` never `unquote()`d the path segment and `_SLUG_RE` rejected spaces regardless.
+- Fixed both layers, redeployed the daemon binary, restarted via `launchctl kickstart -k`, verified live.
+
+**Result:**
+- No files in this repo changed. Fix committed in the Second Brain repo.
+
+## 2026-07-10 — BSO-871: Tailwind + shadcn/ui base adoption
+
+**What happened:**
+- Installed Tailwind v4, made it coexist with `app/globals.css`'s hand-written CSS via the `@layer` cascade mechanism (`@import "tailwindcss"` wraps Tailwind in layers; unlayered BSO CSS wins by default). Found and fixed one real collision: BSO's own generic `button`/`a`/`img` resets were unlayered too, silently overriding shadcn's `@layer utilities` classes — moved that reset block into `@layer base`.
+- Ran `shadcn init`, installed 5 base primitives (button, input, card, dialog, dropdown-menu). Replaced shadcn's default gray theme and the Geist font it added to `app/layout.tsx` with BSO's real brand tokens (`--color-*`, GT Eesti Pro).
+- Registered shadcn's MCP server in `.mcp.json` (verification pending — needs CC session restart).
+- Ran a full audit of repeated UI patterns across `app/`, `app/w/`, `lib/proposal-workspace/` — highest duplication is 5 near-identical button CSS recipes and 5 copy-pasted status/toast state machines, both in `lib/proposal-workspace/blocks.ts`.
+- Filed a separate background task for a real bug found in the Edit Mode watcher (fails to register slugs with spaces).
+
+**Decisions made:**
+- Branch `yegor/bso-871-...` based off `origin/main`, not the local `yegor/bso-793` stack — Tailwind/shadcn is orthogonal infra, not entangled with the unmerged w-engine work.
+- Tailwind's preflight stays on (not disabled) — it's redundant with BSO's existing reset, not conflicting, once layering is fixed.
+- shadcn's default theme/font are never acceptable as-is — always alias to the project's real design tokens.
+
+**Result:**
+- 4/7 BSO-871 acceptance criteria done. Not closed. Waiting on Yegor to pick the first real migration target (recommended: button dedup in `blocks.ts`) before landing the CLAUDE.md rule + doing the migration.
+
 ## 2026-05-20 — Dynamic OG image live + CC+Webflow strategic assessment
 
 **What happened:**
