@@ -1,5 +1,33 @@
 # Backspace Oddity Website — Current State
 
+**Last updated:** 2026-07-08
+**Status:** 🟢 **Trashformas migrated to /w engine + LIVE on trashformas.backspaceoddity.com (seamless — same URL + reused code). §07 client edit/delete shipped (BSO-792). Branches `yegor/bso-792` + `yegor/bso-793` committed, NOT pushed.**
+
+## Session summary — 2026-07-08 (BSO-792 + BSO-793)
+
+**BSO-792 — §07 client edit/delete** (shipped, verified, commit `46f84e7`, branch `yegor/bso-792-...`):
+- Payload `client-questions` `string[]`→`[{id,text}]` with deterministic `legacyId()` back-compat (same hash in server `responses.ts` + client `blocks.ts`).
+- Edit/delete = re-POST the full array via the existing exercise endpoint (append-only, latest-row-wins) — no new route, no `deleted_at`.
+- §07 `clientInput` cards: pencil/✕ gated by localStorage id set; §08 `discussion` read-only. Added `clientInput` to `_demo` as showcase + test surface.
+- Verified e2e on `/w/_demo`: add→edit→delete round-trip to Supabase; legacy `string[]` back-compat; per-item gate; cross-device add-only.
+
+**BSO-793 — Trashformas migration** (LIVE, verified, commits `f507508` + `0ed555e`, branch `yegor/bso-793-...` stacked on 792):
+- `clients/trashformas.ts` reproduces the LIVE bespoke page 1:1 (title "Conceptual proposal — Trashformas", §02 cores + "The shift this is really about", §04 accept/escalate `processFlow`, §06, prefixed §07 questions). The live copy is a hand-polished edit of Anna's draft (Notion 660c96f9), NOT verbatim — matching live = seamless. Added §07 `clientInput` (brings BSO-792). Registered in `clients/index.ts`.
+- Engine fix: discussion decision-lock form was hardcoded Russian ("Записать решение") leaking to all English clients → English defaults, overridable via `ExerciseUI`; jetbrains keeps Russian via `ui` overrides.
+- Supabase `workspaces` row for `trashformas`: reused the LIVE access code (from `.workspace-secrets/trashformas.txt`, never regenerated) + mapped Notion Deal page `39140251-1cda-8046-adcc-da7b705a4edc`.
+- Deployed `dpl_6uD1TQJtUMR32VVBrX638rMCgDt7` → aliased **subdomain only** (`trashformas.backspaceoddity.com`). Verified live by content: gate + live code unlocks the new page, English form, no Russian leak, **apex + urembo untouched**.
+
+**Email:** Act-0 cover drafted (reply in "Re: Your AI form", tharaatta@gmail.com) with the subdomain link + access-code placeholder. Yegor sent it from the app.
+
+**Infra:** Linear migrated to a local stdio MCP (BSO-790) — needed the key in `~/.config/linear/.env` + a CC restart; tools surface under a UUID-prefixed server name.
+
+## Open (Yegor's call)
+- Push + merge `yegor/bso-792` + `yegor/bso-793` (proposed base `8figures-proposal`; origin/main ~1400 lines behind the live engine). Close BSO-792 + BSO-793.
+- `_demo` Supabase workspaces row (ungated) added for testing — keep (demo persists) or remove.
+- BSO-793 §07 edit/delete NOT e2e'd on the live client page (to avoid polluting their data); proven on `_demo` (same engine).
+
+---
+
 **Last updated:** 2026-05-27
 **Status:** 🟢 **`/ajtbd-naming-brief` standalone page live on backspaceoddity.com. Ivan Zamesin naming methodology brief (EN). Route handler pattern confirmed working.**
 
@@ -151,106 +179,3 @@
 - Нужно отразить Layer 2 «PR/outreach/advertising × channels, CEPs as lens» framing
 - Layer 1 расширенная formulation (positioning/narrative/messaging architecture в strategy)
 
-## Quick state — earlier 2026-04-30 (autonomous task)
-
-- **BSO-228 closed** — backport KOS-main 3-layer edit-mode архитектуры в Tools/edit-mode templates + bso-canvas-app + BSO Website worktree. KOS main bundle также получил Layer 2 fix (setThreads({})). Decisions-inbox файл в KOS обновлён — был неточным (claim'ил 3 слоя на main, реально только Layer 1).
-- **BSO-142 closed** — `context/CANONICAL-SOURCES.md` расширен Notion-canonical классом + новой re-sync секцией. File index теперь имеет колонку Type (Git / Notion / Local). Каждый context/*.md явно объявляет canonical source. Снимает класс ошибок «Notion-snapshot stale, никто не знает откуда он».
-- **BSO-61 closed** — push разблокирован (74 commit'а pushed в этой сессии раньше). PAT-блок снят.
-- **OG image cleanup** — `app/layout.tsx` метаданные теперь указывают на local `/images/og-image-v2.jpg` вместо absolute URL на static prod. Forward-compatible с Next.js миграцией.
-- **Backlog hygiene** — комменты на BSO-58, BSO-59, BSO-60, BSO-189 с per-issue review (likely-done / likely-obsolete / needs-acceptance / progress checkpoint). Без автономного закрытия — Yegor's call.
-- **tov-lint pass на page.tsx** — 1 known violation (Screen 4 P1 «We embed. We don't consult from the outside» — anti-consultant per tov.md), но Notion-locked. Остальная копи проходит чисто.
-- **Vercel verify** — backspaceoddity.com отдаёт V2 (hero / sub / 6 cards / Jobs / How we work / AI-native messaging — всё на месте).
-
-## Quick state — 2026-04-29 late session
-
-- **PAT-блок снят** — все 74 commit'а с master pushed на `origin/main` (включая `793c290` /wrap день-entry).
-- **Edit-mode подключён к копи в worktree** — `app/page.tsx` обёрнут в `<EditableText id="...">` для всех ~80 смысловых текстовых нод (hero / work-cards / 5 jobs / how / team / final / footer).
-- **Корневая баг-фикс edit-mode shared library** — `Tools/edit-mode/src/context.tsx`: после успешного `saveAll()` теперь очищается и `threads`.
-- **Verified end-to-end в браузере** — text-mode, click on hero.h1, add variant, approve, Send to Claude → counter падает до 0.
-
-## What This Project Is
-Rebuilding the Backspace Oddity marketing website (backspaceoddity.com) under two tracks:
-1. **Live-site maintenance** — static HTML/CSS at `src/index.html`, what's currently deployed.
-2. **V2 content rebuild** — new site copy + IA, authored in Notion under "New website V2" parent page (`349402511cda8064acc2f157d1ab11b8`). Skeleton + drafts live there before anything lands in HTML.
-
-## Current Status
-
-### Track 1 — Live site (on pause)
-- Live at backspaceoddity.com
-- WEBSITE-CONTENT.md synced to `src/index.html` (2026-04-20)
-- 5 local commits on `master` still unpushed (blocked on PAT)
-
-### Track 2 — V2 content rebuild (active, 2026-04-22 → 2026-04-23)
-
-Notion structure under "New website V2":
-- **IA sketch v0 — screen by screen** (`349402511cda8171bd5bff0dc665a390`) — archive of v0 + v1 + v1.1 drafts that got rejected
-- **Landing skeleton — best-practice structure** (`34a402511cda81bcaf55fcc83eadd4d0`) — working skeleton where drafts land
-- **Reference site audit — 6 sites across 3 clusters** (`34a402511cda81bd84c6e88f60918a05`) — Harvey, Sierra, Decagon, 11x, Sana, Superside, IDEO with 14 Yegor annotations
-
-**Hero locked 2026-04-22:**
-- **H1:** "GTM strategy is not a set of tactics across channels."
-- **Sub (draft):** "It's the decisions underneath — underserved jobs, ICP, category entry points — that make the channels worth running."
-- **CTA:** Book a call → Cal.com
-- Passed 4 gates: tov.md (no client judgment), Maja-check (thesis survives against thought-leaders in the category), BRIEF §4 thesis (negative half; positive half unfolds Screen 2), hook (implicit "if not X, then what").
-
-**Cross-cutting principle locked:** Jobs framing (JTBD over segments) — Screen 3 renamed "Jobs we close" with 5 draft jobs + competition re-frame per job.
-
-**Context loaded in `context/`:**
-- `positioning/bso-positioning-framework-v1.md`
-- `positioning/content-marketing-brief-v0.md`
-- `positioning/cascade-navigation-system-v5.1.md` (mid-session catch of canonical drift)
-- `foundation/bso-magician-not-teacher-architecture.md`
-- `market-context/` (Foundation + Sequoia articles)
-
-### Track 2 — filtered OUT for V1 (per Yegor's review of audit)
-Logo strip, outcome metrics in cases, attribution testimonials, trust/SOC2-style sections, video hero, FAQ section. BSO too early in category for enterprise-grade patterns.
-
-### Track 2 — kept FOR V1
-- Hero with thesis (locked)
-- Screen 3 Jobs we close + Comparison matrix pattern (Superside)
-- Screen 4 tab-switcher product-screens concept (Sierra/Decagon/11x pattern)
-- Target 8–10 screens, not 16
-
-## Key Files
-
-### Project root
-- `src/index.html` — live-site source of truth
-- `WEBSITE-CONTENT.md` — current live-site copy
-- `WEBSITE-CONTENT-v1-archive.md` — pre-2026-04-20 snapshot
-- `PROJECT-CONTEXT.md` — design tokens, portfolio cases
-- `context/` — canonical positioning + market-context cache (6 files + CANONICAL-SOURCES.md)
-- `context/new-website-v2-notion.md` — pointer to Notion V2 parent page
-
-### Notion (V2 rebuild)
-- Parent: `https://www.notion.so/New-website-V2-349402511cda8064acc2f157d1ab11b8`
-- Skeleton: `https://www.notion.so/34a402511cda81bcaf55fcc83eadd4d0`
-- Audit: `https://www.notion.so/34a402511cda81bd84c6e88f60918a05`
-- Drafts archive: `https://www.notion.so/349402511cda8171bd5bff0dc665a390`
-
-## Open Issues
-1. **BSO Figma Bridge setup friction** — forked to Second Brain session 2026-04-23 via `/move-to-session`. Full context in `Second Brain/docs/DECISIONS-INBOX/bso-figma-bridge-setup-friction.md` + paste-prompt in `HANDOFF-to-second-brain.md` at project root. Non-blocking — BSO Website V2 track продолжается (JetBrains PDF got локально).
-2. **Deployment push blocked** — 5+ local commits on `master` need GitHub PAT
-2. **BRIEF §4 thesis needs tightening** — "everything called GTM strategy is tactics" doesn't survive Maja-check; proposed shift to "frameworks exist, systems to run them don't" gap-framing. Change-request belongs in parallel Content Marketing session, not here.
-3. **Screen 2–10 skeleton copy** — only Screen 1 Hero is locked. Screens 2–10 have roles/structures drafted but no copy.
-4. **Notion italic normalization gotcha** — `_italic_` at create becomes `*italic*` on storage; future `update_content` anchors must use fetched representation, not create-time source.
-5. **Hero backdrop, manifesto backdrop, team photos, stale iki.ai HTML comment** — legacy open items from Track 1 (maintenance)
-
-## Next Steps
-
-### Immediate (Track 2, next session)
-1. Screen 2 — "What real GTM strategy is" (positive half of hero thesis unfolds here). Source: BRIEF §4 + Pillar 1 methodology list (Structural JTBD, CEP, SHIFT+, Cascade Navigation).
-2. Screen 3 — already has Jobs framing principle + 5 draft jobs + Screen 3 renamed. Needs: lock 3–5 final jobs + competition-vs-what per job.
-3. Screen 4 — Approach, tab-switcher product-screens concept. Visually-unclear per Yegor's audit comment — defer until visual is decided.
-
-### Parallel (outside this project)
-- Content Marketing session: handoff proposal to tighten BRIEF §4 thesis from "everything called X is Y" to "gap between frameworks and systems" framing.
-
-### Track 1 (when PAT available)
-- Push queued commits to deploy live-site changes
-
-## How to Resume This Project
-1. Read this STATE.md + `WEBSITE-CONTENT.md` + `context/CANONICAL-SOURCES.md`
-2. For V2 rebuild work — start at the Notion skeleton page (`34a402511cda81bcaf55fcc83eadd4d0`). Hero is locked; work on Screen 2.
-3. Rule from 2026-04-22 learnings: before any copy draft, quote the relevant BRIEF §4 passage verbatim. Don't generate from abstract principles under pushback — re-read canonical each pivot.
-4. Notion `update_content` — always use fetched representation for `old_str` (asterisk italic, not underscore).
-5. For Track 1 push — get GitHub PAT, run `git push https://<PAT>@github.com/BackspaceOddity/website.git master:main`.

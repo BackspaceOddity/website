@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   trailingSlash: true,
+  async redirects() {
+    return [
+      // AHM naming brief moved to the proposal framework (ahm.backspaceoddity.com).
+      {
+        source: "/ajtbd-naming-brief/:path*",
+        destination: "https://ahm.backspaceoddity.com/",
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {
