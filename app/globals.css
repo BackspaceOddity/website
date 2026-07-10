@@ -4,6 +4,15 @@
    Copy: Notion landing skeleton (locked 2026-04-22 → 04-29).
    ============================================================ */
 
+/* Tailwind (BSO-871): wrapped in @layer by this import, so every rule below
+   — unlayered — wins the cascade automatically on any property collision.
+   Existing hand-written CSS is untouched and always takes priority. */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
 /* ---------- Fonts — GT Eesti Pro (self-hosted) ---------- */
 @font-face { font-family: "GT Eesti Pro Display"; src: url("/fonts/GTEestiProDisplay-Regular.ttf")       format("truetype"); font-weight: 400; font-style: normal;  font-display: swap; }
 @font-face { font-family: "GT Eesti Pro Display"; src: url("/fonts/GTEestiProDisplay-Medium.ttf")        format("truetype"); font-weight: 500; font-style: normal;  font-display: swap; }
@@ -45,28 +54,101 @@
   --pad-content: 80px;
 
   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* shadcn semantic tokens (BSO-871) — aliased to the BSO brand tokens above,
+     not shadcn's default gray theme. Keeps ONE source of truth: shadcn
+     components resolve to the real design system, not a foreign palette. */
+  --background: var(--color-cream);
+  --foreground: var(--color-dark-green);
+
+  --card: var(--color-cream-soft);
+  --card-foreground: var(--color-dark-green);
+
+  --popover: var(--color-cream-soft);
+  --popover-foreground: var(--color-dark-green);
+
+  --primary: var(--color-dark-green);
+  --primary-foreground: var(--color-ivory);
+
+  --secondary: var(--color-cream-soft);
+  --secondary-foreground: var(--color-dark-green);
+
+  --muted: var(--color-cream-soft);
+  --muted-foreground: color-mix(in oklch, var(--color-dark-green) 60%, transparent);
+
+  --accent: var(--color-cream-soft);
+  --accent-foreground: var(--color-dark-green);
+
+  /* No brand red exists — shadcn's default destructive red is a safety
+     signal (delete/error), not a decorative color, so it stays as-is. */
+  --destructive: oklch(0.577 0.245 27.325);
+
+  --border: color-mix(in oklch, var(--color-dark-green) 15%, transparent);
+  --input: color-mix(in oklch, var(--color-dark-green) 15%, transparent);
+  --ring: color-mix(in oklch, var(--color-dark-green) 50%, transparent);
+
+  /* Charts + sidebar: unused on this site today, left at shadcn defaults
+     rather than inventing an untested brand mapping for components that
+     don't exist here yet. Revisit if/when a chart or sidebar pattern lands. */
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+
+  /* Aligned to BSO's existing card-corner language instead of shadcn's
+     default 0.625rem, so shadcn components match the site's real geometry. */
+  --radius: var(--radius-card);
+
+  --sidebar: oklch(0.985 0 0);
+
+  --sidebar-foreground: oklch(0.145 0 0);
+
+  --sidebar-primary: oklch(0.205 0 0);
+
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+
+  --sidebar-accent: oklch(0.97 0 0);
+
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+
+  --sidebar-border: oklch(0.922 0 0);
+
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* ---------- Reset ---------- */
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+/* ---------- Reset ----------
+   BSO-871: wrapped in @layer base so it still beats Tailwind's own preflight
+   (same layer, later in source) but YIELDS to shadcn/Tailwind utility classes
+   (@layer utilities is declared with higher precedence than @layer base,
+   regardless of selector specificity or source order). Without this, the
+   generic `button { background: none; border: 0 }` reset silently killed
+   every shadcn Button's bg-primary/border utilities, since unlayered CSS
+   would otherwise beat @layer utilities outright. Component classes below
+   this block (.hero, .card, etc.) stay unlayered on purpose — they never
+   share a class name with a Tailwind utility, so this only matters for
+   bare-element resets that collide with components rendering the same tags. */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
 
-body {
-  background: var(--color-cream);
-  color: var(--color-dark-green);
-  font-family: var(--font-text);
-  font-size: var(--size-body);
-  line-height: 1.12;
-  letter-spacing: var(--track-text);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  body {
+    background: var(--color-cream);
+    color: var(--color-dark-green);
+    font-family: var(--font-text);
+    font-size: var(--size-body);
+    line-height: 1.12;
+    letter-spacing: var(--track-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  img, svg { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  p { margin: 0; }
 }
-
-img, svg { display: block; max-width: 100%; }
-a { color: inherit; text-decoration: none; }
-button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-p { margin: 0; }
 
 /* ---------- Page scaffold ---------- */
 .page {
@@ -796,3 +878,15 @@ section { scroll-margin-top: 80px; }
   .how__head .section-h2 { font-size: 42px; }
   .job__headline { font-size: 20px; }
 }
+
+@theme inline { --font-heading: var(--font-display); --font-sans: var(--font-text); --color-sidebar-ring: var(--sidebar-ring); --color-sidebar-border: var(--sidebar-border); --color-sidebar-accent-foreground: var(--sidebar-accent-foreground); --color-sidebar-accent: var(--sidebar-accent); --color-sidebar-primary-foreground: var(--sidebar-primary-foreground); --color-sidebar-primary: var(--sidebar-primary); --color-sidebar-foreground: var(--sidebar-foreground); --color-sidebar: var(--sidebar); --color-chart-5: var(--chart-5); --color-chart-4: var(--chart-4); --color-chart-3: var(--chart-3); --color-chart-2: var(--chart-2); --color-chart-1: var(--chart-1); --color-ring: var(--ring); --color-input: var(--input); --color-border: var(--border); --color-destructive: var(--destructive); --color-accent-foreground: var(--accent-foreground); --color-accent: var(--accent); --color-muted-foreground: var(--muted-foreground); --color-muted: var(--muted); --color-secondary-foreground: var(--secondary-foreground); --color-secondary: var(--secondary); --color-primary-foreground: var(--primary-foreground); --color-primary: var(--primary); --color-popover-foreground: var(--popover-foreground); --color-popover: var(--popover); --color-card-foreground: var(--card-foreground); --color-card: var(--card); --color-foreground: var(--foreground); --color-background: var(--background); --radius-sm: calc(var(--radius) * 0.6); --radius-md: calc(var(--radius) * 0.8); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) * 1.4); --radius-2xl: calc(var(--radius) * 1.8); --radius-3xl: calc(var(--radius) * 2.2); --radius-4xl: calc(var(--radius) * 2.6); }
+
+.dark { --background: oklch(0.145 0 0); --foreground: oklch(0.985 0 0); --card: oklch(0.205 0 0); --card-foreground: oklch(0.985 0 0); --popover: oklch(0.205 0 0); --popover-foreground: oklch(0.985 0 0); --primary: oklch(0.922 0 0); --primary-foreground: oklch(0.205 0 0); --secondary: oklch(0.269 0 0); --secondary-foreground: oklch(0.985 0 0); --muted: oklch(0.269 0 0); --muted-foreground: oklch(0.708 0 0); --accent: oklch(0.269 0 0); --accent-foreground: oklch(0.985 0 0); --destructive: oklch(0.704 0.191 22.216); --border: oklch(1 0 0 / 10%); --input: oklch(1 0 0 / 15%); --ring: oklch(0.556 0 0); --chart-1: oklch(0.87 0 0); --chart-2: oklch(0.556 0 0); --chart-3: oklch(0.439 0 0); --chart-4: oklch(0.371 0 0); --chart-5: oklch(0.269 0 0); --sidebar: oklch(0.205 0 0); --sidebar-foreground: oklch(0.985 0 0); --sidebar-primary: oklch(0.488 0.243 264.376); --sidebar-primary-foreground: oklch(0.985 0 0); --sidebar-accent: oklch(0.269 0 0); --sidebar-accent-foreground: oklch(0.985 0 0); --sidebar-border: oklch(1 0 0 / 10%); --sidebar-ring: oklch(0.556 0 0); }
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50; }
+  body {
+    @apply bg-background text-foreground; }
+  html {
+    @apply font-sans; } }

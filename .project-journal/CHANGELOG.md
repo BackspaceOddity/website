@@ -454,3 +454,7 @@ Cross-project work из SB session — Yegor visit'нул что live = V1 не�
 ### 2026-05-28 — orphan session rolled up (PID no longer alive)
 
 - Timeline file `2026-05-28-1733-31912-yegorkorobeynikov.md` had 3 user prompts, 12 tool calls, 0 errors. Full raw log has been deleted (retention policy).
+
+### 2026-07-10 — orphan session noted (PID no longer alive)
+
+- Timeline file `2026-07-10-1444-27893-yegorkorobeynikov.md` had 0 user prompts, 8 tool calls, 0 errors. Raw file kept in place — will fold into this CHANGELOG via the standard 7-day retention rollup, which preserves INTENT markers.
