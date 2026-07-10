@@ -29,8 +29,8 @@ import {
  * static top-level import of `@backspace-oddity/edit-mode/build-script` here.
  */
 
-// Route prefixes wired to the canonical panel.
-const CANONICAL_ROUTES = ['/8figures'];
+// Route prefixes wired to the canonical panel. (8figures extracted to its own repo.)
+const CANONICAL_ROUTES: string[] = [];
 
 function CanonicalEditMode({ slug }: { slug: string }) {
   useEffect(() => {
