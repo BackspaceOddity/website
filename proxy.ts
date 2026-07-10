@@ -46,6 +46,18 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // merz.backspaceoddity.com → the published Merz fake-door landing (BSO-677).
+  // Bare host serves the published builder page; assets / API / _next pass
+  // through to the same app on this host. Mirrors the kern case.
+  if (slug === 'merz') {
+    if (request.nextUrl.pathname === '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/published/merz/';
+      return NextResponse.rewrite(url);
+    }
+    return NextResponse.next();
+  }
+
   const path = request.nextUrl.pathname;
 
   // Vanity entry points → the client page. Everything else (assets, the /w/

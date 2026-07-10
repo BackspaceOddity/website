@@ -229,3 +229,7 @@
 [2026-06-26 11:47] Edit → app/published/[slug]/page.tsx
 [2026-06-26 11:47] Write → scripts/seed-puma.mjs
 [2026-06-26 13:39] Edit → app/puma/page.tsx
+[2026-06-26 14:44] Edit → app/builder/blocks/merz.tsx
+[2026-06-26 14:45] Edit → app/builder/blocks/cascade.tsx
+[2026-06-26 14:45] Edit → app/builder/BuilderApp.tsx
+[2026-06-26 14:51] Edit → app/builder/BuilderApp.tsx

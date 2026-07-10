@@ -22,7 +22,7 @@ if (!url || !key) { console.error('Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_
 if (!pw) { console.error('Set BUILDER_SEED_PW=<your temp password> in .env.local first (never committed).'); process.exit(1); }
 
 const sb = createClient(url, key, { auth: { persistSession: false } });
-const team = ['yegor', 'anna', 'lieke', 'marnix'].map((n) => `${n}@backspaceoddity.com`);
+const team = ['yegor', 'anna'].map((n) => `${n}@backspaceoddity.com`);
 
 const { data: list, error: listErr } = await sb.auth.admin.listUsers({ perPage: 200 });
 if (listErr) { console.error('listUsers failed:', listErr.message); process.exit(1); }
