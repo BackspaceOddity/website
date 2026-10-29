@@ -7,7 +7,8 @@
 --
 -- Posture of this project (see 001 / 002): the server always uses the
 -- service-role key; anon is denied by RLS policies; authenticated is unused.
--- So service_role gets full table access and anon / authenticated get nothing.
+-- So service_role gets full table access and anon / authenticated get no grants
+-- here. Nothing is revoked: live tables keep what the old defaults gave them.
 --
 -- Numbered 013, not 004: the builder branches already use 004–012, so this file
 -- sorts after them and the ON ALL TABLES grant also covers the builder tables
